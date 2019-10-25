@@ -108,7 +108,7 @@ export default {
 }
 
 .login-pannel-form input {
-  backgroud: white;
+  background: white;
   height: 50px;
   line-height: 50px;
   border-style: none;
