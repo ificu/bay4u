@@ -1,0 +1,328 @@
+<template>
+  <div class="Chat">
+    <!--MainPage-->
+    <div class="Chat-contents" v-if="showMainPage">
+      <div class="Chat-title">
+        채팅 목록
+      </div>
+      <div class="Chat-list">
+        <ul>
+          <li>
+            <i class="Dealer-type fas fa-wrench" style="color:#fbc02e;"></i>
+            <p class="Dealer-name">부품드림</p>
+            <span type="button" class="Chat-detail" v-on:click="chatingToggle">
+              <i class="fas fa-angle-double-right"></i>
+            </span>
+          </li>
+          <li>
+            <i class="Dealer-type fas fa-wrench" style="color:#967d5f;"></i>
+            <p class="Dealer-name">제로무역</p>
+            <span type="button" class="Chat-detail" v-on:click="chatingToggle">
+              <i class="fas fa-angle-double-right"></i>
+            </span>
+          </li>
+          <li>
+            <i class="Dealer-type fas fa-wrench" style="color:#967d5f;"></i>
+            <p class="Dealer-name">파트파츠</p>
+            <span type="button" class="Chat-detail" v-on:click="chatingToggle">
+              <i class="fas fa-angle-double-right"></i>
+            </span>
+          </li>
+          <li>
+            <i class="Dealer-type fas fa-wrench" style="color:#ccc;"></i>
+            <p class="Dealer-name">오토비</p>
+            <span type="button" class="Chat-detail" v-on:click="chatingToggle">
+              <i class="fas fa-angle-double-right"></i>
+            </span>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <!--ChatPage-->
+    <div class="Chating-headerBar" v-if="showChatPage">
+      <span type="button" class="headerBar-Back" v-on:click="chatingToggle">
+        <i class="fas fa-angle-double-left"></i>
+      </span>
+      <p class="headerBar-title">채팅</p>
+    </div>
+    <div class="Chating-page" v-if="showChatPage">
+      <div class="Chating-chatingList">
+        <div class="Chating-me">
+          <div class="Chating-me-contents">
+            안녕하세요<br>
+            11가1111 차량
+            견적 요청합니다.
+          </div>
+        </div>
+        <div class="Chating-dealer">
+          <div class="Chating-icon"> <img src="@/assets/user-icon.png"> </div>
+          <div class="Chating-dealer-contents">
+            벤츠 차량 맞는거죠?
+          </div>
+        </div>
+        <div class="Chating-me">
+          <div class="Chating-me-contents">
+            네, 지난번 오셨던 손님이요.
+          </div>
+        </div>
+        <div v-if="showAppend">
+          <hr>
+        </div>
+        <div class="Chating-me" v-if="showAppend">
+          <div class="Chating-me-contents">
+            견적 주셨던 11가 1111차량<br>부품 주문 합니다.
+          </div>
+        </div>
+        <div class="Chating-dealer" v-if="showAppend">
+          <div class="Chating-icon"> <img src="@/assets/user-icon.png"> </div>
+          <div class="Chating-dealer-contents">
+            네, 담당자 홍길동이 처리 예정입니다.
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="Chating-inputArea" v-if="showChatPage">
+      <input type="text" class="inputArea-inputBox">
+      <span type="button" class="inputArea-send">
+        <i class="fab fa-telegram"></i>
+      </span>
+    </div>
+    <!--Footer-->
+    <div class="Chat-footer">
+      <router-link to="/NewQT">
+        <span>
+          <i class="far fa-clipboard"></i>
+        </span>
+      </router-link >
+      <router-link to="/Chat">
+        <span class="footer-selected">
+          <i class="fas fa-comment-dots"></i>
+        </span>
+      </router-link >
+      <router-link to="/QTList">
+        <span>
+          <i class="far fa-copy"></i>
+        </span>
+      </router-link >
+      <router-link to="/UserInfo">
+        <span>
+          <i class="far fa-address-card"></i>
+        </span>
+      </router-link >
+    </div>
+    </div>
+</template>
+
+<script>
+export default {
+  name: 'Chat',
+  data () {
+    return {
+      showMainPage : true,
+      showChatPage : false,
+      showAppend : false
+    }
+  },
+  created : function() {
+    console.log('param : ' + this.$route.params.test);
+    if(this.$route.params.chatid !== undefined) {
+      this.showMainPage = false;
+      this.showChatPage = true;
+
+      if(this.$route.params.append !== undefined) {
+        this.showAppend = true;
+      }
+    }
+  },
+  methods: {
+    chatingToggle() {
+      this.showMainPage = !this.showMainPage;
+      this.showChatPage = !this.showChatPage;
+    }
+  }
+}
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped>
+
+.Chat-title {
+  margin:auto;
+  width: 90%;
+  padding-top: 25px;
+  margin-bottom: 10px;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.Chat-list {
+  margin:auto;
+  width: 90%;
+  height: 60px;
+}
+
+.Chat-list ul {
+  list-style-type: none;
+  padding: 0px;
+}
+
+.Chat-list li {
+  display: flex;
+  min-height: 50px;
+  height: 50px;
+  line-height: 50px;
+  margin: 0.5rem 0;
+  padding: 0 0.9rem;
+  border-width: thin;
+  border-style: solid;
+  border-radius: 5px;
+  border-color: #bebebe;
+  background-color: #fcf4df;
+}
+
+.Dealer-type {
+  align-self: center;
+  font-size: 1.5rem;
+}
+.Dealer-name {
+  padding-left: 10px;
+  font-weight: bold;
+}
+.Chat-detail {
+  align-self: center;
+  margin-left: auto;
+  color: #5d4038;
+  -webkit-appearance:none;
+  -moz-appearance:none;
+}
+
+.Chating-headerBar {
+  display: flex;
+  height: 50px;
+  width: 100%;
+  background-color: #696565;
+  position: fixed;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, .33);
+}
+.Chating-headerBar .headerBar-Back {
+  flex: 10%;
+  align-self: center;
+  margin-left: 10px;
+  color: white;
+  -webkit-appearance:none;
+  -moz-appearance:none;
+}
+.Chating-headerBar .headerBar-title {
+  flex: 90%;
+  text-align: center;
+  align-self: center;
+  font-weight: bold;
+  font-size: 1.3rem;
+  margin: auto;
+  color: #acd3ce;
+}
+.Chating-page {
+  background-color: #ddd;
+  min-height: calc(100vh - 50px - 70px + 10px);
+}
+.Chating-page .Chating-chatingList {
+  margin:auto;
+  width: 90%;
+  padding-top: 60px;
+}
+.Chating-page .Chating-chatingList .Chating-dealer {
+  display: flex;
+}
+.Chating-page .Chating-chatingList .Chating-dealer .Chating-icon{
+  font-size: 2.5rem;
+  color: #5d4038;
+  margin-top: -10px;
+  margin-right: -20px;
+}
+.Chating-page .Chating-chatingList .Chating-dealer .Chating-icon img{
+  width: 60%;
+}
+.Chating-page .Chating-chatingList .Chating-dealer .Chating-dealer-contents {
+  border: 1px solid #bebebe;
+  border-radius: 0px 15px 15px 15px;
+  margin-bottom: 15px;
+  display: inline-block;
+  padding: 15px;
+  font-size: 0.9rem;
+  background-color: #fff;
+  max-width: 90%;
+}
+.Chating-page .Chating-chatingList .Chating-me {
+  text-align: right;
+}
+.Chating-page .Chating-chatingList .Chating-me-contents {
+  border: 1px solid #bebebe;
+  border-radius: 15px 0px 15px 15px;
+  margin-bottom: 15px;
+  display: inline-block;
+  padding: 15px;
+  font-size: 0.9rem;
+  text-align: left;
+  background-color: #fcf4df;
+  font-weight: bold;
+  max-width: 90%;
+}
+
+
+
+.Chating-inputArea {
+  z-index: 90;
+  position: fixed;
+  display:flex;
+  bottom: 70px;
+  width: 100%;
+  height: 40px;
+  border-top: 1px solid #bebebe;
+}
+.Chating-inputArea .inputArea-inputBox {
+  flex: 85%;
+  border: none;
+  padding: 5px;
+}
+.Chating-inputArea input[type=text]:focus {
+  outline: none;
+}
+.Chating-inputArea .inputArea-send {
+  flex: 15%;
+  align-self: center;
+  text-align: center;
+  color: #ff9999;
+  font-size: 2rem;
+  -webkit-appearance:none;
+  -moz-appearance:none;
+}
+
+.Chat-footer {
+  z-index: 100;
+  position: fixed;
+  display:flex;
+  bottom: 0;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  width: 100%;
+  height: 70px;
+  border-top: 1px solid #bebebe;
+  background: #eeeeee;
+}
+
+.Chat-footer a {
+  flex:25%;
+  text-align: center;
+  color: #848180;
+  margin-top: 5px;
+}
+
+.Chat-footer a span i {
+  font-size: 2.5rem;
+}
+
+.footer-selected {
+  color : #5d4038;
+}
+
+</style>

@@ -1,14 +1,39 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
+
+import Login from '@/views/Login'
+import NewQT from '@/views/NewQT'
+import Chat from '@/views/Chat'
+import QTList from '@/views/QTList'
+import UserInfo from '@/views/UserInfo'
 
 Vue.use(VueRouter)
 
 const routes = [
   {
     path: '/',
-    name: 'home',
-    component: Home
+    name: 'Login',
+    component: Login
+  },
+  {
+    path: '/NewQT',
+    name: 'NewQT',
+    component: NewQT
+  },
+  {
+    path: '/Chat',
+    name: 'Chat',
+    component: Chat
+  },
+  {
+    path: '/QTList',
+    name: 'QTList',
+    component: QTList
+  },
+  {
+    path: '/UserInfo',
+    name: 'UserInfo',
+    component: UserInfo
   },
   {
     path: '/about',
