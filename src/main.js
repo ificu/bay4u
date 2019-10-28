@@ -13,16 +13,19 @@ import './plugins/socketPlugin';
 
 import BootstrapVue from 'bootstrap-vue'
 import VueAwesomeSwiper from 'vue-awesome-swiper'
+import vuetify from './plugins/vuetify';
+import Directives from './plugins/directives';
 
 
 Vue.config.productionTip = false
 
 Vue.use(BootstrapVue)
 Vue.use(VueAwesomeSwiper)
-
+Vue.use(Directives)
 
 new Vue({
   router,
   store,
+  vuetify,
   render: h => h(App)
 }).$mount('#app')

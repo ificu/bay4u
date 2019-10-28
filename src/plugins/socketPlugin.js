@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import io from 'socket.io-client';
 
-const socket = io('http://169.56.92.40:8083/');
+const socket = io('http://169.56.92.40:8083');
 
 
 const SocketPlugin = {

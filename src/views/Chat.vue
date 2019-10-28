@@ -46,6 +46,8 @@
       <p class="headerBar-title">채팅</p>
     </div>
     <div class="Chating-page" v-if="showChatPage">
+      <Message-List :msgs="msgDatas" class="msg-list"></Message-List>
+      <!--
       <div class="Chating-chatingList">
         <div class="Chating-me">
           <div class="Chating-me-contents">
@@ -80,12 +82,10 @@
           </div>
         </div>
       </div>
+      -->
     </div>
-    <div class="Chating-inputArea" v-if="showChatPage">
-      <input type="text" class="inputArea-inputBox">
-      <span type="button" class="inputArea-send">
-        <i class="fab fa-telegram"></i>
-      </span>
+    <div v-if="showChatPage">
+      <Message-From v-on:submitMessage="sendMessage" class="msg-form" ></Message-From>
     </div>
     <!--Footer-->
     <div class="Chat-footer">
@@ -114,14 +114,29 @@
 </template>
 
 <script>
+import { mapMutations, mapState } from 'vuex';
+import MessageList from '@/components/Chat/ChatMessageList.vue';
+import MessageForm from '@/components/Chat/ChatMessageForm.vue';
+import Constant from '@/Constant';
+
 export default {
   name: 'Chat',
   data () {
     return {
+      datas: [],
       showMainPage : true,
       showChatPage : false,
       showAppend : false
     }
+  },
+  components: {
+    'Message-List': MessageList,
+    'Message-From': MessageForm,
+  },
+  computed: {
+    ...mapState({
+      'msgDatas': state => state.socket.msgDatas,
+    }),
   },
   created : function() {
     console.log('param : ' + this.$route.params.test);
@@ -133,8 +148,30 @@ export default {
         this.showAppend = true;
       }
     }
+
+    const $ths = this;
+    this.$socket.on('chat', (data) => {
+      this.pushMsgData(data);
+      $ths.datas.push(data);
+    });
   },
   methods: {
+    ...mapMutations({
+      'pushMsgData': Constant.PUSH_MSG_DATA,
+    }),
+    sendMessage(msg) {
+      this.pushMsgData({
+        from: {
+          name: '나',
+        },
+        msg,
+      });
+      this.$sendMessage({
+        //name: this.$route.params.username,
+        name: "s009",
+        msg,
+      });
+    },
     chatingToggle() {
       this.showMainPage = !this.showMainPage;
       this.showChatPage = !this.showChatPage;
@@ -224,77 +261,6 @@ export default {
 .Chating-page {
   background-color: #ddd;
   min-height: calc(100vh - 50px - 70px + 10px);
-}
-.Chating-page .Chating-chatingList {
-  margin:auto;
-  width: 90%;
-  padding-top: 60px;
-}
-.Chating-page .Chating-chatingList .Chating-dealer {
-  display: flex;
-}
-.Chating-page .Chating-chatingList .Chating-dealer .Chating-icon{
-  font-size: 2.5rem;
-  color: #5d4038;
-  margin-top: -10px;
-  margin-right: -20px;
-}
-.Chating-page .Chating-chatingList .Chating-dealer .Chating-icon img{
-  width: 60%;
-}
-.Chating-page .Chating-chatingList .Chating-dealer .Chating-dealer-contents {
-  border: 1px solid #bebebe;
-  border-radius: 0px 15px 15px 15px;
-  margin-bottom: 15px;
-  display: inline-block;
-  padding: 15px;
-  font-size: 0.9rem;
-  background-color: #fff;
-  max-width: 90%;
-}
-.Chating-page .Chating-chatingList .Chating-me {
-  text-align: right;
-}
-.Chating-page .Chating-chatingList .Chating-me-contents {
-  border: 1px solid #bebebe;
-  border-radius: 15px 0px 15px 15px;
-  margin-bottom: 15px;
-  display: inline-block;
-  padding: 15px;
-  font-size: 0.9rem;
-  text-align: left;
-  background-color: #fcf4df;
-  font-weight: bold;
-  max-width: 90%;
-}
-
-
-
-.Chating-inputArea {
-  z-index: 90;
-  position: fixed;
-  display:flex;
-  bottom: 70px;
-  width: 100%;
-  height: 40px;
-  border-top: 1px solid #bebebe;
-}
-.Chating-inputArea .inputArea-inputBox {
-  flex: 85%;
-  border: none;
-  padding: 5px;
-}
-.Chating-inputArea input[type=text]:focus {
-  outline: none;
-}
-.Chating-inputArea .inputArea-send {
-  flex: 15%;
-  align-self: center;
-  text-align: center;
-  color: #ff9999;
-  font-size: 2rem;
-  -webkit-appearance:none;
-  -moz-appearance:none;
 }
 
 .Chat-footer {
