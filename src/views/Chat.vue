@@ -47,42 +47,6 @@
     </div>
     <div class="Chating-page" v-if="showChatPage">
       <Message-List :msgs="msgDatas" class="msg-list"></Message-List>
-      <!--
-      <div class="Chating-chatingList">
-        <div class="Chating-me">
-          <div class="Chating-me-contents">
-            안녕하세요<br>
-            11가1111 차량
-            견적 요청합니다.
-          </div>
-        </div>
-        <div class="Chating-dealer">
-          <div class="Chating-icon"> <img src="@/assets/user-icon.png"> </div>
-          <div class="Chating-dealer-contents">
-            벤츠 차량 맞는거죠?
-          </div>
-        </div>
-        <div class="Chating-me">
-          <div class="Chating-me-contents">
-            네, 지난번 오셨던 손님이요.
-          </div>
-        </div>
-        <div v-if="showAppend">
-          <hr>
-        </div>
-        <div class="Chating-me" v-if="showAppend">
-          <div class="Chating-me-contents">
-            견적 주셨던 11가 1111차량<br>부품 주문 합니다.
-          </div>
-        </div>
-        <div class="Chating-dealer" v-if="showAppend">
-          <div class="Chating-icon"> <img src="@/assets/user-icon.png"> </div>
-          <div class="Chating-dealer-contents">
-            네, 담당자 홍길동이 처리 예정입니다.
-          </div>
-        </div>
-      </div>
-      -->
     </div>
     <div v-if="showChatPage">
       <Message-From v-on:submitMessage="sendMessage" class="msg-form" ></Message-From>

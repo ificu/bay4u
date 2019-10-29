@@ -12,12 +12,6 @@
           </div>
 
           <div class="modal-body">
-            <div class="body-subTitle" style="margin-top:0px;">
-              <h6>견적 옵션</h6>
-            </div>
-            <div>
-              <b-form-checkbox>배송비 별도 입력</b-form-checkbox>
-            </div>
             <div class="body-subTitle">
               <h6>견적 요청 대리점</h6>
             </div>

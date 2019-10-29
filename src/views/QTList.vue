@@ -763,6 +763,13 @@ export default {
 
 .card-header {
   background-color: #fcf4df;
+  padding-top : 0px;
+  padding-bottom : 0px;
+}
+
+.card-header .container {
+  padding-top : 0px;
+  padding-bottom : 0px;
 }
 
 .QTList-history {
