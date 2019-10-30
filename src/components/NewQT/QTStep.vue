@@ -15,7 +15,30 @@
             </div>
           </v-card>
           <div>
-            <v-text-field label="차량번호" outlined dense color="success"></v-text-field>
+            <!-- 과거 정비이력 Popup-->
+            <v-dialog v-model="dialog" transition="dialog-bottom-transition">
+              <template v-slot:activator="{ on: { click } }">
+                <v-text-field label="차량번호" outlined dense color="success" v-on:keypress.enter="click"></v-text-field>
+              </template>
+              <v-card>
+                <v-toolbar dark color="primary">
+                <v-btn icon dark @click="dialog = false">
+                  <v-icon>mdi-close</v-icon>
+                </v-btn>
+                <v-toolbar-title>과거 정비이력</v-toolbar-title>
+                  <v-spacer></v-spacer>
+                  <v-toolbar-items>
+                    <!--<v-btn dark text @click="dialog = false">Save</v-btn>-->
+                  </v-toolbar-items>
+                </v-toolbar>
+                <v-card-text>
+                  <v-container>
+                    <ROHistory></ROHistory>
+                  </v-container>
+                </v-card-text>         
+                </v-card>
+            </v-dialog>
+
             <v-text-field label="차대번호" outlined dense color="success" class="mt-n5">></v-text-field>
             <v-text-field label="차량종류" outlined dense color="success" class="mt-n5">></v-text-field>
           </div>
@@ -158,6 +181,7 @@
 import ItemCategory from '@/components/NewQT/ItemCategory.vue'
 import QTConfirm from '@/components/NewQT/QTConfirm.vue'
 import QTCamera from '@/components/NewQT/QTCamera.vue'
+import ROHistory from '@/components/NewQT/ROHistory.vue'
 
 export default {
 name: 'QTStep',
@@ -184,7 +208,8 @@ name: 'QTStep',
             dynamicBullets: true,
             clickable: true
           }
-      }
+      },
+      dialog: false
     }
   },
   methods: {
@@ -295,7 +320,8 @@ name: 'QTStep',
     components: {
       ItemCategory: ItemCategory,
       QTConfirm: QTConfirm,
-      QTCamera: QTCamera
+      QTCamera: QTCamera,
+      ROHistory:ROHistory
     }    
   }
 </script>
