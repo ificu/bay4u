@@ -16,7 +16,6 @@ import BootstrapVue from 'bootstrap-vue'
 import VueAwesomeSwiper from 'vue-awesome-swiper'
 import Directives from './plugins/directives';
 
-
 Vue.config.productionTip = false
 
 Vue.use(BootstrapVue)
