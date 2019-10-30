@@ -50,7 +50,7 @@ export default {
   },
   mounted : function() {
       this.$nextTick(function () {
-          var videoPlayer = document.querySelector('#player');
+        var videoPlayer = document.querySelector('#player');
 
         if (!('mediaDevices' in navigator)) {
             navigator.mediaDevices = {};
@@ -73,15 +73,21 @@ export default {
         if (navigator.userAgent.match("iPad") == null 
             && navigator.userAgent.match("iPhone|Mobile|UP.Browser|Android|BlackBerry|Windows CE|Nokia|webOS|Opera Mini|SonyEricsson|opera mobi|Windows Phone|IEMobile|POLARIS") != null) 
         { 
-        //모바일 접속일 경우
-        navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 800 }, height: { ideal: 600 }, facingMode: { exact: "environment" } } })
-            .then(function(stream) {
-                videoPlayer.srcObject = stream;
-                videoPlayer.style.display = 'block';
-            })
-            .catch(function() {
-            //imagePickerArea.style.display = 'block';
-            });
+            alert("모바일접속!!");
+            alert(JSON.stringify(navigator.mediaDevices));
+            //모바일 접속일 경우
+            //navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 800 }, height: { ideal: 600 }, facingMode: { exact: "environment" } } })
+            navigator.mediaDevices.getUserMedia({ video: true } )
+            //navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: "environment" } } })
+                .then(function(stream) {
+                    alert("촬영!!");
+                    videoPlayer.srcObject = stream;
+                    videoPlayer.style.display = 'block';
+                })
+                .catch(function(err) {
+                //imagePickerArea.style.display = 'block';
+                alert(err);
+                });
         } 
         else { 
             navigator.mediaDevices.getUserMedia({ video: true } )
