@@ -73,14 +73,12 @@ export default {
         if (navigator.userAgent.match("iPad") == null 
             && navigator.userAgent.match("iPhone|Mobile|UP.Browser|Android|BlackBerry|Windows CE|Nokia|webOS|Opera Mini|SonyEricsson|opera mobi|Windows Phone|IEMobile|POLARIS") != null) 
         { 
-            alert("모바일접속!!");
             alert(JSON.stringify(navigator.mediaDevices));
             //모바일 접속일 경우
             //navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 800 }, height: { ideal: 600 }, facingMode: { exact: "environment" } } })
-            navigator.mediaDevices.getUserMedia({ video: true } )
-            //navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: "environment" } } })
+            //navigator.mediaDevices.getUserMedia({ video: true } )
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: "environment" } } })
                 .then(function(stream) {
-                    alert("촬영!!");
                     videoPlayer.srcObject = stream;
                     videoPlayer.style.display = 'block';
                 })
@@ -95,8 +93,9 @@ export default {
                 videoPlayer.srcObject = stream;
                 videoPlayer.style.display = 'block';
             })
-            .catch(function() {
+            .catch(function(err) {
                 //imagePickerArea.style.display = 'block';
+                alert(err);
             });
         }
 
