@@ -1,4 +1,4 @@
-# bay4u
+# bay4u 프로젝트
 
 ## Project setup
 ```
