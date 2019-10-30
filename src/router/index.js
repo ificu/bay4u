@@ -7,6 +7,7 @@ import NewNewQT from '@/views/NewNewQT'
 import Chat from '@/views/Chat'
 import QTList from '@/views/QTList'
 import UserInfo from '@/views/UserInfo'
+import MainPage from '@/views/MainPage'
 
 Vue.use(VueRouter)
 
@@ -40,6 +41,11 @@ const routes = [
     path: '/UserInfo',
     name: 'UserInfo',
     component: UserInfo
+  },
+  {
+    path: '/MainPage',
+    name: 'MainPage',
+    component: MainPage
   },
   {
     path: '/about',

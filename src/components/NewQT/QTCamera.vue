@@ -73,11 +73,10 @@ export default {
         if (navigator.userAgent.match("iPad") == null 
             && navigator.userAgent.match("iPhone|Mobile|UP.Browser|Android|BlackBerry|Windows CE|Nokia|webOS|Opera Mini|SonyEricsson|opera mobi|Windows Phone|IEMobile|POLARIS") != null) 
         { 
-            alert(JSON.stringify(navigator.mediaDevices));
             //모바일 접속일 경우
             //navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 800 }, height: { ideal: 600 }, facingMode: { exact: "environment" } } })
-            //navigator.mediaDevices.getUserMedia({ video: true } )
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: "environment" } } })
+            navigator.mediaDevices.getUserMedia({ video: true } )
+            //navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: "environment" } } })
                 .then(function(stream) {
                     videoPlayer.srcObject = stream;
                     videoPlayer.style.display = 'block';

@@ -20,7 +20,6 @@ export default {
   },
   methods: {
     submitMessageFunc() {
-        console.log("test");
       if (this.msg.length === 0) return false;
       this.$emit('submitMessage', this.msg);
       this.msg = '';
@@ -39,7 +38,7 @@ export default {
   position: fixed;
   display:flex;
   bottom: 70px;
-  width: 100%;
+  width: auto;
   height: 40px;
   border-top: 1px solid #bebebe;
 }

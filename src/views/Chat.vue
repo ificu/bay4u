@@ -103,7 +103,6 @@ export default {
     }),
   },
   created : function() {
-    console.log('param : ' + this.$route.params.test);
     if(this.$route.params.chatid !== undefined) {
       this.showMainPage = false;
       this.showChatPage = true;
