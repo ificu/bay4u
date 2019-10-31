@@ -1,5 +1,5 @@
 <template>
-<div>
+<v-row align="center">
     <v-expansion-panels popout>
         <v-expansion-panel
             v-for="(roItem,i) in roList"
@@ -7,12 +7,12 @@
         >
         <v-expansion-panel-header>
             <v-row no-gutters>
-                 <v-col>
-                     {{roItem.DC_DY_BSN}}
+                 <v-col>                           
+                    정비일자 : {{roItem.DC_DY_BSN}}                  
                 </v-col>
                  <v-col>
                       <v-flex text-xs-right text-sm-left >
-                     {{roItem.RO_AMT}}원
+                    수리금액 : {{roItem.RO_AMT}}원
                 </v-flex>     
                 </v-col>               
                 </v-row>
@@ -21,18 +21,23 @@
             </template> 
         </v-expansion-panel-header>
         <v-expansion-panel-content>
-         <v-row no-gutters>
-             <v-col>{{roItem.NM_CR_TEC}}</v-col>
-         </v-row>
-         <v-row no-gutters>
-             <v-col>
-                  {{roItem.RO_NM}}
-             </v-col>
-         </v-row>
+             <v-list-item three-line>
+                <v-list-item-content>
+                    <v-list-item-title><v-icon small color="indigo">fas fa-car</v-icon> 차정명</v-list-item-title>
+                    <v-list-item-subtitle>{{roItem.NM_CR_TEC}}</v-list-item-subtitle>
+                </v-list-item-content>
+                </v-list-item>
+               <!-- <v-divider></v-divider>-->
+                <v-list-item two-line>
+                <v-list-item-content>
+                    <v-list-item-title> <v-icon small color="indigo">mdi-wrench</v-icon> 수리내역</v-list-item-title>
+                    <v-list-item-subtitle> {{roItem.RO_NM}}</v-list-item-subtitle>
+                </v-list-item-content>
+                </v-list-item>
         </v-expansion-panel-content>
         </v-expansion-panel>
     </v-expansion-panels>
-</div>
+</v-row>
 </template>
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script>
