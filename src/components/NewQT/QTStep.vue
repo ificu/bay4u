@@ -21,18 +21,21 @@
                 <v-text-field label="차량번호" outlined dense color="success" v-on:keypress.enter="click"></v-text-field>
               </template>
               <v-card>
-                <v-toolbar dark color="primary">
-                <v-btn icon dark @click="dialog = false">
-                  <v-icon>mdi-close</v-icon>
-                </v-btn>
-                <v-toolbar-title>과거 정비이력</v-toolbar-title>
+                <v-toolbar dark color="primary"> 
+                  <v-toolbar-title>
+                   <v-icon medium>fas fa-edit</v-icon>
+                    과거 정비이력
+                    </v-toolbar-title>                 
                   <v-spacer></v-spacer>
                   <v-toolbar-items>
-                    <!--<v-btn dark text @click="dialog = false">Save</v-btn>-->
+                      <!--<v-btn dark text @click="dialog = false">Save</v-btn>-->
                   </v-toolbar-items>
+                  <v-btn icon dark @click="dialog = false">
+                    <v-icon>mdi-close</v-icon>
+                  </v-btn>
                 </v-toolbar>
                 <v-card-text>
-                  <v-container>
+                  <v-container >
                     <ROHistory></ROHistory>
                   </v-container>
                 </v-card-text>         
