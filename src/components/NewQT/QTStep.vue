@@ -1,5 +1,6 @@
 <template>
   <v-app>
+    
     <v-stepper v-model="e6" vertical>
         <v-stepper-step color="accent" :complete="e6 > 1" step="1">
           차량번호 / 차대번호 촬영 인식
@@ -18,7 +19,7 @@
             <!-- 과거 정비이력 Popup-->
             <v-dialog v-model="dialog" transition="dialog-bottom-transition">
               <template v-slot:activator="{ on: { click } }">
-                <v-text-field label="차량번호" outlined dense color="success" v-on:keypress.enter="click"></v-text-field>
+                <v-text-field label="차량번호" v-model="CarInfo.CarNo" outlined dense color="success"  v-on:keypress.enter="click"></v-text-field>
               </template>
               <v-card>
                 <v-toolbar dark color="primary"> 
@@ -41,9 +42,8 @@
                 </v-card-text>         
                 </v-card>
             </v-dialog>
-
-            <v-text-field label="차대번호" outlined dense color="success" class="mt-n5">></v-text-field>
-            <v-text-field label="차량종류" outlined dense color="success" class="mt-n5">></v-text-field>
+            <v-text-field label="차대번호" v-model="CarInfo.VinNo" outlined dense color="success" class="mt-n5" ></v-text-field>
+            <v-text-field label="차량종류" outlined dense color="success" class="mt-n5"></v-text-field>
           </div>
           <v-btn color="primary" @click="e6 = 2">Continue</v-btn>
           <v-btn text></v-btn>
@@ -318,14 +318,20 @@ name: 'QTStep',
           this.categoryTitle = result.data.Items[0].GRP_NM;
           this.categoryList = result.data.Items;
         });
-      }
+      },
     },
     components: {
       ItemCategory: ItemCategory,
       QTConfirm: QTConfirm,
       QTCamera: QTCamera,
       ROHistory:ROHistory
-    }    
+    },    
+    computed:{
+      CarInfo: {
+          get() { return this.$store.getters.CarInfo },
+          set(value) { this.$store.dispatch('UpdateCarInfo',value) }
+      }
+    }
   }
 </script>
 
@@ -339,7 +345,6 @@ name: 'QTStep',
     opacity:0;
     transform: translateY(20px);
 }
-
 
 .NewQT-submit {
   margin:auto;
