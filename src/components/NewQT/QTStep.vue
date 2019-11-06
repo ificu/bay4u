@@ -17,7 +17,7 @@
           </v-card>
           <div>
             <!-- 과거 정비이력 Popup-->
-            <v-dialog v-model="dialog" transition="dialog-bottom-transition">
+            <v-dialog v-model="dialog" transition="dialog-bottom-transition" >
               <template v-slot:activator="{ on: { click } }">
                 <v-text-field label="차량번호" v-model="CarInfo.CarNo" outlined dense color="success"  v-on:keypress.enter="click"></v-text-field>
               </template>
@@ -36,7 +36,7 @@
                   </v-btn>
                 </v-toolbar>
                 <v-card-text>
-                  <v-container >
+                  <v-container>
                     <ROHistory></ROHistory>
                   </v-container>
                 </v-card-text>         
@@ -583,5 +583,4 @@ name: 'QTStep',
 .custom-control {
   margin-bottom: 20px;
 }
-
 </style>
