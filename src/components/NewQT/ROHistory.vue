@@ -116,8 +116,8 @@ export default {
 }
 .roHistory-date {
   flex: 30%;
-  font-size: 0.8rem;
-  color:#808080;
+  font-size: 0.7rem;
+  /*color:#808080;*/
   vertical-align:initial;
   margin-bottom:1px;
   margin-left:2px;
