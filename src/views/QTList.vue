@@ -1,7 +1,7 @@
 <template>
   <div class="QTList">
     <b-tabs class="QTList-tab" justified v-model="tabIndex" v-if="showMainPage">
-      <b-tab title="부품 견적서" :title-link-class="linkClass(0)" active>
+      <b-tab title="부품 견적서" :title-link-class="linkClass(0)">
         <div class="QTList-contents">
           <div class="QTList-title">
             견적 요청 히스토리
@@ -365,7 +365,7 @@
           </div>
         </div>
       </b-tab>
-      <b-tab title="정비 명세서" :title-link-class="linkClass(2)">
+      <b-tab title="정비 명세서" :title-link-class="linkClass(2)" active>
         <div class="QTList-contents">
           <div class="QTList-title">
             고객 정비 히스토리
@@ -432,7 +432,7 @@
                     </ul>
                     <div class="detailConts-compare">
                       <b-button @click="showRODetailPageToggle">명세서 수정</b-button>
-                      <b-button @click="showCustomerDocPageToggle">고객 명세서 발송</b-button>
+                      <b-button @click="showCustomerDocOptionPageToggle">고객 명세서 발송</b-button>
                     </div>
                   </div>
                 </b-card-body>
@@ -484,7 +484,7 @@
                     </ul>
                     <div class="detailConts-compare">
                       <b-button @click="showRODetailPageToggle">명세서 수정</b-button>
-                      <b-button @click="showCustomerDocPageToggle">고객 명세서 발송</b-button>
+                      <b-button @click="showCustomerDocOptionPageToggle">고객 명세서 발송</b-button>
                     </div>
                   </div>
                 </b-card-body>
@@ -536,7 +536,7 @@
                     </ul>
                     <div class="detailConts-compare">
                       <b-button @click="showRODetailPageToggle">명세서 수정</b-button>
-                      <b-button @click="showCustomerDocPageToggle">고객 명세서 발송</b-button>
+                      <b-button @click="showCustomerDocOptionPageToggle">고객 명세서 발송</b-button>
                     </div>
                   </div>
                 </b-card-body>
@@ -591,6 +591,28 @@
       </CustomerDoc>
     </div>
 
+    <div v-if="showCustomerDocOptionPage">
+      <v-app>  
+      <CustomerDocOption  v-if="showCustomerDocOptionPage" @close="showCustomerDocPageToggle">
+                
+          <h4 slot="header">고객 명세서 출력 옵션</h4>
+          <span slot="body">
+            <v-container fluid>
+              <v-switch class="mb-n4" v-model="customerDocOption" label="카센터 정보" value input-value="true" disabled></v-switch>
+              <v-switch class="mb-n4" v-model="customerDocOption" label="차량 정보" value input-value="true" disabled></v-switch>
+              <v-switch class="mb-n4" v-model="customerDocOption" label="공임 내역" value="공임 내역"></v-switch>
+              <v-switch class="mb-n4" v-model="customerDocOption" label="부품상세 내역" value="부품상세 내역"></v-switch>
+              <v-switch class="mb-n4" v-model="customerDocOption" label="할인 내역" value="할인 내역"></v-switch>
+              <v-switch class="mb-n4" v-model="customerDocOption" label="총 가격" value input-value="true" disabled></v-switch>
+            </v-container>
+          </span>
+          <span slot="footer" @click="showCustomerDocPageToggle">
+            확인 <i class="fas fa-check"></i>
+          </span>
+                
+      </CustomerDocOption>
+      </v-app>  
+    </div>
 
     <div class="QTList-footer" v-if="!showCustomerDocPage">
       <router-link to="/NewQT">
@@ -622,11 +644,13 @@ import QTDetailCompare from '@/components/QTList/QTDetailCompare.vue'
 import QTDetailSelect from '@/components/QTList/QTDetailSelect.vue'
 import QTtoRODetail from '@/components/QTList/QTtoRODetail.vue'
 import CustomerDoc from '@/components/QTList/CustomerDoc.vue'
+import CustomerDocOption from '@/components/QTList/CustomerDocOption.vue'
 
 export default {
   name: 'QTList',
   data () {
     return {
+      customerDocOption: "",
       tabIndex: 0,
       dropdownQT: '차량번호',
       dropdownSO: '차량번호',
@@ -645,6 +669,7 @@ export default {
       showQTShoppingcartPage:false,
       showRODetailPage:false,
       showCustomerDocPage:false,
+      showCustomerDocOptionPage:true,
       swiperOption: {
           slidesPerView: 3,
           spaceBetween: 100,
@@ -674,6 +699,7 @@ export default {
       this.showQTShoppingcartPage = false;
       this.showRODetailPage = false;
       this.showCustomerDocPage = false;
+      this.showCustomerDocOpationPage = false;
       this.listToggleClear();
     },
     showQTComparePageToggle() {
@@ -682,6 +708,7 @@ export default {
       this.showQTShoppingcartPage = false;
       this.showRODetailPage = false;
       this.showCustomerDocPage = false;
+      this.showCustomerDocOpationPage = false;
       this.listToggleClear();
     },
     showQTShoppingcartPageToggle() {
@@ -690,6 +717,7 @@ export default {
       this.showQTShoppingcartPage = true;
       this.showRODetailPage = false;
       this.showCustomerDocPage = false;
+      this.showCustomerDocOpationPage = false;
       this.listToggleClear();
     },
     showRODetailPageToggle() {
@@ -698,6 +726,7 @@ export default {
       this.showQTShoppingcartPage = false;
       this.showRODetailPage = true;
       this.showCustomerDocPage = false;
+      this.showCustomerDocOpationPage = false;
       this.listToggleClear();
     },
     showCustomerDocPageToggle() {
@@ -706,6 +735,16 @@ export default {
       this.showQTShoppingcartPage = false;
       this.showRODetailPage = false;
       this.showCustomerDocPage = true;
+      this.showCustomerDocOpationPage = false;
+      this.listToggleClear();
+    },
+    showCustomerDocOptionPageToggle() {
+      this.showMainPage = false;
+      this.showQTComparePage = false;
+      this.showQTShoppingcartPage = false;
+      this.showRODetailPage = false;
+      this.showCustomerDocPage = true;
+      this.showCustomerDocOpationPage = true;
       this.listToggleClear();
     },
     linkClass(idx) {
@@ -720,7 +759,8 @@ export default {
     QTDetailCompare,
     QTDetailSelect,
     QTtoRODetail,
-    CustomerDoc
+    CustomerDoc,
+    CustomerDocOption
   }
 }
 </script>
@@ -895,7 +935,9 @@ export default {
   margin: auto;
   color: #acd3ce;
 }
-
+.QTList-Options {
+  z-index: 200;
+}
 
 .QTList-footer {
   z-index: 100;
