@@ -7,14 +7,22 @@
       <div class="login-logo">
         <img src="@/assets/logo.png">
       </div>
-      <div class="login-pannel-form">
+      <br>
+        <v-alert
+          v-model="loginAlert"
+          dismissible
+          border="left"
+          elevation="2"
+          icon="mdi-account-alert"
+        >
+          {{loginAlertMessage}}
+        </v-alert>        
+      <div class="login-pannel-form">        
         <b-form-input v-model="id" placeholder="이메일 또는 전화번호"></b-form-input>
         <b-form-input type ="password" v-model="pwd" placeholder="비밀번호"></b-form-input>
-        <router-link to="/NewQT">
-          <div class="login-pannel-form-button">
-            로그인
-          </div>
-        </router-link>
+        <div class="login-pannel-form-button" @click="loginPathTo()">
+          로그인
+        </div>      
       </div>
       <div class="login-pannel-split">
         <hr>
@@ -45,15 +53,79 @@
   </div>
 </template>
 
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script>
 export default {
   name: 'Login',
   data () {
     return {
       id: '',
-      pwd: ''
+      pwd: '',
+      loginAlert: false,
+      loginAlertMessage: ''
     }
-  }
+  },
+  methods: {
+    loginPathTo() {
+      if(this.id === undefined || this.id === ''){
+        this.$router.push('/NewQT');
+      }
+
+      this.dealerList = [];
+
+      var param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_USER";
+      param.payload = {};
+      param.payload.FilterExpression = "ID = :id";
+      param.payload.ExpressionAttributeValues = {};
+      var key = ":id";
+      param.payload.ExpressionAttributeValues[key] = this.id;
+
+      axios({
+        method: 'POST',
+        url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        data: param
+      })
+      .then((result) => {
+        if(result.data.Count == 0){
+          this.loginAlertMessage = "등록되지 않은 아이디 입니다.";
+          this.loginAlert = true;          
+        }
+        else {
+          var id = result.data.Items[0].ID;
+          var pwd = result.data.Items[0].PWD;
+          var type = result.data.Items[0].TYPE;
+          var siteCode = result.data.Items[0].CODE;
+
+          if(!(pwd === this.pwd)) {
+            this.loginAlertMessage = "비밀번호 불일치";
+            this.loginAlert = true;   
+          }
+          else if(type === "SITE") {
+            this.$router.push('/NewQT');
+            this.UserInfo.UserID = id;
+            this.UserInfo.BsnID = siteCode;
+          }
+          else {
+            this.$router.push('/MainPage');
+            this.UserInfo.UserID = id;
+            this.UserInfo.BsnID = siteCode;
+          }
+        }
+      });
+    }
+  },    
+    computed:{
+      UserInfo: {
+          get() { return this.$store.getters.UserInfo },
+          set(value) { this.$store.dispatch('UpdateUserInfo',value) }
+      }
+    }
 }
 </script>
 
