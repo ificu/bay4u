@@ -300,6 +300,7 @@ name: 'QTStep',
       addNewQTRequest() {
         console.log('addNewQTRequest : ' + JSON.stringify(this.qtRequest));
         console.log('UserInfo : ' + JSON.stringify(this.UserInfo));
+        console.log('UserInfo : ' + JSON.stringify(this.CarInfo));
 
         var now = new Date();
         var key = this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
@@ -308,6 +309,12 @@ name: 'QTStep',
         console.log('key : ' + key);
 
         var param = {};
+        param.BsnId = this.UserInfo.BsnID;
+        param.UserID = this.UserInfo.UserID;
+        param.CarNo = this.CarInfo.CarNo;
+        param.VinNo = this.CarInfo.VinNo;
+        param.RequestDataJSON = JSON.stringify(this.qtRequest);
+/*
         param.operation = "create";
         param.tableName = "BAY4U_QT_LIST";
         param.payload = {};
@@ -320,21 +327,21 @@ name: 'QTStep',
         param.payload.Item.ResDealer = "parts";
         param.payload.Item.Memo = convertStringToDynamo(this.qtReqMemo);
         param.payload.Item.LineItem = JSON.stringify(this.qtRequest);
-
+*/
         console.log('param : ' + JSON.stringify(param));
 
         axios({
-          method: 'POST',
-          url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          data: param
+            method: 'POST',
+            url:'http://iparts.sknetworks.co.kr/BAY4UService.svc/SaveQTData',
+            headers:{
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+        },
+        data: param
         })
         .then((result) => {
-          //console.log("======= categoryList result ========");
-          //console.log(result.data);
+          console.log("======= SaveQTData result ========");
+          console.log(result.data);
         });
       },
     },
