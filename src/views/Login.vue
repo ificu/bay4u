@@ -92,29 +92,40 @@ export default {
         data: param
       })
       .then((result) => {
-        console.log("======= loginPathTo result ========");
-        console.log(result.data);
-
         if(result.data.Count == 0){
           this.loginAlertMessage = "등록되지 않은 아이디 입니다.";
           this.loginAlert = true;          
         }
         else {
+          var id = result.data.Items[0].ID;
           var pwd = result.data.Items[0].PWD;
           var type = result.data.Items[0].TYPE;
+          var siteCode = result.data.Items[0].CODE;
 
           if(!(pwd === this.pwd)) {
             this.loginAlertMessage = "비밀번호 불일치";
             this.loginAlert = true;   
           }
-          else if(type === "SITE")
+          else if(type === "SITE") {
             this.$router.push('/NewQT');
-          else
+            this.UserInfo.UserID = id;
+            this.UserInfo.BsnID = siteCode;
+          }
+          else {
             this.$router.push('/MainPage');
+            this.UserInfo.UserID = id;
+            this.UserInfo.BsnID = siteCode;
+          }
         }
       });
     }
-  }
+  },    
+    computed:{
+      UserInfo: {
+          get() { return this.$store.getters.UserInfo },
+          set(value) { this.$store.dispatch('UpdateUserInfo',value) }
+      }
+    }
 }
 </script>
 

@@ -191,6 +191,7 @@ import ItemCategory from '@/components/NewQT/ItemCategory.vue'
 import QTConfirm from '@/components/NewQT/QTConfirm.vue'
 import QTCamera from '@/components/NewQT/QTCamera.vue'
 import ROHistory from '@/components/NewQT/ROHistory.vue'
+import {datePadding, convertStringToDynamo} from '@/utils/common.js'
 
 export default {
 name: 'QTStep',
@@ -219,11 +220,6 @@ name: 'QTStep',
           }
       },
       dialog: false,
-      qtCarNo: "",
-      qtCarVin: "",
-      qtCarType: "",
-      qtReqDt: "",
-      qtReqSite: "",
       qtReqMemo: ""
     }
   },
@@ -303,15 +299,29 @@ name: 'QTStep',
       },
       addNewQTRequest() {
         console.log('addNewQTRequest : ' + JSON.stringify(this.qtRequest));
+        console.log('UserInfo : ' + JSON.stringify(this.UserInfo));
 
-        var key = "";
+        var now = new Date();
+        var key = this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                    + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
+        console.log('key : ' + key);
 
         var param = {};
         param.operation = "create";
         param.tableName = "BAY4U_QT_LIST";
         param.payload = {};
         param.payload.Item = {};
-        param.payload.Item.key = key;
+        param.payload.Item.ID = key;
+        param.payload.Item.CarNo = convertStringToDynamo(this.CarInfo.CarNo);
+        param.payload.Item.CarVin = convertStringToDynamo(this.CarInfo.CarVin);
+        param.payload.Item.ReqDt = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2);
+        param.payload.Item.ReqSite = this.UserInfo.BsnID;
+        param.payload.Item.ResDealer = "parts";
+        param.payload.Item.Memo = convertStringToDynamo(this.qtReqMemo);
+        param.payload.Item.LineItem = JSON.stringify(this.qtRequest);
+
+        console.log('param : ' + JSON.stringify(param));
 
         axios({
           method: 'POST',
@@ -323,10 +333,8 @@ name: 'QTStep',
           data: param
         })
         .then((result) => {
-          console.log("======= categoryList result ========");
-          console.log(result.data);
-          this.categoryTitle = result.data.Items[0].GRP_NM;
-          this.categoryList = result.data.Items;
+          //console.log("======= categoryList result ========");
+          //console.log(result.data);
         });
       },
     },
@@ -340,7 +348,15 @@ name: 'QTStep',
       CarInfo: {
           get() { return this.$store.getters.CarInfo },
           set(value) { this.$store.dispatch('UpdateCarInfo',value) }
+      },
+      UserInfo: {
+          get() { return this.$store.getters.UserInfo },
+          set(value) { this.$store.dispatch('UpdateUserInfo',value) }
       }
+    },
+    mounted() {
+      datePadding();
+      convertStringToDynamo();
     }
   }
 </script>
