@@ -18,7 +18,7 @@
             <!-- 과거 정비이력 Popup-->
             <v-dialog v-model="dialog" transition="dialog-bottom-transition">
               <template v-slot:activator="{ on: { click } }">
-                <v-text-field label="차량번호" outlined dense color="success" v-on:keypress.enter="click"></v-text-field>
+                <v-text-field label="차량번호" outlined dense color="success" v-on:keypress.enter="click" v-model="qtCarNo"></v-text-field>
               </template>
               <v-card>
                 <v-toolbar dark color="primary"> 
@@ -42,8 +42,8 @@
                 </v-card>
             </v-dialog>
 
-            <v-text-field label="차대번호" outlined dense color="success" class="mt-n5">></v-text-field>
-            <v-text-field label="차량종류" outlined dense color="success" class="mt-n5">></v-text-field>
+            <v-text-field label="차대번호" outlined dense color="success" class="mt-n5" v-model="qtCarVin">></v-text-field>
+            <v-text-field label="차량종류" outlined dense color="success" class="mt-n5" v-model="qtCarType">></v-text-field>
           </div>
           <v-btn color="primary" @click="e6 = 2">Continue</v-btn>
           <v-btn text></v-btn>
@@ -67,7 +67,7 @@
             </swiper>
           </div>
           <div>
-            <v-textarea outlined color="success" label="기타 메모 입력" auto-grow rows="3" value=""></v-textarea>
+            <v-textarea outlined color="success" label="기타 메모 입력" auto-grow rows="3" value="" v-model="qtReqMemo"></v-textarea>
           </div>
           <v-btn color="primary" @click="e6 = 3">Continue</v-btn>
           <v-btn text @click="e6 = 1">Back</v-btn>
@@ -216,7 +216,13 @@ name: 'QTStep',
             clickable: true
           }
       },
-      dialog: false
+      dialog: false,
+      qtCarNo: "",
+      qtCarVin: "",
+      qtCarType: "",
+      qtReqDt: "",
+      qtReqSite: "",
+      qtReqMemo: ""
     }
   },
   methods: {
@@ -296,16 +302,14 @@ name: 'QTStep',
       addNewQTRequest() {
         console.log('addNewQTRequest : ' + JSON.stringify(this.qtRequest));
 
+        var key = "";
+
         var param = {};
         param.operation = "create";
         param.tableName = "BAY4U_QT_LIST";
         param.payload = {};
         param.payload.Item = {};
-        param.payload.Item.key =
-        param.payload.FilterExpression = "GRP_ID = :id";
-        param.payload.ExpressionAttributeValues = {};
-        var key = ":id";
-        param.payload.ExpressionAttributeValues[key] = id;
+        param.payload.Item.key = key;
 
         axios({
           method: 'POST',
