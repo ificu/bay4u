@@ -3,14 +3,15 @@
 export function datePadding(n, digits) {
     var zero = '';
     var i = 0;
-    n = n.toString();
+    var chk = ''+n;
+    chk = chk.toString();
   
-    if (n.length < digits) {
-      for (i = 0; i < digits - n.length; i++)
+    if (chk.length < digits) {
+      for (i = 0; i < digits - chk.length; i++)
         zero += '0';
     }
 
-    return zero + n;
+    return zero + chk;
 }
 
 // 공통 함수

@@ -310,12 +310,13 @@ name: 'QTStep',
         console.log('key : ' + key);
 
         var param = {};
+        /*
         param.BsnId = this.UserInfo.BsnID;
         param.UserID = this.UserInfo.UserID;
         param.CarNo = this.CarInfo.CarNo;
         param.VinNo = this.CarInfo.VinNo;
-        param.RequestDataJSON = JSON.stringify(this.qtRequest);
-/*
+        param.RequestDataJSON = JSON.stringify(this.qtRequest);*/
+
         param.operation = "create";
         param.tableName = "BAY4U_QT_LIST";
         param.payload = {};
@@ -328,7 +329,7 @@ name: 'QTStep',
         param.payload.Item.ResDealer = "parts";
         param.payload.Item.Memo = convertStringToDynamo(this.qtReqMemo);
         param.payload.Item.LineItem = JSON.stringify(this.qtRequest);
-*/
+
         console.log('param : ' + JSON.stringify(param));
 
         axios({
@@ -360,7 +361,11 @@ name: 'QTStep',
       UserInfo: {
           get() { return this.$store.getters.UserInfo },
           set(value) { this.$store.dispatch('UpdateUserInfo',value) }
-      }
+      },
+      msgDatas: {
+          get() { return this.$store.getters.msgDatas },
+          set(value) { this.$store.dispatch('UpdateSetMsgData',value) }
+      },
     },
     mounted() {
       datePadding();
