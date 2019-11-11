@@ -113,6 +113,7 @@ export default {
   font-size: 1rem;
   font-weight: bold;
   margin-bottom:5px;
+  font-family: 'Noto Sans KR', sans-serif;
 }
 .roHistory-date {
   flex: 30%;
@@ -121,6 +122,7 @@ export default {
   vertical-align:initial;
   margin-bottom:1px;
   margin-left:2px;
+  font-family: 'Noto Sans KR', sans-serif;
 }
 .roHistory-amount {
   /*flex: 70%;*/
@@ -130,11 +132,13 @@ export default {
   color:#F65314;
   vertical-align:initial;
   margin-bottom:1px;
+  font-family: 'Noto Sans KR', sans-serif;
 }
 .roHistory-content
 {
   font-size: 0.8rem;
   margin-left:0rem;
   margin-top:0.5rem;
+  font-family: 'Noto Sans KR', sans-serif;
 }
 </style>
