@@ -299,22 +299,25 @@ name: 'QTStep',
         console.log('qtRequest : ' + JSON.stringify(this.qtRequest));
       },
       addNewQTRequest() {
+        /*
         console.log('addNewQTRequest : ' + JSON.stringify(this.qtRequest));
         console.log('UserInfo : ' + JSON.stringify(this.UserInfo));
-        console.log('UserInfo : ' + JSON.stringify(this.CarInfo));
-
+        console.log('UserInfo : ' + JSON.stringify(this.CarInfo));*/
+/*
         var now = new Date();
         var key = this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                     + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
 
         console.log('key : ' + key);
-
+*/
         var param = {};
         param.BsnId = this.UserInfo.BsnID;
         param.UserID = this.UserInfo.UserID;
         param.CarNo = this.CarInfo.CarNo;
         param.VinNo = this.CarInfo.VinNo;
+        param.Memo = this.qtReqMemo;
         param.RequestDataJSON = JSON.stringify(this.qtRequest);
+
 /*
         param.operation = "create";
         param.tableName = "BAY4U_QT_LIST";
@@ -343,6 +346,16 @@ name: 'QTStep',
         .then((result) => {
           console.log("======= SaveQTData result ========");
           console.log(result.data);
+
+           var rtnCode = result.data.ReturnCode;
+           if(rtnCode === "0")
+           {
+
+           }
+
+        })
+        .catch((error) => {
+          console.log(error);
         });
       },
     },

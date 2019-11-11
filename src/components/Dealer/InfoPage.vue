@@ -77,6 +77,14 @@
                 <b-form-input></b-form-input>
               </div>
             </div>   
+            <div class="QT-Info">
+              <div class="QTInfo-Left">
+                <div>담당자 :</div> {{headQTData[0].AGENT_NM}}
+              </div>
+              <div class="QTInfo-Right">
+                <div>견적상태 : </div>{{headQTData[0].ESTM_STS_NM}}
+              </div>
+            </div>
             <div class="QTRes-List">
               <div class="QTRes-Title">
                 견적회신 상세
@@ -90,19 +98,37 @@
                 </b-button-group>
               </div>  
             </div>       
-            <table class="QTRes-Table mdl-data-table mdl-js-data-table mdl-data-table--selectable mdl-shadow--2dp">
+            <table class="QTRes-Table mdl-data-table mdl-js-data-table mdl-shadow--2dp">
               <thead>
                 <tr>
-                  <th class="QTItem-Brand mdl-data-table__cell--non-numeric">브랜드</th>
                   <th class="QTItem-Title mdl-data-table__cell--non-numeric">부 품 명</th>
+                  <th class="QTItem-Brand mdl-data-table__cell--non-numeric">부품코드</th>
                   <th class="QTItem-Qty">수량</th>
-                  <th class="QTItem-Qty">재고여부</th>
+                 <!-- <th class="QTItem-Qty">재고여부</th>-->
                   <th class="QTItem-Qty">단가</th>
                   <th class="QTItem-Qty">금액</th>
-                  <th class="QTItem-Qty mdl-data-table__cell--non-numeric">참고</th>
+                  <th class="QTItem-Qty mdl-data-table__cell--non-numeric">배송구분</th>
                 </tr>
               </thead>
               <tbody>
+               
+                 <tr  v-for="(qtItem,i) in detailQTData" :key="i" >
+                  <td class="mdl-data-table__cell--non-numeric">{{qtItem.NM_ITM}}</td>
+                  <td class="mdl-data-table__cell--non-numeric">{{qtItem.CONFIRM_ITM}}</td>
+                  <td>{{qtItem.ORDER_QTY | localeNum}}</td>
+                  <!--
+                  <td>              
+                    <select>
+                      <option value="AUDI" selected>O</option>
+                      <option value="VW">X</option>
+                      <option value="BMW">소량</option>
+                    </select> 
+                  </td>-->
+                  <td>{{qtItem.SAL_PRICE | localeNum}}</td>
+                  <td>{{qtItem.AMT | localeNum}}</td>
+                  <td class="mdl-data-table__cell--non-numeric">{{qtItem.DELV_DAY}}</td>
+                </tr>
+                <!--
                 <tr>
                   <td class="mdl-data-table__cell--non-numeric">MANN</td>
                   <td class="mdl-data-table__cell--non-numeric">오일필터,458-4x</td>
@@ -133,6 +159,7 @@
                   <td>110,000</td>
                   <td class="mdl-data-table__cell--non-numeric">S-155</td>
                 </tr>
+              -->
               </tbody>
             </table>
           </b-card-text>
@@ -141,14 +168,16 @@
     </b-card>   
   </div>   
 </template>
-
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script>
 export default {
   name: 'InfoPage',
   data () {
     return {
       selectedBrand: null,
-      tabIndex: 0
+      tabIndex: 0,
+      headQTData:[],
+      detailQTData:[]
     }
   },
   methods: {
@@ -159,7 +188,60 @@ export default {
         return ['text-secondary']
       }
     }
-  }
+  },
+  mounted(){
+      var param = {};
+      param.BsnId = "S009";
+      param.CarNo = "11지5432";
+      param.VinNo =  this.CarInfo.VinNo;
+      param.RequestDataJSON = "S009191111WBAJD3109JB3163630001"
+
+      console.log("======= ROHistory Request result ========");
+      console.log(param); 
+
+      var rtnCode = "";
+
+      axios({
+          method: 'POST',
+          url:'http://iparts.sknetworks.co.kr/BAY4UService.svc/GetQTData',
+          headers:{
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+          },
+          data: param
+      })
+      .then((result) => {
+          console.log("======= ROHistory Return result ========");     
+          console.log(result.data); 
+         
+          this.rtnCode = result.data.ReturnCode;
+          var rtnQTData = JSON.parse(result.data.ReturnDataJSON);
+
+          this.headQTData = rtnQTData['ESTM_HED'];
+          this.detailQTData = rtnQTData['ESTM_DTL'];
+
+          console.log(this.detailQTData); 
+        
+          /* var qtKeys = Object.keys(rtnQTData );*/
+
+          console.log("ESTM_HED : " + this.headQTData );
+          console.log("ESTM_DTL : " + this.detailQTData );
+
+      })
+      .catch((error) => {
+          console.log(error);
+      }) 
+  },
+    computed:{
+      CarInfo: {
+          get() { return this.$store.getters.CarInfo },
+          set(value) { this.$store.dispatch('UpdateCarInfo',value) }
+      },
+      UserInfo: {
+          get() { return this.$store.getters.UserInfo },
+          set(value) { this.$store.dispatch('UpdateUserInfo',value) }
+      }
+    },
 }
 </script>
 
@@ -230,6 +312,22 @@ export default {
   margin-bottom: 5px;
 }
 .Car-Info .CarInfo-Right {
+  flex: 60%;
+  font-weight: bold;
+  color: #5d4038;
+}
+.QT-Info {
+  display: flex;
+  flex-direction: row;
+}
+.QT-Info .QTInfo-Left {
+  flex: 40%;
+  font-weight: bold;
+  color: #5d4038;
+  margin-right: 5px;
+  margin-bottom: 5px;
+}
+.QT-Info .QTInfo-Right {
   flex: 60%;
   font-weight: bold;
   color: #5d4038;
