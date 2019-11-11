@@ -69,25 +69,26 @@ export default {
         var rtnCode = "";
         var rtnCount = 0;
       
-    axios({
-        method: 'POST',
-        url:'http://iparts.sknetworks.co.kr/BAY4UService.svc/GetROList',
-        headers:{
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        data: param
-    })
-    .then((result) => {
-        console.log("======= ROHistory Return result ========");
-        console.log(result.data); 
-        this.rtnCode = result.data.ReturnCode;
-        this.rtnCount = Number(result.data.ReturnDataCount);
-        this.roList = JSON.parse(result.data.ReturnDataJSON);
-    })
-    .catch((error) => {
-        console.log(error);
-    })
+        axios({
+            method: 'POST',
+            url:'http://iparts.sknetworks.co.kr/BAY4UService.svc/GetROList',
+            headers:{
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            data: param
+        })
+        .then((result) => {
+            console.log("======= ROHistory Return result ========");
+            console.log(result.data); 
+            this.rtnCode = result.data.ReturnCode;
+            this.rtnCount = Number(result.data.ReturnDataCount);
+            this.roList = JSON.parse(result.data.ReturnDataJSON);
+            console.log(this.roList );
+        })
+        .catch((error) => {
+            console.log(error);
+        })
     },    
     computed:{
       CarInfo: {

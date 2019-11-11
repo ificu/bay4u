@@ -299,36 +299,25 @@ name: 'QTStep',
         console.log('qtRequest : ' + JSON.stringify(this.qtRequest));
       },
       addNewQTRequest() {
+        /*
         console.log('addNewQTRequest : ' + JSON.stringify(this.qtRequest));
         console.log('UserInfo : ' + JSON.stringify(this.UserInfo));
-        console.log('UserInfo : ' + JSON.stringify(this.CarInfo));
-
+        console.log('UserInfo : ' + JSON.stringify(this.CarInfo));*/
+/*
         var now = new Date();
         var key = this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                     + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
 
         console.log('key : ' + key);
-
+*/
         var param = {};
-        /*
+        
         param.BsnId = this.UserInfo.BsnID;
         param.UserID = this.UserInfo.UserID;
         param.CarNo = this.CarInfo.CarNo;
         param.VinNo = this.CarInfo.VinNo;
-        param.RequestDataJSON = JSON.stringify(this.qtRequest);*/
-
-        param.operation = "create";
-        param.tableName = "BAY4U_QT_LIST";
-        param.payload = {};
-        param.payload.Item = {};
-        param.payload.Item.ID = key;
-        param.payload.Item.CarNo = convertStringToDynamo(this.CarInfo.CarNo);
-        param.payload.Item.CarVin = convertStringToDynamo(this.CarInfo.CarVin);
-        param.payload.Item.ReqDt = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2);
-        param.payload.Item.ReqSite = this.UserInfo.BsnID;
-        param.payload.Item.ResDealer = "parts";
-        param.payload.Item.Memo = convertStringToDynamo(this.qtReqMemo);
-        param.payload.Item.LineItem = JSON.stringify(this.qtRequest);
+        param.Memo = this.qtReqMemo;
+        param.RequestDataJSON = JSON.stringify(this.qtRequest);
 
         console.log('param : ' + JSON.stringify(param));
 
@@ -344,6 +333,47 @@ name: 'QTStep',
         .then((result) => {
           console.log("======= SaveQTData result ========");
           console.log(result.data);
+
+           var rtnCode = result.data.ReturnCode;
+           if(rtnCode === "0")
+           {
+             param = {};
+
+              param.operation = "create";
+              param.tableName = "BAY4U_QT_LIST";
+              param.payload = {};
+              param.payload.Item = {};
+              param.payload.Item.ID = key;
+              param.payload.Item.CarNo = convertStringToDynamo(this.CarInfo.CarNo);
+              param.payload.Item.CarVin = convertStringToDynamo(this.CarInfo.CarVin);
+              param.payload.Item.ReqDt = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2);
+              param.payload.Item.ReqSite = this.UserInfo.BsnID;
+              param.payload.Item.ResDealer = "parts";
+              param.payload.Item.Memo = convertStringToDynamo(this.qtReqMemo);
+              param.payload.Item.LineItem = JSON.stringify(this.qtRequest);
+
+              axios({
+                  method: 'POST',
+                  url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
+                  headers:{
+                      'Accept': 'application/json',
+                      'Content-Type': 'application/json'
+              },
+              data: param
+              })
+              .then((result) => {
+                console.log("======= Data Save result ========");
+                console.log(result.data);
+                })
+              .catch((error) => {
+                console.log(error);
+              });
+
+           }
+
+        })
+        .catch((error) => {
+          console.log(error);
         });
       },
     },
