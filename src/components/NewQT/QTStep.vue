@@ -290,6 +290,7 @@ name: 'QTStep',
       },
       addNewItem(item) {
         if(this.selectedCategory.indexOf(item.ITM_VAL) === -1) { // 새로 추가된 경우
+            item.SEQ = this.qtRequest.length + 1;
             this.qtRequest.push(item);
         }
         else { // 체크 해제 한 경우
