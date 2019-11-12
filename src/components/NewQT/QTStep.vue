@@ -166,9 +166,11 @@
       </span>
       <span slot="footer">
         전송 하시겠습니까?
+        <!--
         <router-link v-bind:to="{name:'Chat', params:{chatid:1}}">
           <b-button class="submit-YES" @click="addNewQTRequest()">YES</b-button>
-        </router-link >
+        </router-link >-->
+        <b-button class="submit-YES" @click="addNewQTRequest()">YES</b-button>
         <b-button class="submit-NO" @click="showQTConfirm=false">NO</b-button>
       </span>
     </QTConfirm>
@@ -303,14 +305,9 @@ name: 'QTStep',
         console.log('addNewQTRequest : ' + JSON.stringify(this.qtRequest));
         console.log('UserInfo : ' + JSON.stringify(this.UserInfo));
         console.log('UserInfo : ' + JSON.stringify(this.CarInfo));*/
-/*
-        var now = new Date();
-        var key = this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
-                    + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
 
-        console.log('key : ' + key);
-*/
         var param = {};
+        
         param.BsnId = this.UserInfo.BsnID;
         param.UserID = this.UserInfo.UserID;
         param.CarNo = this.CarInfo.CarNo;
@@ -318,20 +315,6 @@ name: 'QTStep',
         param.Memo = this.qtReqMemo;
         param.RequestDataJSON = JSON.stringify(this.qtRequest);
 
-/*
-        param.operation = "create";
-        param.tableName = "BAY4U_QT_LIST";
-        param.payload = {};
-        param.payload.Item = {};
-        param.payload.Item.ID = key;
-        param.payload.Item.CarNo = convertStringToDynamo(this.CarInfo.CarNo);
-        param.payload.Item.CarVin = convertStringToDynamo(this.CarInfo.CarVin);
-        param.payload.Item.ReqDt = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2);
-        param.payload.Item.ReqSite = this.UserInfo.BsnID;
-        param.payload.Item.ResDealer = "parts";
-        param.payload.Item.Memo = convertStringToDynamo(this.qtReqMemo);
-        param.payload.Item.LineItem = JSON.stringify(this.qtRequest);
-*/
         console.log('param : ' + JSON.stringify(param));
 
         axios({
@@ -348,9 +331,53 @@ name: 'QTStep',
           console.log(result.data);
 
            var rtnCode = result.data.ReturnCode;
-           if(rtnCode === "0")
+           if(rtnCode === 0)
            {
+             param = {};
 
+             var now = new Date();
+             var key = this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                        + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
+              param.operation = "create";
+              param.tableName = "BAY4U_QT_LIST";
+              param.payload = {};
+              param.payload.Item = {};
+              param.payload.Item.ID = result.data.ReturnObject;
+              param.payload.Item.CarNo = convertStringToDynamo(this.CarInfo.CarNo);
+              param.payload.Item.CarVin = convertStringToDynamo(this.CarInfo.CarVin);
+              param.payload.Item.ReqDt = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2);
+              param.payload.Item.ReqSite = this.UserInfo.BsnID;
+              param.payload.Item.ResDealer = "parts";
+              param.payload.Item.Memo = convertStringToDynamo(this.qtReqMemo);
+              param.payload.Item.LineItem = JSON.stringify(this.qtRequest);
+
+              axios({
+                  method: 'POST',
+                  url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
+                  headers:{
+                      'Accept': 'application/json',
+                      'Content-Type': 'application/json'
+              },
+              data: param
+              })
+              .then((result) => {
+                console.log("======= Data Save result ========");
+                console.log(result.data);
+                })
+              .catch((error) => {
+                console.log(error);
+              });
+
+              //this.$router.push({name:'Chat', params:{chatid:1}});
+              this.$router.push({name:'Chat', 
+                                  params:{
+                                        chatid: result.data.ReturnObject, 
+                                        carNo: this.CarInfo.CarNo,
+                                        chatFrom: this.UserInfo.BsnID,
+                                        chatTo: "parts",
+                                        chatDate: now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2)
+                                    }});
            }
 
         })
@@ -373,7 +400,11 @@ name: 'QTStep',
       UserInfo: {
           get() { return this.$store.getters.UserInfo },
           set(value) { this.$store.dispatch('UpdateUserInfo',value) }
-      }
+      },
+      msgDatas: {
+          get() { return this.$store.getters.msgDatas },
+          set(value) { this.$store.dispatch('UpdateSetMsgData',value) }
+      },
     },
     mounted() {
       datePadding();

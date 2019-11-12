@@ -1,3 +1,4 @@
+/*
 import Vue from 'vue'
 import Vuex from 'vuex'
 import socket from './modules/socket';
@@ -18,3 +19,4 @@ export default new Vuex.Store({
   },
   strict: debug
 })
+*/

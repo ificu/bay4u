@@ -78,10 +78,11 @@
 </template>
 
 <script>
-import { mapMutations, mapState } from 'vuex';
+//import { mapMutations, mapState } from 'vuex';
+//import Constant from '@/Constant';
 import MessageList from '@/components/Chat/ChatMessageList.vue';
 import MessageForm from '@/components/Chat/ChatMessageForm.vue';
-import Constant from '@/Constant';
+
 
 export default {
   name: 'Chat',
@@ -98,40 +99,68 @@ export default {
     'Message-From': MessageForm,
   },
   computed: {
+      CarInfo: {
+          get() { return this.$store.getters.CarInfo },
+          set(value) { this.$store.dispatch('UpdateCarInfo',value) }
+      },
+      UserInfo: {
+          get() { return this.$store.getters.UserInfo },
+          set(value) { this.$store.dispatch('UpdateUserInfo',value) }
+      },    
+    msgDatas: {
+        get() { return this.$store.getters.msgDatas },
+        set(value) { this.$store.dispatch('UpdateMsgData',value) }
+    },    
+    /*
     ...mapState({
       'msgDatas': state => state.socket.msgDatas,
-    }),
+    }),*/
   },
   created : function() {
     if(this.$route.params.chatid !== undefined) {
       this.showMainPage = false;
       this.showChatPage = true;
 
+      // 초기 메시지 입력
+
       if(this.$route.params.append !== undefined) {
         this.showAppend = true;
       }
     }
 
-    const $ths = this;
+    //const $ths = this;
     this.$socket.on('chat', (data) => {
-      this.pushMsgData(data);
-      $ths.datas.push(data);
+      //this.pushMsgData(data);
+      //$ths.datas.push(data);
+      console.log("Chat msg : ", JSON.stringify(data));
+      var chatMsg = {};
+      chatMsg.from = {'name' : data.from.name};
+      chatMsg.msg  = data.msg;
+      console.log("Chat msg : ", JSON.stringify(chatMsg));
+      this.msgDatas = chatMsg;
     });
   },
   methods: {
+    /*
     ...mapMutations({
       'pushMsgData': Constant.PUSH_MSG_DATA,
-    }),
+    }),*/
     sendMessage(msg) {
+      /*
       this.pushMsgData({
         from: {
           name: '나',
         },
         msg,
-      });
+      });*/
+      var chatMsg = {};
+      chatMsg.from = {'name' : '나'};
+      chatMsg.msg  = msg;
+      this.msgDatas = chatMsg;
+      console.log("Type msg : ", JSON.stringify(chatMsg));
       this.$sendMessage({
         //name: this.$route.params.username,
-        name: "s009",
+        name: this.UserInfo.BsnID,
         msg,
       });
     },
