@@ -99,6 +99,14 @@ export default {
     'Message-From': MessageForm,
   },
   computed: {
+      CarInfo: {
+          get() { return this.$store.getters.CarInfo },
+          set(value) { this.$store.dispatch('UpdateCarInfo',value) }
+      },
+      UserInfo: {
+          get() { return this.$store.getters.UserInfo },
+          set(value) { this.$store.dispatch('UpdateUserInfo',value) }
+      },    
     msgDatas: {
         get() { return this.$store.getters.msgDatas },
         set(value) { this.$store.dispatch('UpdateMsgData',value) }
@@ -112,6 +120,8 @@ export default {
     if(this.$route.params.chatid !== undefined) {
       this.showMainPage = false;
       this.showChatPage = true;
+
+      // 초기 메시지 입력
 
       if(this.$route.params.append !== undefined) {
         this.showAppend = true;
@@ -150,7 +160,7 @@ export default {
       console.log("Type msg : ", JSON.stringify(chatMsg));
       this.$sendMessage({
         //name: this.$route.params.username,
-        name: "s009",
+        name: this.UserInfo.BsnID,
         msg,
       });
     },
