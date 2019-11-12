@@ -97,7 +97,9 @@ export default {
           this.loginAlert = true;          
         }
         else {
+          console.log("로그인 성공 : ", JSON.stringify(result));
           var id = result.data.Items[0].ID;
+          var name = result.data.Items[0].NAME;
           var pwd = result.data.Items[0].PWD;
           var type = result.data.Items[0].TYPE;
           var siteCode = result.data.Items[0].CODE;
@@ -110,22 +112,24 @@ export default {
             this.$router.push('/NewQT');
             this.UserInfo.UserID = id;
             this.UserInfo.BsnID = siteCode;
+            this.UserInfo.Name = name;
           }
           else {
             this.$router.push('/MainPage');
             this.UserInfo.UserID = id;
             this.UserInfo.BsnID = siteCode;
+            this.UserInfo.Name = name;
           }
         }
       });
     }
   },    
-    computed:{
-      UserInfo: {
-          get() { return this.$store.getters.UserInfo },
-          set(value) { this.$store.dispatch('UpdateUserInfo',value) }
-      }
+  computed:{
+    UserInfo: {
+        get() { return this.$store.getters.UserInfo },
+        set(value) { this.$store.dispatch('UpdateUserInfo',value) }
     }
+  }
 }
 </script>
 

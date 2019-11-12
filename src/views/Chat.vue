@@ -77,11 +77,13 @@
     </div>
 </template>
 
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script>
 //import { mapMutations, mapState } from 'vuex';
 //import Constant from '@/Constant';
 import MessageList from '@/components/Chat/ChatMessageList.vue';
 import MessageForm from '@/components/Chat/ChatMessageForm.vue';
+import {datePadding, convertStringToDynamo} from '@/utils/common.js'
 
 
 export default {
@@ -91,7 +93,8 @@ export default {
       datas: [],
       showMainPage : true,
       showChatPage : false,
-      showAppend : false
+      showAppend : false,
+      docId : ""
     }
   },
   components: {
@@ -99,14 +102,14 @@ export default {
     'Message-From': MessageForm,
   },
   computed: {
-      CarInfo: {
-          get() { return this.$store.getters.CarInfo },
-          set(value) { this.$store.dispatch('UpdateCarInfo',value) }
-      },
-      UserInfo: {
-          get() { return this.$store.getters.UserInfo },
-          set(value) { this.$store.dispatch('UpdateUserInfo',value) }
-      },    
+    CarInfo: {
+        get() { return this.$store.getters.CarInfo },
+        set(value) { this.$store.dispatch('UpdateCarInfo',value) }
+    },
+    UserInfo: {
+        get() { return this.$store.getters.UserInfo },
+        set(value) { this.$store.dispatch('UpdateUserInfo',value) }
+    },    
     msgDatas: {
         get() { return this.$store.getters.msgDatas },
         set(value) { this.$store.dispatch('UpdateMsgData',value) }
@@ -122,6 +125,20 @@ export default {
       this.showChatPage = true;
 
       // 초기 메시지 입력
+      var msg = this.$route.params.carNo + " 차량에 대한 견적이 요청됐습니다.";
+      var chatMsg = {};
+      chatMsg.from = {'name' : '나'};
+      chatMsg.msg  = msg;
+      this.msgDatas = chatMsg;
+
+      this.docId = this.$route.params.chatid;
+      
+      this.$sendMessage({
+        name: this.UserInfo.BsnID,
+        msg,
+      });
+
+      this.saveChatMsg(chatMsg);
 
       if(this.$route.params.append !== undefined) {
         this.showAppend = true;
@@ -132,11 +149,9 @@ export default {
     this.$socket.on('chat', (data) => {
       //this.pushMsgData(data);
       //$ths.datas.push(data);
-      console.log("Chat msg : ", JSON.stringify(data));
       var chatMsg = {};
       chatMsg.from = {'name' : data.from.name};
       chatMsg.msg  = data.msg;
-      console.log("Chat msg : ", JSON.stringify(chatMsg));
       this.msgDatas = chatMsg;
     });
   },
@@ -163,11 +178,53 @@ export default {
         name: this.UserInfo.BsnID,
         msg,
       });
+      this.saveChatMsg(chatMsg);
     },
     chatingToggle() {
       this.showMainPage = !this.showMainPage;
       this.showChatPage = !this.showChatPage;
+    },
+    saveChatMsg(chatMsg) {
+      var param = {};
+
+      var now = new Date();
+      var id = this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
+      param.operation = "create";
+      param.tableName = "BAY4U_CHAT";
+      param.payload = {};
+      param.payload.Item = {};
+      param.payload.Item.ID = id;
+      param.payload.Item.DocID = this.docId;
+      param.payload.Item.ChatFrom = this.UserInfo.BsnID;
+      param.payload.Item.ChatTo = "parts";
+      param.payload.Item.Message = chatMsg.msg;
+      param.payload.Item.Status = "0";
+
+      console.log("Send Msg : ", JSON.stringify(param));
+
+      axios({
+          method: 'POST',
+          url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
+          headers:{
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+      },
+      data: param
+      })
+      .then((result) => {
+        console.log("======= Chat Save result ========");
+        console.log(result.data);
+        })
+      .catch((error) => {
+        console.log(error);
+      });
     }
+  },
+  mounted() {
+    datePadding();
+    convertStringToDynamo();
   }
 }
 </script>
