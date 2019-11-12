@@ -346,9 +346,10 @@ name: 'QTStep',
               param.payload.Item.ID = result.data.ReturnObject;
               param.payload.Item.CarNo = convertStringToDynamo(this.CarInfo.CarNo);
               param.payload.Item.CarVin = convertStringToDynamo(this.CarInfo.CarVin);
-              param.payload.Item.ReqDt = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2);
+              param.payload.Item.ReqDt = now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);
               param.payload.Item.ReqSite = this.UserInfo.BsnID;
-              param.payload.Item.ResDealer = "parts";
+              param.payload.Item.ReqName = this.UserInfo.Name;
+              param.payload.Item.ResDealer = "PARTS";
               param.payload.Item.Memo = convertStringToDynamo(this.qtReqMemo);
               param.payload.Item.LineItem = JSON.stringify(this.qtRequest);
 

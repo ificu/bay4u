@@ -14,6 +14,16 @@
 
       <div class="Chat-list">
         <ul>
+          <li v-for="(qtReq, index) in qtReqList" v-bind:key = "index">
+            <i class="Carcenter-type fas fa-wrench" style="color:#fbc02e;"></i>
+            <p class="Carcenter-name">{{qtReq.ReqName}} ({{qtReq.CarNo}})<br>{{qtReq.ReqDt}}</p>
+            <span type="button" class="Chat-detail">
+              <i class="fas fa-angle-double-right"></i>
+            </span>            
+          </li>
+        </ul>        
+        <!--
+        <ul>
           <li>
             <i class="Carcenter-type fas fa-wrench" style="color:#fbc02e;"></i>
             <p class="Carcenter-name">No1. 카센터</p>
@@ -42,9 +52,8 @@
               <i class="fas fa-angle-double-right"></i>
             </span>
           </li>
-        </ul>
+        </ul>-->
       </div>
-
     </b-tab>
     <b-tab title="대리점 대화목록" :title-link-class="linkClass(1)">
 
@@ -53,12 +62,14 @@
   </div>   
 </template>
 
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script>
 export default {
   name: 'UserListPage',
   data () {
     return {
-      tabIndex: 0
+      tabIndex: 0,
+      qtReqList: []
     }
   },
   methods: {
@@ -68,7 +79,43 @@ export default {
       } else {
         return ['bg-light', 'text-secondary']
       }
-    }    
+    },
+    showQTReqList() {
+      var param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_QT_LIST";
+      param.payload = {};
+      param.payload.FilterExpression = "ResDealer = :id";
+      param.payload.ExpressionAttributeValues = {};
+      var key = ":id";
+      if(this.UserInfo.BsnID === "")
+        this.UserInfo.BsnID = "PARTS";
+      param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
+
+      axios({
+        method: 'POST',
+        url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        data: param
+      })
+      .then((result) => {
+        console.log("======= QT List result ========");
+        console.log(result.data);
+        this.qtReqList = result.data.Items;
+      });
+    }
+  },
+  mounted(){
+    this.showQTReqList();
+  },    
+  computed:{
+    UserInfo: {
+        get() { return this.$store.getters.UserInfo },
+        set(value) { this.$store.dispatch('UpdateUserInfo',value) }
+    }
   }
 }
 </script>

@@ -23,7 +23,7 @@
         <div class="page-content">
           <!-- Your content goes here -->
           <div class="content-userList">
-            <UserListPage></UserListPage>
+            <UserListPage v-on:selectChat="setQtInfo"></UserListPage>
           </div>
 
           <div class="content-chatTab">
@@ -52,6 +52,10 @@ export default {
     }
   },
   methods: {
+    //setQtInfo(info) {
+      setQtInfo() {
+
+    }
   },
   components: {
     UserListPage,
