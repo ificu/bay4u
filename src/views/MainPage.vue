@@ -23,7 +23,7 @@
         <div class="page-content">
           <!-- Your content goes here -->
           <div class="content-userList">
-            <UserListPage v-on:selectChat="setQtInfo"></UserListPage>
+            <UserListPage v-on:selectChat="setQtInfo" :chatInfo="chatInfo"  v-on:setQtInfo="setQtInfo"></UserListPage>
           </div>
 
           <div class="content-chatTab">
@@ -49,12 +49,14 @@ export default {
   name: 'MainPage',
   data () {
     return {
+      qtKey: '',
+      chatInfo:[]
     }
   },
   methods: {
-    //setQtInfo(info) {
-      setQtInfo() {
-
+    setQtInfo(info) {
+      this.chatInfo = info;
+      console.log(this.chatInfo);
     }
   },
   components: {
