@@ -14,7 +14,7 @@
 
       <div class="Chat-list">
         <ul>
-          <li v-for="(qtReq, index) in qtReqList" v-bind:key = "index">
+          <li v-for="(qtReq, index) in qtReqList" v-bind:key = "index" v-on:click="addChat(qtReq)" >
             <i class="Carcenter-type fas fa-wrench" style="color:#fbc02e;"></i>
             <p class="Carcenter-name">{{qtReq.ReqName}} ({{qtReq.CarNo}})<br>{{qtReq.ReqDt}}</p>
             <span type="button" class="Chat-detail">
@@ -69,9 +69,10 @@ export default {
   data () {
     return {
       tabIndex: 0,
-      qtReqList: []
+      qtReqList: [],
     }
   },
+  props:['chatInfo'],
   methods: {
     linkClass(idx) {
       if (this.tabIndex === idx) {
@@ -106,6 +107,10 @@ export default {
         console.log(result.data);
         this.qtReqList = result.data.Items;
       });
+    },
+    addChat(itme)
+    {
+       this.$emit('setQtInfo' ,itme);
     }
   },
   mounted(){
