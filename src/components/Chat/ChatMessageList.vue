@@ -1,7 +1,7 @@
 <template>
   <div class="Chating-chatingList" id="test">
     <transition-group name="list" >
-      <div v-for="(msg,index) in msgs" v-bind:key="index">
+      <div v-for="(msg,index) in msgs" v-bind:key="index" class="chatitem">
           <div v-if="msg.msgData.from.name === '나'">
             <div class="Chating-me">
                 <div class="Chating-me-contents">
@@ -55,6 +55,7 @@ export default {
   overflow:auto;
   overflow-x:hidden;
 }
+/*.chatitem{  background-color: black;}*/
 .Chating-chatingList .Chating-dealer {
   display: flex;
 }
