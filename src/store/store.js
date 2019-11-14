@@ -23,6 +23,10 @@ export const store = new Vuex.Store({
         },
         SetMsgData(state, msgData) {
             state.msgDatas.push(msgData);
+        },
+        InitMsgData(state)
+        {
+            state.msgDatas = []
         }
     },
     actions: {

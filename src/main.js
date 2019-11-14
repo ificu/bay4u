@@ -15,13 +15,14 @@ import BootstrapVue from 'bootstrap-vue'
 import VueAwesomeSwiper from 'vue-awesome-swiper'
 import Directives from './plugins/directives';
 
-import './utils/filters'
+import './utils/filters';
 
 Vue.config.productionTip = false
 
 Vue.use(BootstrapVue)
 Vue.use(VueAwesomeSwiper)
 Vue.use(Directives)
+Vue.prototype.$EventBus = new Vue();
 
 new Vue({
     router,

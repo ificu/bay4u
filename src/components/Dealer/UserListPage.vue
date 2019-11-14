@@ -64,6 +64,7 @@
 
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script>
+
 export default {
   name: 'UserListPage',
   data () {
@@ -111,10 +112,12 @@ export default {
     addChat(itme)
     {
        this.$emit('setQtInfo' ,itme);
+       this.$EventBus.$emit('click-chat' , itme)
     }
   },
   mounted(){
     this.showQTReqList();
+
   },    
   computed:{
     UserInfo: {
@@ -185,6 +188,7 @@ export default {
 .Carcenter-name {
   padding-left: 10px;
   font-weight: bold;
+  cursor:pointer;
 }
 .Chat-detail {
   align-self: center;

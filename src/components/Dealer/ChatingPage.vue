@@ -31,13 +31,14 @@ import MessageList from '@/components/Chat/ChatMessageList.vue';
 import MessageForm from '@/components/Chat/ChatMessageForm.vue';
 import {datePadding, convertStringToDynamo} from '@/utils/common.js'
 
-
 export default {
   name: 'ChatingPage',
   data () {
     return {
       tabIndex: 0,
-      datas: []
+      datas: [],
+      chatItem:[],
+      showChatArea:false
     }
   },
   components: {
@@ -81,6 +82,11 @@ export default {
       chatMsg.msg  = data.msg;
       this.msgDatas = chatMsg;
     });
+
+    this.$EventBus.$on('click-chat', chatItem => {
+        
+        this.showchating(chatItem);
+    });
   },  
   methods: {
     /*
@@ -106,6 +112,8 @@ export default {
         msg,
       });
       this.saveChatMsg(chatMsg);
+      console.log("Send Msgdatas : "  + JSON.stringify(this.msgDatas));
+
     },    
     linkClass(idx) {
       if (this.tabIndex === idx) {
@@ -150,12 +158,54 @@ export default {
       .catch((error) => {
         console.log(error);
       });
+    },
+    showchating(chatItem)
+    {
+      console.log("Chat Id : " +  chatItem.ID);
+
+      if(this.msgDatas.length !== 0)
+      {   
+        this.$store.commit('InitMsgData');
+      }
+
+      var param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_CHAT";
+      param.payload = {};
+      param.payload.FilterExpression = "DocID = :id";
+      param.payload.ExpressionAttributeValues = {};
+      var key = ":id";
+     
+      param.payload.ExpressionAttributeValues[key] = chatItem.ID;
+
+      axios({
+        method: 'POST',
+        url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        data: param
+      })
+      .then((result) => {
+        console.log("======= QT List result ========");
+        console.log(result.data);
+
+        result.data.Items.forEach(element => { 
+          var chatMsg = {};
+          chatMsg.from = {'name' : chatItem.reqSite};
+          chatMsg.msg  =element['Message'];
+          this.msgDatas = chatMsg;
+        });
+
+      });
+
     }
   },
   mounted() {
     datePadding();
     convertStringToDynamo();
-  }
+  },
 }
 </script>
 
