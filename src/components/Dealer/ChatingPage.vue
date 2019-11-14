@@ -227,5 +227,8 @@ export default {
   height: 100%;
 }
 
+.ChatingPage .card-text {
+  height: 100%;
+}
 
 </style>
