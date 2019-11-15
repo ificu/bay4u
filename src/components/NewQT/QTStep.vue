@@ -541,7 +541,7 @@ name: 'QTStep',
               param.payload.Item = {};
               param.payload.Item.ID = result.data.ReturnObject;
               param.payload.Item.CarNo = convertStringToDynamo(this.CarInfo.CarNo);
-              param.payload.Item.CarVin = convertStringToDynamo(this.CarInfo.CarVin);
+              param.payload.Item.CarVin = convertStringToDynamo(this.CarInfo.VinNo);
               param.payload.Item.ReqDt = now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);
               param.payload.Item.ReqSite = this.UserInfo.BsnID;
               param.payload.Item.ReqName = this.UserInfo.Name;
