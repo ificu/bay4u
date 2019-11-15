@@ -14,7 +14,7 @@
 
       <div class="Chat-list">
         <ul>
-          <li v-for="(qtReq, index) in qtReqList" v-bind:key = "index" v-on:click="addChat(qtReq)" >
+          <li v-for="(qtReq, index) in qtReqList" v-bind:key = "index" v-on:click="SetQTInfo(qtReq)" >
             <i class="Carcenter-type fas fa-wrench" style="color:#fbc02e;"></i>
             <p class="Carcenter-name">{{qtReq.ReqName}} ({{qtReq.CarNo}})<br>{{qtReq.ReqDt}}</p>
             <span type="button" class="Chat-detail">
@@ -109,10 +109,10 @@ export default {
         this.qtReqList = result.data.Items;
       });
     },
-    addChat(itme)
+    SetQTInfo(itme)
     {
        this.$emit('setQtInfo' ,itme);
-       this.$EventBus.$emit('click-chat' , itme)
+       this.$EventBus.$emit('click-qtInfo' , itme)
     }
   },
   mounted(){

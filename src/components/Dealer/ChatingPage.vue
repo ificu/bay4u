@@ -3,14 +3,16 @@
   <b-card no-body>
     <b-tabs v-model="tabIndex" card>
       <b-tab title="대화 목록" :title-link-class="linkClass(0)" active>
-        <b-card-text>
-          <div>
-            <Message-List :msgs="msgDatas" class="msg-list"></Message-List>
-          </div>
-          <div>
-            <Message-From v-on:submitMessage="sendMessage" class="msg-form" ></Message-From>
-          </div>
-        </b-card-text>
+        <div v-if="showChatArea" class="chatArea">
+          <b-card-text>
+            <div>
+              <Message-List :msgs="msgDatas" class="msg-list"></Message-List>
+            </div>
+            <div>
+              <Message-From v-on:submitMessage="sendMessage" class="msg-form" ></Message-From>
+            </div>
+          </b-card-text>
+        </div>
       </b-tab>
       <!--
       <b-tab title="동진 카센타" :title-link-class="linkClass(1)">
@@ -83,8 +85,7 @@ export default {
       this.msgDatas = chatMsg;
     });
 
-    this.$EventBus.$on('click-chat', chatItem => {
-        
+    this.$EventBus.$on('click-qtInfo', chatItem => {   
         this.showchating(chatItem);
     });
   },  
@@ -165,7 +166,9 @@ export default {
 
       if(this.msgDatas.length !== 0)
       {   
+        // msgDatas 초기화
         this.$store.commit('InitMsgData');
+        this.showChatArea = false;
       }
 
       var param = {};
@@ -198,6 +201,8 @@ export default {
           this.msgDatas = chatMsg;
         });
 
+        this.showChatArea = true;
+
       });
 
     }
@@ -229,6 +234,14 @@ export default {
 
 .ChatingPage .card-text {
   height: 100%;
+  background-color: beige;
+  overflow-y: scroll;
+}
+
+.ChatingPage .chatArea{
+  background-color: blueviolet;
+  height: 700px;
+  float: left;
 }
 
 </style>

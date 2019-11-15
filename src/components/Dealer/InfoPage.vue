@@ -12,28 +12,28 @@
           <img src="@/assets/user-icon.png">
         </div>
         <div class="UserInfo-info">
-          <div class="info-name">No.1 카센터</div>
+          <div class="info-name">{{this.qtInfo.ReqName}}</div>
           <div class="info-tel">02-266-5011 / 010-2222-3534</div>
           <div class="info-addr">서울 성남시 분당구 성남대로343번길 9</div>
         </div>
       </b-card-text>
     </b-card>
     <b-card no-body class="QT-Detail">
-      <b-tabs v-model="tabIndex" card active-nav-item-class="font-weight-bold">
-      <b-tab title="견적 요청" :title-link-class="linkClass(0)" active>
+      <b-tabs v-model="tabIndex" card active-nav-item-class="font-weight-bold" >
+      <b-tab title="견적 요청" :title-link-class="linkClass(0)">
         <b-card-text>
           <div class="Car-Info">
             <div class="CarInfo-Left">
-              <div>차량번호</div>
-              <b-form-input></b-form-input>
+              <div><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>차량번호</div>
+              <b-form-input v-model="this.qtInfo.CarNo"></b-form-input>
             </div>
             <div class="CarInfo-Right">
-              <div>차대번호</div>
-              <b-form-input></b-form-input>
+              <div><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>차대번호</div>
+              <b-form-input v-model="this.qtInfo.CarVin"></b-form-input>
             </div>
           </div>   
-          <div class="QTReq-List">견적요청 상세</div>       
-          <table class="QTReq-Table mdl-data-table mdl-js-data-table mdl-data-table--selectable mdl-shadow--2dp">
+          <div class="QTReq-List"><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>견적요청 상세</div>       
+          <table class="QTReq-Table mdl-data-table mdl-js-data-table mdl-shadow--2dp">
             <thead>
               <tr>
                 <th class="QTItem-Title mdl-data-table__cell--non-numeric">요청 부품</th>
@@ -41,21 +41,24 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td class="mdl-data-table__cell--non-numeric">연료 필터</td>
-                <td>1</td>
+              <tr v-for="(item , index) in qtItems" :key="index">
+                <td class="mdl-data-table__cell--non-numeric">{{item.ITM_NM}}</td>
+                <td>{{item.ITM_QTY}}</td>
               </tr>
+              <!--
               <tr>
                 <td class="mdl-data-table__cell--non-numeric">오일 필터</td>
                 <td>1</td>
               </tr>
+              -->
             </tbody>
           </table>
-          <div class="QTReq-Memo">Memo</div>
+          <div class="QTReq-Memo"><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>Memo</div>
           <b-form-textarea
             id="textarea"
             rows="3"
             max-rows="6"
+            v-model="this.qtInfo.Memo"
           ></b-form-textarea>
         </b-card-text>
       </b-tab>
@@ -85,7 +88,7 @@
             <div class="QT-Title"><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>담당자 : </div>
             <div class="QT-Content">{{this.angentNm }}</div>
             <div class="QT-Title"><v-icon x-small  class="qt-icon">fas fa-angle-down</v-icon>견적상태 : </div>
-            <div class="QT-Content">{{this.estmStsNm}}</div>
+            <div class="QT-ContentSts">{{this.estmStsNm}}</div>
           </div>
           <div class="QTRes-List">
             <div class="QTRes-Title">
@@ -144,6 +147,7 @@
 </template>
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script>
+
 export default {
   name: 'InfoPage',
   data () {
@@ -154,7 +158,11 @@ export default {
       series:'',
       angentNm:'',
       estmStsNm:'',
-      showSum:false
+      showSum:false,
+      qtInfo:[],
+      qtItems:[],
+      selectedTab1: false,
+      selectedTab2: true
     }
   },
   methods: {
@@ -167,10 +175,10 @@ export default {
     },
     GetQtList(key){
       var param = {};
-      param.BsnId = "S009";
-      param.CarNo = "11지5432";
-      param.VinNo =  this.CarInfo.VinNo;
-      param.RequestDataJSON = "S009191111WBAJD3109JB3163630001"
+      param.BsnId = this.qtInfo.ReqSite;
+      param.CarNo = this.qtInfo.CarNo;
+      param.VinNo =  this.qtInfo.CarVin;
+      param.RequestDataJSON = this.qtInfo.ID;
 
       console.log("======= ROHistory Request result ========");
       console.log(param); 
@@ -194,26 +202,42 @@ export default {
           var rtnQTData = JSON.parse(result.data.ReturnDataJSON);
 
           var headQTData = rtnQTData['ESTM_HED'];
-          this.detailQTData = rtnQTData['ESTM_DTL'];
 
-          console.log(this.detailQTData); 
+          if(headQTData[0].ESTM_STS !== '1' && rtnQTData['ESTM_DTL'].Length !== 0)
+          {
+            this.detailQTData = rtnQTData['ESTM_DTL'];
+            this.showSum = !this.showSum; 
+            console.log("견적상태 : " + headQTData[0].ESTM_STS); 
+            console.log("견적수 : " + rtnQTData['ESTM_DTL'].Length ); 
+          }
         
           /* var qtKeys = Object.keys(rtnQTData );*/
-
           /*console.log("ESTM_HED : " + this.headQTData );
           console.log("ESTM_DTL : " + this.detailQTData );*/
           this.series = headQTData[0].SERIES;
           this.angentNm = headQTData[0].AGENT_NM;
           this.estmStsNm = headQTData[0].ESTM_STS_NM;
-          this.showSum = !this.showSum; 
-
       })
       .catch((error) => {
           console.log(error);
       })   
+    },
+    SetQtInfo(){
+      //console.log("QT Info 설정" + JSON.stringify(this.qtInfo));  
+      this.tabIndex = 0;
+      this.qtInfo.CarVin = this.qtInfo.CarVin.replace("*empty*", "");
+      this.qtInfo.Memo = this.qtInfo.Memo.replace("*empty*", "");
+      this.qtItems = JSON.parse(this.qtInfo.LineItem);
+
+      // webpos견적 Data 초기화
+      this.series = '';
+      this.angentNm = '';
+      this.estmStsNm = '';
+      this.showSum = false;
+      this.detailQTData = [];
     }
   },
-    computed:{
+  computed:{
       CarInfo: {
           get() { return this.$store.getters.CarInfo },
           set(value) { this.$store.dispatch('UpdateCarInfo',value) }
@@ -230,7 +254,14 @@ export default {
         });
         return sum;
       }
-    },
+  },
+  created: function(){
+
+    this.$EventBus.$on('click-qtInfo', qtItem => {   
+        this.qtInfo = qtItem;
+        this.SetQtInfo();
+    });
+  },
 }
 </script>
 
@@ -318,6 +349,12 @@ export default {
 .QT-Content {
   flex: auto;
   font-size: 0.8rem;
+}
+.QT-ContentSts{
+  flex: auto;
+  font-size: 1rem;
+  color:#008080;
+  font-weight: bold;
 }
 .QTReq-List {
   font-weight: bold;
