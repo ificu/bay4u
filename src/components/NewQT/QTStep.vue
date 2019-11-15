@@ -17,9 +17,9 @@
           </v-card>
           <div>
             <!-- 과거 정비이력 Popup-->
-            <v-dialog v-model="dialog" transition="dialog-bottom-transition" >
+            <v-dialog v-model="showROHistDialog" transition="dialog-bottom-transition" >
               <template v-slot:activator="{ on: { click } }">
-                <v-text-field label="차량번호" v-model="CarInfo.CarNo" outlined dense color="success"  v-on:keypress.enter="click"></v-text-field>
+                <v-text-field label="차량번호" v-model="CarInfo.CarNo" outlined dense color="success"  v-on:keypress.enter="checkWebPOSHist"></v-text-field>
               </template>
               <v-card>
                 <v-toolbar dark color="primary"> 
@@ -31,7 +31,7 @@
                   <v-toolbar-items>
                       <!--<v-btn dark text @click="dialog = false">Save</v-btn>-->
                   </v-toolbar-items>
-                  <v-btn icon dark @click="dialog = false">
+                  <v-btn icon dark @click="showROHistDialog = false">
                     <v-icon>mdi-close</v-icon>
                   </v-btn>
                 </v-toolbar>
@@ -44,7 +44,26 @@
             </v-dialog>
 
             <v-text-field label="차대번호" v-model="CarInfo.VinNo" outlined dense color="success" class="mt-n5" ></v-text-field>
-            <v-text-field label="차량종류" outlined dense color="success" class="mt-n5"></v-text-field>
+            <!--<v-text-field label="차량종류" outlined dense color="success" class="mt-n5"></v-text-field>-->
+            <v-btn outlined small color="red darken-1" class="mt-n6 mb-4 float-right" v-if="showVINSearchBtn" @click="checkCarVin">차대번호 조회</v-btn>
+            <v-btn outlined small color="red darken-1" class="mt-n6 mb-4 mr-1 float-right" v-if="showROHistBtn" @click="showROHistDialog=!showROHistDialog">정비이력</v-btn>
+
+            <!-- 차대번호 조회 동의 Popup-->
+            <v-dialog v-model="showVINSearchAgreePopup">
+              <v-card>
+                <v-card-title class="headline" >고객 확인 필요</v-card-title>
+                <v-card-text>차대번호 조회를 위해선 고객동의를 받으시고 아래 차량 소유주명을 입력하셔야 합니다.</v-card-text>
+                <v-card  class="ml-4 mr-4" outlined>
+                  <v-text-field label="고객명" v-model="custName" outlined dense color="success" class="pr-4 pl-4 pt-4 mb-n6"></v-text-field>
+                  <v-checkbox v-model="chkCustAgree" color="green darken-1" dense label="차대번호를 조회를 위한 고객명 입력을 동의하셨습니다."></v-checkbox>
+                </v-card>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn color="green darken-1" text @click="checkIntraVanVin">조회</v-btn>
+                  <v-btn color="green darken-1" text @click="showVINSearchAgreePopup = false">취소</v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>        
 
           </div>
           <v-btn color="primary" @click="e6 = 2">Continue</v-btn>
@@ -204,13 +223,13 @@ name: 'QTStep',
       itmQty: 1,
       dealerCount: 0,
       categoryTitle: "",
-      categoryList: [],
-      selectedCategory: [],
-      dealerList: [],
-      qtRequest: [],
-      showItemCategory: false,
-      showQTConfirm: false,
-      showQTCamera: false,
+      categoryList: [],                 // DB에서 조회해 온 견적 요청 부품 군 리스트
+      selectedCategory: [],             // 견적 요청 부품 군 중 선택된 리스트
+      dealerList: [],                   // 요청할 딜러 리스트를 담는 배열
+      qtRequest: [],                    // 견적 요청 리스트를 담는 JSON 배열
+      showItemCategory: false,          // 견적 요청 부품 선택 팝업
+      showQTConfirm: false,             // 최종 견적 요청 확인 팝업
+      showQTCamera: false,              // 카메라 쵤영을 위한 팝업
       captureImg: "",
       swiperOption: {
           slidesPerView: 3,
@@ -221,8 +240,13 @@ name: 'QTStep',
             clickable: true
           }
       },
-      dialog: false,
-      qtReqMemo: ""
+      showROHistDialog: false,          // WebPOS 정비이력 조회 팝업
+      showVINSearchAgreePopup: false,   // 국토부 차대번호 조회를 위한 동의 팝업
+      qtReqMemo: "",
+      showROHistBtn: false,             // 정비이력 조회 버튼 표시 여부
+      showVINSearchBtn: false,          // 차대번호 조회 버튼 표시 여부
+      chkCustAgree: false,              // 차대번호 조회를 위한 고객 동의 체크 여부
+      custName: ""
     }
   },
   methods: {
@@ -231,6 +255,183 @@ name: 'QTStep',
       },
       updatePic(pic){
         this.captureImg = pic;
+        pic = pic.replace("data:image/png;base64,", "");
+        this.checkImgVIN(pic);
+        this.checkImgCarNo(pic);
+      },
+      // Google OCR API를 통해 이미지에서 차대번호 추출
+      checkImgVIN(pic){
+        var param = {};
+        param.requests = [];
+        var req = {};
+        req.image = {};
+        req.image.content = pic;
+        req.features = [];
+        var reqType = {};
+        reqType.type = "TEXT_DETECTION";
+        req.features.push(reqType);
+        param.requests.push(req);
+
+        axios({
+          method: 'POST',
+          url: 'https://vision.googleapis.com/v1/images:annotate?key=AIzaSyApWMx0PYvexvPKJkmMA9lAwWvMC5K6FZU',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          data: param
+        }).then((result) => {
+          console.log("======= Google API result ========");
+          console.log(result.data);
+          var textArea;
+          var vinNo;
+          for (var img of result.data.responses) {
+            textArea = img.fullTextAnnotation.pages[0].blocks[0];
+            //console.log("Area : ", JSON.stringfy(textArea));
+            for (var text of img.textAnnotations) {
+              if(text.description.length == 16 || text.description.length == 17) {
+                // 이 것을 차대번호로 인지
+                console.log("VIN : ", JSON.stringfy(text));
+                this.CarInfo.VinNo = text.description.replace("I", "1").replace("O", "0").replace("g", "9");
+              }
+            }
+          }
+        }).catch((error) => {
+          console.log(error);
+        });
+      },
+      // DB에서 차대번호를 조회 이력이 있는지 체크
+      checkCarVin(){
+        var param = {};
+        param.operation = "list";
+        param.tableName = "BAY4U_CAR_VIN";
+        param.payload = {};
+        param.payload.FilterExpression = "CAR = :carno";
+        param.payload.ExpressionAttributeValues = {};
+        var key = ":carno";
+        param.payload.ExpressionAttributeValues[key] = this.CarInfo.CarNo;
+
+        axios({
+          method: 'POST',
+          url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          data: param
+        })
+        .then((result) => {
+          console.log("======= checkCarVin result ========");
+          console.log(result.data);
+          if(result.data.Count > 0) {
+            this.CarInfo.VinNo = result.data.Items[0].VIN;
+          }
+          else {
+            this.CarInfo.VinNo = "";
+            this.showVINSearchAgreePopup = true;
+          }
+        });
+      },
+      // 인트라밴을 통해 차대번호를 체크
+      checkIntraVanVin(){
+        if(this.chkCustAgree === false || this.custName === "") return;
+
+        var param = {};
+        param.carNo = this.CarInfo.CarNo;
+        param.custName = this.custName;
+
+        axios({
+            method: 'POST',
+            url:'http://bay4u.co.kr:8085/api/intravan',
+            headers:{
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            data: param
+        })
+        .then((result) => {
+            console.log("======= checkIntraVanVin result ========");
+            console.log(result.data); 
+            if(result.data.success === true) {
+              this.CarInfo.VinNo = result.data.data;
+            }
+            else {
+              if(result.data.data.indexOf("소유자 성명") >= 0)
+                this.CarInfo.VinNo = "소유자 성명 불일치";
+              else
+                this.CarInfo.VinNo = "국토부 차대번호 조회 오류";
+            }
+        })
+        .catch((error) => {
+            console.log(error);
+        })
+
+        this.CarInfo.VinNo = "국토부 차대번호 조회 중...";
+        this.showVINSearchAgreePopup = false;
+      },
+      // Aibril Vision API를 통해 이미지에서 차량번호 추출
+      checkImgCarNo(pic){
+        var param = {};
+        param.name = "최범진";
+        param.returnResultImage = false;
+        param.image = pic;
+
+        axios({
+          method: 'POST',
+          url: 'https://visionai.skcc.com/ocr/alpr/recognize',
+          headers: {
+            'api-key': '7bfee9e0-b19a-4f14-a3a0-42c259aac9f2',
+            'Content-Type': 'application/json'
+          },
+          data: param
+        }).then((result) => {
+          console.log("======= Aibril API result ========");
+          console.log(result.data);
+          for (var img of result.data.results) {
+            console.log("CarNo : ", img.carNo);
+            this.CarInfo.CarNo = img.carNo;
+            this.checkWebPOSHist();
+          }
+        }).catch((error) => {
+          console.log(error);
+        });
+      },
+      // WebPOS에 과거 정비내역이 있는지 체크
+      checkWebPOSHist(){
+        var param = {};
+        param.BsnId = this.UserInfo.BsnID;
+        param.CarNo = this.CarInfo.CarNo;
+
+        console.log("======= ROHistory Request result ========");
+        console.log(param); 
+
+        var rtnCode = "";
+        var rtnCount = 0;
+      
+        axios({
+            method: 'POST',
+            url:'http://iparts.sknetworks.co.kr/BAY4UService.svc/GetROList',
+            headers:{
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            data: param
+        })
+        .then((result) => {
+            console.log("======= ROHistory Return result ========");
+            console.log(result.data); 
+            if(result.data.ReturnDataCount > 0) {
+              this.showROHistBtn = true;
+            }
+            
+            this.showVINSearchBtn = true;
+        })
+        .catch((error) => {
+            console.log(error);
+        })
+
+        // 정비이력 조회는 차량번호 입력 or 인식 후 자동 처리 되므로 차대번호 조회도 자동 처리하자...
+        this.checkCarVin();
       },
       showQTConfirmModal() {
         this.dealerList = [];
@@ -301,11 +502,6 @@ name: 'QTStep',
         console.log('qtRequest : ' + JSON.stringify(this.qtRequest));
       },
       addNewQTRequest() {
-        /*
-        console.log('addNewQTRequest : ' + JSON.stringify(this.qtRequest));
-        console.log('UserInfo : ' + JSON.stringify(this.UserInfo));
-        console.log('UserInfo : ' + JSON.stringify(this.CarInfo));*/
-
         var param = {};
         
         param.BsnId = this.UserInfo.BsnID;
