@@ -82,7 +82,7 @@
               </div>
               <!--<b-form-input v-model="headQTData[0].SERIES"></b-form-input>-->
               </div>
-            <div class="QT-Content">{{this.series}}</div>
+               <div class="QT-Content">{{this.series}}</div>
           </div>   
           <div class="QT-Info">
             <div class="QT-Title"><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>담당자 : </div>
@@ -116,8 +116,9 @@
               </tr>
             </thead>
             <tbody>              
-              <tr  v-for="(qtItem,i) in detailQTData" :key="i" >
-                <td class="mdl-data-table__cell--non-numeric">{{qtItem.NM_ITM}}</td>
+              <tr v-for="(qtItem,i) in detailQTData" :key="i" >
+                <td class="mdl-data-table__cell--non-numeric"><div class="itemNm" v-b-tooltip.hover :title=qtItem.NM_ITM>{{qtItem.NM_ITM}}</div>
+                </td>
                 <td class="mdl-data-table__cell--non-numeric">{{qtItem.CONFIRM_ITM}}</td>
                 <td>{{qtItem.ORDER_QTY | localeNum}}</td>
                 <!--<td>              
@@ -490,5 +491,11 @@ export default {
 .qt-icon{
   color:#5d4038;  
   margin-right: 0.2rem;
+}
+.card .itemNm{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 145px;
 }
 </style>
