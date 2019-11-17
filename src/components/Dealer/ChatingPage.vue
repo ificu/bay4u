@@ -1,26 +1,29 @@
 <template>
-  <div class="ChatingPage">
+  <div>
   <b-card no-body>
-    <b-tabs v-model="tabIndex" card>
-      <b-tab title="대화 목록" :title-link-class="linkClass(0)" active>
-        <div v-if="showChatArea" class="chatArea">
+    <!--<b-tabs v-model="tabIndex" card>
+      <b-tab title="대화 목록" :title-link-class="linkClass(0)" active >-->
+      <!--<v-toolbar class="Chating-Title"> 
+        <v-spacer>대화</v-spacer>
+      </v-toolbar>-->
+        <div  class="Chating-Title">{{chatItem.ReqName}} {{ chatItem.CarNo }} </div>
           <b-card-text>
             <div>
-              <Message-List :msgs="msgDatas" class="msg-list"></Message-List>
-            </div>
-            <div>
-              <Message-From v-on:submitMessage="sendMessage" class="msg-form" ></Message-From>
+              <div class="Chating-page">
+                <Message-List :msgs="msgDatas" class="msg-list" v-auto-bottom></Message-List>
+              </div>
+              <div>
+                <Message-From v-on:submitMessage="sendMessage" class="msg-form" ></Message-From>
+              </div>
             </div>
           </b-card-text>
-        </div>
-      </b-tab>
-      <!--
+    <!--  </b-tab>      
       <b-tab title="동진 카센타" :title-link-class="linkClass(1)">
         <b-card-text>
             
         </b-card-text>
-      </b-tab>-->
-    </b-tabs>
+      </b-tab>
+    </b-tabs>-->
   </b-card>
   </div>   
 </template>
@@ -87,6 +90,7 @@ export default {
 
     this.$EventBus.$on('click-qtInfo', chatItem => {   
         this.showchating(chatItem);
+        this.chatItem = chatItem;
     });
   },  
   methods: {
@@ -160,9 +164,9 @@ export default {
         console.log(error);
       });
     },
-    showchating(chatItem)
+    showchating(item)
     {
-      console.log("Chat Id : " +  chatItem.ID);
+      console.log("Chat Id : " +  item.ID);
 
       if(this.msgDatas.length !== 0)
       {   
@@ -179,7 +183,7 @@ export default {
       param.payload.ExpressionAttributeValues = {};
       var key = ":id";
      
-      param.payload.ExpressionAttributeValues[key] = chatItem.ID;
+      param.payload.ExpressionAttributeValues[key] = item.ID;
 
       axios({
         method: 'POST',
@@ -196,7 +200,7 @@ export default {
 
         result.data.Items.forEach(element => { 
           var chatMsg = {};
-          chatMsg.from = {'name' : chatItem.reqSite};
+          chatMsg.from = {'name' : item.reqSite};
           chatMsg.msg  =element['Message'];
           this.msgDatas = chatMsg;
         });
@@ -224,6 +228,7 @@ export default {
 #acd3ce : 옅은 녹색
 #967d5f : 옅은 브라운
 */
+/*
 .ChatingPage {
   height: 100%;
 }
@@ -233,15 +238,48 @@ export default {
 }
 
 .ChatingPage .card-text {
-  height: 100%;
+  height: 90%;
   background-color: beige;
-  overflow-y: scroll;
+}*/
+.Chating-page {
+  background-color: #ddd;
+  /*min-height: calc(90vh - 50px - 80px);*/
+  height:630px;
+  width: 100%;
 }
-
-.ChatingPage .chatArea{
-  background-color: blueviolet;
-  height: 700px;
-  float: left;
+.Chating-Title
+{
+  z-index: 1;
+  background-color: rgb(52,58,62);
+  height: 48px;
+  color:white;
+  font-weight: bold;
+  padding: 10px 15px;
+  border-top-left-radius: 5px 3px;
+  border-top-right-radius: 5px 3px;
 }
-
+.msg-form {
+  bottom: -30px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  width: 100%;
+  border-bottom-left-radius: 5px 3px;
+  border-bottom-right-radius: 5px 3px;
+  border: 1px solid #ddd;
+  background-color: white;
+}
+.msg-list {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 20px;
+  margin-top: 10px;
+  overflow-x: scroll-y;
+  -ms-overflow-style: none; 
+}
+::-webkit-scrollbar {
+display:none;
+}
 </style>
