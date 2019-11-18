@@ -5,7 +5,8 @@ Vue.use(Vuex);
 
 export const store = new Vuex.Store({
     state: {
-        CarInfo: { CarNo: "", VinNo: "WBAJD3109JB316363" },
+        //CarInfo: { CarNo: "", VinNo: "WBAJD3109JB316363" },
+        CarInfo: { CarNo: "", VinNo: "" },
         UserInfo: { UserID: "", BsnID: "", Name: "" },
         msgDatas: [],
     },

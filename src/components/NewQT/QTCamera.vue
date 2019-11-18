@@ -23,7 +23,14 @@ export default {
   },
   methods: {
       closeModal() {
-          this.$emit('updatePic', '');
+          //this.$emit('updatePic', '');
+          var videoPlayer = document.querySelector('#player');
+          if(videoPlayer.srcObject != null) {
+            videoPlayer.srcObject.getTracks().map(function (val) {
+                val.stop();
+            });
+          }
+
           this.$emit('closeQTCameraModal', false);
       },
       captureImg() {
@@ -42,6 +49,12 @@ export default {
 
         var url64 = canvasElement.toDataURL();
         //console.log("url64 : " + url64);
+
+        if(videoPlayer.srcObject != null) {
+            videoPlayer.srcObject.getTracks().map(function (val) {
+                val.stop();
+            });
+        }
 
         this.$emit('updatePic', url64);
         this.$emit('closeQTCameraModal', false);
@@ -69,32 +82,34 @@ export default {
             }
         }
 
+        //alert("userAgent : " + navigator.userAgent);
+
         if (navigator.userAgent.match("iPad") == null 
             && navigator.userAgent.match("iPhone|Mobile|UP.Browser|Android|BlackBerry|Windows CE|Nokia|webOS|Opera Mini|SonyEricsson|opera mobi|Windows Phone|IEMobile|POLARIS") != null) 
         { 
             //모바일 접속일 경우
             //navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 800 }, height: { ideal: 600 }, facingMode: { exact: "environment" } } })
-            navigator.mediaDevices.getUserMedia({ video: true } )
-            //navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: "environment" } } })
+            //navigator.mediaDevices.getUserMedia({ video: true } )
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
                 .then(function(stream) {
                     videoPlayer.srcObject = stream;
                     videoPlayer.style.display = 'block';
                 })
                 .catch(function(err) {
-                //imagePickerArea.style.display = 'block';
-                alert(err);
+                    //imagePickerArea.style.display = 'block';
+                    alert("[Mobile] " + err.name + ": " + err.message);
                 });
         } 
         else { 
             navigator.mediaDevices.getUserMedia({ video: true } )
-            .then(function(stream) {
-                videoPlayer.srcObject = stream;
-                videoPlayer.style.display = 'block';
-            })
-            .catch(function(err) {
-                //imagePickerArea.style.display = 'block';
-                alert(err);
-            });
+                .then(function(stream) {
+                    videoPlayer.srcObject = stream;
+                    videoPlayer.style.display = 'block';
+                })
+                .catch(function(err) {
+                    //imagePickerArea.style.display = 'block';
+                    alert("[PC] " + err.name + ": " + err.message);
+                });
         }
 
       })
