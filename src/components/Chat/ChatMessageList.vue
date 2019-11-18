@@ -55,7 +55,9 @@ export default {
   overflow:auto;
   overflow-x:hidden;
 }
-/*.chatitem{  background-color: black;}*/
+.chatitem{ 
+z-index: 1;
+}
 .Chating-chatingList .Chating-dealer {
   display: flex;
 }

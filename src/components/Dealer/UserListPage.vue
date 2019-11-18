@@ -14,7 +14,7 @@
 
       <div class="Chat-list">
         <ul>
-          <li v-for="(qtReq, index) in qtReqList" v-bind:key = "index" v-on:click="SetQTInfo(qtReq)" >
+          <li v-for="(qtReq, index) in qtReqList" v-bind:key = "index" v-on:click="SetQTInfo(qtReq,index)" :class="{selectItem : selectedList(index)}">
             <i class="Carcenter-type fas fa-wrench" style="color:#fbc02e;"></i>
             <p class="Carcenter-name">{{qtReq.ReqName}} ({{qtReq.CarNo}})<br>{{qtReq.ReqDt}}</p>
             <span type="button" class="Chat-detail">
@@ -71,6 +71,7 @@ export default {
     return {
       tabIndex: 0,
       qtReqList: [],
+      qtItemIndex: -1
     }
   },
   props:['chatInfo'],
@@ -80,6 +81,14 @@ export default {
         return ['bg-secondary', 'text-warning']
       } else {
         return ['bg-light', 'text-secondary']
+      }
+    },
+    selectedList(idx)
+    {
+      if (this.qtItemIndex === idx) {
+        return true
+      } else {
+        return false
       }
     },
     showQTReqList() {
@@ -109,10 +118,11 @@ export default {
         this.qtReqList = result.data.Items;
       });
     },
-    SetQTInfo(itme)
+    SetQTInfo(itme , idx)
     {
        this.$emit('setQtInfo' ,itme);
        this.$EventBus.$emit('click-qtInfo' , itme)
+       this.qtItemIndex = idx;
     }
   },
   mounted(){
@@ -180,6 +190,21 @@ export default {
   border-color: #bebebe;
   background-color: #fcf4df;
 }
+
+.Chat-list .selectItem {
+  display: flex;
+  min-height: 50px;
+  height: 50px;
+  line-height: 50px;
+  margin: 0.5rem 0;
+  padding: 0 0.9rem;
+  border-width: thin;
+  border-style: solid;
+  border-radius: 5px;
+  border-color: #bebebe;
+  background-color: #878f99;
+}
+
 
 .Carcenter-type {
   align-self: center;
