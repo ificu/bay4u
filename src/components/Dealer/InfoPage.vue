@@ -7,14 +7,14 @@
       header-bg-variant="dark"
       style="height:160px;"
     >
-      <b-card-text class="UserInfo-contents">
+      <b-card-text class="UserInfo-contents" v-if="showSiteInfo">
         <div class="UserInfo-img">
           <img src="@/assets/user-icon.png">
         </div>
         <div class="UserInfo-info">
           <div class="info-name">{{this.qtInfo.ReqName}}</div>
-          <div class="info-tel">02-266-5011 / 010-2222-3534</div>
-          <div class="info-addr">서울 성남시 분당구 성남대로343번길 9</div>
+          <div class="info-tel"><v-icon small class="qt-icon">fas fa-phone-square</v-icon>{{this.siteInfo.TEL}} / <v-icon small class="qt-icon">fas fa-mobile-alt</v-icon>{{this.siteInfo.HP}}</div>
+          <div class="info-addr"><v-icon small class="qt-icon">mdi-domain</v-icon>{{this.siteInfo.ADDR}}</div>
         </div>
       </b-card-text>
     </b-card>
@@ -82,7 +82,7 @@
               </div>
               <!--<b-form-input v-model="headQTData[0].SERIES"></b-form-input>-->
               </div>
-            <div class="QT-Content">{{this.series}}</div>
+               <div class="QT-Content">{{this.series}}</div>
           </div>   
           <div class="QT-Info">
             <div class="QT-Title"><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>담당자 : </div>
@@ -116,8 +116,9 @@
               </tr>
             </thead>
             <tbody>              
-              <tr  v-for="(qtItem,i) in detailQTData" :key="i" >
-                <td class="mdl-data-table__cell--non-numeric">{{qtItem.NM_ITM}}</td>
+              <tr v-for="(qtItem,i) in detailQTData" :key="i" >
+                <td class="mdl-data-table__cell--non-numeric"><div class="itemNm" v-b-tooltip.hover :title=qtItem.NM_ITM>{{qtItem.NM_ITM}}</div>
+                </td>
                 <td class="mdl-data-table__cell--non-numeric">{{qtItem.CONFIRM_ITM}}</td>
                 <td>{{qtItem.ORDER_QTY | localeNum}}</td>
                 <!--<td>              
@@ -159,10 +160,10 @@ export default {
       angentNm:'',
       estmStsNm:'',
       showSum:false,
+      showSiteInfo:false,
       qtInfo:[],
       qtItems:[],
-      selectedTab1: false,
-      selectedTab2: true
+      siteInfo:[]
     }
   },
   methods: {
@@ -173,7 +174,7 @@ export default {
         return ['text-secondary']
       }
     },
-    GetQtList(key){
+    GetQtList(){
       var param = {};
       param.BsnId = this.qtInfo.ReqSite;
       param.CarNo = this.qtInfo.CarNo;
@@ -199,24 +200,29 @@ export default {
           console.log(result.data); 
          
           this.rtnCode = result.data.ReturnCode;
-          var rtnQTData = JSON.parse(result.data.ReturnDataJSON);
 
-          var headQTData = rtnQTData['ESTM_HED'];
-
-          if(headQTData[0].ESTM_STS !== '1' && rtnQTData['ESTM_DTL'].Length !== 0)
+          if(this.rtnCode === 0)
           {
-            this.detailQTData = rtnQTData['ESTM_DTL'];
-            this.showSum = !this.showSum; 
-            console.log("견적상태 : " + headQTData[0].ESTM_STS); 
-            console.log("견적수 : " + rtnQTData['ESTM_DTL'].Length ); 
+            var rtnQTData = JSON.parse(result.data.ReturnDataJSON);
+            var headQTData = rtnQTData['ESTM_HED'];
+            
+            if(headQTData.length > 0)
+            {
+              if(headQTData[0].ESTM_STS !== '1' && rtnQTData['ESTM_DTL'].Length !== 0)
+              {
+                this.detailQTData = rtnQTData['ESTM_DTL'];
+                this.showSum = !this.showSum; 
+              }
+
+              /* var qtKeys = Object.keys(rtnQTData );*/
+              /*console.log("ESTM_HED : " + this.headQTData );
+              console.log("ESTM_DTL : " + this.detailQTData );*/
+              this.series = headQTData[0].SERIES;
+              this.angentNm = headQTData[0].AGENT_NM;
+              this.estmStsNm = headQTData[0].ESTM_STS_NM;
+            }
           }
-        
-          /* var qtKeys = Object.keys(rtnQTData );*/
-          /*console.log("ESTM_HED : " + this.headQTData );
-          console.log("ESTM_DTL : " + this.detailQTData );*/
-          this.series = headQTData[0].SERIES;
-          this.angentNm = headQTData[0].AGENT_NM;
-          this.estmStsNm = headQTData[0].ESTM_STS_NM;
+          
       })
       .catch((error) => {
           console.log(error);
@@ -235,6 +241,34 @@ export default {
       this.estmStsNm = '';
       this.showSum = false;
       this.detailQTData = [];
+    },
+    GetSiteInfo(){
+      this.showSiteInfo = false;
+      var param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_SITE";
+      param.payload = {};
+      param.payload.FilterExpression = "CODE = :id";
+      param.payload.ExpressionAttributeValues = {};
+      var key = ":id";
+
+      param.payload.ExpressionAttributeValues[key] = this.qtInfo.ReqSite;
+
+      axios({
+        method: 'POST',
+        url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        data: param
+      })
+      .then((result) => {
+        console.log("======= Site result ========");
+        console.log(result.data);
+        this.siteInfo = result.data.Items[0];
+        this.showSiteInfo = true;
+      });
     }
   },
   computed:{
@@ -260,6 +294,7 @@ export default {
     this.$EventBus.$on('click-qtInfo', qtItem => {   
         this.qtInfo = qtItem;
         this.SetQtInfo();
+        this.GetSiteInfo();
     });
   },
 }
@@ -456,5 +491,11 @@ export default {
 .qt-icon{
   color:#5d4038;  
   margin-right: 0.2rem;
+}
+.card .itemNm{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 145px;
 }
 </style>
