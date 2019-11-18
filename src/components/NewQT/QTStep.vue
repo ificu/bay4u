@@ -342,7 +342,8 @@ name: 'QTStep',
 
         axios({
             method: 'POST',
-            url:'http://bay4u.co.kr:8085/api/intravan',
+            //url:'http://bay4u.co.kr:8085/api/intravan',
+            url:'https://bay4u.co.kr/extif',
             headers:{
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
@@ -358,6 +359,8 @@ name: 'QTStep',
             else {
               if(result.data.data.indexOf("소유자 성명") >= 0)
                 this.CarInfo.VinNo = "소유자 성명 불일치";
+              else if(result.data.data.indexOf("일치하는 차량이 없습니다.") >= 0)
+                this.CarInfo.VinNo = "차량번호 미 존재";
               else
                 this.CarInfo.VinNo = "국토부 차대번호 조회 오류";
             }
@@ -410,7 +413,8 @@ name: 'QTStep',
       
         axios({
             method: 'POST',
-            url:'http://iparts.sknetworks.co.kr/BAY4UService.svc/GetROList',
+            //url:'http://iparts.sknetworks.co.kr/BAY4UService.svc/GetROList',
+            url:'https://bay4u.co.kr/scpif',
             headers:{
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
