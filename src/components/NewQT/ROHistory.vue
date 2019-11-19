@@ -71,7 +71,8 @@ export default {
       
         axios({
             method: 'POST',
-            url:'http://iparts.sknetworks.co.kr/BAY4UService.svc/GetROList',
+            //url:'http://iparts.sknetworks.co.kr/BAY4UService.svc/GetROList',
+            url:'https://bay4u.co.kr/scpif/GetROList',
             headers:{
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'

@@ -5,7 +5,7 @@
             @keyup.13="submitMessageFunc"
             type="text" class="inputArea-inputBox" />
         <span type="button" class="inputArea-send">
-            <i class="fab fa-telegram"></i>
+            <i class="fab fa-telegram" @click="submitMessageFunc"></i>
         </span>
     </div>    
 </template>
