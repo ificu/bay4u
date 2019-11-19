@@ -96,6 +96,7 @@
 
         <v-stepper-step color="accent" :complete="e6 > 3" step="3">견적요청 리스트 확인</v-stepper-step>
         <v-stepper-content step="3">
+          
           <v-list two-line subheader>
             <v-list-item v-for="(qtItem, index) in qtRequest" v-bind:key="index">
               <v-list-item-avatar>
@@ -104,8 +105,7 @@
               </v-list-item-avatar>
               <v-list-item-content>
                 <v-list-item-title v-text="qtItem.ITM_NM"></v-list-item-title>
-                <v-list-item-subtitle  class="qtyInput"> 
-
+                <v-list-item-subtitle> 
                   <v-card
                      class="d-flex flex-row-reverse"
                      flat
@@ -115,7 +115,9 @@
                     <v-btn text icon small @click="subCounter(index)">
                       <v-icon>keyboard_arrow_down</v-icon>
                     </v-btn>
-                    <v-text-field class="mt-0 "  type="number" v-model="qtItem.ITM_QTY" outlined   />
+                    <div class="qtyInput">
+                      <v-text-field  v-model.number="qtItem.ITM_QTY" type="number" ></v-text-field>
+                    </div>
                     <!--<v-btn text small min-width="10px" max-width="15px">
                       {{qtItem.ITM_QTY}}
                     </v-btn>-->
@@ -883,14 +885,23 @@ name: 'QTStep',
   margin-bottom: 20px;
 }
 
-
-
-.qtyInput  .v-input .v-text-field__slot{
-  background-color:gold;
-  height: 30px;
-  font-size: 10px;
-  padding:0px;
-  
+.qtyInput{
+  /*background-color: #ddd;*/
+  height: 20x;
+  width: 30px;
+  text-align: right;
+  border: 1px solid #ddd;
+}
+.qtyInput .v-input{
+  /*background-color: gold;*/
+  height:  20px;
+  width: 25px;
+  font-size:0.9rem;
+  position:absolute;
+  padding-top: 0px;
+  padding-left: 2px;
+  bottom:10px;
+  float: right; 
 }
 
 </style>

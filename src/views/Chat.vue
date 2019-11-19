@@ -7,13 +7,14 @@
       </div>
       <div class="Chat-list">
         <ul>
-          <li>
+          <li v-for="(qtReq, index) in qtReqList" v-bind:key = "index">
             <i class="Dealer-type fas fa-wrench" style="color:#fbc02e;"></i>
-            <p class="Dealer-name">부품드림</p>
+            <p class="Dealer-name">{{qtReq.CarNo}}</p>
             <span type="button" class="Chat-detail" v-on:click="chatingToggle">
               <i class="fas fa-angle-double-right"></i>
             </span>
           </li>
+          <!--
           <li>
             <i class="Dealer-type fas fa-wrench" style="color:#967d5f;"></i>
             <p class="Dealer-name">제로무역</p>
@@ -35,6 +36,7 @@
               <i class="fas fa-angle-double-right"></i>
             </span>
           </li>
+          -->
         </ul>
       </div>
     </div>
@@ -94,7 +96,8 @@ export default {
       showMainPage : true,
       showChatPage : false,
       showAppend : false,
-      docId : ""
+      qtReqList: [],
+      docId : "",
     }
   },
   components: {
@@ -154,6 +157,8 @@ export default {
       chatMsg.msg  = data.msg;
       this.msgDatas = chatMsg;
     });
+
+    this.showQTReqList();
   },
   methods: {
     /*
@@ -220,7 +225,36 @@ export default {
       .catch((error) => {
         console.log(error);
       });
-    }
+    },
+    showQTReqList() {
+      var param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_QT_LIST";
+      param.payload = {};
+      param.payload.FilterExpression = "ReqSite = :id";
+      param.payload.ExpressionAttributeValues = {};
+      var key = ":id";
+      if(this.UserInfo.BsnID === "")
+        this.UserInfo.BsnID = "PARTS";
+      param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
+
+      console.log("chating list pram : " + JSON.stringify(param));
+
+      axios({
+        method: 'POST',
+        url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        data: param
+      })
+      .then((result) => {
+        console.log("======= QT List result ========");
+        console.log(result.data);
+        this.qtReqList = result.data.Items;
+      });
+    },
   },
   mounted() {
     datePadding();
