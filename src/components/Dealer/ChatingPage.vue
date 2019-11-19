@@ -247,9 +247,8 @@ export default {
   height: 100%;
 }
 .chatform .card {
-  position:fixed;
-  height: 80%;
-  width: 29%;
+  height: 100%;
+  width: 100%;
  /* background-color: blue;*/
 }
 .Chating-page {
@@ -289,7 +288,8 @@ export default {
   bottom: 20px;
   margin-top: 0px;
   overflow-x: scroll-y;
-  -ms-overflow-style: none; 
+  -ms-overflow-style: none;
+  height: 95%; 
 }
 ::-webkit-scrollbar {
 display:none;
