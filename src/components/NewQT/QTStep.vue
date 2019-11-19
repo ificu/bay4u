@@ -416,7 +416,7 @@ name: 'QTStep',
         axios({
             method: 'POST',
             //url:'http://iparts.sknetworks.co.kr/BAY4UService.svc/GetROList',
-            url:'https://bay4u.co.kr/scpif/GetROList',
+            url:'https://bay4u.co.kr/scpif',
             headers:{
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
@@ -531,8 +531,7 @@ name: 'QTStep',
 
         axios({
             method: 'POST',
-            //url:'http://iparts.sknetworks.co.kr/BAY4UService.svc/SaveQTData',
-            url:'https://bay4u.co.kr/scpif/SaveQTData',
+            url:'http://iparts.sknetworks.co.kr/BAY4UService.svc/SaveQTData',
             headers:{
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
