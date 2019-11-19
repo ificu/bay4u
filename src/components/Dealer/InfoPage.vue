@@ -188,7 +188,8 @@ export default {
 
       axios({
           method: 'POST',
-          url:'http://iparts.sknetworks.co.kr/BAY4UService.svc/GetQTData',
+          //url:'http://iparts.sknetworks.co.kr/BAY4UService.svc/GetQTData',
+          url:'https://bay4u.co.kr/scpif/GetQTData',
           headers:{
               'Accept': 'application/json',
               'Content-Type': 'application/json'
