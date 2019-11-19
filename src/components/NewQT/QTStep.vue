@@ -104,21 +104,22 @@
               </v-list-item-avatar>
               <v-list-item-content>
                 <v-list-item-title v-text="qtItem.ITM_NM"></v-list-item-title>
-                <v-list-item-subtitle> 
+                <v-list-item-subtitle  class="qtyInput"> 
 
                   <v-card
-                    class="d-flex flex-row-reverse"
-                    flat
+                     class="d-flex flex-row-reverse"
+                     flat
                     tile
                     dense
                   >
-                    <v-btn text icon small>
+                    <v-btn text icon small @click="subCounter(index)">
                       <v-icon>keyboard_arrow_down</v-icon>
                     </v-btn>
-                    <v-btn text small min-width="10px" max-width="15px">
-                      <div>1</div>
-                    </v-btn>
-                    <v-btn text icon small>
+                    <v-text-field class="mt-0 "  type="number" v-model="qtItem.ITM_QTY" outlined   />
+                    <!--<v-btn text small min-width="10px" max-width="15px">
+                      {{qtItem.ITM_QTY}}
+                    </v-btn>-->
+                    <v-btn text icon small @click="addCounter(index)">
                       <v-icon>keyboard_arrow_up</v-icon>
                     </v-btn>
                   </v-card>        
@@ -126,7 +127,7 @@
                 </v-list-item-subtitle>
               </v-list-item-content>   
               <v-list-item-action>
-                <v-btn class="mr-n4" icon>
+                <v-btn class="mr-n4" icon @click="removeItem(qtItem)">
                   <v-icon class="mr-n4 pl-4" color="grey lighten-1">highlight_off</v-icon>
                 </v-btn>
               </v-list-item-action>  
@@ -146,7 +147,6 @@
           <v-btn text @click="e6 = 3">Back</v-btn>
         </v-stepper-content>
     </v-stepper>
-
 
     <ItemCategory v-if="showItemCategory" @close="showItemCategory=false">
       <h4 slot="header">{{categoryTitle}}</h4>
@@ -173,14 +173,14 @@
       <span slot="header">총 {{dealerCount}}개 대리점에 <br> 견적요청을 보냅니다</span>
       <span slot="list1">
         <ul class="qtConfirm-dealerList">
-          <li v-for="(dealer, index) in dealerList" v-bind:key = "index">{{dealer.DEALER_NAME}}</li>
+          <li v-for="(dealer, index) in dealerList" v-bind:key="index">{{dealer.DEALER_NAME}}</li>
         </ul>
       </span>
       <span slot="list2">
-        <div class="qtConfirm-itemList" v-for="item in selectedCategory" v-bind:key = "item">
-          <span class="qtConfirm-itemDel">{{item}}</span>
-          <span class="qtConfirm-itemDel">1개</span>
-          <i class="qtConfirm-itemDel fas fa-times-circle"></i>
+        <div class="qtConfirm-itemList" v-for="(item, index) in qtRequest" v-bind:key="index">
+          <span class="qtConfirm-itemDel">{{item.ITM_NM}}</span>
+          <span class="qtConfirm-itemDel">{{item.ITM_QTY }}개</span>
+            <i class="qtConfirm-itemDel fas fa-times-circle"  @click="removeItem(item)"></i>
         </div>
       </span>
       <span slot="footer">
@@ -503,7 +503,17 @@ name: 'QTStep',
         else { // 체크 해제 한 경우
           this.qtRequest = this.qtRequest.filter(it => it.ITM_VAL != item.ITM_VAL);
         }
+        /*console.log(Array.isArray(this.requests));*/
         console.log('qtRequest : ' + JSON.stringify(this.qtRequest));
+      },
+      removeItem(item) {
+        /*console.log('Index : ' + this.selectedCategory.indexOf(item.ITM_NM));*/
+        this.qtRequest = this.qtRequest.filter(it => it.ITM_VAL != item.ITM_VAL);
+        if(this.selectedCategory.indexOf(item.ITM_NM) >= 0){
+          this.$delete(this.selectedCategory , this.selectedCategory.indexOf(item.ITM_NM));
+        }
+        /*console.log(Array.isArray(this.selectedCategory));
+        console.log('selectedCategory : ' + this.selectedCategory);*/
       },
       addNewQTRequest() {
         var param = {};
@@ -587,6 +597,16 @@ name: 'QTStep',
           console.log(error);
         });
       },
+      addCounter: function(idx) {
+         this.qtRequest[idx].ITM_QTY++;
+      },
+      subCounter: function(idx) {
+         this.qtRequest[idx].ITM_QTY--;
+         if( this.qtRequest[idx].ITM_QTY < 0)
+         {
+            this.qtRequest[idx].ITM_QTY = 0;
+         }
+      },
     },
     components: {
       ItemCategory: ItemCategory,
@@ -631,7 +651,6 @@ name: 'QTStep',
   height: 80px;
   display: flex;
 }
-
 
 .NewQT-submit .submit-list {
   margin:auto;
@@ -863,4 +882,15 @@ name: 'QTStep',
 .custom-control {
   margin-bottom: 20px;
 }
+
+
+
+.qtyInput  .v-input .v-text-field__slot{
+  background-color:gold;
+  height: 30px;
+  font-size: 10px;
+  padding:0px;
+  
+}
+
 </style>

@@ -1,14 +1,12 @@
 <template>
-  <div>
+  <div class="chatform">
   <b-card no-body>
     <!--<b-tabs v-model="tabIndex" card>
       <b-tab title="대화 목록" :title-link-class="linkClass(0)" active >-->
-      <!--<v-toolbar class="Chating-Title"> 
-        <v-spacer>대화</v-spacer>
-      </v-toolbar>-->
         <div  class="Chating-Title">{{chatItem.ReqName}} {{ chatItem.CarNo }} </div>
           <b-card-text>
-            <div>
+            
+            <div v-if="showChatArea">
               <div class="Chating-page">
                 <Message-List :msgs="msgDatas" class="msg-list" v-auto-bottom></Message-List>
               </div>
@@ -16,6 +14,7 @@
                 <Message-From v-on:submitMessage="sendMessage" class="msg-form" ></Message-From>
               </div>
             </div>
+            
           </b-card-text>
     <!--  </b-tab>      
       <b-tab title="동진 카센타" :title-link-class="linkClass(1)">
@@ -43,7 +42,8 @@ export default {
       tabIndex: 0,
       datas: [],
       chatItem:[],
-      showChatArea:false
+      showChatArea:false,
+      show:true
     }
   },
   components: {
@@ -140,8 +140,8 @@ export default {
       param.payload.Item = {};
       param.payload.Item.ID = id;
       param.payload.Item.DocID = this.docId;
-      param.payload.Item.ChatFrom = this.UserInfo.BsnID;
-      param.payload.Item.ChatTo = "parts";
+      param.payload.Item.ChatFrom = this.chatItem.ReqSite
+      param.payload.Item.ChatTo = this.UserInfo.BsnID;
       param.payload.Item.Message = chatMsg.msg;
       param.payload.Item.Status = "0";
 
@@ -241,11 +241,20 @@ export default {
   height: 90%;
   background-color: beige;
 }*/
-.Chating-page {
-  background-color: #ddd;
-  /*min-height: calc(90vh - 50px - 80px);*/
-  height:630px;
+.chatform{
+  position: relative;
   width: 100%;
+  height: 100%;
+}
+.chatform .card {
+  height: 100%;
+}
+.Chating-page {
+    background-color: #ddd;
+    position: absolute;
+  /*min-height: calc(90vh - 50px - 80px);*/
+    width: 100%;
+    height: 92%;
 }
 .Chating-Title
 {
@@ -259,7 +268,7 @@ export default {
   border-top-right-radius: 5px 3px;
 }
 .msg-form {
-  bottom: -30px;
+  bottom: -5px;
   position: absolute;
   left: 0;
   right: 0;
@@ -275,7 +284,7 @@ export default {
   left: 0;
   right: 0;
   bottom: 20px;
-  margin-top: 10px;
+  margin-top: 0px;
   overflow-x: scroll-y;
   -ms-overflow-style: none; 
 }
