@@ -1,5 +1,5 @@
 <template>
-  <div class="Chating-chatingList" id="test">
+  <div v-auto-bottom="msgs" class="Chating-chatingList" id="test">
     <transition-group name="list" >
       <div v-for="(msg,index) in msgs" v-bind:key="index" class="chatitem">
           <div v-if="msg.msgData.from.name === '나'">
@@ -51,7 +51,8 @@ export default {
 .Chating-chatingList {
   margin:auto;
   width: 90%;
-  padding-top: 60px;
+  padding-top: 70px;
+  height: calc(100vh - 50px - 70px + 10px);
   overflow:auto;
   overflow-x:hidden;
 }
