@@ -247,7 +247,10 @@ export default {
   height: 100%;
 }
 .chatform .card {
-  height: 100%;
+  position:fixed;
+  height: 80%;
+  width: 29%;
+ /* background-color: blue;*/
 }
 .Chating-page {
     background-color: #ddd;
