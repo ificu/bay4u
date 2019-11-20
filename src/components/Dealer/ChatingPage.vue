@@ -67,6 +67,7 @@ export default {
     ...mapState({
       'msgDatas': state => state.socket.msgDatas,
     }),*/
+    
   },
   created : function() {
     if(this.$route.params.chatid !== undefined) {
@@ -107,7 +108,7 @@ export default {
         msg,
       });*/
       var chatMsg = {};
-      chatMsg.from = {'name' : '나'};
+      chatMsg.from = {'name' : this.UserInfo.BsnID};
       chatMsg.msg  = msg;
       this.msgDatas = chatMsg;
       console.log("Type msg : ", JSON.stringify(chatMsg));
@@ -139,12 +140,13 @@ export default {
       param.payload = {};
       param.payload.Item = {};
       param.payload.Item.ID = id;
-      param.payload.Item.DocID = this.docId;
-      param.payload.Item.ChatFrom = this.chatItem.ReqSite
-      param.payload.Item.ChatTo = this.UserInfo.BsnID;
+      param.payload.Item.DocID = this.chatItem.ID;  //docId
+      param.payload.Item.ChatFrom = this.UserInfo.BsnID;
+      param.payload.Item.ChatTo = this.chatItem.ReqSite;
       param.payload.Item.Message = chatMsg.msg;
       param.payload.Item.Status = "0";
 
+      console.log("DocID : " ,this.chatItem );
       console.log("Send Msg : ", JSON.stringify(param));
 
       axios({
@@ -195,12 +197,19 @@ export default {
         data: param
       })
       .then((result) => {
-        console.log("======= QT List result ========");
+        console.log("======= Chat Msg List result ========");
         console.log(result.data);
+
+        if(Array.isArray(result.data.Items))
+        {
+          result.data.Items.sort(function(a, b){
+            return (a.ID.substring(a.ID.length,a.ID.length -12) > b.ID.substring(b.ID.length,b.ID.length -12)) ? 1 : -1;
+          });
+        }
 
         result.data.Items.forEach(element => { 
           var chatMsg = {};
-          chatMsg.from = {'name' : item.reqSite};
+          chatMsg.from = {'name' : element['ChatFrom']};
           chatMsg.msg  =element['Message'];
           this.msgDatas = chatMsg;
         });
@@ -209,7 +218,10 @@ export default {
 
       });
 
-    }
+    },
+    chatMsgsSort(msgList){
+                  return _.orderBy(msgList, 'ID', 'desc'); // 오름차순 :: asc
+              }
   },
   mounted() {
     datePadding();
