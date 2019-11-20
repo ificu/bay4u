@@ -100,22 +100,22 @@ a:hover {
 .page-content {
   display: flex;
   height: 100%;
+  min-height: 80vh;
+  /*background-color: aqua;*/
 }
 
 .page-content .content-userList{
   flex: 20%;
   border-right: 1px solid #aaa;
-  height: 100%;
+  /*height: 100%;*/
   background: #f8f9fa;
 }
 .page-content .content-chatTab{
   flex: 30%;
   padding: 10px;
-  height: 100%;
+  /*height: 100%;*/
 }
 .page-content .content-info{
   flex: 50%;
 }
-
-
 </style>
