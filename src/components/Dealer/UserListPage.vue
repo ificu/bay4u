@@ -115,6 +115,14 @@ export default {
       .then((result) => {
         console.log("======= QT List result ========");
         console.log(result.data);
+
+        if(Array.isArray(result.data.Items))
+        {
+          result.data.Items.sort(function(a, b){
+            return (a.ReqDt > b.ReqDt) ? 1 : -1;
+          });
+        }
+
         this.qtReqList = result.data.Items;
       });
     },
