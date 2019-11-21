@@ -83,6 +83,7 @@
               <swiper-slide><img v-on:click="showItemCategoryModal('6')" src="@/assets/group6.png"></swiper-slide>
               <swiper-slide><img v-on:click="showItemCategoryModal('7')" src="@/assets/group7.png"></swiper-slide>
               <swiper-slide><img v-on:click="showItemCategoryModal('8')" src="@/assets/group8.png"></swiper-slide>
+              <swiper-slide><img v-on:click="showItemCategoryModal('9')" src="@/assets/group9.png"></swiper-slide>
               <swiper-slide></swiper-slide>
               <div class="swiper-pagination" slot="pagination"></div>
             </swiper>
@@ -102,6 +103,21 @@
               <v-list-item-avatar>
                 <img src="@/assets/icon-oilfilter.png" v-if="qtItem.ITM_ICON === 'icon-oilfilter.png' ">
                 <img src="@/assets/icon-airfilter.png" v-else-if="qtItem.ITM_ICON === 'icon-airfilter.png' ">
+                <img src="@/assets/icon-battery.png" v-else-if="qtItem.ITM_ICON === 'icon-battery.png' ">
+                <img src="@/assets/icon-beltdrive.png" v-else-if="qtItem.ITM_ICON === 'icon-beltdrive.png' ">
+                <img src="@/assets/icon-brakedisc.png" v-else-if="qtItem.ITM_ICON === 'icon-brakedisc.png' ">
+                <img src="@/assets/icon-brakepad.png" v-else-if="qtItem.ITM_ICON === 'icon-brakepad.png' ">
+                <img src="@/assets/icon-brakepadsensor.png" v-else-if="qtItem.ITM_ICON === 'icon-brakepadsensor.png' ">
+                <img src="@/assets/icon-cabinfilter.png" v-else-if="qtItem.ITM_ICON === 'icon-cabinfilter.png' ">
+                <img src="@/assets/icon-cooling.png" v-else-if="qtItem.ITM_ICON === 'icon-cooling.png' ">
+                <img src="@/assets/icon-engineoil.png" v-else-if="qtItem.ITM_ICON === 'icon-engineoil.png' ">
+                <img src="@/assets/icon-filter.png" v-else-if="qtItem.ITM_ICON === 'icon-filter.png' ">
+                <img src="@/assets/icon-fuelfilter.png" v-else-if="qtItem.ITM_ICON === 'icon-fuelfilter.png' ">
+                <img src="@/assets/icon-ignition.png" v-else-if="qtItem.ITM_ICON === 'icon-ignition.png' ">
+                <img src="@/assets/icon-missionfilter.png" v-else-if="qtItem.ITM_ICON === 'icon-missionfilter.png' ">
+                <img src="@/assets/icon-oilfilter.png" v-else-if="qtItem.ITM_ICON === 'icon-oilfilter.png' ">
+                <img src="@/assets/icon-sensor.png" v-else-if="qtItem.ITM_ICON === 'icon-sensor.png' ">
+                <img src="@/assets/icon-wiper.png" v-else-if="qtItem.ITM_ICON === 'icon-wiper.png' ">
               </v-list-item-avatar>
               <v-list-item-content>
                 <v-list-item-title v-text="qtItem.ITM_NM"></v-list-item-title>
