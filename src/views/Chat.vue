@@ -9,7 +9,7 @@
         <ul>
           <li v-for="(qtReq, index) in qtReqList" v-bind:key = "index">
             <i class="Dealer-type fas fa-wrench" style="color:#fbc02e;"></i>
-            <p class="Dealer-name">{{qtReq.CarNo}}</p><!--<p>{{setDealerNm(qtReq.ResDealer)}}</p>-->
+            <p class="Dealer-name">{{qtReq.CarNo}}</p><!--<p>{{getDealerNm(qtReq.ResDealer)}}</p>-->
             <span type="button" class="Chat-detail" v-on:click="chatingToggle(qtReq)">
               <i class="fas fa-angle-double-right"></i>
             </span>
@@ -126,6 +126,10 @@ export default {
   },
   created : function() {
     if(this.$route.params.chatid !== undefined) {
+
+      // msgDatas 초기화
+      this.$store.commit('InitMsgData');
+
       this.showMainPage = false;
       this.showChatPage = true;
 
@@ -148,6 +152,7 @@ export default {
 
       if(this.$route.params.append !== undefined) {
         this.showAppend = true;
+
       }
     }
 
@@ -239,11 +244,11 @@ export default {
     showchating(item)
     {
       console.log("Chat Id : " +  item.ID);
-      if(this.msgDatas.length !== 0)
-      {   
+      //if(this.msgDatas.length !== 0)
+      //{   
         // msgDatas 초기화
         this.$store.commit('InitMsgData');
-      }
+      //}
 
       var param = {};
       param.operation = "list";
@@ -315,36 +320,34 @@ export default {
         if(Array.isArray(result.data.Items))
         {
           result.data.Items.sort(function(a, b){
-            return (a.ReqDt > b.ReqDt) ? 1 : -1;
+            return (a.ReqDt < b.ReqDt) ? 1 : -1;
           });
         }
 
         this.qtReqList = result.data.Items;
 
+        /*
         result.data.Items.forEach(element => { 
          if(this.resDealers.indexOf(element['ResDealer']) === -1)
          {
             this.resDealers.push(element['ResDealer']);
          }
         });
-
-       /* this.getDealerNm(this.resDealers);*/
+        */
 
       });
     },
-    getDealerNm()
+    getDealerNm(value)
     {
       var param = {};
       param.operation = "list";
       param.tableName = "BAY4U_USER";
       param.payload = {};
-      param.payload.FilterExpression = "ID = :id and TYPE = :type";
+      param.payload.FilterExpression = "ID = :id";
       param.payload.ExpressionAttributeValues = {};
       var key = ":id";
-      var key2 = ":type";
    
-      param.payload.ExpressionAttributeValues[key] = "parts";
-      param.payload.ExpressionAttributeValues[key2] = "DEALER";
+      param.payload.ExpressionAttributeValues[key] = value;
 
       console.log("user list pram : " + JSON.stringify(param));
 
