@@ -2,7 +2,7 @@
   <div v-auto-bottom="msgs" class="Chating-chatingList" id="test">
     <transition-group name="list" >
       <div v-for="(msg,index) in msgs" v-bind:key="index" class="chatitem">
-          <div v-if="msg.msgData.from.name === '나'">
+          <div v-if="msg.msgData.from.name === UserInfo.BsnID">
             <div class="Chating-me">
                 <div class="Chating-me-contents">
                     {{msg.msgData.msg}}
@@ -13,7 +13,7 @@
             <div class="Chating-dealer">
             <div class="Chating-icon"> <img src="@/assets/user-icon.png"> </div>
             <div class="Chating-dealer-contents">
-                {{msg.msgData.msg}}
+                {{msg.msgData.msg}}                
             </div>
             </div>
           </div>
@@ -26,12 +26,22 @@
 export default {
   name: 'MessageList',
   props: ['msgs'],
+  
   updated() {
-
+    
   },
   created : function() {
     console.log("Check msg : ", JSON.stringify(this.msgs));
-  }
+    console.log(this.$store.state.UserInfo.BsnID);
+    
+  },
+ computed: {
+    UserInfo: {
+        get() { return this.$store.getters.UserInfo },
+        set(value) { this.$store.dispatch('UpdateUserInfo',value) }
+    },    
+  },
+  
 };
 </script>
 

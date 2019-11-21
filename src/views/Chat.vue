@@ -9,8 +9,8 @@
         <ul>
           <li v-for="(qtReq, index) in qtReqList" v-bind:key = "index">
             <i class="Dealer-type fas fa-wrench" style="color:#fbc02e;"></i>
-            <p class="Dealer-name">{{qtReq.CarNo}}</p>
-            <span type="button" class="Chat-detail" v-on:click="chatingToggle">
+            <p class="Dealer-name">{{qtReq.CarNo}}</p><!--<p>{{setDealerNm(qtReq.ResDealer)}}</p>-->
+            <span type="button" class="Chat-detail" v-on:click="chatingToggle(qtReq)">
               <i class="fas fa-angle-double-right"></i>
             </span>
           </li>
@@ -42,7 +42,7 @@
     </div>
     <!--ChatPage-->
     <div class="Chating-headerBar" v-if="showChatPage">
-      <span type="button" class="headerBar-Back" v-on:click="chatingToggle">
+      <span type="button" class="headerBar-Back" v-on:click="chatingToggle(null)">
         <i class="fas fa-angle-double-left"></i>
       </span>
       <p class="headerBar-title">채팅</p>
@@ -97,6 +97,8 @@ export default {
       showChatPage : false,
       showAppend : false,
       qtReqList: [],
+      resDealers: [],
+      resDealerNm: [],
       docId : "",
     }
   },
@@ -130,7 +132,8 @@ export default {
       // 초기 메시지 입력
       var msg = this.$route.params.carNo + " 차량에 대한 견적이 요청됐습니다.";
       var chatMsg = {};
-      chatMsg.from = {'name' : '나'};
+      //chatMsg.from = {'name' : '나'};
+      chatMsg.from = {'name' : this.UserInfo.BsnID};
       chatMsg.msg  = msg;
       this.msgDatas = chatMsg;
 
@@ -174,7 +177,7 @@ export default {
         msg,
       });*/
       var chatMsg = {};
-      chatMsg.from = {'name' : '나'};
+      chatMsg.from = {'name' : this.UserInfo.BsnID};
       chatMsg.msg  = msg;
       this.msgDatas = chatMsg;
       console.log("Type msg : ", JSON.stringify(chatMsg));
@@ -185,9 +188,15 @@ export default {
       });
       this.saveChatMsg(chatMsg);
     },
-    chatingToggle() {
+    chatingToggle(item) {
+
       this.showMainPage = !this.showMainPage;
       this.showChatPage = !this.showChatPage;
+      if(item !== null) 
+      {
+        this.docId = item.ID;
+        this.showchating(item);
+      }
     },
     saveChatMsg(chatMsg) {
       var param = {};
@@ -225,6 +234,56 @@ export default {
       .catch((error) => {
         console.log(error);
       });
+    }
+    ,
+    showchating(item)
+    {
+      console.log("Chat Id : " +  item.ID);
+      if(this.msgDatas.length !== 0)
+      {   
+        // msgDatas 초기화
+        this.$store.commit('InitMsgData');
+      }
+
+      var param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_CHAT";
+      param.payload = {};
+      param.payload.FilterExpression = "DocID = :id";
+      param.payload.ExpressionAttributeValues = {};
+      var key = ":id";
+     
+      param.payload.ExpressionAttributeValues[key] = item.ID;
+
+      axios({
+        method: 'POST',
+        url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        data: param
+      })
+      .then((result) => {
+        console.log("======= Chat Msg List result ========");
+        console.log(result.data);
+        
+        if(Array.isArray(result.data.Items))
+        {
+          result.data.Items.sort(function(a, b){
+            return (a.ID.substring(a.ID.length,a.ID.length -12) > b.ID.substring(b.ID.length,b.ID.length -12)) ? 1 : -1;
+          });
+        }
+
+        result.data.Items.forEach(element => { 
+          var chatMsg = {};
+          chatMsg.from = {'name' : element['ChatFrom']};
+          chatMsg.msg  =element['Message'];
+          this.msgDatas = chatMsg;
+        });
+
+      });
+
     },
     showQTReqList() {
       var param = {};
@@ -238,7 +297,7 @@ export default {
         this.UserInfo.BsnID = "PARTS";
       param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
 
-      console.log("chating list pram : " + JSON.stringify(param));
+       console.log("chating list pram : " + JSON.stringify(param));
 
       axios({
         method: 'POST',
@@ -251,10 +310,80 @@ export default {
       })
       .then((result) => {
         console.log("======= QT List result ========");
-        console.log(result.data);
+        console.log(result.data.Items);
         this.qtReqList = result.data.Items;
+        
+        if(Array.isArray(this.qtReqList))
+        {
+            console.log(this.qtReqList);
+            console.log("TRUE");
+            
+        }
+
+        result.data.Items.forEach(element => { 
+         if(this.resDealers.indexOf(element['ResDealer']) === -1)
+         {
+            this.resDealers.push(element['ResDealer']);
+         }
+        });
+
+        /*this.getDealerNm(this.resDealers);*/
+
       });
     },
+    getDealerNm(value)
+    {
+      var param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_USER";
+      param.payload = {};
+      param.payload.FilterExpression = "ID = :id";
+      param.payload.ExpressionAttributeValues = {};
+      var key = ":id";
+      /*var key2 = ":type";*/
+   
+      param.payload.ExpressionAttributeValues[key] = "parts";
+      /*param.payload.ExpressionAttributeValues[key2] = "DEALER";*/
+
+      console.log("user list pram : " + JSON.stringify(param));
+
+      axios({
+        method: 'POST',
+        url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        data: param
+      })
+      .then((result) => {
+        console.log("======= User List result ========");
+        console.log(result.data.Items);
+        this.resDealerNm = result.data.Items;
+      });
+    },
+    setDealerNm(val)
+    {
+       return "";
+      /*return this.resDealerNm.filter(j => j.CODE == val).CODE;*/
+/*
+      this.resDealerNm.forEach(element => { 
+        if(element['CODE'] === val)
+        {
+              
+        }
+      });
+      console.log(val + "/" + index);
+
+      if(index === -1)
+      {
+          return "부품지원센터";
+      }
+      else{
+         return this.resDealerNm[index].NAME;
+      }
+      */
+    }
   },
   mounted() {
     datePadding();
