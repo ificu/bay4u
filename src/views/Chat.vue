@@ -311,14 +311,15 @@ export default {
       .then((result) => {
         console.log("======= QT List result ========");
         console.log(result.data.Items);
-        this.qtReqList = result.data.Items;
-        
-        if(Array.isArray(this.qtReqList))
+
+        if(Array.isArray(result.data.Items))
         {
-            console.log(this.qtReqList);
-            console.log("TRUE");
-            
+          result.data.Items.sort(function(a, b){
+            return (a.ReqDt > b.ReqDt) ? 1 : -1;
+          });
         }
+
+        this.qtReqList = result.data.Items;
 
         result.data.Items.forEach(element => { 
          if(this.resDealers.indexOf(element['ResDealer']) === -1)
@@ -327,23 +328,23 @@ export default {
          }
         });
 
-        /*this.getDealerNm(this.resDealers);*/
+       /* this.getDealerNm(this.resDealers);*/
 
       });
     },
-    getDealerNm(value)
+    getDealerNm()
     {
       var param = {};
       param.operation = "list";
       param.tableName = "BAY4U_USER";
       param.payload = {};
-      param.payload.FilterExpression = "ID = :id";
+      param.payload.FilterExpression = "ID = :id and TYPE = :type";
       param.payload.ExpressionAttributeValues = {};
       var key = ":id";
-      /*var key2 = ":type";*/
+      var key2 = ":type";
    
       param.payload.ExpressionAttributeValues[key] = "parts";
-      /*param.payload.ExpressionAttributeValues[key2] = "DEALER";*/
+      param.payload.ExpressionAttributeValues[key2] = "DEALER";
 
       console.log("user list pram : " + JSON.stringify(param));
 
