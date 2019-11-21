@@ -136,6 +136,10 @@ export default {
   mounted(){
     this.showQTReqList();
 
+  },
+  created : function() {
+    if(this.UserInfo.BsnID === '')
+      this.UserInfo.BsnID = this.$cookies.get('BsnID');
   },    
   computed:{
     UserInfo: {
