@@ -248,7 +248,8 @@ name: 'QTStep',
       showROHistBtn: false,             // 정비이력 조회 버튼 표시 여부
       showVINSearchBtn: false,          // 차대번호 조회 버튼 표시 여부
       chkCustAgree: false,              // 차대번호 조회를 위한 고객 동의 체크 여부
-      custName: ""
+      custName: "",
+
     }
   },
   methods: {

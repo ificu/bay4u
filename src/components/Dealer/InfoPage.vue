@@ -106,6 +106,7 @@
           <table class="QTRes-Table mdl-data-table mdl-js-data-table mdl-shadow--2dp">
             <thead>
               <tr>
+                <th class="QTItem-Title mdl-data-table__cell--non-numeric">브랜드</th>
                 <th class="QTItem-Title mdl-data-table__cell--non-numeric">부 품 명</th>
                 <th class="QTItem-Brand mdl-data-table__cell--non-numeric">부품코드</th>
                 <th class="QTItem-Qty">수량</th>
@@ -117,6 +118,7 @@
             </thead>
             <tbody>              
               <tr v-for="(qtItem,i) in detailQTData" :key="i" >
+                <td> </td>
                 <td class="mdl-data-table__cell--non-numeric"><div class="itemNm" v-b-tooltip.hover :title=qtItem.NM_ITM>{{qtItem.NM_ITM}}</div>
                 </td>
                 <td class="mdl-data-table__cell--non-numeric">{{qtItem.CONFIRM_ITM}}</td>
