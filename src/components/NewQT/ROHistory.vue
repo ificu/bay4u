@@ -1,5 +1,7 @@
 <template>
 <v-row align="center">
+    <div class="roHistoryCarinfo"><v-icon small class="carInfo-icon">fas fa-car</v-icon>{{carName}}</div>
+    <v-divider></v-divider>
     <div>       
     <v-expansion-panels focusable>
         <v-expansion-panel
@@ -21,14 +23,20 @@
                 -->
                 <div class="roHistory-title"><v-icon small class="roHistory-icon">mdi-wrench</v-icon>{{roItem.RO_NM}}</div>
                 <div class="roHistory-date"><v-icon x-small class="roHistory-icon">fas fa-calendar-alt</v-icon>{{roItem.DC_DY_BSN}}</div>
-                <div class="roHistory-amount"><v-icon x-small class="roHistory-icon">far fa-credit-card</v-icon>{{roItem.RO_AMT | localeNum}}원</div>
+               <!-- <div class="roHistory-amount"><v-icon x-small class="roHistory-icon">far fa-credit-card</v-icon>{{roItem.RO_AMT | localeNum}}원</div>-->
             </v-row>
             <template v-slot:actions>
                 <v-icon color="primary">$expand</v-icon>
             </template> 
         </v-expansion-panel-header>
         <v-expansion-panel-content>
-            <div class="roHistory-content"><v-icon small class="roHistory-icon">fas fa-car</v-icon> {{roItem.NM_CR_TEC}} </div>
+            <div class="roHistory-content">
+                <div class="roHistory-brand">MANN</div><div class="roHistory-itemcode">EKHU6004X</div>
+            </div>
+            <div class="roHistory-content">
+                <div class="roHistory-brand">MANN</div><div class="roHistory-itemcode">EKC28125</div>
+            </div>
+            <!--<div class="roHistory-content"><v-icon small class="roHistory-icon">fas fa-car</v-icon> {{roItem.NM_CR_TEC}} </div>-->
             <!--<v-list-item three-line>
                 <v-list-item-content>
                     <v-list-item-title><v-icon small color="indigo">fas fa-car</v-icon> 차정명</v-list-item-title>
@@ -54,7 +62,8 @@ export default {
     data() {
         return {
             roList: [],
-            paramCarno: this.value
+            paramCarno: this.value,
+            carName : ""
         }
     },
     mounted() {
@@ -85,7 +94,12 @@ export default {
             this.rtnCode = result.data.ReturnCode;
             this.rtnCount = Number(result.data.ReturnDataCount);
             this.roList = JSON.parse(result.data.ReturnDataJSON);
+            
             console.log(this.roList );
+            if(this.rtnCount > 0)
+            {
+                this.carName = this.roList[0].NM_CR_TEC;
+            }
         })
         .catch((error) => {
             console.log(error);
@@ -110,6 +124,15 @@ export default {
   color:#DCDCDC;  
   margin-right: 0.2rem;
 }
+.carInfo-icon{
+  color:#4B1004;
+  margin-right: 0.2rem;
+}
+.roHistoryCarinfo{
+    color:#000000;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
 .roHistory-title {
   flex: 90%;
   font-size: 1rem;
@@ -117,7 +140,7 @@ export default {
   margin-bottom:5px;
   font-family: 'Noto Sans KR', sans-serif;
 }
-.roHistory-date {
+.roHistory-amount{
   flex: 30%;
   font-size: 0.7rem;
   /*color:#808080;*/
@@ -126,9 +149,9 @@ export default {
   margin-left:2px;
   font-family: 'Noto Sans KR', sans-serif;
 }
-.roHistory-amount {
-  /*flex: 70%;*/
-  font-size: 0.9rem;
+.roHistory-date  {
+  flex: 70%;
+  font-size: 0.8rem;
   font-weight: bold;
   text-align: right;
   color:#F65314;
@@ -138,9 +161,28 @@ export default {
 }
 .roHistory-content
 {
+  display: flex;
+  /*
   font-size: 0.8rem;
   margin-left:0rem;
   margin-top:0.5rem;
+  font-family: 'Noto Sans KR', sans-serif;
+  */
+}
+.roHistory-brand
+{
+  font-size: 0.8rem;
+  margin-left:1px;
+  margin-top: 5px;
+  margin-right:30px;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+.roHistory-itemcode
+{
+  font-size: 0.8rem;
+  margin-top: 5px;
+  /*margin-left:0rem;
+  margin-top:0.5rem;*/
   font-family: 'Noto Sans KR', sans-serif;
 }
 </style>
