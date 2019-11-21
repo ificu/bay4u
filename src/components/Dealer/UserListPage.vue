@@ -3,7 +3,7 @@
   <b-tabs class="UserList-Tab"  v-model="tabIndex" content-class="mt-3" fill>
     <b-tab title="카센터 대화목록" active :title-link-class="linkClass(0)">
       <div class="Chat-search mdl-textfield mdl-js-textfield mdl-textfield--expandable">
-        <label class="mdl-button mdl-js-button mdl-button--icon" for="sample6">
+        <label class="mdl-button mdl-js-button mdl-button--icon" for="sample6" v-on:click="showQTReqList()">
           <i class="material-icons">search</i>
         </label>
         <div class="mdl-textfield__expandable-holder">
