@@ -140,7 +140,9 @@
               <div class="TotalInfo">
                 <span class="TotalInfo-Title">합계금액</span>
                 <span class="TotalInfo-Text">{{total | localeNum}}</span>
+                <span><b-button>견적 완료 알림</b-button></span>
               </div>
+
           </div>
         </b-card-text>
       </b-tab>

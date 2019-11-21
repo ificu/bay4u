@@ -66,6 +66,18 @@ export default {
   overflow:auto;
   overflow-x:hidden;
 }
+
+/*PC인 경우*/
+@media all and (min-width:800px) {
+  .Chating-chatingList {
+    margin:auto;
+    width: 90%;
+    padding-top: 30px;
+    height: calc(100vh - 50px - 70px + 10px);
+    overflow:auto;
+    overflow-x:hidden;
+  }
+}
 .chatitem{ 
 z-index: 1;
 }

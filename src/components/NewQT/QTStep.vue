@@ -330,7 +330,7 @@ name: 'QTStep',
         var key = ":carno";
         param.payload.ExpressionAttributeValues[key] = this.CarInfo.CarNo;
 
-        this.$cookies.set('CarNo', this.CarInfo.CarNo, '10m');
+        this.$cookies.set('CarNo', this.CarInfo.CarNo, '600s');
 
         axios({
           method: 'POST',
@@ -346,7 +346,7 @@ name: 'QTStep',
           console.log(result.data);
           if(result.data.Count > 0) {
             this.CarInfo.VinNo = result.data.Items[0].VIN;
-            this.$cookies.set('VinNo', this.CarInfo.VinNo, '10m');
+            this.$cookies.set('VinNo', this.CarInfo.VinNo, '600s');
           }
           else {
             this.CarInfo.VinNo = "";
@@ -377,7 +377,7 @@ name: 'QTStep',
             console.log(result.data); 
             if(result.data.success === true) {
               this.CarInfo.VinNo = result.data.data;
-              this.$cookies.set('VinNo', this.CarInfo.VinNo, '10m');
+              this.$cookies.set('VinNo', this.CarInfo.VinNo, '600s');
             }
             else {
               if(result.data.data.indexOf("소유자 성명") >= 0)
@@ -428,7 +428,7 @@ name: 'QTStep',
         param.BsnId = this.UserInfo.BsnID;
         param.CarNo = this.CarInfo.CarNo;
 
-        this.$cookies.set('CarNo', this.CarInfo.CarNo, '10m');
+        this.$cookies.set('CarNo', this.CarInfo.CarNo, '600s');
 
         console.log("======= ROHistory Request result ========");
         console.log(param); 
