@@ -131,6 +131,18 @@ export default {
         get() { return this.$store.getters.UserInfo },
         set(value) { this.$store.dispatch('UpdateUserInfo',value) }
     }
+  },
+  created : function() {
+    Notification.requestPermission(function(result) {
+      if(result === 'granted') {
+        navigator.serviceWorker.ready
+          .then(function(swreg) {
+            //swreg.showNotification('Notice OK', {body:'OOOOKKKK'});
+          });
+      }
+    });
+
+    
   }
 }
 </script>
@@ -142,6 +154,20 @@ export default {
   position: absolute;
   width: 100%;
   height: 100%;
+}
+
+/*PC인 경우*/
+@media all and (min-width:800px) {
+  .login {
+    position:absolute;
+    top:calc(50vh - 300px);
+    left:calc(50vw - 200px);
+    width:400px;height:600px;
+    overflow:hidden;
+    background-color:#fcf4df;
+    -webkit-box-shadow:4px 4px 5px 0 rgba(0,0,0,.33);
+    box-shadow:4px 4px 5px 0 rgba(0,0,0,.33);
+  }
 }
 
 .login-title {
