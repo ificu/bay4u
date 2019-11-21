@@ -234,9 +234,17 @@ export default {
     SetQtInfo(){
       //console.log("QT Info 설정" + JSON.stringify(this.qtInfo));  
       this.tabIndex = 0;
-      this.qtInfo.CarVin = this.qtInfo.CarVin.replace("*empty*", "");
-      this.qtInfo.Memo = this.qtInfo.Memo.replace("*empty*", "");
-      this.qtItems = JSON.parse(this.qtInfo.LineItem);
+      if(this.qtInfo.length > 0)
+      {  
+        this.qtInfo.CarVin = this.qtInfo.CarVin.replace("*empty*", "");
+        this.qtInfo.Memo = this.qtInfo.Memo.replace("*empty*", "");
+        this.qtItems = JSON.parse(this.qtInfo.LineItem);
+      }
+      else{
+        this.qtInfo.CarVin = "";
+        this.qtInfo.Memo = "";
+        this.qtItems = [];
+      }
 
       // webpos견적 Data 초기화
       this.series = '';
@@ -298,6 +306,13 @@ export default {
         this.qtInfo = qtItem;
         this.SetQtInfo();
         this.GetSiteInfo();
+    });
+
+    this.$EventBus.$on('init-qtInfo', chatItem => {   
+        this.qtInfo = [];
+        this.SetQtInfo();
+        this.siteInfo = [];
+         this.showSiteInfo = false;
     });
   },
 }

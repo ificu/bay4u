@@ -92,6 +92,9 @@ export default {
       }
     },
     showQTReqList() {
+
+      this.initQTData();
+
       var param = {};
       param.operation = "list";
       param.tableName = "BAY4U_QT_LIST";
@@ -119,11 +122,12 @@ export default {
         if(Array.isArray(result.data.Items))
         {
           result.data.Items.sort(function(a, b){
-            return (a.ReqDt > b.ReqDt) ? 1 : -1;
+            return (a.ReqDt < b.ReqDt) ? 1 : -1;
           });
         }
 
         this.qtReqList = result.data.Items;
+        
       });
     },
     SetQTInfo(itme , idx)
@@ -131,6 +135,11 @@ export default {
        this.$emit('setQtInfo' ,itme);
        this.$EventBus.$emit('click-qtInfo' , itme)
        this.qtItemIndex = idx;
+    },
+    initQTData()
+    {
+      this.$EventBus.$emit('init-qtInfo', null)
+       this.qtItemIndex = -1
     }
   },
   mounted(){

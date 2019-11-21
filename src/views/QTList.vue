@@ -191,21 +191,22 @@
           </div>
 
           <div class="QTList-history">
-            <b-card no-body class="mb-1">
+            
+            <b-card no-body class="mb-1" v-for="(qtInfo , idx) in confirmQTdata" v-bind:key="idx">
               <b-card-header header-tag="header" role="tab">
                 <b-container>
                   <b-row>
-                    <b-col align-self="center" class="history-date">8/7(수)</b-col>
+                    <b-col align-self="center" class="history-date">{{qtInfo.MONTH}}/{{qtInfo.DAY}}({{qtInfo.DAYWEEK}})</b-col>
                     <b-col class="history-car">
                       <b-row class="history-carNo">
-                        43마4297
+                        {{qtInfo.CAR_NO}}
                       </b-row>
                       <b-row  class="history-carType">
-                        BMW 7Series
+                        {{qtInfo.AGENT_NM}}
                       </b-row>
                     </b-col>
                     <b-col align-self="center" class="history-detailBtn">
-                      <b-button block href="#" v-b-toggle.SOaccordion-1 variant="secondary" size="sm" @click="SOList1Toggle = !SOList1Toggle">
+                      <b-button block href="#"  v-b-toggle="'accordion-' + idx"  variant="secondary" size="sm" v-on:click="GetQtList(qtInfo)">
                         <i v-if="!SOList1Toggle" class="fas fa-chevron-down"></i>
                         <i v-if="SOList1Toggle"  class="fas fa-chevron-up"></i>
                       </b-button>
@@ -213,40 +214,31 @@
                   </b-row>
                 </b-container>
               </b-card-header>
-              <b-collapse id="SOaccordion-1" accordion="my-accordion" role="tabpanel">
+              <b-collapse :id="'accordion-'+idx" accordion="my-accordion" role="tabpanel">
                 <b-card-body>
                   <div class="history-detailConts">
                     <ul>
-                      <li>
+                      <!--<li>
                         <div class="detailConts-dealer">대영 모터스</div>
-                      </li>
-                      <li>
-                        <div class="detailConts-icon"><img src="@/assets/icon-bosch.png"></div>
-                        <div class="detailConts-title">에어 필터</div>
-                        <div class="detailConts-amount">65,000원</div>
-                        <div class="detailConts-status"><i class="fas fa-shipping-fast"></i></div>
-                      </li>
-                      <li>
-                        <div class="detailConts-icon"><img src="@/assets/icon-fram.png"></div>
-                        <div class="detailConts-title">연료 필터</div>
-                        <div class="detailConts-amount">120,000원</div>
-                        <div class="detailConts-status"><i class="fas fa-phone"></i></div>
-                      </li>
-                      <li>
-                        <div class="detailConts-icon"><img src="@/assets/icon-trw.png"></div>
-                        <div class="detailConts-title">디스크 패드</div>
-                        <div class="detailConts-amount">89,000원</div>
-                        <div class="detailConts-status"><i class="fas fa-box-open"></i></div>
+                      </li>-->
+                      <li  v-for="(item, index) in detailQTData" v-bind:key = "index">
+                        <div class="itemCode" > {{item.CONFIRM_ITM}}</div>
+                        <div class="itemName">{{item.NM_ITM}}</div>
+                        <!--<div class="detailConts-amount">{{item.AMT | localeNum}}원</div>-->
+                        <div class="delvDay">{{item.DELV_DAY}}</div>
                       </li>
                     </ul>
+                    <!--
                     <div class="detailConts-compare">
                       <b-button @click="showRODetailPageToggle">정비 명세서 작성</b-button>
                     </div>
+                    -->
                   </div>
                 </b-card-body>
               </b-collapse>
             </b-card>
-
+          
+            <!--
             <b-card no-body class="mb-1">
               <b-card-header header-tag="header" role="tab">
                 <b-container>
@@ -362,6 +354,7 @@
                 </b-card-body>
               </b-collapse>
             </b-card>
+            -->
           </div>
         </div>
       </b-tab>
@@ -679,7 +672,9 @@ export default {
             dynamicBullets: true,
             clickable: true
           }
-      }
+      },
+      detailQTData:[],
+      confirmQTdata: [],
     }
   },
   methods: {
@@ -782,7 +777,7 @@ export default {
         console.log("======= QT List result ========");
         console.log(result.data.Items);
         this.qtReqList = result.data.Items;
-        
+        /*
         if(Array.isArray(this.qtReqList))
         {
             console.log(this.qtReqList);
@@ -796,8 +791,97 @@ export default {
             this.resDealers.push(element['ResDealer']);
          }
         });
-
+*/
       });
+    },
+
+    GetQtList(item){
+
+      this.detailQTData = [];
+      var param = {};
+      param.BsnId = item.BSN_ID;
+      param.CarNo = item.CAR_NO;
+      param.VinNo = item.VIN_NO;
+      param.RequestDataJSON = item.ESTM_ID;
+
+      console.log("======= QT Detail Request result ========");
+      console.log(param); 
+
+      var rtnCode = "";
+
+      axios({
+          method: 'POST',
+          //url:'http://iparts.sknetworks.co.kr/BAY4UService.svc/GetQTData',
+          url:'https://bay4u.co.kr/scpif/GetQTData',
+          headers:{
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+          },
+          data: param
+      })
+      .then((result) => {
+          console.log("======= ROHistory Return result ========");     
+          console.log(result.data); 
+         
+          this.rtnCode = result.data.ReturnCode;
+
+          if(this.rtnCode === 0)
+          {
+            var rtnQTData = JSON.parse(result.data.ReturnDataJSON);
+            var headQTData = rtnQTData['ESTM_HED'];
+            
+            if(headQTData.length > 0)
+            {
+              if(headQTData[0].ESTM_STS !== '1' && rtnQTData['ESTM_DTL'].Length !== 0)
+              {
+                this.detailQTData = rtnQTData['ESTM_DTL'];
+                console.log(this.detailQTData);
+              }
+
+            }
+          }
+      })
+      .catch((error) => {
+          console.log(error);
+      })   
+    },
+    GetConfirmQtList()
+    {
+      this.confirmQTdata  = [];
+
+      var param = {};
+      param.BsnId = this.UserInfo.BsnID;
+
+      console.log("======= Confirm QT Request result ========");
+      console.log(param); 
+
+      var rtnCode = "";
+
+      axios({
+          method: 'POST',
+          //url:'http://iparts.sknetworks.co.kr/BAY4UService.svc/GetConfirmQTData',
+          url:'https://bay4u.co.kr/scpif/GetConfirmQTData',
+          headers:{
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+          },
+          data: param
+      })
+      .then((result) => {
+          console.log("======= Return result ========");     
+          console.log(result.data); 
+         
+          this.rtnCode = result.data.ReturnCode;
+
+          if(this.rtnCode === 0)
+          {
+            this.confirmQTdata = JSON.parse(result.data.ReturnDataJSON);
+            console.log(this.confirmQTdata);
+          }
+      })
+      .catch((error) => {
+          console.log(error);
+      })   
     }
   },
   components: {
@@ -805,10 +889,18 @@ export default {
     QTDetailSelect,
     QTtoRODetail,
     CustomerDoc,
-    CustomerDocOption
+    CustomerDocOption,    
+  },
+  computed: {
+    
+    UserInfo: {
+        get() { return this.$store.getters.UserInfo },
+        set(value) { this.$store.dispatch('UpdateUserInfo',value) }
+    }
   },
   created : function() {
-    this.showQTReqList();
+    //this.showQTReqList();
+    this.GetConfirmQtList();
   }
 }
 </script>
@@ -880,7 +972,6 @@ export default {
   padding-left: 0px;
 }
 
-
 .history-date {
   font-size: 1.2rem;
   font-weight: bold;
@@ -918,7 +1009,7 @@ export default {
   margin-bottom: 5px;
 }
 .detailConts-title {
-  flex: 60%;
+  flex: 50%;
   font-size: 0.9rem;
   font-weight: bold;
 }
@@ -930,6 +1021,7 @@ export default {
   color: #ff9999;
 }
 .detailConts-status {
+  flex: 10%;
   margin-left: 5px;
   color: #999;
 }
@@ -1015,5 +1107,25 @@ export default {
   color : #5d4038;
 }
 
+.history-detailConts .itemName{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.7rem;
+  width: 145px;
+}
+
+.history-detailConts .itemCode {
+  flex: 30%;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #EA4335;
+}
+.history-detailConts .delvDay {
+  flex: 10%;
+  margin-left: 6px;
+  font-size: 0.7rem;
+  color: #999;
+}
 
 </style>

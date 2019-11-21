@@ -93,6 +93,16 @@ export default {
         this.showchating(chatItem);
         this.chatItem = chatItem;
     });
+
+    this.$EventBus.$on('init-qtInfo', chatItem => {   
+        this.chatItem = [];
+        if(this.msgDatas.length !== 0)
+        {   
+          // msgDatas 초기화
+          this.$store.commit('InitMsgData');
+          this.showChatArea = false;
+        }
+    });
   },  
   methods: {
     /*
@@ -217,11 +227,7 @@ export default {
         this.showChatArea = true;
 
       });
-
-    },
-    chatMsgsSort(msgList){
-                  return _.orderBy(msgList, 'ID', 'desc'); // 오름차순 :: asc
-              }
+    }
   },
   mounted() {
     datePadding();
