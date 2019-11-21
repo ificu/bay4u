@@ -4,6 +4,7 @@ import './registerServiceWorker'
 import router from './router'
 import vuetify from './plugins/vuetify'
 import { store } from './store/store'
+import VueCookies from 'vue-cookies'
 
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
@@ -22,7 +23,11 @@ Vue.config.productionTip = false
 Vue.use(BootstrapVue)
 Vue.use(VueAwesomeSwiper)
 Vue.use(Directives)
+Vue.use(VueCookies)
+
 Vue.prototype.$EventBus = new Vue();
+
+VueCookies.config('1d')
 
 new Vue({
     router,

@@ -109,12 +109,14 @@ export default {
             this.loginAlert = true;   
           }
           else if(type === "SITE") {
+            this.$cookies.set('BsnID', siteCode);
             this.$router.push('/NewQT');
             this.UserInfo.UserID = id;
             this.UserInfo.BsnID = siteCode;
             this.UserInfo.Name = name;
           }
           else {
+            this.$cookies.set('BsnID', siteCode);
             this.$router.push('/MainPage');
             this.UserInfo.UserID = id;
             this.UserInfo.BsnID = siteCode;

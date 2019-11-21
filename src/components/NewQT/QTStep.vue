@@ -2,7 +2,7 @@
   <v-app>
     
     <v-stepper v-model="e6" vertical>
-        <v-stepper-step color="accent" :complete="e6 > 1" step="1">
+        <v-stepper-step color="accent" :complete="e6 > 1" step="1" @click="e6 = 1">
           차량번호 / 차대번호 촬영 인식
           <small>차량 번호판이나 등록증, 차대번호를 촬영하시면 자동 인식 됩니다.</small>
         </v-stepper-step>
@@ -70,7 +70,7 @@
           <v-btn text></v-btn>
         </v-stepper-content>
 
-        <v-stepper-step color="accent"  :complete="e6 > 2" step="2">요청 부품 선택</v-stepper-step>
+        <v-stepper-step color="accent"  :complete="e6 > 2" step="2"  @click="e6 = 2">요청 부품 선택</v-stepper-step>
         <v-stepper-content step="2">
           <div class="mb-4">
             <!-- swiper -->
@@ -95,7 +95,7 @@
           <v-btn text @click="e6 = 1">Back</v-btn>
         </v-stepper-content>
 
-        <v-stepper-step color="accent" :complete="e6 > 3" step="3">견적요청 리스트 확인</v-stepper-step>
+        <v-stepper-step color="accent" :complete="e6 > 3" step="3"  @click="e6 = 3">견적요청 리스트 확인</v-stepper-step>
         <v-stepper-content step="3">
           
           <v-list two-line subheader>
@@ -156,7 +156,7 @@
           <v-btn text @click="e6 = 2">Back</v-btn>
         </v-stepper-content>
 
-        <v-stepper-step color="accent"  step="4">견적 요청 전송</v-stepper-step>
+        <v-stepper-step color="accent"  step="4" @click="e6 = 4">견적 요청 전송</v-stepper-step>
         <v-stepper-content step="4">
           <div class="NewQT-submit">
             <b-button class="submit-list">대리점 선택</b-button>
@@ -330,6 +330,8 @@ name: 'QTStep',
         var key = ":carno";
         param.payload.ExpressionAttributeValues[key] = this.CarInfo.CarNo;
 
+        this.$cookies.set('CarNo', this.CarInfo.CarNo, '10m');
+
         axios({
           method: 'POST',
           url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
@@ -344,6 +346,7 @@ name: 'QTStep',
           console.log(result.data);
           if(result.data.Count > 0) {
             this.CarInfo.VinNo = result.data.Items[0].VIN;
+            this.$cookies.set('VinNo', this.CarInfo.VinNo, '10m');
           }
           else {
             this.CarInfo.VinNo = "";
@@ -374,6 +377,7 @@ name: 'QTStep',
             console.log(result.data); 
             if(result.data.success === true) {
               this.CarInfo.VinNo = result.data.data;
+              this.$cookies.set('VinNo', this.CarInfo.VinNo, '10m');
             }
             else {
               if(result.data.data.indexOf("소유자 성명") >= 0)
@@ -423,6 +427,8 @@ name: 'QTStep',
         var param = {};
         param.BsnId = this.UserInfo.BsnID;
         param.CarNo = this.CarInfo.CarNo;
+
+        this.$cookies.set('CarNo', this.CarInfo.CarNo, '10m');
 
         console.log("======= ROHistory Request result ========");
         console.log(param); 
@@ -650,6 +656,18 @@ name: 'QTStep',
     mounted() {
       datePadding();
       convertStringToDynamo();
+    },
+    created : function() {
+      if(this.UserInfo.BsnID === '')
+        this.UserInfo.BsnID = this.$cookies.get('BsnID');
+
+      if(this.$cookies.get('CarNo') !== undefined || this.$cookies.get('CarNo') !== '' || this.$cookies.get('CarNo') !== 'null') {
+        this.CarInfo.CarNo = this.$cookies.get('CarNo');
+      }
+      if(this.$cookies.get('VinNo') !== undefined || this.$cookies.get('VinNo') !== '' || this.$cookies.get('VinNo') !== 'null') {
+        this.CarInfo.VinNo = this.$cookies.get('VinNo');
+      }
+      
     }
   }
 </script>
