@@ -548,7 +548,8 @@ name: 'QTStep',
 
         axios({
             method: 'POST',
-            url:'http://iparts.sknetworks.co.kr/BAY4UService.svc/SaveQTData',
+            //url:'http://iparts.sknetworks.co.kr/BAY4UService.svc/SaveQTData',
+            url:'https://bay4u.co.kr/scpif/SaveQTData',            
             headers:{
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
