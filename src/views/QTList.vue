@@ -1,7 +1,7 @@
 <template>
   <div class="QTList">
     <b-tabs class="QTList-tab" justified v-model="tabIndex" v-if="showMainPage">
-      <b-tab title="부품 견적서" :title-link-class="linkClass(0)">
+      <b-tab title="부품 견적서" :title-link-class="linkClass(0)" >
         <div class="QTList-contents">
           <div class="QTList-title">
             견적 요청 히스토리
@@ -169,7 +169,7 @@
           </div>
         </div>
       </b-tab>
-      <b-tab title="부품 주문서" :title-link-class="linkClass(1)">
+      <b-tab title="부품 주문서" :title-link-class="linkClass(1)" active>
         <div class="QTList-contents">
           <div class="QTList-title">
             부품 주문 히스토리
@@ -365,7 +365,7 @@
           </div>
         </div>
       </b-tab>
-      <b-tab title="정비 명세서" :title-link-class="linkClass(2)" active>
+      <b-tab title="정비 명세서" :title-link-class="linkClass(2)" >
         <div class="QTList-contents">
           <div class="QTList-title">
             고객 정비 히스토리
@@ -669,7 +669,7 @@ export default {
       showQTShoppingcartPage:false,
       showRODetailPage:false,
       showCustomerDocPage:false,
-      showCustomerDocOptionPage:true,
+      showCustomerDocOptionPage:false,
       swiperOption: {
           slidesPerView: 3,
           spaceBetween: 100,
@@ -761,6 +761,55 @@ export default {
     QTtoRODetail,
     CustomerDoc,
     CustomerDocOption
+  },
+  created : function() {
+    this.showQTReqList();
+  },
+  methods: {
+    showQTReqList() {
+      var param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_QT_LIST";
+      param.payload = {};
+      param.payload.FilterExpression = "ReqSite = :id";
+      param.payload.ExpressionAttributeValues = {};
+      var key = ":id";
+      if(this.UserInfo.BsnID === "")
+        this.UserInfo.BsnID = "S009";
+      param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
+
+       console.log("chating list pram : " + JSON.stringify(param));
+
+      axios({
+        method: 'POST',
+        url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        data: param
+      })
+      .then((result) => {
+        console.log("======= QT List result ========");
+        console.log(result.data.Items);
+        this.qtReqList = result.data.Items;
+        
+        if(Array.isArray(this.qtReqList))
+        {
+            console.log(this.qtReqList);
+            console.log("TRUE");
+            
+        }
+
+        result.data.Items.forEach(element => { 
+         if(this.resDealers.indexOf(element['ResDealer']) === -1)
+         {
+            this.resDealers.push(element['ResDealer']);
+         }
+        });
+
+      });
+    }
   }
 }
 </script>
