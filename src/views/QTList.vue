@@ -169,10 +169,10 @@
           </div>
         </div>
       </b-tab>
-      <b-tab title="부품 주문서" :title-link-class="linkClass(1)" active>
+      <b-tab title="견적 확정" :title-link-class="linkClass(1)" active>
         <div class="QTList-contents">
           <div class="QTList-title">
-            부품 주문 히스토리
+            견적 확정 내역
           </div>
           <div class="QTList-search">
             <b-input-group>
@@ -639,6 +639,7 @@
   </div>
 </template>
 
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script>
 import QTDetailCompare from '@/components/QTList/QTDetailCompare.vue'
 import QTDetailSelect from '@/components/QTList/QTDetailSelect.vue'
@@ -753,19 +754,7 @@ export default {
       } else {
         return ['bg-light', 'text-secondary', 'font-weight-light']
       }
-    }
-  },
-  components: {
-    QTDetailCompare,
-    QTDetailSelect,
-    QTtoRODetail,
-    CustomerDoc,
-    CustomerDocOption
-  },
-  created : function() {
-    this.showQTReqList();
-  },
-  methods: {
+    },
     showQTReqList() {
       var param = {};
       param.operation = "list";
@@ -810,6 +799,16 @@ export default {
 
       });
     }
+  },
+  components: {
+    QTDetailCompare,
+    QTDetailSelect,
+    QTtoRODetail,
+    CustomerDoc,
+    CustomerDocOption
+  },
+  created : function() {
+    this.showQTReqList();
   }
 }
 </script>
