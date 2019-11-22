@@ -221,6 +221,16 @@
         </QTCamera>
     </transition>
 
+    <MessageBox v-if="showAlertMsg"  @close="closeMsg(alertMsgPath)">
+      <div slot="header"><h5 >알림</h5><i class="closeModalBtn fas fa-times" @click="closeMsg(alertMsgPath)"></i></div>
+      <span slot="body" @click="closeMsg(alertMsgPath)"><pre>{{alertMsg}}</pre>
+      </span>
+      <div slot="footer" v-if="showAlerMsgConfirmBtn">
+        <v-btn depressed small color="indigo" dark @click="CheckReqVinNoQT(true)"> YES</v-btn>
+        <v-btn depressed small color="blue-grey lighten-2"  @click="CheckReqVinNoQT(false)">NO</v-btn>
+      </div>
+    </MessageBox>
+
   </v-app>  
 </template>
 
@@ -230,6 +240,7 @@ import ItemCategory from '@/components/NewQT/ItemCategory.vue'
 import QTConfirm from '@/components/NewQT/QTConfirm.vue'
 import QTCamera from '@/components/NewQT/QTCamera.vue'
 import ROHistory from '@/components/NewQT/ROHistory.vue'
+import MessageBox from '@/components/Common/MessageBox.vue'
 import {datePadding, convertStringToDynamo} from '@/utils/common.js'
 
 export default {
@@ -265,7 +276,11 @@ name: 'QTStep',
       showVINSearchBtn: false,          // 차대번호 조회 버튼 표시 여부
       chkCustAgree: false,              // 차대번호 조회를 위한 고객 동의 체크 여부
       custName: "",
-
+      showAlertMsg: false,
+      showAlerMsgConfirmBtn :false,
+      alertMsg: "",
+      alertMsgPath: "",
+      isReqVinNoQT: false
     }
   },
   methods: {
@@ -541,14 +556,17 @@ name: 'QTStep',
         console.log('selectedCategory : ' + this.selectedCategory);*/
       },
       addNewQTRequest() {
+      
         var param = {};
-        
         param.BsnId = this.UserInfo.BsnID;
         param.UserID = this.UserInfo.UserID;
         param.CarNo = this.CarInfo.CarNo;
         param.VinNo = this.CarInfo.VinNo;
         param.Memo = this.qtReqMemo;
-        param.RequestDataJSON = JSON.stringify(this.qtRequest);
+        if(this.qtRequest !== undefined || this.qtRequest !== null || this.qtRequest.length !== 0 )
+        {
+            param.RequestDataJSON = JSON.stringify(this.qtRequest);
+        }
 
         console.log('param : ' + JSON.stringify(param));
 
@@ -632,12 +650,85 @@ name: 'QTStep',
             this.qtRequest[idx].ITM_QTY = 0;
          }
       },
+      checkQtData()
+      {
+         
+        if(this.UserInfo === null){
+          //alert("로그인 정보가 없습니다. \r 다시 로그인 해주세요.");
+          this.alertMsg = "로그인 정보가 없습니다.\n다시 로그인 해주세요."
+          this.showAlertMsg = !this.showAlertMsg;
+          this.alertMsgPath = "Login";
+          return false;
+        }
+
+        if(this.UserInfo.BsnID === undefined || this.UserInfo.BsnID === null || this.UserInfo.BsnID.length === 0 )
+        {
+          this.alertMsg = "사이트 정보가 없습니다."
+          this.showAlertMsg = !this.showAlertMsg;
+          return false;
+        }
+
+        if(this.UserInfo.UserID === undefined || this.UserInfo.UserID === null || this.UserInfo.UserID === 0 )
+        {
+          this.alertMsg = "로그인 정보가 없습니다."
+          this.showAlertMsg = !this.showAlertMsg;
+          return false;
+        }
+
+        if(this.UserInfo.BsnID === undefined || this.UserInfo.BsnID === null || this.UserInfo.BsnID.length === 0 )
+        {
+          this.alertMsg = "사이트 정보가 없습니다."
+          this.showAlertMsg = !this.showAlertMsg;
+          return false;
+        }
+        /*
+        if(this.CarInfo.CarNo === undefined || this.CarInfo.CarNo === null || this.CarInfo.CarNo.length === 0 )
+        {
+          this.alertMsg = "차량번호가 없습니다."
+          this.showAlertMsg = !this.showAlertMsg;
+          return false;
+        }
+        */
+        if(this.CarInfo.VinNo === undefined || this.CarInfo.VinNo === null || this.CarInfo.VinNo.length === 0 )
+        {
+          this.alertMsg = "차대번호가 없습니다.\n차대번호 없이 요청하시겠습니까?"
+          this.showAlertMsg = !this.showAlertMsg;
+          this.showAlerMsgConfirmBtn = !this.showAlerMsgConfirmBtn;
+          
+        }
+      /*
+        if(this.qtRequest === undefined || this.qtRequest === null || this.qtRequest.length === 0 )
+        {
+          this.alertMsg = "견적요청 리스트가 없습니다."
+          this.showAlertMsg = !this.showAlertMsg;
+          return false;
+        }
+     */
+        this.addNewQTRequest();
+      },
+      closeMsg(path){     
+          this.showAlertMsg = false;
+          if(path.length > 0 && path == 'Login')
+          {
+              this.$router.push('/');
+          }
+      },
+      CheckReqVinNoQT(value)
+      {
+        if(value){
+          this.CarInfo.VinNo = "99999999999999999";
+        }
+        this.showAlertMsg = false;
+        this.showAlerMsgConfirmBtn = false;
+        this.isReqVinNoQT = value;
+      }
     },
     components: {
       ItemCategory: ItemCategory,
       QTConfirm: QTConfirm,
       QTCamera: QTCamera,
-      ROHistory:ROHistory
+      ROHistory:ROHistory,
+      MessageBox: MessageBox
     },    
     computed:{
       CarInfo: {

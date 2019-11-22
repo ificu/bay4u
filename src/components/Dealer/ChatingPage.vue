@@ -103,6 +103,11 @@ export default {
           this.showChatArea = false;
         }
     });
+
+    this.$EventBus.$on('send-QTConfirm', qtMsg => {   
+        this.msgDatas = qtMsg;
+        this.saveChatMsg(qtMsg);
+    });
   },  
   methods: {
     /*
