@@ -385,7 +385,7 @@ name: 'QTStep',
               else if(result.data.data.indexOf("일치하는 차량이 없습니다.") >= 0)
                 this.CarInfo.VinNo = "차량번호 미 존재";
               else
-                this.CarInfo.VinNo = "국토부 차대번호 조회 오류";
+                this.CarInfo.VinNo = "국토부 차대번호 조회 중...";
             }
         })
         .catch((error) => {
