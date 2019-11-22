@@ -224,10 +224,16 @@
                       <li  v-for="(item, index) in detailQTData" v-bind:key = "index">
                         <div class="itemCode" > {{item.CONFIRM_ITM}}</div>
                         <div class="itemName">{{item.NM_ITM}}</div>
-                        <!--<div class="detailConts-amount">{{item.AMT | localeNum}}원</div>-->
+                        <div class="detailConts-amount">{{item.AMT | localeNum}}원</div>
                         <div class="delvDay">{{item.DELV_DAY}}</div>
                       </li>
                     </ul>
+                    <div class="QTRes-footer">
+                        <div class="TotalInfo">
+                          <span class="TotalInfo-Title">합계금액</span>
+                          <span class="TotalInfo-Text">{{total | localeNum}}</span>
+                        </div>
+                    </div>
                     <!--
                     <div class="detailConts-compare">
                       <b-button @click="showRODetailPageToggle">정비 명세서 작성</b-button>
@@ -354,7 +360,7 @@
                 </b-card-body>
               </b-collapse>
             </b-card>
-            -->
+-->            
           </div>
         </div>
       </b-tab>
@@ -896,6 +902,14 @@ export default {
     UserInfo: {
         get() { return this.$store.getters.UserInfo },
         set(value) { this.$store.dispatch('UpdateUserInfo',value) }
+    },
+
+    total: function() {
+        let sum = 0;
+        this.detailQTData.forEach(function(item) {
+          sum += (parseFloat(item.AMT));
+        });
+        return sum;
     }
   },
   created : function() {
@@ -1014,8 +1028,8 @@ export default {
   font-weight: bold;
 }
 .detailConts-amount {
-  flex: 40%;
-  font-size: 0.9rem;
+  flex: 25%;
+  font-size: 0.8rem;
   font-weight: bold;
   text-align: right;
   color: #ff9999;
@@ -1117,7 +1131,7 @@ export default {
 
 .history-detailConts .itemCode {
   flex: 30%;
-  font-size: 0.9rem;
+  font-size: 0.7rem;
   font-weight: bold;
   color: #EA4335;
 }
@@ -1128,4 +1142,36 @@ export default {
   color: #999;
 }
 
+.QTRes-footer{
+  font-size: 1.25rem;
+  line-height: 1.5;
+  border-radius: 0.3rem;
+  display: flex;
+  justify-content: flex-end;
+}
+.QTRes-footer .TotalInfo{
+  margin-right: -1px;
+}
+.QTRes-footer .TotalInfo-Title{
+    align-items: center;
+    margin-bottom: 0;
+    font-size: 1rem;
+    font-weight: 400;
+    color: #5d4038;
+    text-align: center;
+    white-space: nowrap;
+    border-radius: 0.25rem;
+}
+.QTRes-footer .TotalInfo-Text{
+     -webkit-box-align: center;
+    align-items: center;
+    padding: 0.375rem 0.75rem;
+    margin-bottom: 0;
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: #E50914;
+    text-align: center;
+    white-space: nowrap;
+    border-radius: 0.25rem;
+}
 </style>
