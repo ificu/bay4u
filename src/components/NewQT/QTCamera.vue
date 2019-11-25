@@ -149,19 +149,6 @@ export default {
                                             alert("[Mobile Retry] " + err.name + ": " + err.message);
                                         });
                                 }
-                                /*
-                                if(device.kind === "videoinput" && device.label.match("FaceTime|facing back")) {
-
-                                    navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: "environment" } } })
-                                        .then(function(stream) {
-                                            videoPlayer.srcObject = stream;
-                                            videoPlayer.style.display = 'block';
-                                        })
-                                        .catch(function(err) {
-                                            alert("[Mobile Retry] " + err.name + ": " + err.message);
-                                        });
-
-                                }*/
                             });
                         });
 
