@@ -134,7 +134,14 @@ export default {
       this.showChatPage = true;
 
       // 초기 메시지 입력
-      var msg = this.$route.params.carNo + " 차량에 대한 견적이 요청됐습니다.";
+      var msg = "";
+      if(this.$route.params.carNo === null || this.$route.params.carNo.length === 0){
+        msg = "미상차량에 대한 견적이 요청됐습니다.";
+      }
+      else{
+        msg = this.$route.params.carNo + " 차량에 대한 견적이 요청됐습니다.";
+      }
+      
       var chatMsg = {};
       //chatMsg.from = {'name' : '나'};
       chatMsg.from = {'name' : this.UserInfo.BsnID};
@@ -209,6 +216,8 @@ export default {
       var now = new Date();
       var id = this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                 + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+      var key = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
 
       param.operation = "create";
       param.tableName = "BAY4U_CHAT";
@@ -220,6 +229,7 @@ export default {
       param.payload.Item.ChatTo = "parts";
       param.payload.Item.Message = chatMsg.msg;
       param.payload.Item.Status = "0";
+      param.payload.Item.ReqTm = key;
 
       console.log("Send Msg : ", JSON.stringify(param));
 
@@ -276,7 +286,8 @@ export default {
         if(Array.isArray(result.data.Items))
         {
           result.data.Items.sort(function(a, b){
-            return (a.ID.substring(a.ID.length,a.ID.length -12) > b.ID.substring(b.ID.length,b.ID.length -12)) ? 1 : -1;
+            //return (a.ID.substring(a.ID.length,a.ID.length -12) > b.ID.substring(b.ID.length,b.ID.length -12)) ? 1 : -1;
+            return (a.ReqTm> b.ReqTm) ? 1 : -1;
           });
         }
 
@@ -319,8 +330,9 @@ export default {
 
         if(Array.isArray(result.data.Items))
         {
+       
           result.data.Items.sort(function(a, b){
-            return (a.ReqDt < b.ReqDt) ? 1 : -1;
+            return (a.ReqSeq < b.ReqSeq) ? 1 : -1;
           });
         }
 

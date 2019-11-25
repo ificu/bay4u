@@ -16,6 +16,7 @@
             </div>
           </v-card>
           <div>
+          <div class="text-right mb-2"><v-btn  color="#FFECB3" depressed @click="SetDummyCar()">미상차량</v-btn></div>
             <!-- 과거 정비이력 Popup-->
             <v-dialog v-model="showROHistDialog" transition="dialog-bottom-transition" >
               <template v-slot:activator="{ on: { click } }">
@@ -207,7 +208,7 @@
         <router-link v-bind:to="{name:'Chat', params:{chatid:1}}">
           <b-button class="submit-YES" @click="addNewQTRequest()">YES</b-button>
         </router-link >-->
-        <b-button class="submit-YES" @click="addNewQTRequest()">YES</b-button>
+        <b-button class="submit-YES" @click="checkQtData()">YES</b-button>
         <b-button class="submit-NO" @click="showQTConfirm=false">NO</b-button>
       </span>
     </QTConfirm>
@@ -225,9 +226,12 @@
       <div slot="header"><h5 >알림</h5><i class="closeModalBtn fas fa-times" @click="closeMsg(alertMsgPath)"></i></div>
       <span slot="body" @click="closeMsg(alertMsgPath)"><pre>{{alertMsg}}</pre>
       </span>
+      <div slot="footer" v-if="showAlerMsgBtn">
+        <v-btn depressed small color="indigo" dark @click="closeMsg(alertMsgPath)"> 확인</v-btn>
+      </div>
       <div slot="footer" v-if="showAlerMsgConfirmBtn">
-        <v-btn depressed small color="indigo" dark @click="CheckReqVinNoQT(true)"> YES</v-btn>
-        <v-btn depressed small color="blue-grey lighten-2"  @click="CheckReqVinNoQT(false)">NO</v-btn>
+        <v-btn depressed small color="indigo" dark @click="CheckReqVinNoQT(true)">확인</v-btn>
+        <v-btn depressed small color="blue-grey lighten-2"  @click="CheckReqVinNoQT(false)">취소</v-btn>
       </div>
     </MessageBox>
 
@@ -278,9 +282,10 @@ name: 'QTStep',
       custName: "",
       showAlertMsg: false,
       showAlerMsgConfirmBtn :false,
+      showAlerMsgBtn: true,
       alertMsg: "",
       alertMsgPath: "",
-      isReqVinNoQT: false
+      alertYesNo: false
     }
   },
   methods: {
@@ -556,7 +561,7 @@ name: 'QTStep',
         console.log('selectedCategory : ' + this.selectedCategory);*/
       },
       addNewQTRequest() {
-      
+        
         var param = {};
         param.BsnId = this.UserInfo.BsnID;
         param.UserID = this.UserInfo.UserID;
@@ -590,7 +595,7 @@ name: 'QTStep',
              param = {};
 
              var now = new Date();
-             var key = this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+             var key = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                         + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
 
               param.operation = "create";
@@ -603,6 +608,7 @@ name: 'QTStep',
               param.payload.Item.ReqDt = now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);
               param.payload.Item.ReqSite = this.UserInfo.BsnID;
               param.payload.Item.ReqName = this.UserInfo.Name;
+              param.payload.Item.ReqSeq = key;
               param.payload.Item.ResDealer = "PARTS";
               param.payload.Item.Memo = convertStringToDynamo(this.qtReqMemo);
               param.payload.Item.LineItem = JSON.stringify(this.qtRequest);
@@ -652,7 +658,7 @@ name: 'QTStep',
       },
       checkQtData()
       {
-         
+
         if(this.UserInfo === null){
           //alert("로그인 정보가 없습니다. \r 다시 로그인 해주세요.");
           this.alertMsg = "로그인 정보가 없습니다.\n다시 로그인 해주세요."
@@ -663,22 +669,25 @@ name: 'QTStep',
 
         if(this.UserInfo.BsnID === undefined || this.UserInfo.BsnID === null || this.UserInfo.BsnID.length === 0 )
         {
-          this.alertMsg = "사이트 정보가 없습니다."
+          this.alertMsg = "사이트 정보가 없습니다.\n다시 로그인 해주세요."
           this.showAlertMsg = !this.showAlertMsg;
+          this.alertMsgPath = "Login";
           return false;
         }
 
         if(this.UserInfo.UserID === undefined || this.UserInfo.UserID === null || this.UserInfo.UserID === 0 )
         {
-          this.alertMsg = "로그인 정보가 없습니다."
+          this.alertMsg = "로그인 정보가 없습니다.\n다시 로그인 해주세요."
           this.showAlertMsg = !this.showAlertMsg;
+          this.alertMsgPath = "Login";
           return false;
         }
 
         if(this.UserInfo.BsnID === undefined || this.UserInfo.BsnID === null || this.UserInfo.BsnID.length === 0 )
         {
-          this.alertMsg = "사이트 정보가 없습니다."
+          this.alertMsg = "사이트 정보가 없습니다.\n다시 로그인 해주세요."
           this.showAlertMsg = !this.showAlertMsg;
+          this.alertMsgPath = "Login";
           return false;
         }
         /*
@@ -693,8 +702,9 @@ name: 'QTStep',
         {
           this.alertMsg = "차대번호가 없습니다.\n차대번호 없이 요청하시겠습니까?"
           this.showAlertMsg = !this.showAlertMsg;
-          this.showAlerMsgConfirmBtn = !this.showAlerMsgConfirmBtn;
-          
+          this.showAlerMsgBtn = false;
+          this.showAlerMsgConfirmBtn = !this.showAlerMsgConfirmBtn;  
+          return false;
         }
       /*
         if(this.qtRequest === undefined || this.qtRequest === null || this.qtRequest.length === 0 )
@@ -715,12 +725,25 @@ name: 'QTStep',
       },
       CheckReqVinNoQT(value)
       {
-        if(value){
-          this.CarInfo.VinNo = "99999999999999999";
+        if(value === true)
+        {
+           this.CarInfo.VinNo = "99999999999999999";
+           this.addNewQTRequest();
+           
+           console.log("this.alertYesNo : ", this.alertYesNo);
+           console.log("VinNo : ", this.CarInfo.VinNo);
+           
         }
+        
         this.showAlertMsg = false;
         this.showAlerMsgConfirmBtn = false;
-        this.isReqVinNoQT = value;
+        this.alertYesNo = value;
+
+      },
+      SetDummyCar()
+      {
+        this.CarInfo.VinNo = "99999999999999999";
+        this.e6 = 2;
       }
     },
     components: {
