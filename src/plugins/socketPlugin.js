@@ -15,6 +15,8 @@ const SocketPlugin = {
       socket.emit('chat', {
         msg: $payload.msg,
         name: $payload.name,
+        recv: $payload.recv,
+        chatId: $payload.chatId,
       });
     };
 

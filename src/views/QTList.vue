@@ -764,8 +764,6 @@ export default {
       param.payload.FilterExpression = "ReqSite = :id";
       param.payload.ExpressionAttributeValues = {};
       var key = ":id";
-      if(this.UserInfo.BsnID === "")
-        this.UserInfo.BsnID = "S009";
       param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
 
        console.log("chating list pram : " + JSON.stringify(param));
@@ -914,9 +912,16 @@ export default {
   },
   created : function() {
     //this.showQTReqList();
+
     if(this.$route !== undefined && this.$route.name === "QTList" ) {
          this.GetConfirmQtList();
     }
+
+    if(this.UserInfo.BsnID === '')
+      this.UserInfo.BsnID = this.$cookies.get('BsnID');
+
+    this.GetConfirmQtList();  
+
   }
 }
 </script>
