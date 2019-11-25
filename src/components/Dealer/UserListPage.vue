@@ -122,7 +122,7 @@ export default {
 
         if(Array.isArray(result.data.Items)) {
           result.data.Items.sort(function(a, b){
-            return (a.ReqDt < b.ReqDt) ? 1 : -1;
+            return (a.ReqSeq < b.ReqSeq) ? 1 : -1;
           });
         }
 
