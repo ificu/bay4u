@@ -1,7 +1,7 @@
 <template>
   <div class="UserListPage">
   <b-tabs class="UserList-Tab"  v-model="tabIndex" content-class="mt-3" fill>
-    <b-tab title="카센터 대화목록" active :title-link-class="linkClass(0)">
+    <b-tab  class="tabPage1" title="카센터 대화목록" active :title-link-class="linkClass(0)">
       <div class="Chat-search mdl-textfield mdl-js-textfield mdl-textfield--expandable">
         <label class="mdl-button mdl-js-button mdl-button--icon" for="sample6" v-on:click="showQTReqList()">
           <i class="material-icons">search</i>
@@ -170,9 +170,22 @@ export default {
 #967d5f : 옅은 브라운
 */
 
+.UserListPage{
+  width: 100%;
+  height: 100%;
+}
 
 .UserList-Tab {
   margin: 10px;
+  height: 98%;
+  position: relative;
+}
+
+.UserList-Tab .tabPage1 {
+  height: 95%;
+  position:absolute;
+  right: 0;
+  left:0;
 }
 
 .Chat-search {
@@ -189,13 +202,16 @@ export default {
 
 .Chat-list {
   margin:auto;
-  width: 90%;
-  height: 60px;
+  width: 98%;
+  height: 90%;
+  /*height: 60px;*/
 }
 
 .Chat-list ul {
   list-style-type: none;
   padding: 0px;
+  height: 98%; 
+  overflow: auto;
 }
 
 .Chat-list li {
@@ -203,7 +219,8 @@ export default {
   min-height: 50px;
   height: 50px;
   line-height: 50px;
-  margin: 0.5rem 0;
+  /*margin: 0.5rem 0;*/
+  margin:4px 5px;
   padding: 0 0.9rem;
   border-width: thin;
   border-style: solid;
@@ -225,7 +242,6 @@ export default {
   border-color: #bebebe;
   background-color: #878f99;
 }
-
 
 .Carcenter-type {
   align-self: center;
