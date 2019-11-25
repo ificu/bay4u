@@ -134,10 +134,10 @@ export default {
         
       });
     },
-    SetQTInfo(itme , idx)
+    SetQTInfo(item , idx)
     {
-       this.$emit('setQtInfo' ,itme);
-       this.$EventBus.$emit('click-qtInfo' , itme)
+       this.$emit('setQtInfo' ,item);
+       this.$EventBus.$emit('click-qtInfo' , item)
        this.qtItemIndex = idx;
        this.qtReqList[idx].isRead = true;
     },
