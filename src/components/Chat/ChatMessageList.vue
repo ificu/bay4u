@@ -28,7 +28,7 @@ export default {
   props: ['msgs'],
   
   updated() {
-    
+    console.log("Update msg : ", JSON.stringify(this.msgs));
   },
   created : function() {
     console.log("Check msg : ", JSON.stringify(this.msgs));

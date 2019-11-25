@@ -43,9 +43,11 @@ export default {
         captureButton.style.display = 'none';
         var context = canvasElement.getContext('2d');
         context.drawImage(videoPlayer, 0, 0, canvasElement.width, videoPlayer.videoHeight / (videoPlayer.videoWidth / canvasElement.width));
-        videoPlayer.srcObject.getVideoTracks().forEach(function(track) {
-            track.stop();
-        });
+        if(videoPlayer.srcObject != null) {
+            videoPlayer.srcObject.getVideoTracks().forEach(function(track) {
+                track.stop();
+            });
+        }
 
         var url64 = canvasElement.toDataURL();
         //console.log("url64 : " + url64);
@@ -65,32 +67,62 @@ export default {
         var videoPlayer = document.querySelector('#player');
 
         if (!('mediaDevices' in navigator)) {
+            alert("mediaDevices create");
             navigator.mediaDevices = {};
         }
 
         if (!('getUserMedia' in navigator.mediaDevices)) {
             navigator.mediaDevices.getUserMedia = function(constraints) {
-            var getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+            var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
             if (!getUserMedia) {
+                alert("getUserMedia define error ");
                 return Promise.reject(new Error('getUserMedia is not implemented!'));
             }
 
             return new Promise(function(resolve, reject) {
+                //if(getUserMedia_nav)
+                //    getUserMedia_nav.call(constraints, resolve, reject);
+                //else if(getUserMedia_brz)
+                //    getUserMedia_brz.call(navigator, constraints, resolve, reject);
                 getUserMedia.call(navigator, constraints, resolve, reject);
             });
             }
         }
 
-        //alert("userAgent : " + navigator.userAgent);
+        //alert("getVideoTracks check");
+        if(videoPlayer.srcObject != null) {
+            videoPlayer.srcObject.getVideoTracks().forEach(function(track) {
+                track.stop();
+            });
+        }
 
-        if (navigator.userAgent.match("iPad") == null 
-            && navigator.userAgent.match("iPhone|Mobile|UP.Browser|Android|BlackBerry|Windows CE|Nokia|webOS|Opera Mini|SonyEricsson|opera mobi|Windows Phone|IEMobile|POLARIS") != null) 
+        //alert("getTracks check");
+        if(videoPlayer.srcObject != null) {
+            videoPlayer.srcObject.getTracks().map(function (val) {
+                val.stop();
+            });
+        }        
+        /*
+        alert("enumerateDevices check");
+        navigator.mediaDevices.enumerateDevices()
+            .then(function(devices) {
+                devices.forEach(function(device) {
+                    alert("device info. : " + JSON.stringify(device) );
+                });
+            })
+            .catch(function(err) {
+                    //imagePickerArea.style.display = 'block';
+                    alert("[devices] " + err.name + ": " + err.message);
+            });*/
+
+        //alert("navigator.userAgen check");
+        if (navigator.userAgent.match("iPad|iPhone|Mobile|UP.Browser|Android|BlackBerry|Windows CE|Nokia|webOS|Opera Mini|SonyEricsson|opera mobi|Windows Phone|IEMobile|POLARIS") != null) 
         { 
             //모바일 접속일 경우
             //navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 800 }, height: { ideal: 600 }, facingMode: { exact: "environment" } } })
             //navigator.mediaDevices.getUserMedia({ video: true } )
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: "environment" } } })
                 .then(function(stream) {
                     videoPlayer.srcObject = stream;
                     videoPlayer.style.display = 'block';
@@ -98,6 +130,41 @@ export default {
                 .catch(function(err) {
                     //imagePickerArea.style.display = 'block';
                     alert("[Mobile] " + err.name + ": " + err.message);
+
+                    navigator.mediaDevices.enumerateDevices()
+                        .then(function(devices) {
+                            devices.forEach(function(device) {
+                                alert(JSON.stringify(device));
+                                //if(device.kind === "videoinput" && device.label.match("camera2 4")){
+                                if(device.kind === "videoinput" && device.label.match("facing back")){
+                                    var option = {
+                                        deviceId : { exact: device.deviceId}
+                                    };
+                                    navigator.mediaDevices.getUserMedia(option)
+                                        .then(function(stream) {
+                                            videoPlayer.srcObject = stream;
+                                            videoPlayer.style.display = 'block';
+                                        })
+                                        .catch(function(err) {
+                                            alert("[Mobile Retry] " + err.name + ": " + err.message);
+                                        });
+                                }
+                                /*
+                                if(device.kind === "videoinput" && device.label.match("FaceTime|facing back")) {
+
+                                    navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: "environment" } } })
+                                        .then(function(stream) {
+                                            videoPlayer.srcObject = stream;
+                                            videoPlayer.style.display = 'block';
+                                        })
+                                        .catch(function(err) {
+                                            alert("[Mobile Retry] " + err.name + ": " + err.message);
+                                        });
+
+                                }*/
+                            });
+                        });
+
                 });
         } 
         else { 
