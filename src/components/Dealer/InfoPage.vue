@@ -140,7 +140,7 @@
               <div class="TotalInfo">
                 <span class="TotalInfo-Title">합계금액</span>
                 <span class="TotalInfo-Text">{{total | localeNum}}</span>
-                <span><b-button>견적 완료 알림</b-button></span>
+                <span><b-button v-on:click="sendQTconfirmMsg()">견적 완료 알림</b-button></span>
               </div>
 
           </div>
@@ -282,6 +282,14 @@ export default {
         this.siteInfo = result.data.Items[0];
         this.showSiteInfo = true;
       });
+    },
+    sendQTconfirmMsg()
+    {
+      var msg = this.qtInfo.CarNo + " 차량에 대한 견적이 완료됐습니다.";
+      var qtMsg = {};
+      qtMsg.from = {'name' : this.UserInfo.BsnID};
+      qtMsg.msg  = msg;
+      this.$EventBus.$emit('send-QTConfirm' , qtMsg)
     }
   },
   computed:{

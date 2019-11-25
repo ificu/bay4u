@@ -856,7 +856,7 @@ export default {
       var param = {};
       param.BsnId = this.UserInfo.BsnID;
 
-      console.log("======= Confirm QT Request result ========");
+      console.log("======= 견적확정 조회 Request result ========");
       console.log(param); 
 
       var rtnCode = "";
@@ -872,7 +872,7 @@ export default {
           data: param
       })
       .then((result) => {
-          console.log("======= Return result ========");     
+          console.log("======= 견적확정 조회 Return result ========");     
           console.log(result.data); 
          
           this.rtnCode = result.data.ReturnCode;
@@ -912,10 +912,16 @@ export default {
   },
   created : function() {
     //this.showQTReqList();
+
+    if(this.$route !== undefined && this.$route.name === "QTList" ) {
+         this.GetConfirmQtList();
+    }
+
     if(this.UserInfo.BsnID === '')
       this.UserInfo.BsnID = this.$cookies.get('BsnID');
 
     this.GetConfirmQtList();  
+
   }
 }
 </script>

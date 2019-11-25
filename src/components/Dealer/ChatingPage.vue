@@ -115,10 +115,15 @@ export default {
         }
     });
 
+    this.$EventBus.$on('send-QTConfirm', qtMsg => {   
+        this.msgDatas = qtMsg;
+        this.saveChatMsg(qtMsg);
+
     Notification.requestPermission(function(result) {
       if(result === 'granted') {
         console.log('Notification OK');
       }
+
     });
   },  
   methods: {
@@ -163,6 +168,9 @@ export default {
       var id = this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                 + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
 
+      var key = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
       param.operation = "create";
       param.tableName = "BAY4U_CHAT";
       param.payload = {};
@@ -173,6 +181,7 @@ export default {
       param.payload.Item.ChatTo = this.chatItem.ReqSite;
       param.payload.Item.Message = chatMsg.msg;
       param.payload.Item.Status = "0";
+      param.payload.Item.ReqTm = key;
 
       axios({
           method: 'POST',
@@ -228,7 +237,8 @@ export default {
         if(Array.isArray(result.data.Items))
         {
           result.data.Items.sort(function(a, b){
-            return (a.ID.substring(a.ID.length,a.ID.length -12) > b.ID.substring(b.ID.length,b.ID.length -12)) ? 1 : -1;
+            //return (a.ID.substring(a.ID.length,a.ID.length -12) > b.ID.substring(b.ID.length,b.ID.length -12)) ? 1 : -1;
+            return (a.ReqTm> b.ReqTm) ? 1 : -1;
           });
         }
 
