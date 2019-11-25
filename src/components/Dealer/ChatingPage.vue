@@ -118,6 +118,7 @@ export default {
     this.$EventBus.$on('send-QTConfirm', qtMsg => {   
         this.msgDatas = qtMsg;
         this.saveChatMsg(qtMsg);
+    });
 
     Notification.requestPermission(function(result) {
       if(result === 'granted') {
