@@ -43,7 +43,7 @@ export default {
       datas: [],
       chatItem:[],
       showChatArea:false,
-      show:true
+      show:true,
     }
   },
   components: {
@@ -83,15 +83,26 @@ export default {
     this.$socket.on('chat', (data) => {
       //this.pushMsgData(data);
       //$ths.datas.push(data);
-      var chatMsg = {};
-      chatMsg.from = {'name' : data.from.name};
-      chatMsg.msg  = data.msg;
-      this.msgDatas = chatMsg;
+      if(this.chatItem.ID === data.chatId) {
+        var chatMsg = {};
+        chatMsg.from = {'name' : data.from.name};
+        chatMsg.to = {'name' : data.to.name};
+        chatMsg.msg  = data.msg;
+        chatMsg.Chatid = this.chatItem.ID;
+        this.msgDatas = chatMsg;
+      }
+      else {
+        var options = {
+          body : data.msg
+        };
+        new Notification('채팅 메시지 (' + data.from.name + ')', options);
+        this.$EventBus.$emit('update-chatMsg', data.chatId);  
+      }
     });
 
-    this.$EventBus.$on('click-qtInfo', chatItem => {   
+    this.$EventBus.$on('click-qtInfo', chatItem => {  
         this.showchating(chatItem);
-        this.chatItem = chatItem;
+        this.chatItem = chatItem;     
     });
 
     this.$EventBus.$on('init-qtInfo', chatItem => {   
@@ -102,6 +113,12 @@ export default {
           this.$store.commit('InitMsgData');
           this.showChatArea = false;
         }
+    });
+
+    Notification.requestPermission(function(result) {
+      if(result === 'granted') {
+        console.log('Notification OK');
+      }
     });
   },  
   methods: {
@@ -119,17 +136,18 @@ export default {
       });*/
       var chatMsg = {};
       chatMsg.from = {'name' : this.UserInfo.BsnID};
+      chatMsg.to = {'name' : this.chatItem.ReqSite};
+      chatMsg.Chatid = this.chatItem.ID;
       chatMsg.msg  = msg;
       this.msgDatas = chatMsg;
-      console.log("Type msg : ", JSON.stringify(chatMsg));
       this.$sendMessage({
         //name: this.$route.params.username,
         name: this.UserInfo.BsnID,
         msg,
+        recv: this.chatItem.ReqSite,
+        chatId: this.chatItem.ID
       });
       this.saveChatMsg(chatMsg);
-      console.log("Send Msgdatas : "  + JSON.stringify(this.msgDatas));
-
     },    
     linkClass(idx) {
       if (this.tabIndex === idx) {
@@ -155,9 +173,6 @@ export default {
       param.payload.Item.ChatTo = this.chatItem.ReqSite;
       param.payload.Item.Message = chatMsg.msg;
       param.payload.Item.Status = "0";
-
-      console.log("DocID : " ,this.chatItem );
-      console.log("Send Msg : ", JSON.stringify(param));
 
       axios({
           method: 'POST',

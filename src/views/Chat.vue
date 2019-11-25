@@ -138,6 +138,7 @@ export default {
       var chatMsg = {};
       //chatMsg.from = {'name' : '나'};
       chatMsg.from = {'name' : this.UserInfo.BsnID};
+      chatMsg.to = {'name' : "parts"};
       chatMsg.msg  = msg;
       this.msgDatas = chatMsg;
 
@@ -146,6 +147,8 @@ export default {
       this.$sendMessage({
         name: this.UserInfo.BsnID,
         msg,
+        recv: "parts",
+        chatId: this.docId
       });
 
       this.saveChatMsg(chatMsg);
@@ -154,16 +157,22 @@ export default {
         this.showAppend = true;
 
       }
+
+      if(this.UserInfo.BsnID === '')
+        this.UserInfo.BsnID = this.$cookies.get('BsnID');
     }
 
     //const $ths = this;
     this.$socket.on('chat', (data) => {
-      //this.pushMsgData(data);
-      //$ths.datas.push(data);
-      var chatMsg = {};
-      chatMsg.from = {'name' : data.from.name};
-      chatMsg.msg  = data.msg;
-      this.msgDatas = chatMsg;
+      console.log('Chat Recv : ', data);
+      if(this.docId === data.chatId) {
+        var chatMsg = {};
+        chatMsg.from = {'name' : data.from.name};
+        chatMsg.to = {'name' : data.to.name};
+        chatMsg.msg  = data.msg;
+        chatMsg.Chatid = this.docId;
+        this.msgDatas = chatMsg;
+      }
     });
 
     this.showQTReqList();
@@ -183,13 +192,16 @@ export default {
       });*/
       var chatMsg = {};
       chatMsg.from = {'name' : this.UserInfo.BsnID};
+      chatMsg.to = {'name' : "parts"};
+      chatMsg.Chatid = this.docId;
       chatMsg.msg  = msg;
       this.msgDatas = chatMsg;
-      console.log("Type msg : ", JSON.stringify(chatMsg));
       this.$sendMessage({
         //name: this.$route.params.username,
         name: this.UserInfo.BsnID,
         msg,
+        recv: "parts",
+        chatId: this.docId
       });
       this.saveChatMsg(chatMsg);
     },

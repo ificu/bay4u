@@ -15,7 +15,8 @@
       <div class="Chat-list">
         <ul>
           <li v-for="(qtReq, index) in qtReqList" v-bind:key = "index" v-on:click="SetQTInfo(qtReq,index)" :class="{selectItem : selectedList(index)}">
-            <i class="Carcenter-type fas fa-wrench" style="color:#fbc02e;"></i>
+            <i class="Carcenter-type fas fa-wrench" style="color:#fbc02e;" v-if="qtReq.isRead === true"></i>     
+            <i class="Carcenter-type fas fa-wrench" style="color:red;" v-else-if="qtReq.isRead === false"></i>          
             <p class="Carcenter-name">{{qtReq.ReqName}} ({{qtReq.CarNo}})<br>{{qtReq.ReqDt}}</p>
             <span type="button" class="Chat-detail">
               <i class="fas fa-angle-double-right"></i>
@@ -119,11 +120,14 @@ export default {
         console.log("======= QT List result ========");
         console.log(result.data);
 
-        if(Array.isArray(result.data.Items))
-        {
+        if(Array.isArray(result.data.Items)) {
           result.data.Items.sort(function(a, b){
             return (a.ReqDt < b.ReqDt) ? 1 : -1;
           });
+        }
+
+        for (var chat of result.data.Items) {
+          chat.isRead = true;
         }
 
         this.qtReqList = result.data.Items;
@@ -135,6 +139,7 @@ export default {
        this.$emit('setQtInfo' ,itme);
        this.$EventBus.$emit('click-qtInfo' , itme)
        this.qtItemIndex = idx;
+       this.qtReqList[idx].isRead = true;
     },
     initQTData()
     {
@@ -149,6 +154,14 @@ export default {
   created : function() {
     if(this.UserInfo.BsnID === '')
       this.UserInfo.BsnID = this.$cookies.get('BsnID');
+
+    this.$EventBus.$on('update-chatMsg', docId => {  
+      for (var chat of this.qtReqList) {
+        if(chat.ID === docId) {
+          chat.isRead = false;
+        }
+      }
+    });      
   },    
   computed:{
     UserInfo: {
