@@ -498,15 +498,18 @@ export default {
   height: 90%;
   background-color: beige;
 }*/
+.v-application{
+  width: 100%;
+  height: 100%;
+}
 .chatform{
-  position: relative;
   width: 100%;
   height: 100%;
 }
 .chatform .card {
-  height: 100%;
+  position: relative;
+  height: 87%;
   width: 100%;
- /* background-color: blue;*/
 }
 .Chating-page {
     background-color: #ddd;

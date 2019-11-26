@@ -263,7 +263,8 @@ export default {
     SetQtInfo(){
       console.log("QT Info 설정" + JSON.stringify(this.qtInfo));  
       this.tabIndex = 0;
-      if(this.qtInfo.LineItem.length > 0)
+      
+      if(this.qtInfo.length > 0 && this.qtInfo.LineItem.length > 0)
       {  
         this.qtInfo.CarVin = this.qtInfo.CarVin.replace("*empty*", "");
         this.qtInfo.Memo = this.qtInfo.Memo.replace("*empty*", "");
@@ -378,7 +379,7 @@ export default {
         this.qtInfo = [];
         this.SetQtInfo();
         this.siteInfo = [];
-         this.showSiteInfo = false;
+        this.showSiteInfo = false;
     });
   },
 }
@@ -401,9 +402,13 @@ export default {
 .card-body {
   padding: 10px;
 }
-
+.v-application{
+  width: 100%;
+  height: 100%;
+}
 .InfoPage {
-  height: calc(100% - 10px);
+ /*height: calc(100% - 10px);)*/
+ height: 90%;
 }
 
 .UserInfo-contents {
