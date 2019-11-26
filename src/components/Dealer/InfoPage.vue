@@ -1,154 +1,179 @@
 <template>
-  <div class="InfoPage">
-    <b-card
-      header="카센타 정보"
-      header-text-variant="white"
-      header-tag="header"
-      header-bg-variant="dark"
-      style="height:160px;"
-    >
-      <b-card-text class="UserInfo-contents" v-if="showSiteInfo">
-        <div class="UserInfo-img">
-          <img src="@/assets/user-icon.png">
-        </div>
-        <div class="UserInfo-info">
-          <div class="info-name">{{this.qtInfo.ReqName}}</div>
-          <div class="info-tel"><v-icon small class="qt-icon">fas fa-phone-square</v-icon>{{this.siteInfo.TEL}} / <v-icon small class="qt-icon">fas fa-mobile-alt</v-icon>{{this.siteInfo.HP}}</div>
-          <div class="info-addr"><v-icon small class="qt-icon">mdi-domain</v-icon>{{this.siteInfo.ADDR}}</div>
-        </div>
-      </b-card-text>
-    </b-card>
-    <b-card no-body class="QT-Detail">
-      <b-tabs v-model="tabIndex" card active-nav-item-class="font-weight-bold" >
-      <b-tab title="견적 요청" :title-link-class="linkClass(0)">
-        <b-card-text>
-          <div class="Car-Info">
-            <div class="CarInfo-Left">
-              <div><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>차량번호</div>
-              <b-form-input v-model="this.qtInfo.CarNo"></b-form-input>
-            </div>
-            <div class="CarInfo-Right">
-              <div><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>차대번호</div>
-              <b-form-input v-model="this.qtInfo.CarVin"></b-form-input>
-            </div>
-          </div>   
-          <div class="QTReq-List"><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>견적요청 상세</div>       
-          <table class="QTReq-Table mdl-data-table mdl-js-data-table mdl-shadow--2dp">
-            <thead>
-              <tr>
-                <th class="QTItem-Title mdl-data-table__cell--non-numeric">요청 부품</th>
-                <th class="QTItem-Qty">수량</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(item , index) in qtItems" :key="index">
-                <td class="mdl-data-table__cell--non-numeric">{{item.ITM_NM}}</td>
-                <td>{{item.ITM_QTY}}</td>
-              </tr>
+  <v-app>
+    <div class="InfoPage">
+      <b-card
+        header="카센타 정보"
+        header-text-variant="white"
+        header-tag="header"
+        header-bg-variant="dark"
+        style="height:160px;"
+      >
+        <b-card-text class="UserInfo-contents" v-if="showSiteInfo">
+          <div class="UserInfo-img">
+            <img src="@/assets/user-icon.png">
+          </div>
+          <div class="UserInfo-info">
+            <div class="info-name">{{this.qtInfo.ReqName}}</div>
+            <div class="info-tel"><v-icon small class="qt-icon">fas fa-phone-square</v-icon>{{this.siteInfo.TEL}} / <v-icon small class="qt-icon">fas fa-mobile-alt</v-icon>{{this.siteInfo.HP}}</div>
+            <div class="info-addr"><v-icon small class="qt-icon">mdi-domain</v-icon>{{this.siteInfo.ADDR}}</div>
+          </div>
+        </b-card-text>
+      </b-card>
+      <b-card no-body class="QT-Detail">
+        <b-tabs v-model="tabIndex" card active-nav-item-class="font-weight-bold" >
+        <b-tab title="견적 요청" :title-link-class="linkClass(0)">
+          <b-card-text>
+            <div class="Car-Info">
+              <div class="CarInfo-Left">
+                <div><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>차량번호</div>
+                <b-form-input v-model="this.qtInfo.CarNo"></b-form-input>
+              </div>
+              <div class="CarInfo-Right">
+                <div><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>차대번호</div>
+                <b-form-input v-model="this.qtInfo.CarVin"></b-form-input>
+              </div>
+            </div>   
+            <div class="QTReq-List"><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>견적요청 상세</div>       
+            <table class="QTReq-Table mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+              <thead>
+                <tr>
+                  <th class="QTItem-Title mdl-data-table__cell--non-numeric">요청 부품</th>
+                  <th class="QTItem-Qty">수량</th>
+                  <th class="QTItem-String">첨부파일</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(item , index) in qtItems" :key="index">
+                  <td class="mdl-data-table__cell--non-numeric">{{item.ITM_NM}}</td>
+                  <td>{{item.ITM_QTY}}</td>
+                  <td>
+                    <v-btn outlined small color="#00BFA5" class="float-right" v-if="item.IMG !== undefined" @click="showQTImage(item.IMG)">사진 확인</v-btn>
+                  </td>
+                </tr>
+                <!--
+                <tr>
+                  <td class="mdl-data-table__cell--non-numeric">오일 필터</td>
+                  <td>1</td>
+                </tr>
+                -->
+              </tbody>
+            </table>
+            <div class="QTReq-Memo"><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>Memo</div>
+            <b-form-textarea
+              id="textarea"
+              rows="3"
+              max-rows="6"
+              v-model="this.qtInfo.Memo"
+            ></b-form-textarea>         
+          </b-card-text>
+        </b-tab>
+        <b-tab title="견적 회신" :title-link-class="linkClass(1)">
+          <b-card-text>
+            <div class="QT-Info">
               <!--
-              <tr>
-                <td class="mdl-data-table__cell--non-numeric">오일 필터</td>
-                <td>1</td>
-              </tr>
+              <div class="CarInfo-Left">
+                <div>브랜드</div>
+                <b-form-select v-model="selectedBrand" class="mb-3">
+                  <option :value="null">차량 브랜드 선택</option>
+                  <option value="AUDI">AUDI</option>
+                  <option value="VW">VW</option>
+                  <option value="BMW">BMW</option>
+                  <option value="Benz">Benz</option>
+                </b-form-select> 
+              </div>
               -->
-            </tbody>
-          </table>
-          <div class="QTReq-Memo"><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>Memo</div>
-          <b-form-textarea
-            id="textarea"
-            rows="3"
-            max-rows="6"
-            v-model="this.qtInfo.Memo"
-          ></b-form-textarea>
-        </b-card-text>
-      </b-tab>
-      <b-tab title="견적 회신" :title-link-class="linkClass(1)">
-        <b-card-text>
-          <div class="QT-Info">
-            <!--
-            <div class="CarInfo-Left">
-              <div>브랜드</div>
-              <b-form-select v-model="selectedBrand" class="mb-3">
-                <option :value="null">차량 브랜드 선택</option>
-                <option value="AUDI">AUDI</option>
-                <option value="VW">VW</option>
-                <option value="BMW">BMW</option>
-                <option value="Benz">Benz</option>
-              </b-form-select> 
+              <div class="QT-Title">
+                <div><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>차정상세 :           
+                </div>
+                <!--<b-form-input v-model="headQTData[0].SERIES"></b-form-input>-->
+                </div>
+                <div class="QT-Content">{{this.series}}</div>
+            </div>   
+            <div class="QT-Info">
+              <div class="QT-Title"><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>담당자 : </div>
+              <div class="QT-Content">{{this.angentNm }}</div>
+              <div class="QT-Title"><v-icon x-small  class="qt-icon">fas fa-angle-down</v-icon>견적상태 : </div>
+              <div class="QT-ContentSts">{{this.estmStsNm}}</div>
             </div>
-            -->
-            <div class="QT-Title">
-              <div><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>차정상세 :           
-              </div>
-              <!--<b-form-input v-model="headQTData[0].SERIES"></b-form-input>-->
-              </div>
-               <div class="QT-Content">{{this.series}}</div>
-          </div>   
-          <div class="QT-Info">
-            <div class="QT-Title"><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>담당자 : </div>
-            <div class="QT-Content">{{this.angentNm }}</div>
-            <div class="QT-Title"><v-icon x-small  class="qt-icon">fas fa-angle-down</v-icon>견적상태 : </div>
-            <div class="QT-ContentSts">{{this.estmStsNm}}</div>
-          </div>
-          <div class="QTRes-List">
-            <div class="QTRes-Title">
-              <v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>견적회신 상세
-            </div>  
-            <div class="QTRes-Button">
-              <b-button-group size="sm">
-                <b-button variant="outline-secondary">엑셀 카피 자동 입력</b-button>
-                <b-button variant="outline-secondary" v-on:click="GetQtList">견적서 자동 입력</b-button>
-                <b-button variant="outline-secondary">선택 삭제</b-button>
-                <b-button class="QTRes-ButtonAdd" variant="outline-secondary">부품 추가</b-button>
-              </b-button-group>
-            </div>  
-          </div>       
-          <table class="QTRes-Table mdl-data-table mdl-js-data-table mdl-shadow--2dp">
-            <thead>
-              <tr>
-                <th class="QTItem-Title mdl-data-table__cell--non-numeric">브랜드</th>
-                <th class="QTItem-Title mdl-data-table__cell--non-numeric">부 품 명</th>
-                <th class="QTItem-Brand mdl-data-table__cell--non-numeric">부품코드</th>
-                <th class="QTItem-Qty">수량</th>
-                <!-- <th class="QTItem-Qty">재고여부</th>-->
-                <th class="QTItem-Qty">단가</th>
-                <th class="QTItem-Qty">금액</th>
-                <th class="QTItem-Qty mdl-data-table__cell--non-numeric">배송구분</th>
-              </tr>
-            </thead>
-            <tbody>              
-              <tr v-for="(qtItem,i) in detailQTData" :key="i" >
-                <td> </td>
-                <td class="mdl-data-table__cell--non-numeric"><div class="itemNm" v-b-tooltip.hover :title=qtItem.NM_ITM>{{qtItem.NM_ITM}}</div>
-                </td>
-                <td class="mdl-data-table__cell--non-numeric">{{qtItem.CONFIRM_ITM}}</td>
-                <td>{{qtItem.ORDER_QTY | localeNum}}</td>
-                <!--<td>              
-                  <select>
-                    <option value="AUDI" selected>O</option>
-                    <option value="VW">X</option>
-                    <option value="BMW">소량</option>
-                  </select> 
-                </td>-->
-                <td>{{qtItem.SAL_PRICE | localeNum}}</td>
-                <td>{{qtItem.AMT | localeNum}}</td>
-                <td class="mdl-data-table__cell--non-numeric">{{qtItem.DELV_DAY}}</td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="QTRes-footer" v-if="showSum">
-              <div class="TotalInfo">
-                <span class="TotalInfo-Title">합계금액</span>
-                <span class="TotalInfo-Text">{{total | localeNum}}</span>
-                <span><b-button v-on:click="sendQTconfirmMsg()">견적 완료 알림</b-button></span>
-              </div>
+            <div class="QTRes-List">
+              <div class="QTRes-Title">
+                <v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>견적회신 상세
+              </div>  
+              <div class="QTRes-Button">
+                <b-button-group size="sm">
+                  <b-button variant="outline-secondary">엑셀 카피 자동 입력</b-button>
+                  <b-button variant="outline-secondary" v-on:click="GetQtList">견적서 자동 입력</b-button>
+                  <b-button variant="outline-secondary">선택 삭제</b-button>
+                  <b-button class="QTRes-ButtonAdd" variant="outline-secondary">부품 추가</b-button>
+                </b-button-group>
+              </div>  
+            </div>       
+            <table class="QTRes-Table mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+              <thead>
+                <tr>
+                  <th class="QTItem-Title mdl-data-table__cell--non-numeric">브랜드</th>
+                  <th class="QTItem-Title mdl-data-table__cell--non-numeric">부 품 명</th>
+                  <th class="QTItem-Brand mdl-data-table__cell--non-numeric">부품코드</th>
+                  <th class="QTItem-Qty">수량</th>
+                  <!-- <th class="QTItem-Qty">재고여부</th>-->
+                  <th class="QTItem-Qty">단가</th>
+                  <th class="QTItem-Qty">금액</th>
+                  <th class="QTItem-Qty mdl-data-table__cell--non-numeric">배송구분</th>
+                </tr>
+              </thead>
+              <tbody>              
+                <tr v-for="(qtItem,i) in detailQTData" :key="i" >
+                  <td> </td>
+                  <td class="mdl-data-table__cell--non-numeric"><div class="itemNm" v-b-tooltip.hover :title=qtItem.NM_ITM>{{qtItem.NM_ITM}}</div>
+                  </td>
+                  <td class="mdl-data-table__cell--non-numeric">{{qtItem.CONFIRM_ITM}}</td>
+                  <td>{{qtItem.ORDER_QTY | localeNum}}</td>
+                  <!--<td>              
+                    <select>
+                      <option value="AUDI" selected>O</option>
+                      <option value="VW">X</option>
+                      <option value="BMW">소량</option>
+                    </select> 
+                  </td>-->
+                  <td>{{qtItem.SAL_PRICE | localeNum}}</td>
+                  <td>{{qtItem.AMT | localeNum}}</td>
+                  <td class="mdl-data-table__cell--non-numeric">{{qtItem.DELV_DAY}}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="QTRes-footer" v-if="showSum">
+                <div class="TotalInfo">
+                  <span class="TotalInfo-Title">합계금액</span>
+                  <span class="TotalInfo-Text">{{total | localeNum}}</span>
+                  <span><b-button v-on:click="sendQTconfirmMsg()">견적 완료 알림</b-button></span>
+                </div>
 
-          </div>
-        </b-card-text>
-      </b-tab>
-      </b-tabs>
-    </b-card>   
-  </div>   
+            </div>
+          </b-card-text>
+        </b-tab>
+        </b-tabs>
+      </b-card>   
+
+      <v-dialog v-model="showQTImageFlag" width="500px">
+        <v-card>
+          <v-card-title class="headline" >이미지 확인</v-card-title>
+          <v-img class="grey lighten-3 mr-4 ml-4"  v-bind:src="itemImage" max-width="500px"></v-img>
+
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="#00BFA5"
+              outlined
+              @click="showQTImageFlag = false"
+            >
+              닫기
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>  
+
+    </div>   
+  </v-app>
 </template>
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script>
@@ -167,7 +192,9 @@ export default {
       showSiteInfo:false,
       qtInfo:[],
       qtItems:[],
-      siteInfo:[]
+      siteInfo:[],
+      showQTImageFlag:false,
+      itemImage:''
     }
   },
   methods: {
@@ -234,9 +261,9 @@ export default {
       })   
     },
     SetQtInfo(){
-      //console.log("QT Info 설정" + JSON.stringify(this.qtInfo));  
+      console.log("QT Info 설정" + JSON.stringify(this.qtInfo));  
       this.tabIndex = 0;
-      if(this.qtInfo.length > 0)
+      if(this.qtInfo.LineItem.length > 0)
       {  
         this.qtInfo.CarVin = this.qtInfo.CarVin.replace("*empty*", "");
         this.qtInfo.Memo = this.qtInfo.Memo.replace("*empty*", "");
@@ -290,6 +317,35 @@ export default {
       qtMsg.from = {'name' : this.UserInfo.BsnID};
       qtMsg.msg  = msg;
       this.$EventBus.$emit('send-QTConfirm' , qtMsg)
+    },
+    showQTImage(img) { 
+      this.showQTImageFlag = true;
+      var param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_IMG";
+      param.payload = {};
+      param.payload.FilterExpression = "ID = :id";
+      param.payload.ExpressionAttributeValues = {};
+      var key = ":id";
+
+      param.payload.ExpressionAttributeValues[key] = img;
+
+      axios({
+        method: 'POST',
+        url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        data: param
+      })
+      .then((result) => {
+        console.log("======= Image Data result ========");
+        console.log(result.data);
+
+        this.itemImage = result.data.Items[0].IMG;
+        
+      });      
     }
   },
   computed:{
@@ -473,6 +529,12 @@ export default {
   width: 20%;
   font-weight: bold;
   color: #967d5f;
+}
+.QTItem-String{
+  width: 40%;
+  font-weight: bold;
+  color: #967d5f;
+  text-align: center;
 }
 
 /*

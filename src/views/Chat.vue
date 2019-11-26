@@ -51,8 +51,21 @@
       <Message-List :msgs="msgDatas" class="msg-list"></Message-List>
     </div>
     <div v-if="showChatPage">
-      <Message-From v-on:submitMessage="sendMessage" class="msg-form" ></Message-From>
+      <Message-From 
+        v-on:submitMessage="sendMessage" 
+        v-on:showImageModal="cameraShow" 
+        class="msg-form" >
+      </Message-From>
     </div>
+    <!-- 카메라 표시 팝업 -->
+    <transition>
+        <QTCamera 
+          v-if="showQTCamera" 
+          v-on:closeQTCameraModal="cameraShow(false)"
+          v-on:updatePic="updatePic"
+          >
+        </QTCamera>
+    </transition>        
     <!--Footer-->
     <div class="Chat-footer">
       <router-link to="/NewQT">
@@ -86,7 +99,7 @@
 import MessageList from '@/components/Chat/ChatMessageList.vue';
 import MessageForm from '@/components/Chat/ChatMessageForm.vue';
 import {datePadding, convertStringToDynamo} from '@/utils/common.js'
-
+import QTCamera from '@/components/NewQT/QTCamera.vue'
 
 export default {
   name: 'Chat',
@@ -100,11 +113,13 @@ export default {
       resDealers: [],
       resDealerNm: [],
       docId : "",
+      showQTCamera: false,
     }
   },
   components: {
     'Message-List': MessageList,
     'Message-From': MessageForm,
+    'QTCamera': QTCamera,
   },
   computed: {
     CarInfo: {
@@ -164,9 +179,6 @@ export default {
         this.showAppend = true;
 
       }
-
-      if(this.UserInfo.BsnID === '')
-        this.UserInfo.BsnID = this.$cookies.get('BsnID');
     }
 
     //const $ths = this;
@@ -178,11 +190,51 @@ export default {
         chatMsg.to = {'name' : data.to.name};
         chatMsg.msg  = data.msg;
         chatMsg.Chatid = this.docId;
-        this.msgDatas = chatMsg;
+        if(data.imgId !== undefined) {       
+          var param = {};
+          param.operation = "list";
+          param.tableName = "BAY4U_IMG";
+          param.payload = {};
+          param.payload.FilterExpression = "ID = :id";
+          param.payload.ExpressionAttributeValues = {};
+          var key = ":id";
+
+          param.payload.ExpressionAttributeValues[key] = data.imgId;
+
+          axios({
+            method: 'POST',
+            url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+            data: param
+          })
+          .then((result) => {
+            console.log("======= Image Data result ========");
+            console.log(result.data);
+
+            chatMsg.img = result.data.Items[0].IMG;
+            chatMsg.imgId = data.imgId;    
+
+            this.msgDatas = chatMsg;
+          })
+          .catch((error) => {
+            console.log(error);
+            this.msgDatas = chatMsg;
+          });  
+        }
+        else {
+          this.msgDatas = chatMsg;
+        }
       }
     });
 
+    if(this.UserInfo.BsnID === '')
+      this.UserInfo.BsnID = this.$cookies.get('BsnID');
+
     this.showQTReqList();
+
   },
   methods: {
     /*
@@ -242,6 +294,7 @@ export default {
       param.payload.Item.Message = chatMsg.msg;
       param.payload.Item.Status = "0";
       param.payload.Item.ReqTm = key;
+      param.payload.Item.IMG = chatMsg.imgId;
 
       console.log("Send Msg : ", JSON.stringify(param));
 
@@ -306,8 +359,46 @@ export default {
         result.data.Items.forEach(element => { 
           var chatMsg = {};
           chatMsg.from = {'name' : element['ChatFrom']};
-          chatMsg.msg  =element['Message'];
-          this.msgDatas = chatMsg;
+          chatMsg.to = {'name' : element['ChatTo']};
+          chatMsg.Chatid = this.docId;
+          chatMsg.msg  = element['Message'];
+          if(element['IMG'] !== undefined) {
+            param = {};
+            param.operation = "list";
+            param.tableName = "BAY4U_IMG";
+            param.payload = {};
+            param.payload.FilterExpression = "ID = :id";
+            param.payload.ExpressionAttributeValues = {};
+            var key = ":id";
+
+            param.payload.ExpressionAttributeValues[key] = element['IMG'];
+
+            axios({
+              method: 'POST',
+              url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+              },
+              data: param
+            })
+            .then((result) => {
+              console.log("======= Image Data result ========");
+              console.log(result.data);
+
+              chatMsg.img = result.data.Items[0].IMG;
+              chatMsg.imgId = element['IMG'];    
+
+              this.msgDatas = chatMsg;
+            })
+            .catch((error) => {
+              console.log(error);
+              this.msgDatas = chatMsg;
+            });  
+          }
+          else {
+            this.msgDatas = chatMsg;
+          }       
         });
 
       });
@@ -321,8 +412,6 @@ export default {
       param.payload.FilterExpression = "ReqSite = :id";
       param.payload.ExpressionAttributeValues = {};
       var key = ":id";
-      if(this.UserInfo.BsnID === "")
-        this.UserInfo.BsnID = "PARTS";
       param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
 
        console.log("chating list pram : " + JSON.stringify(param));
@@ -394,7 +483,7 @@ export default {
     {
        return "";
       /*return this.resDealerNm.filter(j => j.CODE == val).CODE;*/
-/*
+      /*
       this.resDealerNm.forEach(element => { 
         if(element['CODE'] === val)
         {
@@ -411,6 +500,89 @@ export default {
          return this.resDealerNm[index].NAME;
       }
       */
+    },
+    cameraShow(flag) {
+      this.showQTCamera = flag;
+    },
+    updatePic(pic) {
+
+      var now = new Date();
+      var key = this.UserInfo.BsnID + now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
+      var param = {};
+
+      param.operation = "create";
+      param.tableName = "BAY4U_IMG";
+      param.payload = {};
+      param.payload.Item = {};
+      param.payload.Item.ID = key;
+      param.payload.Item.IMG = pic;
+
+      axios({
+          method: 'POST',
+          url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
+          headers:{
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+          },
+          data: param
+      })
+      .then((result) => {
+        console.log("======= IMG Save result ========");
+        console.log(result.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });    
+      
+      var msg = '사진첨부';
+      var chatMsg = {};
+      chatMsg.from = {'name' : this.UserInfo.BsnID};
+      chatMsg.to = {'name' : "parts"};
+      chatMsg.Chatid = this.docId;
+      chatMsg.msg = msg;
+      chatMsg.img = pic;
+      chatMsg.imgId = key;
+      this.msgDatas = chatMsg;
+      this.$sendMessage({
+        name: this.UserInfo.BsnID,
+        msg,
+        recv: "parts",
+        chatId: this.docId,
+        imgId: key
+      });
+      this.saveChatMsg(chatMsg);      
+
+    },  
+    getImgData(imgId) {
+
+      var param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_IMG";
+      param.payload = {};
+      param.payload.FilterExpression = "ID = :id";
+      param.payload.ExpressionAttributeValues = {};
+      var key = ":id";
+
+      param.payload.ExpressionAttributeValues[key] = imgId;
+
+      axios({
+        method: 'POST',
+        url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        data: param
+      })
+      .then((result) => {
+        console.log("======= Image Data result ========");
+        console.log(result.data);
+
+        return result.data.Items[0].IMG;
+      });        
+      return "";
     }
   },
   mounted() {
@@ -480,6 +652,7 @@ export default {
   background-color: #696565;
   position: fixed;
   box-shadow: 0 2px 3px rgba(0, 0, 0, .33);
+  z-index: 100;
 }
 .Chating-headerBar .headerBar-Back {
   flex: 10%;

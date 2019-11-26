@@ -4,17 +4,24 @@
       <div v-for="(msg,index) in msgs" v-bind:key="index" class="chatitem">
           <div v-if="msg.msgData.from.name === UserInfo.BsnID">
             <div class="Chating-me">
-                <div class="Chating-me-contents">
+                <div class="Chating-me-contents" v-if="msg.msgData.imgId === undefined">
                     {{msg.msgData.msg}}
                 </div>
+                <div class="Chating-me-contents" v-if="msg.msgData.imgId !== undefined">
+                    <v-img class="grey lighten-3"  v-bind:src="msg.msgData.img" max-width="200px"></v-img>
+                </div>                
             </div>
           </div>
           <div v-else>
             <div class="Chating-dealer">
-            <div class="Chating-icon"> <img src="@/assets/user-icon.png"> </div>
-            <div class="Chating-dealer-contents">
-                {{msg.msgData.msg}}                
-            </div>
+              <div class="Chating-icon"> <img src="@/assets/user-icon.png"> </div>
+              <div class="Chating-dealer-contents" v-if="msg.msgData.imgId === undefined">
+                  {{msg.msgData.msg}}
+              </div>
+              <div class="Chating-dealer-contents" v-if="msg.msgData.imgId !== undefined">
+                  <v-img class="grey lighten-3"  v-bind:src="msg.msgData.img" max-width="200px"></v-img>
+              </div> 
+
             </div>
           </div>
       </div>
@@ -28,11 +35,11 @@ export default {
   props: ['msgs'],
   
   updated() {
-    console.log("Update msg : ", JSON.stringify(this.msgs));
+    //console.log("Update msg : ", JSON.stringify(this.msgs));
   },
   created : function() {
-    console.log("Check msg : ", JSON.stringify(this.msgs));
-    console.log(this.$store.state.UserInfo.BsnID);
+    //console.log("Check msg : ", JSON.stringify(this.msgs));
+    //console.log(this.$store.state.UserInfo.BsnID);
     
   },
  computed: {
