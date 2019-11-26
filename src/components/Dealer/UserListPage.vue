@@ -120,7 +120,7 @@ export default {
 
         if(Array.isArray(result.data.Items)) {
           result.data.Items.sort(function(a, b){
-            return (a.ReqDt < b.ReqDt) ? 1 : -1;
+            return (a.ReqSeq < b.ReqSeq) ? 1 : -1;
           });
         }
 
@@ -132,10 +132,10 @@ export default {
         
       });
     },
-    SetQTInfo(itme , idx)
+    SetQTInfo(item , idx)
     {
-       this.$emit('setQtInfo' ,itme);
-       this.$EventBus.$emit('click-qtInfo' , itme)
+       this.$emit('setQtInfo' ,item);
+       this.$EventBus.$emit('click-qtInfo' , item)
        this.qtItemIndex = idx;
        this.qtReqList[idx].isRead = true;
     },

@@ -204,13 +204,13 @@
                       <b-row  class="history-carType">
                         {{qtInfo.AGENT_NM}}
                       </b-row>
-                    </b-col>
+                    </b-col>                    
                     <b-col align-self="center" class="history-detailBtn">
                       <b-button block href="#"  v-b-toggle="'accordion-' + idx"  variant="secondary" size="sm" v-on:click="GetQtList(qtInfo)">
                         <i v-if="!SOList1Toggle" class="fas fa-chevron-down"></i>
                         <i v-if="SOList1Toggle"  class="fas fa-chevron-up"></i>
                       </b-button>
-                    </b-col>
+                    </b-col>              
                   </b-row>
                 </b-container>
               </b-card-header>
@@ -229,10 +229,10 @@
                       </li>
                     </ul>
                     <div class="QTRes-footer">
-                        <div class="TotalInfo">
-                          <span class="TotalInfo-Title">합계금액</span>
-                          <span class="TotalInfo-Text">{{total | localeNum}}</span>
-                        </div>
+                      <div class="TotalInfo">
+                        <span class="TotalInfo-Title">합계금액</span>
+                        <span class="TotalInfo-Text">{{total | localeNum}}</span>
+                      </div>
                     </div>
                     <!--
                     <div class="detailConts-compare">
@@ -825,7 +825,7 @@ export default {
       })
       .then((result) => {
           console.log("======= ROHistory Return result ========");     
-          console.log(result.data); 
+          console.log( JSON.stringify(result.data)); 
          
           this.rtnCode = result.data.ReturnCode;
 
@@ -839,7 +839,7 @@ export default {
               if(headQTData[0].ESTM_STS !== '1' && rtnQTData['ESTM_DTL'].Length !== 0)
               {
                 this.detailQTData = rtnQTData['ESTM_DTL'];
-                console.log(this.detailQTData);
+                console.log("ESTM_DTL : " , this.detailQTData);
               }
 
             }
@@ -986,8 +986,9 @@ export default {
 .history-detailConts {
   background-color: #f9f9f9;
   margin: -20px;
-  padding: 10px;
+  padding: 20px;
 }
+
 .history-detailConts ul {
   list-style-type: none;
   padding-left: 0px;
@@ -1010,12 +1011,15 @@ export default {
 }
 .history-detailBtn {
   flex:15%;
-  text-align: right;
+  text-align: right; 
+  /*background-color: #E50914;*/
+  padding: 1px;
+  width: 60px;
 }
-
+/*
 .history-detailConts {
   padding: 20px;
-}
+}*/
 .history-detailConts li {
   display: flex;
   align-items:center;
