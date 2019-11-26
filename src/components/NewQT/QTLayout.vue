@@ -264,7 +264,7 @@ import QTConfirm from '@/components/NewQT/QTConfirm.vue'
 import QTCamera from '@/components/NewQT/QTCamera.vue'
 import ROHistory from '@/components/NewQT/ROHistory.vue'
 import MessageBox from '@/components/Common/MessageBox.vue'
-import {datePadding, convertStringToDynamo} from '@/utils/common.js'
+import {datePadding, convertStringToDynamo, convertArrayToDynamo} from '@/utils/common.js'
 
 export default {
 name: 'QTStep',
@@ -686,8 +686,8 @@ name: 'QTStep',
             headers:{
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
-            },
-            data: param
+        },
+        data: param
         })
         .then((result) => {
           console.log("======= SaveQTData result ========");
@@ -710,12 +710,15 @@ name: 'QTStep',
               param.payload.Item.CarNo = convertStringToDynamo(this.CarInfo.CarNo);
               param.payload.Item.CarVin = convertStringToDynamo(this.CarInfo.VinNo);
               param.payload.Item.ReqDt = now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);
-              param.payload.Item.ReqSite = this.UserInfo.BsnID;
-              param.payload.Item.ReqName = this.UserInfo.Name;
+              param.payload.Item.ReqSite = convertStringToDynamo(this.UserInfo.BsnID);
+              param.payload.Item.ReqName = convertStringToDynamo(this.UserInfo.Name);
               param.payload.Item.ReqSeq = key;
               param.payload.Item.ResDealer = "PARTS";
               param.payload.Item.Memo = convertStringToDynamo(this.qtReqMemo);
-              param.payload.Item.LineItem = JSON.stringify(this.qtRequest);
+              //param.payload.Item.LineItem = JSON.stringify(this.qtRequest);
+              param.payload.Item.LineItem = convertArrayToDynamo(JSON.stringify(this.qtRequest));
+
+              console.log(JSON.stringify(param));
 
               axios({
                   method: 'POST',
@@ -723,8 +726,8 @@ name: 'QTStep',
                   headers:{
                       'Accept': 'application/json',
                       'Content-Type': 'application/json'
-                  },
-                  data: param
+              },
+              data: param
               })
               .then((result) => {
                 console.log("======= Data Save result ========");
@@ -806,6 +809,14 @@ name: 'QTStep',
         }
 
         if(this.UserInfo.BsnID === undefined || this.UserInfo.BsnID === null || this.UserInfo.BsnID.length === 0 )
+        {
+          this.alertMsg = "사이트 정보가 없습니다.\n다시 로그인 해주세요."
+          this.showAlertMsg = !this.showAlertMsg;
+          this.alertMsgPath = "Login";
+          return false;
+        }
+        
+        if(this.UserInfo.Name === undefined || this.UserInfo.Name === null || this.UserInfo.Name.length === 0 )
         {
           this.alertMsg = "사이트 정보가 없습니다.\n다시 로그인 해주세요."
           this.showAlertMsg = !this.showAlertMsg;

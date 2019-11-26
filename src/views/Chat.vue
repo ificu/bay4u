@@ -352,7 +352,7 @@ export default {
         {
           result.data.Items.sort(function(a, b){
             //return (a.ID.substring(a.ID.length,a.ID.length -12) > b.ID.substring(b.ID.length,b.ID.length -12)) ? 1 : -1;
-            return (a.ReqTm> b.ReqTm) ? 1 : -1;
+            return (a.ReqTm > b.ReqTm) ? 1 : -1;
           });
         }
 

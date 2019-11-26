@@ -222,9 +222,12 @@
                         <div class="detailConts-dealer">대영 모터스</div>
                       </li>-->
                       <li  v-for="(item, index) in detailQTData" v-bind:key = "index">
-                        <div class="itemCode" > {{item.CONFIRM_ITM}}</div>
-                        <div class="itemName">{{item.NM_ITM}}</div>
-                        <div class="detailConts-amount">{{item.AMT | localeNum}}원</div>
+                        <div>
+                          <div class="itemCode" > {{item.CONFIRM_ITM}}</div>
+                          <div class="itemName">{{item.NM_ITM}}</div>
+                        </div>
+                        <div v-if="item.AMT === 0" class="detailConts-amount">{{ item.AMT }}원</div>
+                        <div v-if="item.AMT !== 0" class="detailConts-amount">{{ item.AMT | localeNum}}원</div>
                         <div class="delvDay">{{item.DELV_DAY}}</div>
                       </li>
                     </ul>
@@ -1043,7 +1046,8 @@ export default {
   font-size: 0.8rem;
   font-weight: bold;
   text-align: right;
-  color: #ff9999;
+ /* color: #ff9999;*/
+  color: #EA4335;
 }
 .detailConts-status {
   flex: 10%;
@@ -1142,9 +1146,9 @@ export default {
 
 .history-detailConts .itemCode {
   flex: 30%;
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   font-weight: bold;
-  color: #EA4335;
+  color: #0D47A1;
 }
 .history-detailConts .delvDay {
   flex: 10%;
