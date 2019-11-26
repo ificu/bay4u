@@ -406,7 +406,7 @@ name: 'QTStep',
             for (var text of img.textAnnotations) {
               if(text.description.length == 16 || text.description.length == 17) {
                 // 이 것을 차대번호로 인지
-                console.log("VIN : ", JSON.stringfy(text));
+                console.log("VIN : ", JSON.stringify(text));
                 this.CarInfo.VinNo = text.description.replace("I", "1").replace("O", "0").replace("g", "9");
               }
             }
@@ -438,15 +438,18 @@ name: 'QTStep',
           data: param
         })
         .then((result) => {
-          console.log("======= checkCarVin result ========");
-          console.log(result.data);
-          if(result.data.Count > 0) {
-            this.CarInfo.VinNo = result.data.Items[0].VIN;
-            this.$cookies.set('VinNo', this.CarInfo.VinNo, '600s');
-          }
-          else {
-            this.CarInfo.VinNo = "";
-            this.showVINSearchAgreePopup = true;
+          // 차대번호가 있는데 괜히 덮어 씌어지지 않게 처리
+          if(this.CarInfo.VinNo === "") {
+            console.log("======= checkCarVin result ========");
+            console.log(result.data);
+            if(result.data.Count > 0) {
+              this.CarInfo.VinNo = result.data.Items[0].VIN;
+              this.$cookies.set('VinNo', this.CarInfo.VinNo, '600s');
+            }
+            else {
+              this.CarInfo.VinNo = "";
+              this.showVINSearchAgreePopup = true;
+            }
           }
         });
       },
@@ -510,9 +513,11 @@ name: 'QTStep',
           console.log("======= Aibril API result ========");
           console.log(result.data);
           for (var img of result.data.results) {
-            console.log("CarNo : ", img.carNo);
-            this.CarInfo.CarNo = img.carNo;
-            this.checkWebPOSHist();
+            if(img.carNo.length > 4) {
+              console.log("CarNo : ", img.carNo);
+              this.CarInfo.CarNo = img.carNo;
+              this.checkWebPOSHist();
+            }
           }
         }).catch((error) => {
           console.log(error);
@@ -520,6 +525,9 @@ name: 'QTStep',
       },
       // WebPOS에 과거 정비내역이 있는지 체크
       checkWebPOSHist(){
+
+        if(this.CarInfo.CarNo === '' || this.CarInfo.CarNo === null || this.CarInfo.CarNo === undefined) return;
+
         var param = {};
         param.BsnId = this.UserInfo.BsnID;
         param.CarNo = this.CarInfo.CarNo;
