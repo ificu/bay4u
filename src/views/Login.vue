@@ -19,7 +19,7 @@
         </v-alert>        
       <div class="login-pannel-form">        
         <b-form-input v-model="id" placeholder="이메일 또는 전화번호"></b-form-input>
-        <b-form-input type ="password" v-model="pwd" placeholder="비밀번호"></b-form-input>
+        <b-form-input type ="password" v-model="pwd" placeholder="비밀번호" v-on:keypress.enter="loginPathTo"></b-form-input>
         <div class="login-pannel-form-button" @click="loginPathTo()">
           로그인
         </div>      
@@ -109,14 +109,16 @@ export default {
             this.loginAlert = true;   
           }
           else if(type === "SITE") {
-            this.$cookies.set('BsnID', siteCode);
+            this.$cookies.set('BsnID', siteCode, '6000s');
+            this.$cookies.set('UserNM', name, '6000s');
             this.$router.push('/NewQT');
             this.UserInfo.UserID = id;
             this.UserInfo.BsnID = siteCode;
             this.UserInfo.Name = name;
           }
           else {
-            this.$cookies.set('BsnID', siteCode);
+            this.$cookies.set('BsnID', siteCode, '60000s');
+            this.$cookies.set('UserNM', name, '60000s');
             this.$router.push('/MainPage');
             this.UserInfo.UserID = id;
             this.UserInfo.BsnID = siteCode;
@@ -133,6 +135,7 @@ export default {
     }
   },
   created : function() {
+    /*
     Notification.requestPermission(function(result) {
       if(result === 'granted') {
         navigator.serviceWorker.ready
@@ -140,7 +143,7 @@ export default {
             //swreg.showNotification('Notice OK', {body:'OOOOKKKK'});
           });
       }
-    });
+    });*/
 
     
   }

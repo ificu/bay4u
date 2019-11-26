@@ -103,8 +103,6 @@ export default {
       param.payload.FilterExpression = "ResDealer = :id";
       param.payload.ExpressionAttributeValues = {};
       var key = ":id";
-      if(this.UserInfo.BsnID === "")
-        this.UserInfo.BsnID = "PARTS";
       param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
 
       axios({
@@ -154,13 +152,66 @@ export default {
   created : function() {
     if(this.UserInfo.BsnID === '')
       this.UserInfo.BsnID = this.$cookies.get('BsnID');
+    if(this.UserInfo.Name === '')
+      this.UserInfo.Name = this.$cookies.get('UserNM');
+
 
     this.$EventBus.$on('update-chatMsg', docId => {  
+      var checkExist = false;
+
       for (var chat of this.qtReqList) {
         if(chat.ID === docId) {
           chat.isRead = false;
+          checkExist = true;
         }
       }
+
+      // 값이 true가 아니면 현재 리스트에 없다는 의미으로 다시 조회해 와서 표시 하자.
+      if(checkExist === false) {
+
+        var param = {};
+        param.operation = "list";
+        param.tableName = "BAY4U_QT_LIST";
+        param.payload = {};
+        param.payload.FilterExpression = "ResDealer = :id";
+        param.payload.ExpressionAttributeValues = {};
+        var key = ":id";
+        param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
+
+        axios({
+          method: 'POST',
+          url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          data: param
+        })
+        .then((result) => {
+          console.log("======= QT List result ========");
+          console.log(result.data);
+
+          if(Array.isArray(result.data.Items)) {
+            result.data.Items.sort(function(a, b){
+              return (a.ReqDt < b.ReqDt) ? 1 : -1;
+            });
+          }
+
+          for (var chat of result.data.Items) {
+            chat.isRead = true;
+          }
+
+          this.qtReqList = result.data.Items;
+
+          for (var chat of this.qtReqList) {
+            if(chat.ID === docId) {
+              chat.isRead = false;
+            }
+          }          
+          
+        });
+      }
+
     });      
   },    
   computed:{

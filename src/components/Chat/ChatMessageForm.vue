@@ -1,21 +1,24 @@
 <template>
-    <div class="Chating-inputArea">
-        <input 
-            v-model = "msg"
-            @keyup.13="submitMessageFunc"
-            type="text" class="inputArea-inputBox" />
-        <span type="button" class="inputArea-send">
-            <i class="fab fa-telegram" @click="submitMessageFunc"></i>
-        </span>
-    </div>    
+  <div class="Chating-inputArea">
+      <input 
+          v-model = "msg"
+          @keyup.13="submitMessageFunc"
+          type="text" class="inputArea-inputBox" />
+      <span type="button" class="inputArea-send">
+          <i class="far fa-images" @click="showImageModal"></i>&nbsp;
+          <i class="fab fa-telegram" @click="submitMessageFunc"></i>
+      </span>
+  </div>    
 </template>
 
 <script>
+
 export default {
   name: 'MessageForm',
   data() {
     return {
       msg: '',
+      showQTCamera: true,
     };
   },
   methods: {
@@ -25,6 +28,10 @@ export default {
       this.msg = '';
       return true;
     },
+    showImageModal(){
+      this.$emit('showImageModal', this.showQTCamera);
+    },
+   
   },
 };
 </script>
@@ -66,7 +73,7 @@ export default {
   outline: none;
 }
 .Chating-inputArea .inputArea-send {
-  flex: 15%;
+  flex: 23%;
   align-self: center;
   text-align: center;
   color: #ff9999;

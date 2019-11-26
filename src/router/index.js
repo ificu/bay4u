@@ -4,6 +4,7 @@ import VueRouter from 'vue-router'
 import Login from '@/views/Login'
 import NewQT from '@/views/NewQT'
 import NewNewQT from '@/views/NewNewQT'
+import NewNewNewQT from '@/views/NewNewNewQT'
 import Chat from '@/views/Chat'
 import QTList from '@/views/QTList'
 import UserInfo from '@/views/UserInfo'
@@ -23,9 +24,14 @@ const routes = [
     component: NewQT
   },
   {
+    path: '/NewQTOldOld',
+    name: 'NewQTOldOld',
+    component: NewNewQT
+  },
+  {
     path: '/NewQT',
     name: 'NewQT',
-    component: NewNewQT
+    component: NewNewNewQT
   },
   {
     path: '/Chat',

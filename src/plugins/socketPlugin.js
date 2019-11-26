@@ -17,6 +17,7 @@ const SocketPlugin = {
         name: $payload.name,
         recv: $payload.recv,
         chatId: $payload.chatId,
+        imgId: $payload.imgId,
       });
     };
 

@@ -134,7 +134,7 @@ export default {
                     navigator.mediaDevices.enumerateDevices()
                         .then(function(devices) {
                             devices.forEach(function(device) {
-                                alert(JSON.stringify(device));
+                                //alert(JSON.stringify(device));
                                 //if(device.kind === "videoinput" && device.label.match("camera2 4")){
                                 if(device.kind === "videoinput" && device.label.match("facing back")){
                                     var option = {
