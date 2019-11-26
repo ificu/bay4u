@@ -24,6 +24,10 @@ export function convertStringToDynamo(str) {
 
     return str;
 }
+export function convertArrayToDynamo(arr) {
+    var str = arr.replace(/\s/gi, "*empty*");     
+    return str;
+}
 export function convertDynamoToString(str) {
     return str.replace("*empty*", "");
 }

@@ -133,7 +133,8 @@
                       <v-icon>keyboard_arrow_down</v-icon>
                     </v-btn>
                     <div class="qtyInput">
-                      <v-text-field  v-model.number="qtItem.ITM_QTY" type="number" ></v-text-field>
+                      <!--<v-text-field  v-model.number="qtItem.ITM_QTY" type="number" ></v-text-field>-->
+                      <input type="number"  v-model.number="qtItem.ITM_QTY" >
                     </div>
                     <!--<v-btn text small min-width="10px" max-width="15px">
                       {{qtItem.ITM_QTY}}
@@ -161,15 +162,18 @@
                     <v-icon>keyboard_arrow_down</v-icon>
                   </v-btn>
                   <div class="qtyInput">
-                    <v-text-field  type="number" v-model="tempItem.ITM_QTY"></v-text-field>
+                    <!--<v-text-field  type="number" v-model="tempItem.ITM_QTY"></v-text-field>-->
+                    <input type="number"  v-model.number="tempItem.ITM_QTY" >
                   </div>
                   <v-btn text icon small @click="addCounter()">
                     <v-icon>keyboard_arrow_up</v-icon>
                   </v-btn>
                 </v-card>  
+                <v-btn class="mx-2 " fab dark color="indigo" x-small @click="addNewItem(tempItem)"><v-icon dark>mdi-plus</v-icon></v-btn>
             </div>
-            
-            <div class="text-right mb-2 mt-6" ><v-btn small  color="indigo" outlined @click="addNewItem(tempItem)">기타부품추가</v-btn></div>
+            <div class="text-right mb-2 mt-6" >
+              <!--<v-btn small  color="indigo" outlined @click="addNewItem(tempItem)">기타부품추가</v-btn>-->
+            </div>
           </v-list>
           <v-btn color="primary" @click="e6 = 4">Continue</v-btn>
           <v-btn text @click="e6 = 2">Back</v-btn>
@@ -263,7 +267,7 @@ import QTConfirm from '@/components/NewQT/QTConfirm.vue'
 import QTCamera from '@/components/NewQT/QTCamera.vue'
 import ROHistory from '@/components/NewQT/ROHistory.vue'
 import MessageBox from '@/components/Common/MessageBox.vue'
-import {datePadding, convertStringToDynamo} from '@/utils/common.js'
+import {datePadding, convertStringToDynamo, convertArrayToDynamo} from '@/utils/common.js'
 
 export default {
 name: 'QTStep',
@@ -305,12 +309,12 @@ name: 'QTStep',
       alertMsgPath: "",
       alertYesNo: false,
       tempItem:{                        // 기타부품 추가
-        ITM_ICON:"",
+        ITM_ICON:" ",
         ITM_QTY:1,
-        GRP_ID:"",
-        ITM_NM:"",
-        ITM_VAL:"",
-        GRP_NM:"",
+        GRP_ID:" ",
+        ITM_NM:" ",
+        ITM_VAL:" ",
+        GRP_NM:" ",
         SEQ:0
       }
     }
@@ -569,28 +573,28 @@ name: 'QTStep',
       },
       addNewItem(item) {
         
-        if(item.ITM_VAL === "")
+        if(item.ITM_VAL === " ")
         {
             var tempItem = {};
-            tempItem.ITM_ICON = "";
+            tempItem.ITM_ICON = " ";
             tempItem.ITM_QTY = item.ITM_QTY;
-            tempItem.GRP_ID = "";
-            if(item.ITM_NM === ""){
+            tempItem.GRP_ID = " ";
+            if(item.ITM_NM === " "){
               tempItem.ITM_NM = "기타부품";
             }
             else{
-                tempItem.ITM_NM = item.ITM_NM;
+              tempItem.ITM_NM = item.ITM_NM;
             }
             
-            tempItem.ITM_VAL = item.ITM_NM + this.qtRequest.length + 1 ;
-            tempItem.GRP_NM = "";
+            tempItem.ITM_VAL = tempItem.ITM_NM + this.qtRequest.length + 1 ;
+            tempItem.GRP_NM = " ";
             tempItem.SEQ =  this.qtRequest.length + 1;
             this.qtRequest.push(tempItem);
             
             // 기타부품 초기화
             item.ITM_QTY = 1;
-            item.ITM_NM = "";
-            item.ITM_VAL = "";
+            item.ITM_NM = " ";
+            item.ITM_VAL = " ";
             item.SEQ = 0;
         }
         else{
@@ -616,7 +620,10 @@ name: 'QTStep',
         console.log('selectedCategory : ' + this.selectedCategory);*/
       },
       addNewQTRequest() {
-        
+
+       //  var str = convertArrayToDynamo(JSON.stringify(this.qtRequest));
+       //  console.log("STR : ", str);
+
         var param = {};
         param.BsnId = this.UserInfo.BsnID;
         param.UserID = this.UserInfo.UserID;
@@ -661,14 +668,15 @@ name: 'QTStep',
               param.payload.Item.CarNo = convertStringToDynamo(this.CarInfo.CarNo);
               param.payload.Item.CarVin = convertStringToDynamo(this.CarInfo.VinNo);
               param.payload.Item.ReqDt = now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);
-              param.payload.Item.ReqSite = this.UserInfo.BsnID;
-              param.payload.Item.ReqName = this.UserInfo.Name;
+              param.payload.Item.ReqSite = convertStringToDynamo(this.UserInfo.BsnID);
+              param.payload.Item.ReqName = convertStringToDynamo(this.UserInfo.Name);
               param.payload.Item.ReqSeq = key;
               param.payload.Item.ResDealer = "PARTS";
               param.payload.Item.Memo = convertStringToDynamo(this.qtReqMemo);
-              param.payload.Item.LineItem = JSON.stringify(this.qtRequest);
+              //param.payload.Item.LineItem = JSON.stringify(this.qtRequest);
+              param.payload.Item.LineItem = convertArrayToDynamo(JSON.stringify(this.qtRequest));
 
-              console.log(param);
+              console.log(JSON.stringify(param));
 
               axios({
                   method: 'POST',
@@ -702,6 +710,7 @@ name: 'QTStep',
         .catch((error) => {
           console.log(error);
         });
+ 
       },
       addCounter: function(idx) {
         if(idx === undefined)
@@ -765,6 +774,14 @@ name: 'QTStep',
           this.alertMsgPath = "Login";
           return false;
         }
+
+        if(this.UserInfo.Name === undefined || this.UserInfo.Name === null || this.UserInfo.Name.length === 0 )
+        {
+          this.alertMsg = "사이트 정보가 없습니다.\n다시 로그인 해주세요."
+          this.showAlertMsg = !this.showAlertMsg;
+          this.alertMsgPath = "Login";
+          return false;
+        }
         /*
         if(this.CarInfo.CarNo === undefined || this.CarInfo.CarNo === null || this.CarInfo.CarNo.length === 0 )
         {
@@ -805,9 +822,8 @@ name: 'QTStep',
            this.CarInfo.VinNo = "99999999999999999";
            this.addNewQTRequest();
            
-           console.log("this.alertYesNo : ", this.alertYesNo);
-           console.log("VinNo : ", this.CarInfo.VinNo);
-           
+           //console.log("this.alertYesNo : ", this.alertYesNo);
+           //console.log("VinNo : ", this.CarInfo.VinNo);
         }
         
         this.showAlertMsg = false;
@@ -1108,14 +1124,12 @@ name: 'QTStep',
 .custom-control {
   margin-bottom: 20px;
 }
-
 .qtyInput{
   background-color: #ddd;
   height: 20x;
   width: 30px;
   text-align: right;
-  border: 1px solid #ddd;
-  
+  border: 1px solid #78909C;
 }
 .qtyInput .v-input{
   /*background-color: gold;*/
@@ -1127,6 +1141,13 @@ name: 'QTStep',
   padding-left: 2px;
   bottom:10px;
   float: right; 
+}
+.qtyInput input{
+  background-color: inherit;
+  width: 26px;
+  height:  30px;
+  padding: 0;
+  font-size:0.9rem;
 }
 .tempItems{
   display:list-item;
