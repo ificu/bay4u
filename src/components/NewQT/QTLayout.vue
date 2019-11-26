@@ -154,6 +154,27 @@
           </v-list-item-action>  
         </v-list-item>
         <v-divider></v-divider>
+
+        <!-- 기타부품 추가 -->            
+        <div class="tempItems">
+            <v-text-field label="기타부품"  outlined dense color="success" class="tempItem" v-model="tempItem.ITM_NM"></v-text-field>
+            <v-card class="d-flex flex-row-reverse" flat  tile dense>
+              <v-btn text icon small @click="subCounter()">
+                <v-icon>keyboard_arrow_down</v-icon>
+              </v-btn>
+              <div class="qtyInput">
+                <!--<v-text-field  type="number" v-model="tempItem.ITM_QTY"></v-text-field>-->
+                <input type="number"  v-model.number="tempItem.ITM_QTY" >
+              </div>
+              <v-btn text icon small @click="addCounter()">
+                <v-icon>keyboard_arrow_up</v-icon>
+              </v-btn>
+            </v-card>  
+            <v-btn class="mx-2 " fab color="success" x-small @click="addNewItem(tempItem)"><v-icon dark>mdi-plus</v-icon></v-btn>
+        </div>   
+        <div class="text-right mb-2 mt-6" >
+          <!--<v-btn small  color="indigo" outlined @click="addNewItem(tempItem)">기타부품추가</v-btn>-->
+        </div>
         <div class="text-center mt-2 mb-4">
           <b-button v-on:click="showQTConfirmModal" block class = "red lighten-3">최종 견적 요청</b-button>
         </div>      
@@ -284,7 +305,16 @@ name: 'QTStep',
       alertMsg: "",
       alertMsgPath: "",
       alertYesNo: false,
-      imgCaptureType: ""
+      imgCaptureType: "",
+      tempItem:{                        // 기타부품 추가
+        ITM_ICON:" ",
+        ITM_QTY:1,
+        GRP_ID:" ",
+        ITM_NM:" ",
+        ITM_VAL:" ",
+        GRP_NM:" ",
+        SEQ:0
+      }
     }
   },
   methods: {
@@ -587,14 +617,42 @@ name: 'QTStep',
         this.showItemCategory = !this.showItemCategory;
       },
       addNewItem(item) {
-        if(this.selectedCategory.indexOf(item.ITM_VAL) === -1) { // 새로 추가된 경우
+
+        if(item.ITM_VAL === " ")
+        {
+            var tempItem = {};
+            tempItem.ITM_ICON = " ";
+            tempItem.ITM_QTY = item.ITM_QTY;
+            tempItem.GRP_ID = " ";
+            if(item.ITM_NM === " "){
+              tempItem.ITM_NM = "기타부품";
+            }
+            else{
+              tempItem.ITM_NM = item.ITM_NM;
+            }
+            
+            tempItem.ITM_VAL = tempItem.ITM_NM + this.qtRequest.length + 1 ;
+            tempItem.GRP_NM = " ";
+            tempItem.SEQ =  this.qtRequest.length + 1;
+            this.qtRequest.push(tempItem);
+            
+            // 기타부품 초기화
+            item.ITM_QTY = 1;
+            item.ITM_NM = " ";
+            item.ITM_VAL = " ";
+            item.SEQ = 0;
+        }
+        else{
+
+          if(this.selectedCategory.indexOf(item.ITM_VAL) === -1) { // 새로 추가된 경우
             item.SEQ = this.qtRequest.length + 1;
             this.qtRequest.push(item);
+          }
+          else { // 체크 해제 한 경우
+            this.qtRequest = this.qtRequest.filter(it => it.ITM_VAL != item.ITM_VAL);
+          }
         }
-        else { // 체크 해제 한 경우
-          this.qtRequest = this.qtRequest.filter(it => it.ITM_VAL != item.ITM_VAL);
-        }
-        /*console.log(Array.isArray(this.requests));*/
+         /*console.log(Array.isArray(this.requests));*/
         console.log('qtRequest : ' + JSON.stringify(this.qtRequest));
       },
       removeItem(item) {
@@ -693,14 +751,32 @@ name: 'QTStep',
         });
       },
       addCounter: function(idx) {
-         this.qtRequest[idx].ITM_QTY++;
+        if(idx === undefined)
+        {
+           this.tempItem.ITM_QTY++;
+        }
+        else{
+          this.qtRequest[idx].ITM_QTY++;
+        }
       },
       subCounter: function(idx) {
-         this.qtRequest[idx].ITM_QTY--;
-         if( this.qtRequest[idx].ITM_QTY < 0)
-         {
-            this.qtRequest[idx].ITM_QTY = 0;
-         }
+
+        if(idx === undefined)
+        {
+          this.tempItem.ITM_QTY--;
+          if( this.tempItem.ITM_QTY < 0)
+          {
+            this.tempItem.ITM_QTY = 0;
+          }
+        }
+        else
+        {
+          this.qtRequest[idx].ITM_QTY--;
+          if( this.qtRequest[idx].ITM_QTY < 0)
+          {
+              this.qtRequest[idx].ITM_QTY = 0;
+          }
+        }
       },
       checkQtData()
       {
@@ -1083,11 +1159,11 @@ name: 'QTStep',
 }
 
 .qtyInput{
-  /*background-color: #ddd;*/
+  background-color: #ddd;
   height: 20x;
   width: 30px;
   text-align: right;
-  border: 1px solid #ddd;
+  border: 1px solid #78909C;
 }
 .qtyInput .v-input{
   /*background-color: gold;*/
@@ -1099,6 +1175,23 @@ name: 'QTStep',
   padding-left: 2px;
   bottom:10px;
   float: right; 
+}
+.qtyInput input{
+  background-color: inherit;
+  width: 26px;
+  height:  30px;
+  padding: 0;
+  font-size:0.9rem;
+}
+.tempItems{
+  display:list-item;
+  /*height:  20px;*/
+  display: flex;
+}
+.tempItems .tempItem{
+  height:  20px;
+  width: 150px;
+
 }
 
 </style>
