@@ -54,7 +54,7 @@
 .msg-modal-header{
     padding: 5px 10px;
     border-radius: 5px 5px 0px 0px;
-    background-color: #343148;
+    background-color: #696565;
     display:flex;
 }
 .msg-modal-header :nth-child(1){

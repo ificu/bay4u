@@ -268,6 +268,7 @@ export default {
       param.payload.Item.Message = chatMsg.msg;
       param.payload.Item.Status = "0";
       param.payload.Item.ReqTm = key;
+      param.payload.Item.IMG = chatMsg.imgId;
 
       axios({
           method: 'POST',
