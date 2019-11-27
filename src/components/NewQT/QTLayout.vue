@@ -92,16 +92,16 @@
         <!-- 기타부품 추가 -->            
         <div class="tempItems">
             <v-text-field label="기타부품"  outlined dense color="success" class="tempItem ml-4" v-model="tempItem.ITM_NM"></v-text-field>
-            <v-card class="d-flex flex-row-reverse" flat  tile dense>
-              <v-btn text icon small @click="subCounter()">
-                <v-icon>keyboard_arrow_down</v-icon>
+            <v-card class="d-flex flex-row-reverse" flat  tile dense >
+              <v-btn fab dark x-small color="#757575" @click="subCounter()">
+                <v-icon dark>mdi-minus</v-icon>
               </v-btn>
               <div class="qtyInput">
                 <!--<v-text-field  type="number" v-model="tempItem.ITM_QTY"></v-text-field>-->
                 <input type="number"  v-model.number="tempItem.ITM_QTY" >
               </div>
-              <v-btn text icon small @click="addCounter()">
-                <v-icon>keyboard_arrow_up</v-icon>
+              <v-btn fab x-small dark color="#757575" @click="addCounter()">
+                <v-icon dark>mdi-plus</v-icon>
               </v-btn>
             </v-card>  
             <v-btn class="mx-2 " fab color="success" x-small @click="addNewItem(tempItem)">입력</v-btn>
@@ -150,22 +150,29 @@
             <v-list-item-title v-text="qtItem.ITM_NM"></v-list-item-title>
             <v-list-item-subtitle> 
               <v-card
-                  class="d-flex flex-row-reverse"
-                  flat
+                class="d-flex flex-row-reverse"
+                flat
                 tile
                 dense
+                id="reqList"
               >
-                <v-btn text icon small @click="subCounter(index)">
+               <!-- <v-btn text icon small @click="subCounter(index)">
                   <v-icon>keyboard_arrow_down</v-icon>
+                </v-btn>-->
+                <v-btn fab dark x-small color="#757575" @click="subCounter(index)">
+                  <v-icon dark>mdi-minus</v-icon>
                 </v-btn>
                 <div class="qtyInput">
                   <v-text-field  v-model.number="qtItem.ITM_QTY" type="number" ></v-text-field>
                 </div>
                 <!--<v-btn text small min-width="10px" max-width="15px">
                   {{qtItem.ITM_QTY}}
-                </v-btn>-->
+                </v-btn>
                 <v-btn text icon small @click="addCounter(index)">
                   <v-icon>keyboard_arrow_up</v-icon>
+                </v-btn>-->
+                <v-btn fab x-small dark color="#757575" @click="addCounter(index)">
+                  <v-icon dark>mdi-plus</v-icon>
                 </v-btn>
               </v-card>        
 
@@ -1284,7 +1291,32 @@ name: 'QTStep',
 .tempItems .tempItem{
   height:  20px;
   width: 150px;
+}
 
+.tempItems .v-card .v-btn {
+    height: 15px;
+    width: 15px;
+    min-width: 10px;
+    margin: 10px 3px;
+}
+.tempItems .v-card .v-btn .v-icon {
+  height: 10px;
+  width: 10px;
+  min-width: 10px;
+  margin: 0px;
+}
+
+#reqList .v-btn {
+  height: 15px;
+  width: 15px;
+  min-width: 10px;
+  margin: 10px 3px;
+}
+#reqList .v-btn  .v-icon {
+  height: 10px;
+  width: 10px;
+  min-width: 10px;
+  margin: 0px;;
 }
 
 </style>
