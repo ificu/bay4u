@@ -168,7 +168,7 @@ export default {
 
       // 값이 true가 아니면 현재 리스트에 없다는 의미으로 다시 조회해 와서 표시 하자.
       if(checkExist === false) {
-
+        console.log('checkExist : false');
         var param = {};
         param.operation = "list";
         param.tableName = "BAY4U_QT_LIST";
@@ -198,16 +198,15 @@ export default {
           }
 
           for (var chat of result.data.Items) {
-            chat.isRead = true;
-          }
-
-          this.qtReqList = result.data.Items;
-
-          for (var chat of this.qtReqList) {
             if(chat.ID === docId) {
               chat.isRead = false;
+            }            
+            else {
+              chat.isRead = true;
             }
-          }          
+          }
+
+          this.qtReqList = result.data.Items;    
           
         });
       }

@@ -32,6 +32,11 @@
                 <div><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>차대번호</div>
                 <b-form-input v-model="this.qtInfo.CarVin"></b-form-input>
               </div>
+              <div class="CarInfo-Button">
+                <v-btn class="ma-2" outlined fab color="#acd3ce" elevation="5" @click="showQTImage(qtInfo.IMG)">
+                  사진<br>확인
+                </v-btn>             
+              </div>              
             </div>   
             <div class="QTReq-List"><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>견적요청 상세</div>       
             <table class="QTReq-Table mdl-data-table mdl-js-data-table mdl-shadow--2dp">
@@ -320,6 +325,7 @@ export default {
       this.$EventBus.$emit('send-QTConfirm' , qtMsg)
     },
     showQTImage(img) { 
+      console.log("Image : ", img);
       this.showQTImageFlag = true;
       var param = {};
       param.operation = "list";
@@ -448,7 +454,7 @@ export default {
   display: flex;
 }
 .Car-Info .CarInfo-Left {
-  flex: 40%;
+  flex: 30%;
   font-weight: bold;
   color: #5d4038;
   margin-right: 5px;
@@ -458,6 +464,9 @@ export default {
   flex: 60%;
   font-weight: bold;
   color: #5d4038;
+}
+.Car-Info .CarInfo-Button {
+  flex: 10%;
 }
 .QT-Info {
   display:flex;

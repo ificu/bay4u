@@ -111,6 +111,7 @@ export default {
           else if(type === "SITE") {
             this.$cookies.set('BsnID', siteCode, '6000s');
             this.$cookies.set('UserNM', name, '6000s');
+            this.$cookies.set('UserType', type, '6000s');
             this.$router.push('/NewQT');
             this.UserInfo.UserID = id;
             this.UserInfo.BsnID = siteCode;
@@ -119,6 +120,7 @@ export default {
           else {
             this.$cookies.set('BsnID', siteCode, '60000s');
             this.$cookies.set('UserNM', name, '60000s');
+            this.$cookies.set('UserType', type, '6000s');
             this.$router.push('/MainPage');
             this.UserInfo.UserID = id;
             this.UserInfo.BsnID = siteCode;
@@ -144,6 +146,18 @@ export default {
           });
       }
     });*/
+    // 이미 로그인이 되어서 캐시에 남아있는 상태면 자동 로그인
+    console.log('Cookie Check : ', this.$cookies.get('BsnID'));
+    if(this.$cookies.get('BsnID') !== "" && this.$cookies.get('BsnID') !== null) {
+      var type = this.$cookies.get('UserType');
+
+      if(type === "SITE") {
+        this.$router.push('/NewQT');
+      }
+      else {
+        this.$router.push('/MainPage');
+      }
+    }
 
     
   }

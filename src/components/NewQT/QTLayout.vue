@@ -13,6 +13,7 @@
         </v-btn>
       </div>    
       <div>
+        <div class="text-left pl-6 mb-n9"><v-btn  color="#FFECB3" depressed @click="CarInfoClear()">CLEAR</v-btn></div>
         <div class="text-right mb-2 pr-6"><v-btn  color="#FFECB3" depressed @click="SetDummyCar()">미상차량</v-btn></div>
         <!-- 과거 정비이력 Popup / 차량번호 입력 -->
         <v-dialog v-model="showROHistDialog" transition="dialog-bottom-transition" >
@@ -75,6 +76,7 @@
         <!-- swiper -->
         <swiper  class="NewQT-itemSelect-wiper" :options="swiperOption">
           <swiper-slide><img v-on:click="showItemCategoryModal('1')" src="@/assets/group1.png"></swiper-slide>
+          <swiper-slide><img v-on:click="showItemCategoryModal('9')" src="@/assets/group9.png"></swiper-slide>
           <swiper-slide><img v-on:click="showItemCategoryModal('2')" src="@/assets/group2.png"></swiper-slide>
           <swiper-slide><img v-on:click="showItemCategoryModal('3')" src="@/assets/group3.png"></swiper-slide>
           <swiper-slide><img v-on:click="showItemCategoryModal('4')" src="@/assets/group4.png"></swiper-slide>
@@ -82,13 +84,35 @@
           <swiper-slide><img v-on:click="showItemCategoryModal('6')" src="@/assets/group6.png"></swiper-slide>
           <swiper-slide><img v-on:click="showItemCategoryModal('7')" src="@/assets/group7.png"></swiper-slide>
           <swiper-slide><img v-on:click="showItemCategoryModal('8')" src="@/assets/group8.png"></swiper-slide>
-          <swiper-slide><img v-on:click="showItemCategoryModal('9')" src="@/assets/group9.png"></swiper-slide>
           <swiper-slide></swiper-slide>
           <div class="swiper-pagination" slot="pagination"></div>
         </swiper>
       </div>
+
+        <!-- 기타부품 추가 -->            
+        <div class="tempItems">
+            <v-text-field label="기타부품"  outlined dense color="success" class="tempItem ml-4" v-model="tempItem.ITM_NM"></v-text-field>
+            <v-card class="d-flex flex-row-reverse" flat  tile dense>
+              <v-btn text icon small @click="subCounter()">
+                <v-icon>keyboard_arrow_down</v-icon>
+              </v-btn>
+              <div class="qtyInput">
+                <!--<v-text-field  type="number" v-model="tempItem.ITM_QTY"></v-text-field>-->
+                <input type="number"  v-model.number="tempItem.ITM_QTY" >
+              </div>
+              <v-btn text icon small @click="addCounter()">
+                <v-icon>keyboard_arrow_up</v-icon>
+              </v-btn>
+            </v-card>  
+            <v-btn class="mx-2 " fab color="success" x-small @click="addNewItem(tempItem)">입력</v-btn>
+        </div>   
+        <div class="ml-6 mt-2 mb-2">
+          <small color = "success"># 부품명 입력 후 "입력"버튼을 누르면 추가 됩니다.</small>
+          <!--<v-btn small  color="indigo" outlined @click="addNewItem(tempItem)">기타부품추가</v-btn>-->
+        </div>
+
       <div>
-        <v-textarea outlined class="ml-4 mr-4" color="success" label="기타 메모 입력" auto-grow rows="3" value="" v-model="qtReqMemo"></v-textarea>
+        <v-textarea outlined class="ml-4 mr-4" color="success" label="사진 및 추가 요청사항" auto-grow rows="3" value="" v-model="qtReqMemo"></v-textarea>
       </div>
       <div>
         <v-btn outlined small color="teal accent-4" class="mt-n6 mb-4 mr-4 float-right"  @click="showQTCameraModal(true, 'ITEMIMG')">부품 사진 입력</v-btn>
@@ -154,27 +178,6 @@
           </v-list-item-action>  
         </v-list-item>
         <v-divider></v-divider>
-
-        <!-- 기타부품 추가 -->            
-        <div class="tempItems">
-            <v-text-field label="기타부품"  outlined dense color="success" class="tempItem" v-model="tempItem.ITM_NM"></v-text-field>
-            <v-card class="d-flex flex-row-reverse" flat  tile dense>
-              <v-btn text icon small @click="subCounter()">
-                <v-icon>keyboard_arrow_down</v-icon>
-              </v-btn>
-              <div class="qtyInput">
-                <!--<v-text-field  type="number" v-model="tempItem.ITM_QTY"></v-text-field>-->
-                <input type="number"  v-model.number="tempItem.ITM_QTY" >
-              </div>
-              <v-btn text icon small @click="addCounter()">
-                <v-icon>keyboard_arrow_up</v-icon>
-              </v-btn>
-            </v-card>  
-            <v-btn class="mx-2 " fab color="success" x-small @click="addNewItem(tempItem)"><v-icon dark>mdi-plus</v-icon></v-btn>
-        </div>   
-        <div class="text-right mb-2 mt-6" >
-          <!--<v-btn small  color="indigo" outlined @click="addNewItem(tempItem)">기타부품추가</v-btn>-->
-        </div>
         <div class="text-center mt-2 mb-4">
           <b-button v-on:click="showQTConfirmModal" block class = "red lighten-3">최종 견적 요청</b-button>
         </div>      
@@ -242,14 +245,14 @@
 
     <!-- 알림 메시지 팝업 -->
     <MessageBox v-if="showAlertMsg"  @close="closeMsg(alertMsgPath)">
-      <div slot="header"><h5 >알림</h5><i class="closeModalBtn fas fa-times" @click="closeMsg(alertMsgPath)"></i></div>
+      <div slot="header"><h5 >알림</h5></div>
       <span slot="body" @click="closeMsg(alertMsgPath)"><pre>{{alertMsg}}</pre>
       </span>
       <div slot="footer" v-if="showAlerMsgBtn">
-        <v-btn depressed small color="indigo" dark @click="closeMsg(alertMsgPath)"> 확인</v-btn>
+        <v-btn depressed small color="#967d5f" dark @click="closeMsg(alertMsgPath)"> 확인</v-btn>
       </div>
       <div slot="footer" v-if="showAlerMsgConfirmBtn">
-        <v-btn depressed small color="indigo" dark @click="CheckReqVinNoQT(true)">확인</v-btn>
+        <v-btn depressed small color="#967d5f" dark @click="CheckReqVinNoQT(true)">확인</v-btn>
         <v-btn depressed small color="blue-grey lighten-2"  @click="CheckReqVinNoQT(false)">취소</v-btn>
       </div>
     </MessageBox>
@@ -282,7 +285,7 @@ name: 'QTStep',
       showItemCategory: false,          // 견적 요청 부품 선택 팝업
       showQTConfirm: false,             // 최종 견적 요청 확인 팝업
       showQTCamera: false,              // 카메라 쵤영을 위한 팝업
-      captureImg: "",
+      captureImg: "",                   // 카메라에서 촬영된 차량번호 or 차대번호 이미지
       swiperOption: {
           slidesPerView: 3,
           spaceBetween: 120,
@@ -326,6 +329,8 @@ name: 'QTStep',
         if(this.imgCaptureType === "CARNO") {
           this.captureImg = pic;
           pic = pic.replace("data:image/png;base64,", "");
+          this.CarInfo.CarNo = "이미지 인식 중...";
+          this.CarInfo.VinNo = "이미지 인식 중...";
           this.checkImgVIN(pic);
           this.checkImgCarNo(pic);
         }
@@ -385,7 +390,7 @@ name: 'QTStep',
         var reqType = {};
         reqType.type = "TEXT_DETECTION";
         req.features.push(reqType);
-        param.requests.push(req);
+        param.requests.push(req);    
 
         axios({
           method: 'POST',
@@ -398,16 +403,48 @@ name: 'QTStep',
         }).then((result) => {
           console.log("======= Google API result ========");
           console.log(result.data);
+
+          if(this.CarInfo.VinNo === "이미지 인식 중...") this.CarInfo.VinNo = "";
+
           var textArea;
           var vinNo;
           for (var img of result.data.responses) {
             textArea = img.fullTextAnnotation.pages[0].blocks[0];
             //console.log("Area : ", JSON.stringfy(textArea));
+            var regType = /^[A-Za-z0-9+]*$/; // 영문 또는 숫자만 체크
             for (var text of img.textAnnotations) {
-              if(text.description.length == 16 || text.description.length == 17) {
-                // 이 것을 차대번호로 인지
-                console.log("VIN : ", JSON.stringify(text));
-                this.CarInfo.VinNo = text.description.replace("I", "1").replace("O", "0").replace("g", "9");
+              if(regType.test(text.description)) {
+                if(text.description.length == 17) {
+                  // 이 것을 차대번호로 인지
+                  console.log("VIN-17 : ", JSON.stringify(text));
+                  this.CarInfo.VinNo = text.description.replace(/\I/g, "1").replace(/\O/g, "0").replace(/\g/g, "9").toUpperCase();
+                }
+                if(text.description.length == 16 || text.description.length == 18) {
+                  // 이 것을 차대번호로 인지
+                  this.alertMsg = "차대번호가 인식되었으나\n한자리 정도 오차가 있습니다.\n정확한 차대번호를 확인해 주세요.";
+                  this.showAlertMsg = !this.showAlertMsg;
+                  this.alertMsgPath = "";
+
+                  console.log("VIN-16/18 : ", JSON.stringify(text));
+                  this.CarInfo.VinNo = text.description.replace(/\I/g, "1").replace(/\O/g, "0").replace(/\g/g, "9").toUpperCase();
+                }
+              }
+            }
+
+            // 여전히 인식 안된 경우 두개의 문자열을 연결하여 한번 더 체크해 보자. 
+            if(this.CarInfo.VinNo === "" || this.CarInfo.VinNo === null) {
+              var preCheckedString = "";
+              for (var text of img.textAnnotations) {
+                if(regType.test(text.description)) {
+                  if(preCheckedString !== ""){
+                    var checkString = preCheckedString + text.description.replace(/\I/g, "1").replace(/\O/g, "0").replace(/\g/g, "9").toUpperCase();
+                    if(checkString.length == 17) {
+                      console.log("VIN-pre : ", JSON.stringify(text));
+                      this.CarInfo.VinNo = checkString;
+                    }
+                  }
+                  preCheckedString = text.description.replace(/\I/g, "1").replace(/\O/g, "0").replace(/\g/g, "9").toUpperCase();
+                }
               }
             }
           }
@@ -439,7 +476,7 @@ name: 'QTStep',
         })
         .then((result) => {
           // 차대번호가 있는데 괜히 덮어 씌어지지 않게 처리
-          if(this.CarInfo.VinNo === "") {
+          if(this.CarInfo.VinNo === "" || this.CarInfo.VinNo === null) {
             console.log("======= checkCarVin result ========");
             console.log(result.data);
             if(result.data.Count > 0) {
@@ -512,6 +549,9 @@ name: 'QTStep',
         }).then((result) => {
           console.log("======= Aibril API result ========");
           console.log(result.data);
+
+          if(this.CarInfo.CarNo === "이미지 인식 중...") this.CarInfo.CarNo = "";
+
           for (var img of result.data.results) {
             if(img.carNo.length > 4) {
               console.log("CarNo : ", img.carNo);
@@ -709,6 +749,8 @@ name: 'QTStep',
              var now = new Date();
              var key = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                         + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+             var imgKey = this.UserInfo.BsnID + now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                        + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
 
               param.operation = "create";
               param.tableName = "BAY4U_QT_LIST";
@@ -723,6 +765,7 @@ name: 'QTStep',
               param.payload.Item.ReqSeq = key;
               param.payload.Item.ResDealer = "PARTS";
               param.payload.Item.Memo = convertStringToDynamo(this.qtReqMemo);
+              param.payload.Item.IMG = imgKey;
               //param.payload.Item.LineItem = JSON.stringify(this.qtRequest);
               param.payload.Item.LineItem = convertArrayToDynamo(JSON.stringify(this.qtRequest));
 
@@ -744,6 +787,32 @@ name: 'QTStep',
               .catch((error) => {
                 console.log(error);
               });
+
+              param = {};
+
+              param.operation = "create";
+              param.tableName = "BAY4U_IMG";
+              param.payload = {};
+              param.payload.Item = {};
+              param.payload.Item.ID = imgKey;
+              param.payload.Item.IMG = this.captureImg;
+
+              axios({
+                  method: 'POST',
+                  url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
+                  headers:{
+                      'Accept': 'application/json',
+                      'Content-Type': 'application/json'
+                  },
+                  data: param
+              })
+              .then((result) => {
+                console.log("======= IMG Save result ========");
+                console.log(result.data);
+                })
+              .catch((error) => {
+                console.log(error);
+              });                       
 
               //this.$router.push({name:'Chat', params:{chatid:1}});
               this.$router.push({name:'Chat', 
@@ -789,8 +858,7 @@ name: 'QTStep',
           }
         }
       },
-      checkQtData()
-      {
+      checkQtData() {
 
         if(this.UserInfo === null){
           //alert("로그인 정보가 없습니다. \r 다시 로그인 해주세요.");
@@ -857,15 +925,14 @@ name: 'QTStep',
      */
         this.addNewQTRequest();
       },
-      closeMsg(path){     
+      closeMsg(path) {     
           this.showAlertMsg = false;
           if(path.length > 0 && path == 'Login')
           {
               this.$router.push('/');
           }
       },
-      CheckReqVinNoQT(value)
-      {
+      CheckReqVinNoQT(value) {
         if(value === true)
         {
            this.CarInfo.VinNo = "99999999999999999";
@@ -881,10 +948,17 @@ name: 'QTStep',
         this.alertYesNo = value;
 
       },
-      SetDummyCar()
-      {
+      SetDummyCar() {
         this.CarInfo.VinNo = "99999999999999999";
         this.e6 = 2;
+      },
+      CarInfoClear() {
+        this.CarInfo.CarNo = "";
+        this.CarInfo.VinNo = "";
+        this.showVINSearchBtn = false;
+        this.showROHistBtn = false;
+        this.$cookies.set('CarNo', this.CarInfo.CarNo, '600s');
+        this.$cookies.set('VinNo', this.CarInfo.VinNo, '600s');
       }
     },
     components: {
