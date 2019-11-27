@@ -269,11 +269,12 @@ export default {
       console.log("QT Info 설정" + JSON.stringify(this.qtInfo));  
       this.tabIndex = 0;
       
-      if(this.qtInfo.length > 0 && this.qtInfo.LineItem.length > 0)
+      if(this.qtInfo.LineItem.length > 0)
       {  
         this.qtInfo.CarVin = this.qtInfo.CarVin.replace("*empty*", "");
         this.qtInfo.Memo = this.qtInfo.Memo.replace("*empty*", "");
-        this.qtItems = JSON.parse(this.qtInfo.LineItem);
+       console.log("상세내용 :" , this.qtInfo.LineItem);
+       this.qtItems = JSON.parse(this.qtInfo.LineItem);
       }
       else{
         this.qtInfo.CarVin = "";
