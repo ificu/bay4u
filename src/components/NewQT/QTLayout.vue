@@ -6,7 +6,7 @@
         <v-card-title>1. 차량번호/ 차대번호 촬영 인식</v-card-title>
       </v-app-bar>
       <v-card-subtitle class="pb-0">차량 번호판이나 등록증, 차대번호를 촬영하시면 자동 인식 됩니다.</v-card-subtitle>
-      <v-img class="grey lighten-3 mr-4 ml-4" height="115" v-bind:src="captureImg" ref="picImg"></v-img>
+      <v-img class="grey lighten-3 mr-4 ml-4" height="115" v-bind:src="captureImg" ref="picImg" @click="console.log('log....')"></v-img>
       <div class="text-center mt-2 mb-4">
         <v-btn fab small color="success" @click="showQTCameraModal(true, 'CARNO')">
           <v-icon>fas fa-camera</v-icon>
@@ -595,6 +595,12 @@ name: 'QTStep',
             console.log(result.data); 
             if(result.data.ReturnDataCount > 0) {
               this.showROHistBtn = true;
+              var hisData = JSON.parse(result.data.ReturnDataJSON);
+              this.CarInfo.VinNo = hisData[0].VIN_NO;
+            }
+            else {
+              // 정비이력 조회는 차량번호 입력 or 인식 후 자동 처리 되므로 차대번호 조회도 자동 처리하자...
+              this.checkCarVin();
             }
             
             this.showVINSearchBtn = true;
@@ -602,9 +608,7 @@ name: 'QTStep',
         .catch((error) => {
             console.log(error);
         })
-
-        // 정비이력 조회는 차량번호 입력 or 인식 후 자동 처리 되므로 차대번호 조회도 자동 처리하자...
-        this.checkCarVin();
+        
       },
       showQTConfirmModal() {
         this.dealerList = [];
