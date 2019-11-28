@@ -31,3 +31,7 @@ export function convertArrayToDynamo(arr) {
 export function convertDynamoToString(str) {
     return str.replace("*empty*", "");
 }
+
+export function convertDynamoToArrayString(arr) {
+    return arr.replace(/[*]empty[*]/gi," ");   
+}
