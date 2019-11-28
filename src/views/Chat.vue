@@ -50,13 +50,7 @@
     <div class="Chating-page" v-if="showChatPage">
       <Message-List :msgs="msgDatas" class="msg-list"></Message-List>
     </div>
-    <div class="Chating-input" v-if="showChatPage">
-      <Message-From 
-        v-on:submitMessage="sendMessage" 
-        v-on:showImageModal="cameraShow" 
-        class="msg-form" >
-      </Message-From>
-    </div>
+
     <!-- 카메라 표시 팝업 -->
     <transition>
         <QTCamera 
@@ -68,28 +62,37 @@
     </transition>        
     <!--Footer-->
     <div class="Chat-footer">
-      <router-link to="/NewQT">
-        <span>
-          <i class="far fa-clipboard"></i>
-        </span>
-      </router-link >
-      <router-link to="/Chat">
-        <span class="footer-selected">
-          <i class="fas fa-comment-dots"></i>
-        </span>
-      </router-link >
-      <router-link to="/QTList">
-        <span>
-          <i class="far fa-copy"></i>
-        </span>
-      </router-link >
-      <router-link to="/UserInfo">
-        <span>
-          <i class="far fa-address-card"></i>
-        </span>
-      </router-link >
+      <div class="Chating-input" v-if="showChatPage">
+        <Message-From 
+          v-on:submitMessage="sendMessage" 
+          v-on:showImageModal="cameraShow" 
+          class="msg-form" >
+        </Message-From>
+      </div>      
+      <div  class="Chating-footer">
+        <router-link to="/NewQT">
+          <span>
+            <i class="far fa-clipboard"></i>
+          </span>
+        </router-link >
+        <router-link to="/Chat">
+          <span class="footer-selected">
+            <i class="fas fa-comment-dots"></i>
+          </span>
+        </router-link >
+        <router-link to="/QTList">
+          <span>
+            <i class="far fa-copy"></i>
+          </span>
+        </router-link >
+        <router-link to="/UserInfo">
+          <span>
+            <i class="far fa-address-card"></i>
+          </span>
+        </router-link >
+      </div>
     </div>
-    </div>
+  </div>
 </template>
 
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
@@ -678,11 +681,12 @@ export default {
 .Chating-input {
   z-index: 100;
   position: fixed;
+  bottom: 70px;
   display:flex;
   width: 100%;
-  height: 70px;
+  background: white;
 }
-.Chat-footer {
+.Chating-footer {
   z-index: 100;
   position: fixed;
   display:flex;
@@ -695,14 +699,14 @@ export default {
   background: #eeeeee;
 }
 
-.Chat-footer a {
+.Chating-footer a {
   flex:25%;
   text-align: center;
   color: #848180;
   margin-top: 5px;
 }
 
-.Chat-footer a span i {
+.Chating-footer a span i {
   font-size: 2.5rem;
 }
 
