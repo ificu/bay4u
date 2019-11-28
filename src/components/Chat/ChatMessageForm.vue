@@ -45,7 +45,7 @@ export default {
   /*position: fixed;*/
   display:flex;
   bottom: 70px;
-  width: auto;
+  width: 100%;
   height: 40px;
   border-top: 1px solid #bebebe;
 }
@@ -64,18 +64,20 @@ export default {
 }
 
 .Chating-inputArea .inputArea-inputBox {
-  /*flex: 85%;*/
   border: none;
   padding: 3px;
-  width: 87%;
+  width: 75%;
 }
 .Chating-inputArea input[type=text]:focus {
   outline: none;
 }
 .Chating-inputArea .inputArea-send {
-  flex: 23%;
+
+  position: fixed;
+  right:0;
   align-self: center;
-  text-align: center;
+  text-align: right;
+  padding-right: 4px;
   color: #ff9999;
   font-size: 2rem;
   -webkit-appearance:none;

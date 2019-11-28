@@ -1,7 +1,7 @@
 <template>
   <div class="QTList">
     <b-tabs class="QTList-tab" justified v-model="tabIndex" v-if="showMainPage">
-      <b-tab title="부품 견적서" :title-link-class="linkClass(0)" >
+      <b-tab title="부품 ghltls" :title-link-class="linkClass(0)" >
         <div class="QTList-contents">
           <div class="QTList-title">
             견적 요청 히스토리
