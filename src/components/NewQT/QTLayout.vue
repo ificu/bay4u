@@ -44,13 +44,13 @@
             </v-toolbar>
             <v-card-text>
               <v-container>
-                <ROHistory></ROHistory>
+                <ROHistory :RoHistoryData="roList"></ROHistory>
               </v-container>
             </v-card-text>         
             </v-card>
         </v-dialog>
 
-        <v-text-field label="차대번호" v-model="CarInfo.VinNo" outlined dense color="success"  class="pr-4 pl-4" ></v-text-field>
+        <v-text-field label="차대번호" v-model="CarInfo.VinNo" outlined dense color="success"  class="pr-4 pl-4"  v-on:keypress.enter="checkWebPOSHist"></v-text-field>
         <!--<v-text-field label="차량종류" outlined dense color="success" class="mt-n5"></v-text-field>-->
         <v-btn outlined small color="red darken-1" class="mt-n6 mb-4 mr-4 float-right" v-if="showVINSearchBtn" @click="checkCarVin">차대번호 조회</v-btn>
         <v-btn outlined small color="red darken-1" class="mt-n6 mb-4 mr-1 float-right" v-if="showROHistBtn" @click="showROHistDialog=!showROHistDialog">정비이력</v-btn>
@@ -100,16 +100,16 @@
         <!-- 기타부품 추가 -->            
         <div class="tempItems">
             <v-text-field label="기타부품"  outlined dense color="success" class="tempItem ml-4" v-model="tempItem.ITM_NM"></v-text-field>
-            <v-card class="d-flex flex-row-reverse" flat  tile dense>
-              <v-btn text icon small @click="subCounter()">
-                <v-icon>keyboard_arrow_down</v-icon>
+            <v-card class="d-flex flex-row-reverse" flat  tile dense >
+              <v-btn fab dark x-small color="#757575" @click="subCounter()">
+                <v-icon dark>mdi-minus</v-icon>
               </v-btn>
               <div class="qtyInput">
                 <!--<v-text-field  type="number" v-model="tempItem.ITM_QTY"></v-text-field>-->
                 <input type="number"  v-model.number="tempItem.ITM_QTY" >
               </div>
-              <v-btn text icon small @click="addCounter()">
-                <v-icon>keyboard_arrow_up</v-icon>
+              <v-btn fab x-small dark color="#757575" @click="addCounter()">
+                <v-icon dark>mdi-plus</v-icon>
               </v-btn>
             </v-card>  
             <v-btn class="mx-2 " fab color="success" x-small @click="addNewItem(tempItem)">입력</v-btn>
@@ -158,22 +158,29 @@
             <v-list-item-title v-text="qtItem.ITM_NM"></v-list-item-title>
             <v-list-item-subtitle> 
               <v-card
-                  class="d-flex flex-row-reverse"
-                  flat
+                class="d-flex flex-row-reverse"
+                flat
                 tile
                 dense
+                id="reqList"
               >
-                <v-btn text icon small @click="subCounter(index)">
+               <!-- <v-btn text icon small @click="subCounter(index)">
                   <v-icon>keyboard_arrow_down</v-icon>
+                </v-btn>-->
+                <v-btn fab dark x-small color="#757575" @click="subCounter(index)">
+                  <v-icon dark>mdi-minus</v-icon>
                 </v-btn>
                 <div class="qtyInput">
                   <v-text-field  v-model.number="qtItem.ITM_QTY" type="number" ></v-text-field>
                 </div>
                 <!--<v-btn text small min-width="10px" max-width="15px">
                   {{qtItem.ITM_QTY}}
-                </v-btn>-->
+                </v-btn>
                 <v-btn text icon small @click="addCounter(index)">
                   <v-icon>keyboard_arrow_up</v-icon>
+                </v-btn>-->
+                <v-btn fab x-small dark color="#757575" @click="addCounter(index)">
+                  <v-icon dark>mdi-plus</v-icon>
                 </v-btn>
               </v-card>        
 
@@ -327,7 +334,8 @@ name: 'QTStep',
         ITM_VAL:" ",
         GRP_NM:" ",
         SEQ:0
-      }
+      },
+      roList: [],
     }
   },
   methods: {
@@ -575,12 +583,13 @@ name: 'QTStep',
       },
       // WebPOS에 과거 정비내역이 있는지 체크
       checkWebPOSHist(){
-
-        if(this.CarInfo.CarNo === '' || this.CarInfo.CarNo === null || this.CarInfo.CarNo === undefined) return;
-
+        if((this.CarInfo.CarNo === '' || this.CarInfo.CarNo === null || this.CarInfo.CarNo === undefined) &&
+            (this.CarInfo.VinNo === '' || this.CarInfo.VinNo === null || this.CarInfo.VinNo === undefined)) 
+        return;
         var param = {};
         param.BsnId = this.UserInfo.BsnID;
         param.CarNo = this.CarInfo.CarNo;
+        param.VinNo = this.CarInfo.VinNo;
 
         this.$cookies.set('CarNo', this.CarInfo.CarNo, '600s');
 
@@ -605,8 +614,8 @@ name: 'QTStep',
             console.log(result.data); 
             if(result.data.ReturnDataCount > 0) {
               this.showROHistBtn = true;
-              var hisData = JSON.parse(result.data.ReturnDataJSON);
-              this.CarInfo.VinNo = hisData[0].VIN_NO;
+              this.roList = JSON.parse(result.data.ReturnDataJSON);
+              this.CarInfo.VinNo = result.data.ReturnObject;
             }
             else if (result.data.ReturnObject !== "" && result.data.ReturnObject !== null) {
               this.CarInfo.VinNo = result.data.ReturnObject;
@@ -1036,7 +1045,6 @@ name: 'QTStep',
     opacity:0;
     transform: translateY(20px);
 }
-
 .NewQT-submit {
   margin:auto;
   height: 80px;
@@ -1307,7 +1315,32 @@ name: 'QTStep',
 .tempItems .tempItem{
   height:  20px;
   width: 150px;
+}
 
+.tempItems .v-card .v-btn {
+    height: 15px;
+    width: 15px;
+    min-width: 10px;
+    margin: 10px 3px;
+}
+.tempItems .v-card .v-btn .v-icon {
+  height: 10px;
+  width: 10px;
+  min-width: 10px;
+  margin: 0px;
+}
+
+#reqList .v-btn {
+  height: 15px;
+  width: 15px;
+  min-width: 10px;
+  margin: 10px 3px;
+}
+#reqList .v-btn  .v-icon {
+  height: 10px;
+  width: 10px;
+  min-width: 10px;
+  margin: 0px;;
 }
 
 </style>

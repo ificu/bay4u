@@ -182,6 +182,7 @@
 </template>
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script>
+import {datePadding, convertDynamoToString , convertDynamoToArrayString} from '@/utils/common.js'
 
 export default {
   name: 'InfoPage',
@@ -269,17 +270,19 @@ export default {
       console.log("QT Info 설정" + JSON.stringify(this.qtInfo));  
       this.tabIndex = 0;
       
-      if(this.qtInfo.LineItem.length > 0)
-      {  
-        this.qtInfo.CarVin = this.qtInfo.CarVin.replace("*empty*", "");
-        this.qtInfo.Memo = this.qtInfo.Memo.replace("*empty*", "");
-       console.log("상세내용 :" , this.qtInfo.LineItem);
-       this.qtItems = JSON.parse(this.qtInfo.LineItem);
-      }
-      else{
-        this.qtInfo.CarVin = "";
-        this.qtInfo.Memo = "";
-        this.qtItems = [];
+      if( this.qtInfo.LineItem !== undefined)
+      { 
+        if(this.qtInfo.LineItem.length > 0)
+        {  
+          this.qtInfo.CarVin = convertDynamoToString(this.qtInfo.CarVin);
+          this.qtInfo.Memo = convertDynamoToString(this.qtInfo.Memo); 
+          this.qtItems = JSON.parse(convertDynamoToArrayString(this.qtInfo.LineItem));
+        }
+        else{
+          this.qtInfo.CarVin = "";
+          this.qtInfo.Memo = "";
+          this.qtItems = [];
+        }
       }
 
       // webpos견적 Data 초기화
