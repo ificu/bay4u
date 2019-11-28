@@ -7,10 +7,10 @@
       </div>
       <div class="Chat-list">
         <ul>
-          <li v-for="(qtReq, index) in qtReqList" v-bind:key = "index">
+          <li v-for="(qtReq, index) in qtReqList" v-bind:key = "index" v-on:click="chatingToggle(qtReq)">
             <i class="Dealer-type fas fa-wrench" style="color:#fbc02e;"></i>
             <p class="Dealer-name">{{(qtReq.CarNo === "*empty*")?"미상차량" : qtReq.CarNo }}</p><!--<p>{{getDealerNm(qtReq.ResDealer)}}</p>-->
-            <span type="button" class="Chat-detail" v-on:click="chatingToggle(qtReq)">
+            <span type="button" class="Chat-detail">
               <i class="fas fa-angle-double-right"></i>
             </span>
           </li>
