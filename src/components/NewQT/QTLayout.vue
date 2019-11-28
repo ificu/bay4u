@@ -1023,7 +1023,6 @@ name: 'QTStep',
     opacity:0;
     transform: translateY(20px);
 }
-
 .NewQT-submit {
   margin:auto;
   height: 80px;
