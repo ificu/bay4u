@@ -72,7 +72,6 @@ export default {
   outline: none;
 }
 .Chating-inputArea .inputArea-send {
-
   position: fixed;
   right:0;
   align-self: center;
@@ -83,6 +82,19 @@ export default {
   -webkit-appearance:none;
   -moz-appearance:none;
 }
-
+@media screen and (min-width: 769px) {
+  .Chating-inputArea .inputArea-send  { 
+  /* 데스크탑에서 사용될 스타일을 여기에 작성합니다. */
+  position: absolute;
+  flex:25%;
+  align-self: center;
+  text-align: right;
+  padding-right: 4px;
+  color: #ff9999;
+  font-size: 2rem;
+  -webkit-appearance:none;
+  -moz-appearance:none;
+  }
+}
 
 </style>

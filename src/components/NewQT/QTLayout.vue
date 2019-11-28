@@ -106,7 +106,7 @@
               </v-btn>
               <div class="qtyInput">
                 <!--<v-text-field  type="number" v-model="tempItem.ITM_QTY"></v-text-field>-->
-                <input type="number"  v-model.number="tempItem.ITM_QTY" >
+                <input type="number" v-on:keypress.enter="addNewItem(tempItem)" v-model.number="tempItem.ITM_QTY" >
               </div>
               <v-btn fab x-small dark color="#757575" @click="addCounter()">
                 <v-icon dark>mdi-plus</v-icon>
@@ -171,7 +171,8 @@
                   <v-icon dark>mdi-minus</v-icon>
                 </v-btn>
                 <div class="qtyInput">
-                  <v-text-field  v-model.number="qtItem.ITM_QTY" type="number" ></v-text-field>
+                  <!--<v-text-field  v-model.number="qtItem.ITM_QTY" type="number" ></v-text-field>-->
+                  <input type="number"  v-model.number="qtItem.ITM_QTY" >                  
                 </div>
                 <!--<v-btn text small min-width="10px" max-width="15px">
                   {{qtItem.ITM_QTY}}
@@ -1310,7 +1311,6 @@ name: 'QTStep',
   background-color: #ddd;
   height: 20x;
   width: 30px;
-  text-align: right;
   border: 1px solid #78909C;
 }
 .qtyInput .v-input{
@@ -1330,6 +1330,7 @@ name: 'QTStep',
   height:  30px;
   padding: 0;
   font-size:0.9rem;
+  text-align: center;
 }
 .tempItems{
   display:list-item;
