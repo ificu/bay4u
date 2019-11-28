@@ -6,7 +6,15 @@
         <v-card-title>1. 차량번호/ 차대번호 촬영 인식</v-card-title>
       </v-app-bar>
       <v-card-subtitle class="pb-0">차량 번호판이나 등록증, 차대번호를 촬영하시면 자동 인식 됩니다.</v-card-subtitle>
-      <v-img class="grey lighten-3 mr-4 ml-4" height="115" v-bind:src="captureImg" ref="picImg" @click="console.log('log....')"></v-img>
+      <v-img class="grey lighten-3 mr-4 ml-4" min-height="115" v-bind:height="imgSize" v-bind:src="captureImg" ref="picImg" ></v-img>
+
+      <div class="text-right mr-6 mt-n10 mb-4">
+        <v-btn icon small color="teal"  @click="changeImageSize">
+          <v-icon v-if="imgSize === '115' ">fas fa-expand</v-icon>
+          <v-icon v-if="imgSize === '100%' ">fas fa-compress</v-icon>
+        </v-btn>
+      </div>    
+
       <div class="text-center mt-2 mb-4">
         <v-btn fab small color="success" @click="showQTCameraModal(true, 'CARNO')">
           <v-icon>fas fa-camera</v-icon>
@@ -239,6 +247,7 @@
           v-if="showQTCamera" 
           v-on:closeQTCameraModal="showQTCameraModal(false, '')"
           v-on:updatePic="updatePic"
+          :cameraType="imgCaptureType"
           >
         </QTCamera>
     </transition>
@@ -309,6 +318,7 @@ name: 'QTStep',
       alertMsgPath: "",
       alertYesNo: false,
       imgCaptureType: "",
+      imgSize: "115",
       tempItem:{                        // 기타부품 추가
         ITM_ICON:" ",
         ITM_QTY:1,
@@ -521,7 +531,7 @@ name: 'QTStep',
               else if(result.data.data.indexOf("일치하는 차량이 없습니다.") >= 0)
                 this.CarInfo.VinNo = "차량번호 미 존재";
               else
-                this.CarInfo.VinNo = "국토부 차대번호 조회 중...";
+                this.CarInfo.VinNo = "국토부 조회 중 오류";
             }
         })
         .catch((error) => {
@@ -597,6 +607,9 @@ name: 'QTStep',
               this.showROHistBtn = true;
               var hisData = JSON.parse(result.data.ReturnDataJSON);
               this.CarInfo.VinNo = hisData[0].VIN_NO;
+            }
+            else if (result.data.ReturnObject !== "" && result.data.ReturnObject !== null) {
+              this.CarInfo.VinNo = result.data.ReturnObject;
             }
             else {
               // 정비이력 조회는 차량번호 입력 or 인식 후 자동 처리 되므로 차대번호 조회도 자동 처리하자...
@@ -963,6 +976,12 @@ name: 'QTStep',
         this.showROHistBtn = false;
         this.$cookies.set('CarNo', this.CarInfo.CarNo, '600s');
         this.$cookies.set('VinNo', this.CarInfo.VinNo, '600s');
+      },
+      changeImageSize() {
+        if(this.imgSize === "100%")
+          this.imgSize = "115";
+        else
+        this.imgSize = "100%";
       }
     },
     components: {
