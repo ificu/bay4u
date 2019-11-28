@@ -66,8 +66,12 @@ export default {
             carName : ""
         }
     },
+    props:['RoHistoryData'],
     mounted() {
-    
+
+       this.roList = this.RoHistoryData;
+       this.carName = this.roList[0].NM_CR_TEC;
+    /*
         var param = {};
         param.BsnId = this.$store.state.UserInfo.BsnID;
         param.CarNo = this.$store.state.CarInfo.CarNo;
@@ -104,6 +108,7 @@ export default {
         .catch((error) => {
             console.log(error);
         })
+        */
     },    
     computed:{
       CarInfo: {

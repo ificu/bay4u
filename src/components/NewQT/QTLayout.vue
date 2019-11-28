@@ -36,13 +36,13 @@
             </v-toolbar>
             <v-card-text>
               <v-container>
-                <ROHistory></ROHistory>
+                <ROHistory :RoHistoryData="roList"></ROHistory>
               </v-container>
             </v-card-text>         
             </v-card>
         </v-dialog>
 
-        <v-text-field label="차대번호" v-model="CarInfo.VinNo" outlined dense color="success"  class="pr-4 pl-4" ></v-text-field>
+        <v-text-field label="차대번호" v-model="CarInfo.VinNo" outlined dense color="success"  class="pr-4 pl-4"  v-on:keypress.enter="checkWebPOSHist"></v-text-field>
         <!--<v-text-field label="차량종류" outlined dense color="success" class="mt-n5"></v-text-field>-->
         <v-btn outlined small color="red darken-1" class="mt-n6 mb-4 mr-4 float-right" v-if="showVINSearchBtn" @click="checkCarVin">차대번호 조회</v-btn>
         <v-btn outlined small color="red darken-1" class="mt-n6 mb-4 mr-1 float-right" v-if="showROHistBtn" @click="showROHistDialog=!showROHistDialog">정비이력</v-btn>
@@ -324,7 +324,8 @@ name: 'QTStep',
         ITM_VAL:" ",
         GRP_NM:" ",
         SEQ:0
-      }
+      },
+      roList: [],
     }
   },
   methods: {
@@ -572,12 +573,13 @@ name: 'QTStep',
       },
       // WebPOS에 과거 정비내역이 있는지 체크
       checkWebPOSHist(){
-
-        if(this.CarInfo.CarNo === '' || this.CarInfo.CarNo === null || this.CarInfo.CarNo === undefined) return;
-
+        if((this.CarInfo.CarNo === '' || this.CarInfo.CarNo === null || this.CarInfo.CarNo === undefined) &&
+            (this.CarInfo.VinNo === '' || this.CarInfo.VinNo === null || this.CarInfo.VinNo === undefined)) 
+        return;
         var param = {};
         param.BsnId = this.UserInfo.BsnID;
         param.CarNo = this.CarInfo.CarNo;
+        param.VinNo = this.CarInfo.VinNo;
 
         this.$cookies.set('CarNo', this.CarInfo.CarNo, '600s');
 
@@ -602,6 +604,7 @@ name: 'QTStep',
             console.log(result.data); 
             if(result.data.ReturnDataCount > 0) {
               this.showROHistBtn = true;
+              this.roList = JSON.parse(result.data.ReturnDataJSON);
             }
             
             this.showVINSearchBtn = true;
