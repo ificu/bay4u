@@ -660,6 +660,29 @@ name: 'QTStep',
           this.dealerList = result.data.Items;
         });
 
+        // 기타부품 체크
+        if(this.tempItem.ITM_NM.replace(/\s/gi, "") !== "")
+        { 
+          console.log("기타부품추가추");
+          var tmpItemNm = this.tempItem.ITM_NM.replace(/\s{1}/i, "");
+          var newItem = {};
+          newItem.ITM_ICON = " ";
+          newItem.ITM_QTY = this.tempItem.ITM_QTY;
+          newItem.GRP_ID = " ";
+          newItem.ITM_NM = tmpItemNm;
+
+          newItem.ITM_VAL = tmpItemNm + this.qtRequest.length + 1 ;
+          newItem.GRP_NM = " ";
+          newItem.SEQ =  this.qtRequest.length + 1;
+          this.qtRequest.push(newItem);
+
+          // 기타부품 초기화
+          this.tempItem.ITM_QTY = 1;
+          this.tempItem.ITM_NM = " ";
+          this.tempItem.ITM_VAL = " ";
+          this.tempItem.SEQ = 0;
+        }
+
         this.showQTConfirm = !this.showQTConfirm;
       },
       showItemCategoryModal(id) {
@@ -694,18 +717,19 @@ name: 'QTStep',
 
         if(item.ITM_VAL === " ")
         {
+            var tmpItmNm = item.ITM_NM.replace(/\s{1}/i, "");
             var tempItem = {};
             tempItem.ITM_ICON = " ";
             tempItem.ITM_QTY = item.ITM_QTY;
             tempItem.GRP_ID = " ";
-            if(item.ITM_NM === " "){
-              tempItem.ITM_NM = "기타부품";
+            if(item.ITM_NM.replace(/\s/gi, "") === ""){
+              return;
             }
             else{
-              tempItem.ITM_NM = item.ITM_NM;
+              tempItem.ITM_NM = tmpItmNm;
             }
             
-            tempItem.ITM_VAL = tempItem.ITM_NM + this.qtRequest.length + 1 ;
+            tempItem.ITM_VAL = tmpItmNm + this.qtRequest.length + 1 ;
             tempItem.GRP_NM = " ";
             tempItem.SEQ =  this.qtRequest.length + 1;
             this.qtRequest.push(tempItem);
