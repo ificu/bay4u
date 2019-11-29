@@ -283,7 +283,7 @@ export default {
   height: 50px;
   line-height: 50px;
   /*margin: 0.5rem 0;*/
-  margin:4px 5px;
+  margin:4px 1px;
   padding: 0 0.9rem;
   border-width: thin;
   border-style: solid;
