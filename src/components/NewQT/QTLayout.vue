@@ -483,6 +483,7 @@ name: 'QTStep',
         param.payload.ExpressionAttributeValues[key] = this.CarInfo.CarNo;
 
         this.$cookies.set('CarNo', this.CarInfo.CarNo, '600s');
+        this.CarInfo.VinNo = "";
 
         axios({
           method: 'POST',
@@ -504,7 +505,40 @@ name: 'QTStep',
             }
             else {
               this.CarInfo.VinNo = "";
-              this.showVINSearchAgreePopup = true;
+
+              // DB에 차량이 없다면 Intravan 통해서 국토부 조회 체크 
+
+              param = {};
+              param.carNo = this.CarInfo.CarNo;
+              param.entNo = this.UserInfo.EntNo;
+
+              axios({
+                  method: 'POST',
+                  //url:'http://bay4u.co.kr:8085/api/intravan',
+                  url:'https://bay4u.co.kr/extpkgif',
+                  headers:{
+                      'Accept': 'application/json',
+                      'Content-Type': 'application/json'
+                  },
+                  data: param
+              })
+              .then((result) => {
+                  console.log("======= checkIntraVanPkg result ========");
+                  console.log(result.data); 
+                  if(result.data.success === true) {
+                    this.CarInfo.VinNo = result.data.data;
+                    this.$cookies.set('VinNo', this.CarInfo.VinNo, '600s');
+                  }
+                  else {
+                    // 조회 에러가 났다면 고객명을 입력받아 차대 원부 조회
+                    this.showVINSearchAgreePopup = true;
+                  }
+              })
+              .catch((error) => {
+                  console.log(error);
+              })
+
+              this.CarInfo.VinNo = "국토부 차대번호 조회 중...";
             }
           }
         });
@@ -547,7 +581,7 @@ name: 'QTStep',
             console.log(error);
         })
 
-        this.CarInfo.VinNo = "국토부 차대번호 조회 중...";
+        this.CarInfo.VinNo = "차대 원부 조회 중...";
         this.showVINSearchAgreePopup = false;
       },
       // Aibril Vision API를 통해 이미지에서 차량번호 추출
@@ -631,6 +665,7 @@ name: 'QTStep',
         .catch((error) => {
             console.log(error);
         })
+        this.CarInfo.VinNo = "WebPOS 이력 조회 중...";
         
       },
       showQTConfirmModal() {
@@ -1008,6 +1043,7 @@ name: 'QTStep',
         this.CarInfo.VinNo = "";
         this.showVINSearchBtn = false;
         this.showROHistBtn = false;
+        this.captureImg = "";
         this.$cookies.set('CarNo', this.CarInfo.CarNo, '600s');
         this.$cookies.set('VinNo', this.CarInfo.VinNo, '600s');
       },

@@ -106,6 +106,7 @@ export default {
           var pwd = result.data.Items[0].PWD;
           var type = result.data.Items[0].TYPE;
           var siteCode = result.data.Items[0].CODE;
+          var entNo = result.data.Items[0].ENTNO;
 
           console.log('ID 체크 : ', id);
 
@@ -121,6 +122,7 @@ export default {
             this.UserInfo.UserID = id;
             this.UserInfo.BsnID = siteCode;
             this.UserInfo.Name = name;
+            this.UserInfo.EntNo = entNo;
           }
           else {
             this.$cookies.set('BsnID', siteCode, '60000s');
@@ -152,7 +154,6 @@ export default {
       }
     });*/
     // 이미 로그인이 되어서 캐시에 남아있는 상태면 자동 로그인
-    /*
     console.log('Cookie Check : ', this.$cookies.get('BsnID'));
     if(this.$cookies.get('BsnID') !== "" && this.$cookies.get('BsnID') !== null) {
       var type = this.$cookies.get('UserType');
@@ -163,7 +164,7 @@ export default {
       else {
         this.$router.push('/MainPage');
       }
-    }*/
+    }
   }
 }
 </script>
