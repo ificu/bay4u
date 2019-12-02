@@ -29,7 +29,7 @@
         </span>
       </router-link >
     </div>
-
+    <CheckLogin></CheckLogin>
   </div>
 
 </template>
@@ -38,11 +38,13 @@
 <script>
 
 import QTLayout from '@/components/NewQT/QTLayout.vue'
+import CheckLogin from '@/components/Common/CheckLogin.vue'
 
 export default {
   name: 'NewQT',
   components: {
-    QTLayout: QTLayout
+    QTLayout: QTLayout,
+    CheckLogin:CheckLogin
   }
 }
 

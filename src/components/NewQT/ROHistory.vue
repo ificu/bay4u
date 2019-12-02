@@ -8,7 +8,7 @@
             v-for="(roItem,i) in roList"
             :key="i"
         >
-        <v-expansion-panel-header  class="roHistory-header">
+        <v-expansion-panel-header  class="roHistory-header" @click="GetRoItem(roItem)">
             <v-row no-gutters>
                 <!--
                 <v-col cols="12">    
@@ -30,11 +30,12 @@
             </template> 
         </v-expansion-panel-header>
         <v-expansion-panel-content>
+            <div v-for="(item,idx) in roitemList" :key="idx">
             <div class="roHistory-content">
-                <div class="roHistory-brand">MANN</div><div class="roHistory-itemcode">EKHU6004X</div>
+                <div class="roHistory-itemcode">{{item.ID_ITM}}</div>
+                <div class="roHistory-amount">{{item.MO_PRC_REG | localeNum}} 원</div>
             </div>
-            <div class="roHistory-content">
-                <div class="roHistory-brand">MANN</div><div class="roHistory-itemcode">EKC28125</div>
+                <div class="roHistory-brand">{{item.NM_ITM}}</div>
             </div>
             <!--<div class="roHistory-content"><v-icon small class="roHistory-icon">fas fa-car</v-icon> {{roItem.NM_CR_TEC}} </div>-->
             <!--<v-list-item three-line>
@@ -62,6 +63,7 @@ export default {
     data() {
         return {
             roList: [],
+            roitemList: [],
             paramCarno: this.value,
             carName : ""
         }
@@ -109,7 +111,44 @@ export default {
             console.log(error);
         })
         */
-    },    
+    },   
+    methods:
+    {
+        GetRoItem(item)
+        {
+            var param = {};
+            param.RequestDataJSON = item.ID_TRN
+            
+            console.log("======= GetRoItem Request result ========");
+            console.log(param); 
+
+            var rtnCode = "";
+            var rtnCount = 0;
+
+            axios({
+            method: 'POST',
+            //url:'http://iparts.sknetworks.co.kr/BAY4UService.svc/GetROItemList',
+            url:'https://bay4u.co.kr/scpif/GetROItemList',
+            headers:{
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            data: param
+            })
+            .then((result) => {
+
+            console.log("======= GetRoItem Return result ========");
+            console.log(result.data); 
+            this.rtnCode = result.data.ReturnCode;
+            this.rtnCount = Number(result.data.ReturnDataCount);
+            this.roitemList = JSON.parse(result.data.ReturnDataJSON);
+
+            })
+            .catch((error) => {
+                console.log(error);
+            })
+        }
+    },
     computed:{
       CarInfo: {
           get() { return this.$store.getters.CarInfo },
@@ -145,49 +184,41 @@ export default {
   margin-bottom:5px;
   font-family: 'Noto Sans KR', sans-serif;
 }
-.roHistory-amount{
-  flex: 30%;
-  font-size: 0.7rem;
-  /*color:#808080;*/
-  vertical-align:initial;
-  margin-bottom:1px;
-  margin-left:2px;
-  font-family: 'Noto Sans KR', sans-serif;
-}
+
 .roHistory-date  {
-  flex: 70%;
-  font-size: 0.8rem;
-  font-weight: bold;
-  text-align: right;
-  color:#F65314;
-  vertical-align:initial;
-  margin-bottom:1px;
-  font-family: 'Noto Sans KR', sans-serif;
+    flex: 70%;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-align: right;
+    color:#F65314;
+    vertical-align:initial;
+    margin-bottom:1px;
+    font-family: 'Noto Sans KR', sans-serif;
 }
 .roHistory-content
 {
-  display: flex;
-  /*
-  font-size: 0.8rem;
-  margin-left:0rem;
-  margin-top:0.5rem;
-  font-family: 'Noto Sans KR', sans-serif;
-  */
+    display:flex;
 }
+
 .roHistory-brand
 {
-  font-size: 0.8rem;
-  margin-left:1px;
-  margin-top: 5px;
-  margin-right:30px;
-  font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.8rem;
+    margin-top: 5px;
+    margin-right:30px;
 }
 .roHistory-itemcode
 {
-  font-size: 0.8rem;
-  margin-top: 5px;
-  /*margin-left:0rem;
-  margin-top:0.5rem;*/
-  font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.9rem;
+    margin-top: 5px;
+    font-weight: bold;
+    flex:50%;
+}
+
+.roHistory-amount{
+    color:#F65314;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-top: 5px;
+    float:right;
 }
 </style>

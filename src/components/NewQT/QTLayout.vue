@@ -210,6 +210,7 @@
             :key="item.ITM_VAL"
             :value="item.ITM_VAL"
             @change="addNewItem(item)"
+            size="lg"
           >
             {{ item.ITM_NM }}
           </b-form-checkbox>
@@ -584,6 +585,7 @@ name: 'QTStep',
         if((this.CarInfo.CarNo === '' || this.CarInfo.CarNo === null || this.CarInfo.CarNo === undefined) &&
             (this.CarInfo.VinNo === '' || this.CarInfo.VinNo === null || this.CarInfo.VinNo === undefined)) 
         return;
+
         var param = {};
         param.BsnId = this.UserInfo.BsnID;
         param.CarNo = this.CarInfo.CarNo;
@@ -1046,20 +1048,6 @@ name: 'QTStep',
     mounted() {
       datePadding();
       convertStringToDynamo();
-    },
-    created : function() {
-      if(this.UserInfo.BsnID === '')
-        this.UserInfo.BsnID = this.$cookies.get('BsnID');
-      if(this.UserInfo.Name === '')
-        this.UserInfo.Name = this.$cookies.get('UserNM');
-
-      if(this.$cookies.get('CarNo') !== undefined || this.$cookies.get('CarNo') !== '' || this.$cookies.get('CarNo') !== 'null') {
-        this.CarInfo.CarNo = this.$cookies.get('CarNo');
-      }
-      if(this.$cookies.get('VinNo') !== undefined || this.$cookies.get('VinNo') !== '' || this.$cookies.get('VinNo') !== 'null') {
-        this.CarInfo.VinNo = this.$cookies.get('VinNo');
-      }
-      
     }
   }
 </script>
@@ -1319,14 +1307,14 @@ name: 'QTStep',
 .tempItems .v-card{
   height: 40px;
   width: 90px;
-  margin-left:5px;
+  margin-left:4px;
   border : solid 1px #BDBDBD;
   border-radius: 3px 3px 3px 3px;
 }
 
 .tempItems .v-card .v-btn {
     height: 40px;
-    width: 20px;
+    width: 19px;
     min-width: 5px;
     margin: 0px 0px;
     border:0px;
@@ -1360,6 +1348,7 @@ name: 'QTStep',
   border-radius: 3px 3px 3px 3px;
   width: 100px;
   float: right;
+  margin-right: 15px;
 }
 #reqList .v-btn {
   height: 35px;

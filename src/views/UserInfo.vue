@@ -51,12 +51,13 @@
         확인 <i class="fas fa-check"></i>
       </span>
     </MaintenanceMaster>
-
+    <CheckLogin></CheckLogin>
   </div>
 </template>
 
 <script>
 import MaintenanceMaster from '@/components/UserInfo/MaintenanceMaster.vue'
+import CheckLogin from '@/components/Common/CheckLogin.vue'
 
 export default {
   name: 'UserInfo',
@@ -72,7 +73,8 @@ export default {
     }
   },
   components: {
-    MaintenanceMaster: MaintenanceMaster
+    MaintenanceMaster: MaintenanceMaster,
+    CheckLogin:CheckLogin
   }
 }
 </script>
