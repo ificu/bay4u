@@ -97,21 +97,22 @@
         </swiper>
       </div>
 
-        <!-- 기타부품 추가 -->            
-        <div class="tempItems">
+        <!-- 기타부품 추가 --> 
+         <div class="tempItems">
             <v-text-field label="기타부품"  outlined dense color="success" class="tempItem ml-4" v-model="tempItem.ITM_NM"></v-text-field>
-            <v-card class="d-flex flex-row-reverse" flat  tile dense >
-              <v-btn fab dark x-small color="#757575" @click="subCounter()">
+            <v-card class="d-flex" flat  tile dense >
+              <v-btn tile outlined depressed  @click="subCounter()">-</v-btn>
+             <!-- <v-btn fab dark x-small color="#757575" @click="subCounter()">
                 <v-icon dark>mdi-minus</v-icon>
-              </v-btn>
+              </v-btn>-->
               <div class="qtyInput">
-                <!--<v-text-field  type="number" v-model="tempItem.ITM_QTY"></v-text-field>-->
-                <input type="number" v-on:keypress.enter="addNewItem(tempItem)" v-model.number="tempItem.ITM_QTY" >
+               <input type="number" v-on:keypress.enter="addNewItem(tempItem)" v-model.number="tempItem.ITM_QTY" >
               </div>
-              <v-btn fab x-small dark color="#757575" @click="addCounter()">
+             <!-- <v-btn fab x-small dark color="#757575" @click="addCounter()">
                 <v-icon dark>mdi-plus</v-icon>
-              </v-btn>
-            </v-card>  
+              </v-btn>-->
+                <v-btn tile outlined depressed @click="addCounter()">+</v-btn>
+            </v-card>
             <v-btn class="mx-2 " fab color="success" x-small @click="addNewItem(tempItem)">입력</v-btn>
         </div>   
         <div class="ml-6 mt-2 mb-2">
@@ -167,9 +168,7 @@
                <!-- <v-btn text icon small @click="subCounter(index)">
                   <v-icon>keyboard_arrow_down</v-icon>
                 </v-btn>-->
-                <v-btn fab dark x-small color="#757575" @click="subCounter(index)">
-                  <v-icon dark>mdi-minus</v-icon>
-                </v-btn>
+                <v-btn tile outlined depressed  @click="addCounter(index)">+</v-btn>
                 <div class="qtyInput">
                   <!--<v-text-field  v-model.number="qtItem.ITM_QTY" type="number" ></v-text-field>-->
                   <input type="number"  v-model.number="qtItem.ITM_QTY" >                  
@@ -180,9 +179,7 @@
                 <v-btn text icon small @click="addCounter(index)">
                   <v-icon>keyboard_arrow_up</v-icon>
                 </v-btn>-->
-                <v-btn fab x-small dark color="#757575" @click="addCounter(index)">
-                  <v-icon dark>mdi-plus</v-icon>
-                </v-btn>
+                <v-btn tile outlined depressed   @click="subCounter(index)">-</v-btn>
               </v-card>        
 
             </v-list-item-subtitle>
@@ -205,13 +202,13 @@
     <ItemCategory v-if="showItemCategory" @close="showItemCategory=false">
       <h4 slot="header">{{categoryTitle}}</h4>
       <span slot="body">
+        
         <b-form-group>
           <b-form-checkbox
             v-for="item in categoryList"
             v-model="selectedCategory"
             :key="item.ITM_VAL"
             :value="item.ITM_VAL"
-            inline
             @change="addNewItem(item)"
           >
             {{ item.ITM_NM }}
@@ -743,6 +740,14 @@ name: 'QTStep',
         .then((result) => {
           console.log("======= categoryList result ========");
           console.log(result.data);
+
+        if(Array.isArray(result.data.Items))
+        {
+          result.data.Items.sort(function(a, b){
+            return (a.SORT > b.SORT) ? 1 : -1;
+          });
+        }
+
           this.categoryTitle = result.data.Items[0].GRP_NM;
           this.categoryList = result.data.Items;
         });
@@ -750,7 +755,6 @@ name: 'QTStep',
         this.showItemCategory = !this.showItemCategory;
       },
       addNewItem(item) {
-
         if(item.ITM_VAL === " ")
         {
             var tmpItmNm = item.ITM_NM.replace(/\s{1}/i, "");
@@ -1343,65 +1347,71 @@ name: 'QTStep',
   margin-bottom: 20px;
 }
 
+.tempItems{
+  display:list-item;
+  display: flex;
+}
+
+.tempItems .v-card{
+  height: 40px;
+  width: 90px;
+  margin-left:5px;
+  border : solid 1px #BDBDBD;
+  border-radius: 3px 3px 3px 3px;
+}
+
+.tempItems .v-card .v-btn {
+    height: 40px;
+    width: 20px;
+    min-width: 5px;
+    margin: 0px 0px;
+    border:0px;
+    font-size: 1.6em;
+    text-align: center;
+}
 .qtyInput{
-  background-color: #ddd;
-  height: 20x;
-  width: 30px;
-  border: 1px solid #78909C;
+  height: 40x;
+  width: 50px;
+  border-right: solid 1px #BDBDBD;
+  border-left: solid 1px #BDBDBD;
 }
-.qtyInput .v-input{
-  /*background-color: gold;*/
-  height:  20px;
-  width: 25px;
-  font-size:0.9rem;
-  position:absolute;
-  padding-top: 0px;
-  padding-left: 2px;
-  bottom:10px;
-  float: right; 
-}
-.qtyInput input{
-  background-color: inherit;
+.qtyInput input {
   width: 26px;
   height:  30px;
   padding: 0;
   font-size:0.9rem;
   text-align: center;
 }
-.tempItems{
-  display:list-item;
-  /*height:  20px;*/
-  display: flex;
-}
-.tempItems .tempItem{
-  height:  20px;
-  width: 150px;
-}
 
-.tempItems .v-card .v-btn {
-    height: 15px;
-    width: 15px;
-    min-width: 10px;
-    margin: 10px 3px;
-}
+/*
 .tempItems .v-card .v-btn .v-icon {
   height: 10px;
   width: 10px;
   min-width: 10px;
   margin: 0px;
 }
-
-#reqList .v-btn {
-  height: 15px;
-  width: 15px;
-  min-width: 10px;
-  margin: 10px 3px;
+*/
+#reqList  {
+  border : solid 1px #BDBDBD;
+  border-radius: 3px 3px 3px 3px;
+  width: 100px;
+  float: right;
 }
+#reqList .v-btn {
+  height: 35px;
+  width: 20px;
+  min-width: 5px;
+  margin: 0px 0px;
+  border:0px;
+  font-size: 1.6em;
+  text-align: center;
+}
+/*
 #reqList .v-btn  .v-icon {
   height: 10px;
   width: 10px;
   min-width: 10px;
   margin: 0px;;
-}
+}*/
 
 </style>
