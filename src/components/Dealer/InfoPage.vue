@@ -183,6 +183,7 @@
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script>
 import {datePadding, convertDynamoToString , convertDynamoToArrayString} from '@/utils/common.js'
+import Constant from '@/Constant';
 
 export default {
   name: 'InfoPage',
@@ -225,12 +226,8 @@ export default {
 
       axios({
           method: 'POST',
-          //url:'http://iparts.sknetworks.co.kr/BAY4UService.svc/GetQTData',
-          url:'https://bay4u.co.kr/scpif/GetQTData',
-          headers:{
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-          },
+          url: Constant.SCPIF_URL + 'GetQTData',
+          headers: Constant.JSON_HEADER,
           data: param
       })
       .then((result) => {
@@ -306,11 +303,8 @@ export default {
 
       axios({
         method: 'POST',
-        url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
         data: param
       })
       .then((result) => {
@@ -343,11 +337,8 @@ export default {
 
       axios({
         method: 'POST',
-        url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
         data: param
       })
       .then((result) => {

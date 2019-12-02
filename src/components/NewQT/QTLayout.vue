@@ -282,6 +282,7 @@ import QTCamera from '@/components/NewQT/QTCamera.vue'
 import ROHistory from '@/components/NewQT/ROHistory.vue'
 import MessageBox from '@/components/Common/MessageBox.vue'
 import {datePadding, convertStringToDynamo, convertArrayToDynamo} from '@/utils/common.js'
+import Constant from '@/Constant';
 
 export default {
 name: 'QTStep',
@@ -379,11 +380,8 @@ name: 'QTStep',
 
           axios({
               method: 'POST',
-              url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
-              headers:{
-                  'Accept': 'application/json',
-                  'Content-Type': 'application/json'
-              },
+              url: Constant.LAMBDA_URL,
+              eaders: Constant.JSON_HEADER,
               data: param
           })
           .then((result) => {
@@ -410,11 +408,8 @@ name: 'QTStep',
 
         axios({
           method: 'POST',
-          url: 'https://vision.googleapis.com/v1/images:annotate?key=AIzaSyApWMx0PYvexvPKJkmMA9lAwWvMC5K6FZU',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
+          url: Constant.GOOGLE_URL,
+          headers: Constant.JSON_HEADER,
           data: param
         }).then((result) => {
           console.log("======= Google API result ========");
@@ -484,11 +479,8 @@ name: 'QTStep',
 
         axios({
           method: 'POST',
-          url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
+          url: Constant.LAMBDA_URL,
+          headers: Constant.JSON_HEADER,
           data: param
         })
         .then((result) => {
@@ -511,12 +503,8 @@ name: 'QTStep',
 
               axios({
                   method: 'POST',
-                  //url:'http://bay4u.co.kr:8085/api/intravan',
-                  url:'https://bay4u.co.kr/extpkgif',
-                  headers:{
-                      'Accept': 'application/json',
-                      'Content-Type': 'application/json'
-                  },
+                  url: Constant.INTRA_PKGIF_URL,
+                  headers: Constant.JSON_HEADER,
                   data: param
               })
               .then((result) => {
@@ -550,12 +538,8 @@ name: 'QTStep',
 
         axios({
             method: 'POST',
-            //url:'http://bay4u.co.kr:8085/api/intravan',
-            url:'https://bay4u.co.kr/extif',
-            headers:{
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
+            url: Constant.INTRAIF_URL,
+            headers: Constant.JSON_HEADER,
             data: param
         })
         .then((result) => {
@@ -590,11 +574,8 @@ name: 'QTStep',
 
         axios({
           method: 'POST',
-          url: 'https://visionai.skcc.com/ocr/alpr/recognize',
-          headers: {
-            'api-key': '7bfee9e0-b19a-4f14-a3a0-42c259aac9f2',
-            'Content-Type': 'application/json'
-          },
+          url: Constant.AIBRIL_URL,
+          headers: Constant.AIBRIL_HEADER,
           data: param
         }).then((result) => {
           console.log("======= Aibril API result ========");
@@ -633,12 +614,8 @@ name: 'QTStep',
       
         axios({
             method: 'POST',
-            //url:'http://iparts.sknetworks.co.kr/BAY4UService.svc/GetROList',
-            url:'https://bay4u.co.kr/scpif/GetROList',
-            headers:{
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
+            url: Constant.SCPIF_URL + 'GetROList',
+            headers: Constant.JSON_HEADER,
             data: param
         })
         .then((result) => {
@@ -679,11 +656,8 @@ name: 'QTStep',
 
         axios({
           method: 'POST',
-          url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
+          url: Constant.LAMBDA_URL,
+          headers: Constant.JSON_HEADER,
           data: param
         })
         .then((result) => {
@@ -730,11 +704,8 @@ name: 'QTStep',
 
         axios({
           method: 'POST',
-          url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
+          url: Constant.LAMBDA_URL,
+          headers: Constant.JSON_HEADER,
           data: param
         })
         .then((result) => {
@@ -819,13 +790,9 @@ name: 'QTStep',
 
         axios({
             method: 'POST',
-            //url:'http://iparts.sknetworks.co.kr/BAY4UService.svc/SaveQTData',
-            url:'https://bay4u.co.kr/scpif/SaveQTData',            
-            headers:{
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-        },
-        data: param
+            url: Constant.SCPIF_URL + 'SaveQTData',
+            headers: Constant.JSON_HEADER,
+            data: param
         })
         .then((result) => {
           console.log("======= SaveQTData result ========");
@@ -862,13 +829,10 @@ name: 'QTStep',
               console.log(JSON.stringify(param));
 
               axios({
-                  method: 'POST',
-                  url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
-                  headers:{
-                      'Accept': 'application/json',
-                      'Content-Type': 'application/json'
-              },
-              data: param
+                method: 'POST',
+                url: Constant.LAMBDA_URL,
+                headers: Constant.JSON_HEADER,
+                data: param
               })
               .then((result) => {
                 console.log("======= Data Save result ========");
@@ -889,11 +853,8 @@ name: 'QTStep',
 
               axios({
                   method: 'POST',
-                  url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
-                  headers:{
-                      'Accept': 'application/json',
-                      'Content-Type': 'application/json'
-                  },
+                  url: Constant.LAMBDA_URL,
+                  headers: Constant.JSON_HEADER,
                   data: param
               })
               .then((result) => {

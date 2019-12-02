@@ -55,6 +55,8 @@
 
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script>
+import Constant from '@/Constant';
+
 export default {
   name: 'Login',
   data () {
@@ -87,11 +89,8 @@ export default {
 
       axios({
         method: 'POST',
-        url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
         data: param
       })
       .then((result) => {
