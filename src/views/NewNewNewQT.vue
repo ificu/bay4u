@@ -2,7 +2,8 @@
   <div class="NewQT">
     <div class="NewQT-contents">
       <div class="NewQT-title">
-        신규 견적 요청
+        <span>신규 견적 요청</span>
+        <CheckLogin></CheckLogin>
       </div>
       <QTLayout></QTLayout>
     </div>
@@ -29,7 +30,6 @@
         </span>
       </router-link >
     </div>
-    <CheckLogin></CheckLogin>
   </div>
 
 </template>
@@ -59,8 +59,11 @@ export default {
   padding-top: 25px;
   font-size: 1.5rem;
   font-weight: bold;
+  display:flex;
 }
-
+.NewQT-title span{
+  width: 100%;
+}
 .NewQT-desc {
   margin:auto;
   width: 90%;
