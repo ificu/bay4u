@@ -638,6 +638,7 @@
         </span>
       </router-link >
     </div>
+    <CheckLogin></CheckLogin>
   </div>
 </template>
 
@@ -648,6 +649,7 @@ import QTDetailSelect from '@/components/QTList/QTDetailSelect.vue'
 import QTtoRODetail from '@/components/QTList/QTtoRODetail.vue'
 import CustomerDoc from '@/components/QTList/CustomerDoc.vue'
 import CustomerDocOption from '@/components/QTList/CustomerDocOption.vue'
+import CheckLogin from '@/components/Common/CheckLogin.vue'
 import Constant from '@/Constant';
 
 export default {
@@ -886,7 +888,8 @@ export default {
     QTDetailSelect,
     QTtoRODetail,
     CustomerDoc,
-    CustomerDocOption,    
+    CustomerDocOption,
+    CheckLogin:CheckLogin  
   },
   computed: {
     

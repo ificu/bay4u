@@ -92,6 +92,7 @@
         </router-link >
       </div>
     </div>
+    <CheckLogin></CheckLogin>
   </div>
 </template>
 
@@ -103,6 +104,7 @@ import MessageList from '@/components/Chat/ChatMessageList.vue';
 import MessageForm from '@/components/Chat/ChatMessageForm.vue';
 import {datePadding, convertStringToDynamo} from '@/utils/common.js'
 import QTCamera from '@/components/NewQT/QTCamera.vue'
+import CheckLogin from '@/components/Common/CheckLogin.vue'
 
 export default {
   name: 'Chat',
@@ -123,6 +125,7 @@ export default {
     'Message-List': MessageList,
     'Message-From': MessageForm,
     'QTCamera': QTCamera,
+    CheckLogin:CheckLogin
   },
   computed: {
     CarInfo: {
