@@ -2,7 +2,8 @@
   <div class="UserInfo">
     <div class="UserInfo-contents">
       <div class="UserInfo-title">
-        사용자 정보
+        <span>사용자 정보</span>
+        <CheckLogin></CheckLogin>
       </div>
       <div class="UserInfo-img">
         <img src="@/assets/user-icon.png">
@@ -51,7 +52,6 @@
         확인 <i class="fas fa-check"></i>
       </span>
     </MaintenanceMaster>
-    <CheckLogin></CheckLogin>
   </div>
 </template>
 
@@ -88,6 +88,11 @@ export default {
   margin-bottom: 10px;
   font-size: 1.5rem;
   font-weight: bold;
+  display: flex;
+}
+
+.UserInfo-title span{
+  width: 100%;
 }
 
 .UserInfo-img {

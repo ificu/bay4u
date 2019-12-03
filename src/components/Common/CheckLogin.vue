@@ -1,5 +1,12 @@
 <template>
   <div class="LoginCheck">
+    <div class="logout-btn">
+        <v-btn color="#90A4AE" dark depressed small @click="logOut">
+            로그아웃
+            <v-icon right dark size="20px">fas fa-sign-out-alt</v-icon>
+        </v-btn>
+    </div>
+
   <!-- 알림 메시지 팝업 -->
     <MessageBox v-if="showAlertMsg"  @close="closeMsg(alertMsgPath)">
       <div slot="header"><h5 >알림</h5></div>
@@ -100,7 +107,23 @@ export default {
         {
             this.$router.push('/');
         }
+    },
+
+    logOut( )
+    {
+        this.$cookies.remove('BsnID');
+        this.$cookies.remove('UserNM');
+        this.$cookies.remove('UserType');      
+        
+        this.$router.push('/');
     }
   }
 }
 </script>
+
+<style scoped>
+.LoginCheck{
+    text-align:end;
+}
+
+</style>

@@ -3,7 +3,8 @@
     <!--MainPage-->
     <div class="Chat-contents" v-if="showMainPage">
       <div class="Chat-title">
-        채팅 목록
+        <span>채팅 목록</span>
+        <CheckLogin></CheckLogin>
       </div>
       <div class="Chat-list">
         <ul>
@@ -92,7 +93,6 @@
         </router-link >
       </div>
     </div>
-    <CheckLogin></CheckLogin>
   </div>
 </template>
 
@@ -590,6 +590,10 @@ export default {
   margin-bottom: 10px;
   font-size: 1.5rem;
   font-weight: bold;
+  display:flex;
+}
+.Chat-title span{
+  width: 100%;
 }
 
 .Chat-list {
