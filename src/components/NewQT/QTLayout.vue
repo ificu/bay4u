@@ -282,6 +282,7 @@ import QTCamera from '@/components/NewQT/QTCamera.vue'
 import ROHistory from '@/components/NewQT/ROHistory.vue'
 import MessageBox from '@/components/Common/MessageBox.vue'
 import {datePadding, convertStringToDynamo, convertArrayToDynamo} from '@/utils/common.js'
+import Constant from '@/Constant';
 
 export default {
 name: 'QTStep',
@@ -379,11 +380,8 @@ name: 'QTStep',
 
           axios({
               method: 'POST',
-              url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
-              headers:{
-                  'Accept': 'application/json',
-                  'Content-Type': 'application/json'
-              },
+              url: Constant.LAMBDA_URL,
+              eaders: Constant.JSON_HEADER,
               data: param
           })
           .then((result) => {
@@ -410,11 +408,8 @@ name: 'QTStep',
 
         axios({
           method: 'POST',
-          url: 'https://vision.googleapis.com/v1/images:annotate?key=AIzaSyApWMx0PYvexvPKJkmMA9lAwWvMC5K6FZU',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
+          url: Constant.GOOGLE_URL,
+          headers: Constant.JSON_HEADER,
           data: param
         }).then((result) => {
           console.log("======= Google API result ========");
@@ -480,14 +475,12 @@ name: 'QTStep',
         param.payload.ExpressionAttributeValues[key] = this.CarInfo.CarNo;
 
         this.$cookies.set('CarNo', this.CarInfo.CarNo, '600s');
+        this.CarInfo.VinNo = "";
 
         axios({
           method: 'POST',
-          url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
+          url: Constant.LAMBDA_URL,
+          headers: Constant.JSON_HEADER,
           data: param
         })
         .then((result) => {
@@ -501,7 +494,36 @@ name: 'QTStep',
             }
             else {
               this.CarInfo.VinNo = "";
-              this.showVINSearchAgreePopup = true;
+
+              // DB에 차량이 없다면 Intravan 통해서 국토부 조회 체크 
+
+              param = {};
+              param.carNo = this.CarInfo.CarNo;
+              param.entNo = this.UserInfo.EntNo;
+
+              axios({
+                  method: 'POST',
+                  url: Constant.INTRA_PKGIF_URL,
+                  headers: Constant.JSON_HEADER,
+                  data: param
+              })
+              .then((result) => {
+                  console.log("======= checkIntraVanPkg result ========");
+                  console.log(result.data); 
+                  if(result.data.success === true) {
+                    this.CarInfo.VinNo = result.data.data;
+                    this.$cookies.set('VinNo', this.CarInfo.VinNo, '600s');
+                  }
+                  else {
+                    // 조회 에러가 났다면 고객명을 입력받아 차대 원부 조회
+                    this.showVINSearchAgreePopup = true;
+                  }
+              })
+              .catch((error) => {
+                  console.log(error);
+              })
+
+              this.CarInfo.VinNo = "국토부 차대번호 조회 중...";
             }
           }
         });
@@ -516,12 +538,8 @@ name: 'QTStep',
 
         axios({
             method: 'POST',
-            //url:'http://bay4u.co.kr:8085/api/intravan',
-            url:'https://bay4u.co.kr/extif',
-            headers:{
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
+            url: Constant.INTRAIF_URL,
+            headers: Constant.JSON_HEADER,
             data: param
         })
         .then((result) => {
@@ -544,7 +562,7 @@ name: 'QTStep',
             console.log(error);
         })
 
-        this.CarInfo.VinNo = "국토부 차대번호 조회 중...";
+        this.CarInfo.VinNo = "차대 원부 조회 중...";
         this.showVINSearchAgreePopup = false;
       },
       // Aibril Vision API를 통해 이미지에서 차량번호 추출
@@ -556,11 +574,8 @@ name: 'QTStep',
 
         axios({
           method: 'POST',
-          url: 'https://visionai.skcc.com/ocr/alpr/recognize',
-          headers: {
-            'api-key': '7bfee9e0-b19a-4f14-a3a0-42c259aac9f2',
-            'Content-Type': 'application/json'
-          },
+          url: Constant.AIBRIL_URL,
+          headers: Constant.AIBRIL_HEADER,
           data: param
         }).then((result) => {
           console.log("======= Aibril API result ========");
@@ -599,12 +614,8 @@ name: 'QTStep',
       
         axios({
             method: 'POST',
-            //url:'http://iparts.sknetworks.co.kr/BAY4UService.svc/GetROList',
-            url:'https://bay4u.co.kr/scpif/GetROList',
-            headers:{
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
+            url: Constant.SCPIF_URL + 'GetROList',
+            headers: Constant.JSON_HEADER,
             data: param
         })
         .then((result) => {
@@ -628,6 +639,7 @@ name: 'QTStep',
         .catch((error) => {
             console.log(error);
         })
+        this.CarInfo.VinNo = "WebPOS 이력 조회 중...";
         
       },
       showQTConfirmModal() {
@@ -644,11 +656,8 @@ name: 'QTStep',
 
         axios({
           method: 'POST',
-          url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
+          url: Constant.LAMBDA_URL,
+          headers: Constant.JSON_HEADER,
           data: param
         })
         .then((result) => {
@@ -695,11 +704,8 @@ name: 'QTStep',
 
         axios({
           method: 'POST',
-          url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
+          url: Constant.LAMBDA_URL,
+          headers: Constant.JSON_HEADER,
           data: param
         })
         .then((result) => {
@@ -784,13 +790,9 @@ name: 'QTStep',
 
         axios({
             method: 'POST',
-            //url:'http://iparts.sknetworks.co.kr/BAY4UService.svc/SaveQTData',
-            url:'https://bay4u.co.kr/scpif/SaveQTData',            
-            headers:{
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-        },
-        data: param
+            url: Constant.SCPIF_URL + 'SaveQTData',
+            headers: Constant.JSON_HEADER,
+            data: param
         })
         .then((result) => {
           console.log("======= SaveQTData result ========");
@@ -827,13 +829,10 @@ name: 'QTStep',
               console.log(JSON.stringify(param));
 
               axios({
-                  method: 'POST',
-                  url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
-                  headers:{
-                      'Accept': 'application/json',
-                      'Content-Type': 'application/json'
-              },
-              data: param
+                method: 'POST',
+                url: Constant.LAMBDA_URL,
+                headers: Constant.JSON_HEADER,
+                data: param
               })
               .then((result) => {
                 console.log("======= Data Save result ========");
@@ -854,11 +853,8 @@ name: 'QTStep',
 
               axios({
                   method: 'POST',
-                  url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
-                  headers:{
-                      'Accept': 'application/json',
-                      'Content-Type': 'application/json'
-                  },
+                  url: Constant.LAMBDA_URL,
+                  headers: Constant.JSON_HEADER,
                   data: param
               })
               .then((result) => {
@@ -1012,6 +1008,7 @@ name: 'QTStep',
         this.CarInfo.VinNo = "";
         this.showVINSearchBtn = false;
         this.showROHistBtn = false;
+        this.captureImg = "";
         this.$cookies.set('CarNo', this.CarInfo.CarNo, '600s');
         this.$cookies.set('VinNo', this.CarInfo.VinNo, '600s');
       },

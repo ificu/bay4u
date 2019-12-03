@@ -69,7 +69,7 @@
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script>
 //import { mapMutations, mapState } from 'vuex';
-//import Constant from '@/Constant';
+import Constant from '@/Constant';
 import MessageList from '@/components/Chat/ChatMessageList.vue';
 import MessageForm from '@/components/Chat/ChatMessageForm.vue';
 import {datePadding, convertStringToDynamo} from '@/utils/common.js'
@@ -147,11 +147,8 @@ export default {
 
           axios({
             method: 'POST',
-            url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            },
+            url: Constant.LAMBDA_URL,
+            headers: Constant.JSON_HEADER,
             data: param
           })
           .then((result) => {
@@ -317,11 +314,8 @@ export default {
 
       axios({
         method: 'POST',
-        url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
         data: param
       })
       .then((result) => {
@@ -358,11 +352,8 @@ export default {
 
               axios({
                 method: 'POST',
-                url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
-                headers: {
-                  'Accept': 'application/json',
-                  'Content-Type': 'application/json'
-                },
+                url: Constant.LAMBDA_URL,
+                headers: Constant.JSON_HEADER,
                 data: param
               })
               .then((result) => {
@@ -434,11 +425,8 @@ export default {
 
       axios({
           method: 'POST',
-          url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
-          headers:{
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-          },
+          url: Constant.LAMBDA_URL,
+          headers: Constant.JSON_HEADER,
           data: param
       })
       .then((result) => {
