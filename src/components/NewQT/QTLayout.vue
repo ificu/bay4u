@@ -1323,6 +1323,8 @@ name: 'QTStep',
   width: 50px;
   border-right: solid 1px #BDBDBD;
   border-left: solid 1px #BDBDBD;
+  padding-top: 4px;
+  text-align: center;
 }
 .qtyInput input {
   width: 26px;
