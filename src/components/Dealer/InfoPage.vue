@@ -151,6 +151,7 @@
                   <span class="TotalInfo-Title">합계금액</span>
                   <span class="TotalInfo-Text">{{total | localeNum}}</span>
                   <span><b-button v-on:click="sendQTconfirmMsg()">견적 완료 알림</b-button></span>
+                  <!--<v-btn @click="SendSMS" >SMS전송</v-btn>-->
                 </div>
 
             </div>
@@ -357,6 +358,36 @@ export default {
         this.itemImage = result.data.Items[0].IMG;
         
       });      
+    },
+    SendSMS()
+    {
+      var param = {};
+      param.TranPhone = "010-8542-9796";
+      param.TranCallback = "1600-9691";
+      param.TranMsg =  "모바일 견적요청이 완료되었습니다.";
+
+      console.log("======= SendSMS Request result ========");
+      console.log(param); 
+
+      axios({
+          method: 'POST',
+          //url:'http://iparts.sknetworks.co.kr/BAY4UService.svc/SendSMS',
+          url:'https://bay4u.co.kr/scpif/SendSMS',
+          headers:{
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+          },
+          data: param
+      })
+      .then((result) => {
+          console.log("======= SendSMS Return result ========");     
+          console.log(result.data); 
+          console.log(result.data.ReturnMessage)
+      })
+      .catch((error) => {
+          console.log(error);
+      })   
+
     }
   },
   computed:{
