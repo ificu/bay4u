@@ -111,17 +111,28 @@ export default {
 
     logOut( )
     {
-        this.$cookies.remove('BsnID');
-        this.$cookies.remove('UserNM');
-        this.$cookies.remove('UserType');      
+        var cookiesList = this.$cookies.keys();
         
+        for(var i=0; i<cookiesList.length; i++)
+        {
+         this.$cookies.remove(cookiesList[i]);
+        }
+     
+        this.UserInfo.UserID = "";
+        this.UserInfo.BsnID = "";
+        this.UserInfo.Name = "";
+        this.UserInfo.EntNo = "";
+
+        this.CarInfo.CarNo = "";
+        this.CarInfo.VinNo = "";
+
         this.$router.push('/');
     }
   }
 }
 </script>
 
-<style scoped>
+<style>
 .LoginCheck{
     text-align:end;
 }
