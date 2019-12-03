@@ -178,6 +178,7 @@
 <script>
 import ItemCategory from '@/components/NewQT/ItemCategory.vue'
 import QTConfirm from '@/components/NewQT/QTConfirm.vue'
+import Constant from '@/Constant';
 
 export default {
   name: 'NewQT',
@@ -219,11 +220,8 @@ export default {
 
       axios({
         method: 'POST',
-        url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
         data: param
       })
       .then((result) => {
@@ -247,11 +245,8 @@ export default {
 
       axios({
         method: 'POST',
-        url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
         data: param
       })
       .then((result) => {
@@ -288,11 +283,8 @@ export default {
 
       axios({
         method: 'POST',
-        url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
         data: param
       })
       .then((result) => {
