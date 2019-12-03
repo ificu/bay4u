@@ -10,7 +10,8 @@
         <ul>
           <li v-for="(qtReq, index) in qtReqList" v-bind:key = "index" v-on:click="chatingToggle(qtReq)">
             <i class="Dealer-type fas fa-wrench" style="color:#fbc02e;"></i>
-            <p class="Dealer-name">{{(qtReq.CarNo === "*empty*")?"미상차량" : qtReq.CarNo }}</p><!--<p>{{getDealerNm(qtReq.ResDealer)}}</p>-->
+            <p class="Chart-carinfo">{{(qtReq.CarNo === "*empty*")?"미상차량" : qtReq.CarNo }} / {{qtReq.ReqDt}}</p>
+            <span class="Dealer-name">{{SetDealerNm(qtReq.ResDealer)}}</span>
             <span type="button" class="Chat-detail">
               <i class="fas fa-angle-double-right"></i>
             </span>
@@ -148,6 +149,7 @@ export default {
   created : function() {
     if(this.$route.params.chatid !== undefined) {
 
+    
       // msgDatas 초기화
       this.$store.commit('InitMsgData');
 
@@ -162,16 +164,21 @@ export default {
       else{
         msg = this.$route.params.carNo + " 차량에 대한 견적이 요청됐습니다.";
       }
-      
+
+      var now = new Date();
+      var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
       var chatMsg = {};
       //chatMsg.from = {'name' : '나'};
       chatMsg.from = {'name' : this.UserInfo.BsnID};
       chatMsg.to = {'name' : "parts"};
       chatMsg.msg  = msg;
+      chatMsg.reqTm = chatTime;
       this.msgDatas = chatMsg;
 
       this.docId = this.$route.params.chatid;
-      
+  
       this.$sendMessage({
         name: this.UserInfo.BsnID,
         msg,
@@ -185,6 +192,7 @@ export default {
         this.showAppend = true;
 
       }
+   
     }
 
     //const $ths = this;
@@ -252,11 +260,16 @@ export default {
         },
         msg,
       });*/
+      var now = new Date();
+      var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
       var chatMsg = {};
       chatMsg.from = {'name' : this.UserInfo.BsnID};
       chatMsg.to = {'name' : "parts"};
       chatMsg.Chatid = this.docId;
       chatMsg.msg  = msg;
+      chatMsg.reqTm  = chatTime;
       this.msgDatas = chatMsg;
       this.$sendMessage({
         //name: this.$route.params.username,
@@ -296,7 +309,7 @@ export default {
       param.payload.Item.ChatTo = "parts";
       param.payload.Item.Message = chatMsg.msg;
       param.payload.Item.Status = "0";
-      param.payload.Item.ReqTm = key;
+      param.payload.Item.ReqTm = chatMsg.reqTm;
       param.payload.Item.IMG = chatMsg.imgId;
 
       console.log("Send Msg : ", JSON.stringify(param));
@@ -359,6 +372,7 @@ export default {
           chatMsg.to = {'name' : element['ChatTo']};
           chatMsg.Chatid = this.docId;
           chatMsg.msg  = element['Message'];
+          chatMsg.reqTm = element['ReqTm'];
           if(element['IMG'] !== undefined) {
             param = {};
             param.operation = "list";
@@ -412,11 +426,8 @@ export default {
 
       axios({
         method: 'POST',
-        url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
         data: param
       })
       .then((result) => {
@@ -433,67 +444,44 @@ export default {
 
         this.qtReqList = result.data.Items;
 
-        /*
-        result.data.Items.forEach(element => { 
-         if(this.resDealers.indexOf(element['ResDealer']) === -1)
-         {
-            this.resDealers.push(element['ResDealer']);
-         }
-        });
-        */
+        this.getDealerNm();
 
       });
     },
-    getDealerNm(value)
+    getDealerNm()
     {
       var param = {};
       param.operation = "list";
-      param.tableName = "BAY4U_USER";
+      param.tableName = "BAY4U_CARCENTER_DEALER";
       param.payload = {};
-      param.payload.FilterExpression = "ID = :id";
+      param.payload.FilterExpression = "CARCENTER = :id";
       param.payload.ExpressionAttributeValues = {};
       var key = ":id";
    
-      param.payload.ExpressionAttributeValues[key] = value;
+      param.payload.ExpressionAttributeValues[key] =  this.UserInfo.BsnID;
 
-      console.log("user list pram : " + JSON.stringify(param));
+      console.log("Carcenter_Dealer pram : " + JSON.stringify(param));
 
       axios({
         method: 'POST',
-        url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
         data: param
       })
       .then((result) => {
-        console.log("======= User List result ========");
+        console.log("======= Carcenter_Dealer result ========");
         console.log(result.data.Items);
         this.resDealerNm = result.data.Items;
       });
     },
-    setDealerNm(val)
+    SetDealerNm(val)
     {
-       return "";
-      /*return this.resDealerNm.filter(j => j.CODE == val).CODE;*/
-      /*
-      this.resDealerNm.forEach(element => { 
-        if(element['CODE'] === val)
-        {
-              
-        }
-      });
-      console.log(val + "/" + index);
+      var dealerNm = this.resDealerNm.find(j => j.DEALER === val);
 
-      if(index === -1)
+      if(dealerNm !== undefined)
       {
-          return "부품지원센터";
+        return dealerNm.DEALER_NAME;
       }
-      else{
-         return this.resDealerNm[index].NAME;
-      }
-      */
     },
     cameraShow(flag) {
       this.showQTCamera = flag;
@@ -527,6 +515,9 @@ export default {
         console.log(error);
       });    
       
+      var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
       var msg = '사진첨부';
       var chatMsg = {};
       chatMsg.from = {'name' : this.UserInfo.BsnID};
@@ -535,6 +526,7 @@ export default {
       chatMsg.msg = msg;
       chatMsg.img = pic;
       chatMsg.imgId = key;
+      chatMsg.reqTm  = chatTime;
       this.msgDatas = chatMsg;
       this.$sendMessage({
         name: this.UserInfo.BsnID,
@@ -626,9 +618,14 @@ export default {
   font-size: 1.5rem;
 }
 .Dealer-name {
+  padding-left: 15px;
+}
+.Chart-carinfo {
   padding-left: 10px;
+  margin-top: 5px;
   font-weight: bold;
 }
+
 .Chat-detail {
   align-self: center;
   margin-left: auto;

@@ -106,6 +106,9 @@ export default {
       var key = ":id";
       param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
 
+      console.log("======= QT Request result ========");
+      console.log(JSON.stringify(param));
+
       axios({
         method: 'POST',
         url: Constant.LAMBDA_URL,

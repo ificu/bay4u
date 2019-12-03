@@ -9,7 +9,10 @@
                 </div>
                 <div class="Chating-me-contents" v-if="msg.msgData.imgId !== undefined">
                     <v-img class="grey lighten-3"  v-bind:src="msg.msgData.img" max-width="200px"></v-img>
-                </div>                
+                </div>
+                <div class="Chating-me-requestTime"> 
+                  {{setRequestTime(msg.msgData.reqTm)}}
+                </div>
             </div>
           </div>
           <div v-else>
@@ -21,7 +24,9 @@
               <div class="Chating-dealer-contents" v-if="msg.msgData.imgId !== undefined">
                   <v-img class="grey lighten-3"  v-bind:src="msg.msgData.img" max-width="200px"></v-img>
               </div> 
-
+            </div>
+            <div class="Chating-dealer-requestTime"> 
+                {{setRequestTime(msg.msgData.reqTm)}}
             </div>
           </div>
       </div>
@@ -42,13 +47,27 @@ export default {
     //console.log(this.$store.state.UserInfo.BsnID);
     
   },
- computed: {
+  computed: {
     UserInfo: {
         get() { return this.$store.getters.UserInfo },
         set(value) { this.$store.dispatch('UpdateUserInfo',value) }
     },    
   },
-  
+  methods:
+  {
+    setRequestTime(value)
+    { 
+      if(value !== undefined){
+        var str = value.substring(0, 8);
+        var str2 = value.substring(8, 10);
+        var str3 = value.substring(10, 12);
+        return str + " "+ str2 + ":" + str3;
+      }
+      else{
+        return "";
+      }
+    }
+  }
 };
 </script>
 
@@ -103,7 +122,7 @@ z-index: 1;
 .Chating-chatingList .Chating-dealer .Chating-dealer-contents {
   border: 1px solid #bebebe;
   border-radius: 0px 15px 15px 15px;
-  margin-bottom: 15px;
+  margin-bottom: 0px;
   display: inline-block;
   padding: 15px;
   font-size: 0.9rem;
@@ -116,7 +135,7 @@ z-index: 1;
 .Chating-chatingList .Chating-me-contents {
   border: 1px solid #bebebe;
   border-radius: 15px 0px 15px 15px;
-  margin-bottom: 15px;
+  margin-bottom: 0px;
   display: inline-block;
   padding: 15px;
   font-size: 0.9rem;
@@ -124,5 +143,15 @@ z-index: 1;
   background-color: #fcf4df;
   font-weight: bold;
   max-width: 90%;
+}
+.Chating-chatingList .Chating-dealer-requestTime{
+   font-size: 0.4em;
+   margin-bottom: 10px;
+   margin-left: 60px;
+}
+.Chating-chatingList .Chating-me-requestTime{
+  font-size: 0.4em;
+  margin-bottom: 10px;
+  margin-right: 10px;
 }
 </style>

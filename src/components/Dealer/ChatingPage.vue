@@ -223,11 +223,17 @@ export default {
         },
         msg,
       });*/
+
+      var now = new Date();
+      var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
       var chatMsg = {};
       chatMsg.from = {'name' : this.UserInfo.BsnID};
       chatMsg.to = {'name' : this.chatItem.ReqSite};
       chatMsg.Chatid = this.chatItem.ID;
       chatMsg.msg  = msg;
+      chatMsg.reqTm = chatTime;
       this.msgDatas = chatMsg;
       this.$sendMessage({
         name: this.UserInfo.BsnID,
@@ -264,16 +270,13 @@ export default {
       param.payload.Item.ChatTo = this.chatItem.ReqSite;
       param.payload.Item.Message = chatMsg.msg;
       param.payload.Item.Status = "0";
-      param.payload.Item.ReqTm = key;
+      param.payload.Item.ReqTm = chatMsg.reqTm;
       param.payload.Item.IMG = chatMsg.imgId;
 
       axios({
           method: 'POST',
-          url: 'https://2fb6f8ww5b.execute-api.ap-northeast-2.amazonaws.com/bay4u/backendService',
-          headers:{
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-          },
+          url: Constant.LAMBDA_URL,
+          headers: Constant.JSON_HEADER,
           data: param
       })
       .then((result) => {
@@ -338,6 +341,7 @@ export default {
             chatMsg.to = {'name' : element['ChatTo']};
             chatMsg.Chatid = this.docId;
             chatMsg.msg  = element['Message'];
+            chatMsg.reqTm = element['ReqTm'];
             if(element['IMG'] !== undefined) {       
 
               param = {};
@@ -437,6 +441,10 @@ export default {
         console.log(error);
       });    
       
+      var now = new Date();
+      var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
       var msg = '사진첨부';
       var chatMsg = {};
       chatMsg.from = {'name' : this.UserInfo.BsnID};
@@ -445,6 +453,7 @@ export default {
       chatMsg.msg = msg;
       chatMsg.img = fileImage.src;
       chatMsg.imgId = key;
+      chatMsg.reqTm = chatTime;
       this.msgDatas = chatMsg;
       this.$sendMessage({
         name: this.UserInfo.BsnID,
