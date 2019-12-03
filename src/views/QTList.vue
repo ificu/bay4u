@@ -1,10 +1,11 @@
 <template>
   <div class="QTList">
     <b-tabs class="QTList-tab" justified v-model="tabIndex" v-if="showMainPage">
-      <b-tab title="부품 ghltls" :title-link-class="linkClass(0)" >
+      <b-tab title="부품요청 내역" :title-link-class="linkClass(0)" >
         <div class="QTList-contents">
           <div class="QTList-title">
-            견적 요청 히스토리
+            <span>견적 요청 히스토리</span>
+            <CheckLogin></CheckLogin>
           </div>
           <div class="QTList-search">
             <b-input-group>
@@ -169,10 +170,11 @@
           </div>
         </div>
       </b-tab>
-      <b-tab title="견적 확정" :title-link-class="linkClass(1)" active>
+      <b-tab title="견적확정 내역" :title-link-class="linkClass(1)" active>
         <div class="QTList-contents">
           <div class="QTList-title">
-            견적 확정 내역
+            <span>견적 확정 내역</span>
+            <CheckLogin></CheckLogin>
           </div>
           <div class="QTList-search">
             <b-input-group>
@@ -370,7 +372,8 @@
       <b-tab title="정비 명세서" :title-link-class="linkClass(2)" >
         <div class="QTList-contents">
           <div class="QTList-title">
-            고객 정비 히스토리
+            <span>고객 정비 히스토리</span>
+            <CheckLogin></CheckLogin>
           </div>
           <div class="QTList-search">
             <b-input-group>
@@ -638,7 +641,6 @@
         </span>
       </router-link >
     </div>
-    <CheckLogin></CheckLogin>
   </div>
 </template>
 
@@ -944,6 +946,11 @@ export default {
   margin-bottom: 10px;
   font-size: 1.5rem;
   font-weight: bold;
+  display:flex;
+}
+
+.QTList-title span{
+  width: 100%;
 }
 
 .QTList-search {
