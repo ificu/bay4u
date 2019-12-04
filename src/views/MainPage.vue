@@ -17,6 +17,7 @@
     </header>
     <div class="mdl-layout__drawer">
       <span class="mdl-layout-title">준비중...</span>
+      <CheckLogin></CheckLogin>
     </div>
     <main class="mdl-layout__content">
       <section class="mdl-layout__tab-panel is-active" id="tab-page">
@@ -44,6 +45,7 @@
 import UserListPage from '@/components/Dealer/UserListPage.vue'
 import ChatingPage from '@/components/Dealer/ChatingPage.vue'
 import InfoPage from '@/components/Dealer/InfoPage.vue'
+import CheckLogin from '@/components/Common/CheckLogin.vue'
 
 export default {
   name: 'MainPage',
@@ -62,7 +64,8 @@ export default {
   components: {
     UserListPage,
     ChatingPage,
-    InfoPage
+    InfoPage,
+    CheckLogin
   }
 }
 </script>

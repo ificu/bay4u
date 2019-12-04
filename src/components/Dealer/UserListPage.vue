@@ -106,6 +106,9 @@ export default {
       var key = ":id";
       param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
 
+      console.log("======= QT Request result ========");
+      console.log(JSON.stringify(param));
+
       axios({
         method: 'POST',
         url: Constant.LAMBDA_URL,
@@ -153,8 +156,8 @@ export default {
     if(this.UserInfo.Name === '')
       this.UserInfo.Name = this.$cookies.get('UserNM');
 
-
     this.$EventBus.$on('update-chatMsg', docId => {  
+      
       var checkExist = false;
 
       for (var chat of this.qtReqList) {
@@ -167,6 +170,33 @@ export default {
       // 값이 true가 아니면 현재 리스트에 없다는 의미으로 다시 조회해 와서 표시 하자.
       if(checkExist === false) {
         console.log('checkExist : false');
+        console.log('docId : ' , docId.chatId);
+
+        if(docId.qtInfo  !== undefined)
+        {
+          //console.log('Param qtInfo : ' , docId.qtInfo);
+          var newQtData = {};
+          newQtData.CarNo   = docId.qtInfo.CarNo;
+          newQtData.CarVin  = docId.qtInfo.CarVin;
+          newQtData.ID  = docId.qtInfo.ID;
+          newQtData.LineItem  = docId.qtInfo.LineItem;
+          newQtData.Memo  = docId.qtInfo.Memo;
+          newQtData.ReqDt  = docId.qtInfo.ReqDt;
+          newQtData.ReqName  = docId.qtInfo.ReqName;
+          newQtData.ReqSeq  = docId.qtInfo.ReqSeq;
+          newQtData.ReqSite  = docId.qtInfo.ReqSite;
+          newQtData.ResDealer  = docId.qtInfo.ResDealer;
+          newQtData.isRead  = false;
+          this.qtReqList.push(newQtData);
+
+          if(Array.isArray(this.qtReqList)) {
+            this.qtReqList.sort(function(a, b){
+            return (a.ReqSeq < b.ReqSeq) ? 1 : -1;
+            });
+          }
+        }
+
+        /*
         var param = {};
         param.operation = "list";
         param.tableName = "BAY4U_QT_LIST";
@@ -174,7 +204,9 @@ export default {
         param.payload.FilterExpression = "ResDealer = :id";
         param.payload.ExpressionAttributeValues = {};
         var key = ":id";
-        param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
+        param.payload.ExpressionAttributeValues[key] = docId;
+
+        console.log("QT param : ", param);
 
         axios({
           method: 'POST',
@@ -183,27 +215,28 @@ export default {
           data: param
         })
         .then((result) => {
-          console.log("======= QT List result ========");
-          console.log(result.data);
+        console.log("======= QT List result ========");
+        console.log(result.data);
 
-          if(Array.isArray(result.data.Items)) {
-            result.data.Items.sort(function(a, b){
-              return (a.ReqDt < b.ReqDt) ? 1 : -1;
-            });
+        if(Array.isArray(result.data.Items)) {
+          result.data.Items.sort(function(a, b){
+          return (a.ReqDt < b.ReqDt) ? 1 : -1;
+          });
+        }
+      
+        for (var chat of result.data.Items) {
+          if(chat.ID === docId) {
+            chat.isRead = false;
+          }            
+          else {
+            chat.isRead = true;
           }
+        }
 
-          for (var chat of result.data.Items) {
-            if(chat.ID === docId) {
-              chat.isRead = false;
-            }            
-            else {
-              chat.isRead = true;
-            }
-          }
+        this.qtReqList = result.data.Items;    
 
-          this.qtReqList = result.data.Items;    
-          
         });
+         */
       }
 
     });      

@@ -323,10 +323,15 @@ export default {
     },
     sendQTconfirmMsg()
     {
+      var now = new Date();
+      var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
       var msg = this.qtInfo.CarNo + " 차량에 대한 견적이 완료됐습니다.";
       var qtMsg = {};
       qtMsg.from = {'name' : this.UserInfo.BsnID};
       qtMsg.msg  = msg;
+      qtMsg.reqTm = chatTime;
       this.$EventBus.$emit('send-QTConfirm' , qtMsg)
       /*
       var param = {};
