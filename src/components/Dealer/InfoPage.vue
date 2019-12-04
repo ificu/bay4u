@@ -163,14 +163,20 @@
       <v-dialog v-model="showQTImageFlag" width="500px">
         <v-card>
           <v-card-title class="headline" >이미지 확인</v-card-title>
-          <v-img class="grey lighten-3 mr-4 ml-4"  v-bind:src="itemImage" max-width="500px"></v-img>
+          <v-img class="grey lighten-3 mr-4 ml-4"  v-bind:src="itemImage" max-width="800px"></v-img>
 
           <v-card-actions>
             <v-spacer></v-spacer>
+             <v-btn
+              color="#A1887F"
+              @click="saveImage"
+            >
+              저장
+            </v-btn>      
             <v-btn
               color="#00BFA5"
               outlined
-              @click="showQTImageFlag = false"
+              @click="showQTImageFlag = false; itemImage = '';"
             >
               닫기
             </v-btn>
@@ -322,6 +328,26 @@ export default {
       qtMsg.from = {'name' : this.UserInfo.BsnID};
       qtMsg.msg  = msg;
       this.$EventBus.$emit('send-QTConfirm' , qtMsg)
+      /*
+      var param = {};
+      param.system = "BAY4U";
+      param.telNo = "01085429796";
+      param.callbackNo = "01037329517";
+      param.msg = "테스트 전송 입니다.";
+
+      axios({
+        method: 'POST',
+        url: Constant.SCPIF_URL + 'SendSMS',
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+        console.log(result);
+      })
+      .catch((error) => {
+        console.log(error);
+      });      
+      */
     },
     showQTImage(img) { 
       console.log("Image : ", img);
@@ -349,6 +375,17 @@ export default {
         this.itemImage = result.data.Items[0].IMG;
         
       });      
+    },
+    saveImage() {
+      console.log("Info : ", this.qtInfo);
+      var link   = document.createElement('a');
+      link.href = this.itemImage;
+      link.target = '_self';
+      if(this.qtInfo.CarVin !== '' )
+        link.download = this.qtInfo.CarVin + '.png';
+      else
+        link.download = this.qtInfo.ID + '.png';
+      link.click();
     },
     SendSMS()
     {
@@ -413,6 +450,11 @@ export default {
         this.siteInfo = [];
         this.showSiteInfo = false;
     });
+
+    this.$EventBus.$on('click-showImage', img => {   
+        this.itemImage = img;
+        this.showQTImageFlag = true;
+    });    
   },
 }
 </script>
