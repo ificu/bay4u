@@ -8,6 +8,7 @@ export default {
     AIBRIL_URL: 'https://visionai.skcc.com/ocr/alpr/recognize',
     INTRAIF_URL: 'https://bay4u.co.kr/extif',
     INTRA_PKGIF_URL: 'https://bay4u.co.kr/extpkgif',
+    CHAT_URL: 'https://bay4u.co.kr:8083',
     JSON_HEADER: {'Accept': 'application/json','Content-Type': 'application/json'},
     AIBRIL_HEADER: {'api-key': '7bfee9e0-b19a-4f14-a3a0-42c259aac9f2', 'Content-Type': 'application/json'}
 
@@ -18,6 +19,7 @@ export default {
     AIBRIL_URL: 'https://visionai.skcc.com/ocr/alpr/recognize',
     INTRAIF_URL: 'https://bay4u.co.kr:444/extif',
     INTRA_PKGIF_URL: 'https://bay4u.co.kr:444/extpkgif',
+    CHAT_URL: 'https://bay4u.co.kr:8084',    
     JSON_HEADER: {'Accept': 'application/json','Content-Type': 'application/json'},
     AIBRIL_HEADER: {'api-key': '7bfee9e0-b19a-4f14-a3a0-42c259aac9f2', 'Content-Type': 'application/json'}*/
   };
