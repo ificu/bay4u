@@ -8,7 +8,7 @@
                     {{msg.msgData.msg}}
                 </div>
                 <div class="Chating-me-contents" v-if="msg.msgData.imgId !== undefined">
-                    <v-img class="grey lighten-3"  v-bind:src="msg.msgData.img" max-width="200px"></v-img>
+                    <v-img class="grey lighten-3"  v-bind:src="msg.msgData.img" max-width="200px" @click="$EventBus.$emit('click-showImage' , msg.msgData.img)"></v-img>
                 </div>
                 <div class="Chating-me-requestTime"> 
                   {{setRequestTime(msg.msgData.reqTm)}}
@@ -22,7 +22,7 @@
                   {{msg.msgData.msg}}
               </div>
               <div class="Chating-dealer-contents" v-if="msg.msgData.imgId !== undefined">
-                  <v-img class="grey lighten-3"  v-bind:src="msg.msgData.img" max-width="200px"></v-img>
+                  <v-img class="grey lighten-3"  v-bind:src="msg.msgData.img" max-width="200px" @click="$EventBus.$emit('click-showImage' , msg.msgData.img)"></v-img>
               </div> 
             </div>
             <div class="Chating-dealer-requestTime"> 
@@ -38,7 +38,11 @@
 export default {
   name: 'MessageList',
   props: ['msgs'],
-  
+  methods: {
+    showImage() {
+
+    }
+  },
   updated() {
     //console.log("Update msg : ", JSON.stringify(this.msgs));
   },
