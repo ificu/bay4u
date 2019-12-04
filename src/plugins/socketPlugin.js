@@ -18,6 +18,8 @@ const SocketPlugin = {
         recv: $payload.recv,
         chatId: $payload.chatId,
         imgId: $payload.imgId,
+        reqTm: $payload.reqTm,
+        qtInfo: $payload.qtInfo,
       });
     };
 

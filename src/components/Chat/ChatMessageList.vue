@@ -58,10 +58,11 @@ export default {
     setRequestTime(value)
     { 
       if(value !== undefined){
-        var str = value.substring(0, 8);
-        var str2 = value.substring(8, 10);
-        var str3 = value.substring(10, 12);
-        return str + " "+ str2 + ":" + str3;
+        var month = value.substring(4, 6);
+        var date = value.substring(6, 8);
+        var hour = value.substring(8, 10);
+        var minute = value.substring(10, 12);
+        return month + '.' + date + ' '+ hour + ':' + minute;
       }
       else{
         return "";
@@ -150,7 +151,7 @@ z-index: 1;
    margin-left: 60px;
 }
 .Chating-chatingList .Chating-me-requestTime{
-  font-size: 0.4em;
+  font-size: 0.5em;
   margin-bottom: 10px;
   margin-right: 10px;
 }

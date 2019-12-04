@@ -125,14 +125,17 @@ export default {
     this.$socket.on('chat', (data) => {
       //this.pushMsgData(data);
       //$ths.datas.push(data);
+      console.log("Chat Data Recv : ", data);
+      console.log('chatItem.ID : ' + this.chatItem.ID + ' / ' + 'data.chatId : ' + data.chatId);
+      
       if(this.chatItem.ID === data.chatId) {
-        console.log("Chat Data Recv : ", data);
-
+        
         var chatMsg = {};
         chatMsg.from = {'name' : data.from.name};
         chatMsg.to = {'name' : data.to.name};
         chatMsg.msg  = data.msg;
         chatMsg.Chatid = this.chatItem.ID;
+        chatMsg.reqTm = data.reqTm;
 
         if(data.imgId !== undefined) {       
           var param = {};
@@ -174,7 +177,7 @@ export default {
           body : data.msg
         };
         new Notification('채팅 메시지 (' + data.from.name + ')', options);
-        this.$EventBus.$emit('update-chatMsg', data.chatId);  
+        this.$EventBus.$emit('update-chatMsg', data);  
       }
     });
 
@@ -195,6 +198,15 @@ export default {
 
     this.$EventBus.$on('send-QTConfirm', qtMsg => {   
         this.msgDatas = qtMsg;
+
+        this.$sendMessage({
+          name: this.UserInfo.BsnID,
+          msg: qtMsg.msg,
+          recv: this.chatItem.ReqSite,
+          chatId: this.chatItem.ID,
+          reqTm : qtMsg.reqTm,
+        });
+
         this.saveChatMsg(qtMsg);
     });
 
@@ -239,7 +251,8 @@ export default {
         name: this.UserInfo.BsnID,
         msg,
         recv: this.chatItem.ReqSite,
-        chatId: this.chatItem.ID
+        chatId: this.chatItem.ID,
+        reqTm : chatTime,
       });
       this.saveChatMsg(chatMsg);
     },    

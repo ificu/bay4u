@@ -179,20 +179,20 @@ export default {
 
       this.docId = this.$route.params.chatid;
   
+      this.saveChatMsg(chatMsg);
+
       this.$sendMessage({
         name: this.UserInfo.BsnID,
         msg,
         recv: "parts",
-        chatId: this.docId
+        chatId: this.docId,
+        reqTm : chatTime,
+        qtInfo : this.$route.params.qtInfo,
       });
-
-      this.saveChatMsg(chatMsg);
 
       if(this.$route.params.append !== undefined) {
         this.showAppend = true;
-
       }
-   
     }
 
     //const $ths = this;
@@ -204,6 +204,7 @@ export default {
         chatMsg.to = {'name' : data.to.name};
         chatMsg.msg  = data.msg;
         chatMsg.Chatid = this.docId;
+        chatMsg.reqTm = data.reqTm;
         if(data.imgId !== undefined) {       
           var param = {};
           param.operation = "list";
@@ -276,7 +277,8 @@ export default {
         name: this.UserInfo.BsnID,
         msg,
         recv: "parts",
-        chatId: this.docId
+        chatId: this.docId,
+        chatDttm : chatTime,
       });
       this.saveChatMsg(chatMsg);
     },

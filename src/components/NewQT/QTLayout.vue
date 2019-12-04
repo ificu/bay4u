@@ -844,6 +844,8 @@ name: 'QTStep',
                 console.log(error);
               });
 
+              var qtInfoData = param.payload.Item;
+
               param = {};
 
               param.operation = "create";
@@ -874,7 +876,8 @@ name: 'QTStep',
                                         carNo: this.CarInfo.CarNo,
                                         chatFrom: this.UserInfo.BsnID,
                                         chatTo: "parts",
-                                        chatDate: now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2)
+                                        chatDate: now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2),
+                                        qtInfo : qtInfoData
                                     }});
            }
 
