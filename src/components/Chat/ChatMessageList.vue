@@ -38,11 +38,6 @@
 export default {
   name: 'MessageList',
   props: ['msgs'],
-  methods: {
-    showImage() {
-
-    }
-  },
   updated() {
     //console.log("Update msg : ", JSON.stringify(this.msgs));
   },
