@@ -782,6 +782,21 @@ name: 'QTStep',
         param.UserID = this.UserInfo.UserID;
         param.CarNo = this.CarInfo.CarNo;
         param.VinNo = this.CarInfo.VinNo;
+        if(Array.isArray(this.roList) && this.roList.length > 0  ){
+          
+          param.KTYPNR  = this.roList[0].KTYPNR ;
+          param.CD_CR_DTL = this.roList[0].CD_CR_DTL ;
+          param.MCODE = this.roList[0].MCODE ;
+          
+        }
+        else{
+          
+          param.KTYPNR  = '' ;
+          param.CD_CR_DTL = '' ;
+          param.MCODE = '' ;
+         
+        }
+        
         param.Memo = this.qtReqMemo;
         if(this.qtRequest !== undefined || this.qtRequest !== null || this.qtRequest.length !== 0 )
         {

@@ -369,14 +369,30 @@ export default {
         }
 
         result.data.Items.forEach(element => { 
+          
           var chatMsg = {};
           chatMsg.from = {'name' : element['ChatFrom']};
           chatMsg.to = {'name' : element['ChatTo']};
           chatMsg.Chatid = this.docId;
           chatMsg.msg  = element['Message'];
           chatMsg.reqTm = element['ReqTm'];
-          if(element['IMG'] !== undefined) {
-            param = {};
+          chatMsg.imgId = element['IMG']; 
+          chatMsg.img = ''; 
+
+          this.msgDatas = chatMsg;    
+        });
+        
+        this.setImg(this.msgDatas);
+
+      });
+
+    },
+    setImg(data)
+    {
+        data.forEach(element => { 
+          if(element.msgData.imgId !== undefined)
+          {
+            var param = {};
             param.operation = "list";
             param.tableName = "BAY4U_IMG";
             param.payload = {};
@@ -384,8 +400,11 @@ export default {
             param.payload.ExpressionAttributeValues = {};
             var key = ":id";
 
-            param.payload.ExpressionAttributeValues[key] = element['IMG'];
+            param.payload.ExpressionAttributeValues[key] =  element.msgData.imgId;
 
+            console.log("======= Image Data request ========");
+            console.log(param.payload);
+    
             axios({
               method: 'POST',
               url: Constant.LAMBDA_URL,
@@ -396,23 +415,16 @@ export default {
               console.log("======= Image Data result ========");
               console.log(result.data);
 
-              chatMsg.img = result.data.Items[0].IMG;
-              chatMsg.imgId = element['IMG'];    
-
-              this.msgDatas = chatMsg;
+              element.msgData.img = result.data.Items[0].IMG;
+      
             })
             .catch((error) => {
               console.log(error);
-              this.msgDatas = chatMsg;
-            });  
+          
+            });
           }
-          else {
-            this.msgDatas = chatMsg;
-          }       
+          
         });
-
-      });
-
     },
     showQTReqList() {
       var param = {};
