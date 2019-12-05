@@ -73,18 +73,22 @@
 .msg-modal-body {
     padding: 10px 15px;
     font-weight:bold;
-    font-size: 0.7em;
+    font-size: 0.9em;
     text-align: left;
     vertical-align: middle;
     background-color: #fff;
 }
+.msg-modal-body .msgBody{
+    font-size: 0.65em;
+}
 .msg-modal-footer {
+    padding-top:5px;
     padding-right:5px;
     padding-bottom: 5px;
     display:flex;
     flex-direction: row-reverse;
     background-color: #4E342E;
-     border-radius: 0px 0px 5px 5px;
+    border-radius: 0px 0px 5px 5px;
 }
 .msg-modal-footer .v-btn {
     margin-left: 5px;

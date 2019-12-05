@@ -10,7 +10,7 @@
   <!-- 알림 메시지 팝업 -->
     <MessageBox v-if="showAlertMsg"  @close="closeMsg(alertMsgPath)">
       <div slot="header"><h5 >알림</h5></div>
-      <span slot="body" @click="closeMsg(alertMsgPath)"><pre>{{alertMsg}}</pre>
+      <span slot="body" @click="closeMsg(alertMsgPath)"><pre class="msgBody">{{alertMsg}}</pre>
       </span>
       <div slot="footer" v-if="showAlerMsgBtn">
         <v-btn depressed small color="#967d5f" dark @click="closeMsg(alertMsgPath)"> 확인</v-btn>
