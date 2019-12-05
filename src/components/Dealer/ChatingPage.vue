@@ -349,53 +349,64 @@ export default {
           }
 
           result.data.Items.forEach(element => { 
-            var chatMsg = {};
-            chatMsg.from = {'name' : element['ChatFrom']};
-            chatMsg.to = {'name' : element['ChatTo']};
-            chatMsg.Chatid = this.docId;
-            chatMsg.msg  = element['Message'];
-            chatMsg.reqTm = element['ReqTm'];
-            if(element['IMG'] !== undefined) {       
+            
+          var chatMsg = {};
+          chatMsg.from = {'name' : element['ChatFrom']};
+          chatMsg.to = {'name' : element['ChatTo']};
+          chatMsg.Chatid = this.docId;
+          chatMsg.msg  = element['Message'];
+          chatMsg.reqTm = element['ReqTm'];
+          chatMsg.imgId = element['IMG']; 
+          chatMsg.img = ''; 
 
-              param = {};
-              param.operation = "list";
-              param.tableName = "BAY4U_IMG";
-              param.payload = {};
-              param.payload.FilterExpression = "ID = :id";
-              param.payload.ExpressionAttributeValues = {};
-              var key = ":id";
-
-              param.payload.ExpressionAttributeValues[key] = element['IMG'];
-
-              axios({
-                method: 'POST',
-                url: Constant.LAMBDA_URL,
-                headers: Constant.JSON_HEADER,
-                data: param
-              })
-              .then((result) => {
-                console.log("======= Image Data result ========");
-                console.log(result.data);
-
-                chatMsg.img = result.data.Items[0].IMG;
-                chatMsg.imgId = element['IMG'];    
-
-                this.msgDatas = chatMsg;
-              })
-              .catch((error) => {
-                console.log(error);
-                this.msgDatas = chatMsg;
-              });  
-            }
-            else {
-              this.msgDatas = chatMsg;
-            }       
+          this.msgDatas = chatMsg;
+             
           });
-
+   
+          this.setImg(this.msgDatas);
           this.showChatArea = true;
         }
 
       });
+    },
+    setImg(data)
+    {
+        data.forEach(element => { 
+          if(element.msgData.imgId !== undefined)
+          {
+            var param = {};
+            param.operation = "list";
+            param.tableName = "BAY4U_IMG";
+            param.payload = {};
+            param.payload.FilterExpression = "ID = :id";
+            param.payload.ExpressionAttributeValues = {};
+            var key = ":id";
+
+            param.payload.ExpressionAttributeValues[key] =  element.msgData.imgId;
+
+            console.log("======= Image Data request ========");
+            console.log(param.payload);
+    
+            axios({
+              method: 'POST',
+              url: Constant.LAMBDA_URL,
+              headers: Constant.JSON_HEADER,
+              data: param
+            })
+            .then((result) => {
+              console.log("======= Image Data result ========");
+              console.log(result.data);
+
+              element.msgData.img = result.data.Items[0].IMG;
+      
+            })
+            .catch((error) => {
+              console.log(error);
+          
+            });
+          }
+          
+        });
     },
     imageSelect() {
       this.showImageSelectFlag = true;
