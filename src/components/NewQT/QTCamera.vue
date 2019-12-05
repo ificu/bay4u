@@ -131,9 +131,7 @@ export default {
             });
         }
 
-        var imgData = {'img' : url64, 'width' : videoPlayer.videoWidth, 'height' : videoPlayer.videoHeight };
-
-        this.$emit('updatePic', imgData);
+        this.$emit('updatePic', url64);
         this.$emit('closeQTCameraModal', false);
     },
     imageSelect() {
@@ -153,11 +151,7 @@ export default {
         this.showImageSelectFlag = false;
         var fileImage = document.querySelector('#fileImageView');
 
-        console.log(fileImage.width);
-
-        var imgData = {'img' : fileImage.src, 'width' : 0, 'height' : 0 };
-
-        this.$emit('updatePic', imgData);
+        this.$emit('updatePic', fileImage.src);
         this.$emit('closeQTCameraModal', false);
     }      
   },

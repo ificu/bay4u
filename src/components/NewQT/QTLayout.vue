@@ -343,8 +343,7 @@ name: 'QTStep',
         this.showQTCamera = showFlag;
         this.imgCaptureType = type;
       },
-      updatePic(imgData){
-        var pic = imgData.img;
+      updatePic(pic){
         if(this.imgCaptureType === "CARNO") {
           this.captureImg = pic;
           pic = pic.replace("data:image/png;base64,", "");
