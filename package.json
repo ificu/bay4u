@@ -1,6 +1,6 @@
 {
   "name": "bay4u-m",
-  "version": "19.12.05.2",
+  "version": "19.12.07.1",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
