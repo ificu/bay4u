@@ -160,7 +160,7 @@ export default {
       if(type === "SITE") {
         this.$router.push('/NewQT');
       }
-      else {
+      else if(type === "DEALER") {
         this.$router.push('/MainPage');
       }
     }

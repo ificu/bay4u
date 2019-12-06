@@ -34,6 +34,16 @@
           <div class="content-info">
             <InfoPage></InfoPage>
           </div>
+
+          <!-- 알림 메시지 팝업 -->
+          <MessageBox v-if="showAlertMsg"  @close="closeMsg(alertMsgPath)">
+            <div slot="header"><h5 >알림</h5></div>
+            <span slot="body" @click="closeMsg(alertMsgPath)"><pre>{{alertMsg}}</pre>
+            </span>
+            <div slot="footer" v-if="showAlerMsgBtn">
+              <v-btn depressed small color="#967d5f" dark @click="closeMsg(alertMsgPath)"> 확인</v-btn>
+            </div>
+          </MessageBox>
           
         </div>
       </section>
@@ -46,26 +56,78 @@ import UserListPage from '@/components/Dealer/UserListPage.vue'
 import ChatingPage from '@/components/Dealer/ChatingPage.vue'
 import InfoPage from '@/components/Dealer/InfoPage.vue'
 import CheckLogin from '@/components/Common/CheckLogin.vue'
+import MessageBox from '@/components/Common/MessageBox.vue'
 
 export default {
   name: 'MainPage',
   data () {
     return {
+      showAlertMsg: false,
+      showAlerMsgBtn: true,
       qtKey: '',
-      chatInfo:[]
+      chatInfo:[],
+      alertMsg: "",
+      alertMsgPath: "",
+    }
+  },
+  computed:{
+    CarInfo: {
+        get() { return this.$store.getters.CarInfo },
+        set(value) { this.$store.dispatch('UpdateCarInfo',value) }
+    },
+    UserInfo: {
+        get() { return this.$store.getters.UserInfo },
+        set(value) { this.$store.dispatch('UpdateUserInfo',value) }
     }
   },
   methods: {
     setQtInfo(info) {
       this.chatInfo = info;
       console.log(this.chatInfo);
-    }
+    },
+    closeMsg(path) {     
+        this.showAlertMsg = false;
+        this.logOut();
+        if(path.length > 0 && path == 'Login')
+        {
+            this.$router.push('/');
+        }
+    },    
+    logOut( )
+    {
+        var cookiesList = this.$cookies.keys();
+        
+        for(var i=0; i<cookiesList.length; i++)
+        {
+         this.$cookies.remove(cookiesList[i]);
+        }
+     
+        this.UserInfo.UserID = "";
+        this.UserInfo.BsnID = "";
+        this.UserInfo.Name = "";
+        this.UserInfo.EntNo = "";
+
+        this.CarInfo.CarNo = "";
+        this.CarInfo.VinNo = "";
+
+        this.$router.push('/');
+    }    
   },
   components: {
     UserListPage,
     ChatingPage,
     InfoPage,
-    CheckLogin
+    CheckLogin,
+    MessageBox
+  },
+  created : function() {
+    // 혹시 모바일에서 접근하는 케이스라면 에러 처리 하자.
+    if (navigator.userAgent.match("iPad|iPhone|Mobile|UP.Browser|Android|BlackBerry|Windows CE|Nokia|webOS|Opera Mini|SonyEricsson|opera mobi|Windows Phone|IEMobile|POLARIS") != null) 
+    { 
+      this.alertMsg = "로그인 정보가 잘못 설정되었습니다.\n다시 로그인 해주세요."
+      this.showAlertMsg = !this.showAlertMsg;
+      this.alertMsgPath = "Login";
+    }
   }
 }
 </script>
