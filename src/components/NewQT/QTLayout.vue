@@ -791,7 +791,7 @@ name: 'QTStep',
         }
         else{
           
-          param.KTYPNR  = '' ;
+          param.KTYPNR  = '0' ;
           param.CD_CR_DTL = '' ;
           param.MCODE = '' ;
          

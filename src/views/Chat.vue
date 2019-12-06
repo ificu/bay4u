@@ -10,7 +10,9 @@
         <ul>
           <li v-for="(qtReq, index) in qtReqList" v-bind:key = "index" v-on:click="chatingToggle(qtReq)">
             <i class="Dealer-type fas fa-wrench" style="color:#fbc02e;"></i>
-            <p class="Chart-carinfo">{{(qtReq.CarNo === "*empty*")?"미상차량" : qtReq.CarNo }} / {{qtReq.ReqDt}}</p>
+            <div class="Chart-qtinfo">
+              <span class="Chart-carInfo">{{(qtReq.CarNo === "*empty*")?"미상차량" : qtReq.CarNo }}</span> / 
+              <span  class="Chart-date">{{setReqDt(qtReq.ReqDt)}}</span></div>
             <span class="Dealer-name">{{SetDealerNm(qtReq.ResDealer)}}</span>
             <span type="button" class="Chat-detail">
               <i class="fas fa-angle-double-right"></i>
@@ -577,6 +579,16 @@ export default {
         return result.data.Items[0].IMG;
       });        
       return "";
+    },
+    setReqDt(value)
+    { 
+      if(value !== undefined){
+        var str = value.substring(2, 10);
+        return str;
+      }
+      else{
+        return "";
+      }
     }
   },
   mounted() {
@@ -634,10 +646,17 @@ export default {
 .Dealer-name {
   padding-left: 15px;
 }
-.Chart-carinfo {
+.Chart-qtinfo {
   padding-left: 10px;
-  margin-top: 5px;
+}
+
+.Chart-qtinfo .Chart-carInfo {
   font-weight: bold;
+  font-size: 1.4em;
+}
+
+.Chart-qtinfo .Chart-date {
+ font-size: 0.8em;
 }
 
 .Chat-detail {
