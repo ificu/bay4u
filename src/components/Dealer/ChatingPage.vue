@@ -6,9 +6,11 @@
           <b-tab title="대화 목록" :title-link-class="linkClass(0)" active >-->
             <div  class="Chating-Title">{{chatItem.ReqName}} {{ chatItem.CarNo }} </div>
               <b-card-text>
-                
-                <div v-if="showChatArea">
-                  <div class="Chating-page">
+                <div style="visibility:hidden; opacity:0" id="dropzone">
+                  <div id="textnode">Drop files to add data.</div>
+            </div>
+                <div v-if="showChatArea" >
+                   <div class="Chating-page">
                     <Message-List :msgs="msgDatas" class="msg-list" v-auto-bottom></Message-List>
                   </div>
                   <div>
@@ -18,8 +20,8 @@
                       class="msg-form" >
                     </Message-From>
                   </div>
+                  <v-img  id="dragDropImg" src="" ></v-img>
                 </div>
-                
               </b-card-text>
         <!--  </b-tab>      
           <b-tab title="동진 카센타" :title-link-class="linkClass(1)">
@@ -28,6 +30,7 @@
             </b-card-text>
           </b-tab>
         </b-tabs>-->
+        
       </b-card>
     </div>   
     <v-dialog v-model="showImageSelectFlag" width="500px">
@@ -42,7 +45,8 @@
             class="pr-6 pl-6"
             v-model="selectFiles"
             v-on:change="selectedFileChage"
-          ></v-file-input>
+        >
+        </v-file-input>
         
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -85,7 +89,8 @@ export default {
       show:true,
       showImageSelectFlag:false,
       selectFiles: [],
-      itemImage: ''
+      itemImage: '',
+      dragDropFiles: []
     }
   },
   components: {
@@ -488,11 +493,125 @@ export default {
       });
       this.saveChatMsg(chatMsg);     
 
+    },
+    dragDropFileSend(file) {
+      
+      var fileImage = document.querySelector('#dragDropImg');
+      console.log('Img Path :' , fileImage.src);
+
+      var now = new Date();
+      var key = this.UserInfo.BsnID + now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
+      var param = {};
+      param.operation = "create";
+      param.tableName = "BAY4U_IMG";
+      param.payload = {};
+      param.payload.Item = {};
+      param.payload.Item.ID = key;
+      param.payload.Item.IMG = fileImage.src;
+
+      axios({
+          method: 'POST',
+          url: Constant.LAMBDA_URL,
+          headers: Constant.JSON_HEADER,
+          data: param
+      })
+      .then((result) => {
+        console.log("======= IMG Save result ========");
+        console.log(result.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });    
+ 
+      var now = new Date();
+      var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
+      var msg = '사진첨부';
+      var chatMsg = {};
+      chatMsg.from = {'name' : this.UserInfo.BsnID};
+      chatMsg.to = {'name' : this.chatItem.ReqSite};
+      chatMsg.Chatid = this.chatItem.ID;
+      chatMsg.msg = msg;
+      chatMsg.img = fileImage.src;
+      chatMsg.imgId = key;
+      chatMsg.reqTm = chatTime;
+      this.msgDatas = chatMsg;
+      this.$sendMessage({
+        name: this.UserInfo.BsnID,
+        msg,
+        recv: this.chatItem.ReqSite,
+        chatId: this.chatItem.ID,
+        imgId: key
+      });
+
+      this.saveChatMsg(chatMsg);     
+
+    },
+    uploadFiles: function(f) {
+    var self = this;
+
+    for (var i = 0; i < f.length; i++) {
+        if (f[i].type !== "image/png") {
+          //if text file is not submitted alert and skip over it
+          alert("Sorry, " + f[i].type + " is not an accepted file type.");
+          continue;
+        } else {
+
+          var reader = new FileReader();
+          reader.readAsDataURL(f[i]);  
+
+          reader.onload = function(e) {
+          console.log('Image Data : ', e.target.result);
+          document.querySelector('#dragDropImg').src = e.target.result;
+          }
+
+          reader.onloadend = function() {
+             self.dragDropFileSend(f[i]);
+           };
+        }
+      }
     }
   },
   mounted() {
     datePadding();
     convertStringToDynamo();
+
+    var self = this;
+    window.addEventListener("dragenter", function (e) {
+            document.querySelector("#dropzone").style.visibility = "";
+            document.querySelector("#dropzone").style.opacity = 1;
+            document.querySelector("#textnode").style.fontSize = "48px";
+    });
+
+    window.addEventListener("dragleave", function (e) {
+        e.preventDefault();
+
+            document.querySelector("#dropzone").style.visibility = "hidden";
+            document.querySelector("#dropzone").style.opacity = 0;
+            document.querySelector("#textnode").style.fontSize = "42px";
+        
+    });
+
+    window.addEventListener("dragover", function (e) {
+        e.preventDefault();
+        document.querySelector("#dropzone").style.visibility = "";
+        document.querySelector("#dropzone").style.opacity = 1;
+        document.querySelector("#textnode").style.fontSize = "48px";
+    });
+
+    window.addEventListener("drop", function (e) {
+        e.preventDefault();
+        document.querySelector("#dropzone").style.visibility = "hidden";
+        document.querySelector("#dropzone").style.opacity = 0;
+        document.querySelector("#textnode").style.fontSize = "42px";
+        
+      var files = e.dataTransfer.files;
+        console.log("Drop files:", files);
+        self.uploadFiles(files);
+      });
   },
 }
 </script>
@@ -575,5 +694,49 @@ export default {
 }
 ::-webkit-scrollbar {
 display:none;
+}
+
+/* Drag & Drop */
+#file-panel {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: auto;
+}
+
+.panel-body {
+  height: auto;
+}
+
+#upload-list {
+  height: auto;
+  padding: 0px;
+}
+
+ul {
+  list-style-type: none;
+}
+
+div#dropzone {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999999999;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    transition: visibility 175ms, opacity 175ms;
+    display: table;
+    text-shadow: 1px 1px 2px #000;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.45);
+    font: bold 42px Oswald, DejaVu Sans, Tahoma, sans-serif;
+}
+div#textnode {
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+    transition: font-size 175ms;
 }
 </style>
