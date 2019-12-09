@@ -6,10 +6,7 @@
           <b-tab title="대화 목록" :title-link-class="linkClass(0)" active >-->
             <div  class="Chating-Title">{{chatItem.ReqName}} {{ chatItem.CarNo }} </div>
               <b-card-text>
-                <div style="visibility:hidden; opacity:0" id="dropzone">
-                  <div id="textnode">Drop files to add data.</div>
-            </div>
-                <div v-if="showChatArea" >
+                 <div v-if="showChatArea" >
                    <div class="Chating-page">
                     <Message-List :msgs="msgDatas" class="msg-list" v-auto-bottom></Message-List>
                   </div>
@@ -21,7 +18,11 @@
                     </Message-From>
                   </div>
                   <v-img  id="dragDropImg" src="" ></v-img>
+                  <div style="visibility:hidden; opacity:0" id="dropzone">
+                    <div id="textnode">Drop files to add data.</div>
+                  </div>
                 </div>
+                
               </b-card-text>
         <!--  </b-tab>      
           <b-tab title="동진 카센타" :title-link-class="linkClass(1)">
@@ -77,6 +78,7 @@ import Constant from '@/Constant';
 import MessageList from '@/components/Chat/ChatMessageList.vue';
 import MessageForm from '@/components/Chat/ChatMessageForm.vue';
 import {datePadding, convertStringToDynamo} from '@/utils/common.js'
+import { async } from 'q';
 
 export default {
   name: 'ChatingPage',
@@ -90,7 +92,8 @@ export default {
       showImageSelectFlag:false,
       selectFiles: [],
       itemImage: '',
-      dragDropFiles: []
+      dragDropFiles: [],
+      dragFileSendCount : 0,
     }
   },
   components: {
@@ -272,8 +275,16 @@ export default {
       var param = {};
 
       var now = new Date();
-      var id = this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+      var id = '';
+      if(this.dragFileSendCount > 0)
+      {
+        id =  this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2) + this.dragFileSendCount;
+      }
+      else{
+        id =  this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                 + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+      }
 
       var key = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                 + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
@@ -290,6 +301,9 @@ export default {
       param.payload.Item.Status = "0";
       param.payload.Item.ReqTm = chatMsg.reqTm;
       param.payload.Item.IMG = chatMsg.imgId;
+
+      console.log("======= Chat Save Request ========");
+      console.log(JSON.stringify(param));
 
       axios({
           method: 'POST',
@@ -368,10 +382,13 @@ export default {
              
           });
    
-          this.setImg(this.msgDatas);
           this.showChatArea = true;
         }
 
+      })
+      .then(() =>{
+        this.setImg(this.msgDatas);
+          
       });
     },
     setImg(data)
@@ -390,7 +407,7 @@ export default {
             param.payload.ExpressionAttributeValues[key] =  element.msgData.imgId;
 
             console.log("======= Image Data request ========");
-            console.log(param.payload);
+            console.log(JSON.stringify(param));
     
             axios({
               method: 'POST',
@@ -401,9 +418,7 @@ export default {
             .then((result) => {
               console.log("======= Image Data result ========");
               console.log(result.data);
-
               element.msgData.img = result.data.Items[0].IMG;
-      
             })
             .catch((error) => {
               console.log(error);
@@ -456,6 +471,9 @@ export default {
       param.payload.Item.ID = key;
       param.payload.Item.IMG = fileImage.src;
 
+        console.log("======= IMG Save request ========");
+      console.log(JSON.stringify(param));
+
       axios({
           method: 'POST',
           url: Constant.LAMBDA_URL,
@@ -494,14 +512,16 @@ export default {
       this.saveChatMsg(chatMsg);     
 
     },
-    dragDropFileSend(file) {
+    dragDropFileSend() {
       
+      this.dragFileSendCount++;
+
       var fileImage = document.querySelector('#dragDropImg');
       console.log('Img Path :' , fileImage.src);
-
+      console.log('dragFileSendCount : ' , this.dragFileSendCount)
       var now = new Date();
       var key = this.UserInfo.BsnID + now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
-                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2) + this.dragFileSendCount;
 
       var param = {};
       param.operation = "create";
@@ -511,20 +531,23 @@ export default {
       param.payload.Item.ID = key;
       param.payload.Item.IMG = fileImage.src;
 
+      console.log("======= IMG Save request ========");
+      console.log(JSON.stringify(param));
+
       axios({
           method: 'POST',
           url: Constant.LAMBDA_URL,
           headers: Constant.JSON_HEADER,
           data: param
       })
-      .then((result) => {
+      .then((result)  => {
         console.log("======= IMG Save result ========");
         console.log(result.data);
       })
       .catch((error) => {
         console.log(error);
       });    
- 
+
       var now = new Date();
       var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                 + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
@@ -548,32 +571,34 @@ export default {
       });
 
       this.saveChatMsg(chatMsg);     
-
     },
     uploadFiles: function(f) {
-    var self = this;
 
-    for (var i = 0; i < f.length; i++) {
-        if (f[i].type !== "image/png") {
-          //if text file is not submitted alert and skip over it
-          alert("Sorry, " + f[i].type + " is not an accepted file type.");
-          continue;
-        } else {
+      this.dragFileSendCount = 0;
+      
+      var self = this;
 
-          var reader = new FileReader();
-          reader.readAsDataURL(f[i]);  
+      for (var i = 0; i < f.length; i++) {
+          if (f[i].type !== "image/png") {
+            //if text file is not submitted alert and skip over it
+            alert("Sorry, " + f[i].type + " is not an accepted file type.");
+            continue;
+          } else {
 
-          reader.onload = function(e) {
-          console.log('Image Data : ', e.target.result);
-          document.querySelector('#dragDropImg').src = e.target.result;
+            var reader = new FileReader();
+            reader.readAsDataURL(f[i]);  
+
+            reader.onload = function(e) {
+              console.log('Image Data : ', e.target.result);
+              document.querySelector('#dragDropImg').src = e.target.result;
+            }
+            
+            reader.onloadend = function() {
+              self.dragDropFileSend();
+            };
           }
-
-          reader.onloadend = function() {
-             self.dragDropFileSend(f[i]);
-           };
         }
       }
-    }
   },
   mounted() {
     datePadding();
@@ -581,12 +606,14 @@ export default {
 
     var self = this;
     window.addEventListener("dragenter", function (e) {
+      if(self.showChatArea === false) return;
             document.querySelector("#dropzone").style.visibility = "";
             document.querySelector("#dropzone").style.opacity = 1;
             document.querySelector("#textnode").style.fontSize = "48px";
     });
 
     window.addEventListener("dragleave", function (e) {
+       if(self.showChatArea === false) return;
         e.preventDefault();
 
             document.querySelector("#dropzone").style.visibility = "hidden";
@@ -596,6 +623,7 @@ export default {
     });
 
     window.addEventListener("dragover", function (e) {
+       if(self.showChatArea === false) return;
         e.preventDefault();
         document.querySelector("#dropzone").style.visibility = "";
         document.querySelector("#dropzone").style.opacity = 1;
@@ -603,6 +631,7 @@ export default {
     });
 
     window.addEventListener("drop", function (e) {
+       if(self.showChatArea === false) return;
         e.preventDefault();
         document.querySelector("#dropzone").style.visibility = "hidden";
         document.querySelector("#dropzone").style.opacity = 0;
