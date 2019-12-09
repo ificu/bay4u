@@ -579,9 +579,12 @@ export default {
       var self = this;
 
       for (var i = 0; i < f.length; i++) {
-          if (f[i].type !== "image/png") {
+          var fileType = f[i].type;
+          //if (f[i].type !== "image/png" ) {
+          if(fileType.substring(0,5) !== "image"){
             //if text file is not submitted alert and skip over it
-            alert("Sorry, " + f[i].type + " is not an accepted file type.");
+            //alert("Sorry, " + f[i].type + " is not an accepted file type.");
+            alert("이미지 파일만 선택 해 주세요. " );
             continue;
           } else {
 
@@ -607,35 +610,35 @@ export default {
     var self = this;
     window.addEventListener("dragenter", function (e) {
       if(self.showChatArea === false) return;
-            document.querySelector("#dropzone").style.visibility = "";
-            document.querySelector("#dropzone").style.opacity = 1;
-            document.querySelector("#textnode").style.fontSize = "48px";
+         //   document.querySelector("#dropzone").style.visibility = "";
+         //   document.querySelector("#dropzone").style.opacity = 1;
+         //   document.querySelector("#textnode").style.fontSize = "48px";
     });
 
     window.addEventListener("dragleave", function (e) {
        if(self.showChatArea === false) return;
         e.preventDefault();
 
-            document.querySelector("#dropzone").style.visibility = "hidden";
-            document.querySelector("#dropzone").style.opacity = 0;
-            document.querySelector("#textnode").style.fontSize = "42px";
+          //  document.querySelector("#dropzone").style.visibility = "hidden";
+          //  document.querySelector("#dropzone").style.opacity = 0;
+          //  document.querySelector("#textnode").style.fontSize = "42px";
         
     });
 
     window.addEventListener("dragover", function (e) {
        if(self.showChatArea === false) return;
         e.preventDefault();
-        document.querySelector("#dropzone").style.visibility = "";
-        document.querySelector("#dropzone").style.opacity = 1;
-        document.querySelector("#textnode").style.fontSize = "48px";
+      //  document.querySelector("#dropzone").style.visibility = "";
+     //   document.querySelector("#dropzone").style.opacity = 1;
+      //  document.querySelector("#textnode").style.fontSize = "48px";
     });
 
     window.addEventListener("drop", function (e) {
        if(self.showChatArea === false) return;
         e.preventDefault();
-        document.querySelector("#dropzone").style.visibility = "hidden";
-        document.querySelector("#dropzone").style.opacity = 0;
-        document.querySelector("#textnode").style.fontSize = "42px";
+      //  document.querySelector("#dropzone").style.visibility = "hidden";
+      //  document.querySelector("#dropzone").style.opacity = 0;
+      //  document.querySelector("#textnode").style.fontSize = "42px";
         
       var files = e.dataTransfer.files;
         console.log("Drop files:", files);
