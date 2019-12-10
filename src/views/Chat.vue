@@ -43,6 +43,7 @@
           -->
         </ul>
       </div>
+      <BackToTop></BackToTop>
     </div>
     <!--ChatPage-->
     <div class="Chating-headerBar" v-if="showChatPage">
@@ -108,6 +109,7 @@ import MessageForm from '@/components/Chat/ChatMessageForm.vue';
 import {datePadding, convertStringToDynamo} from '@/utils/common.js'
 import QTCamera from '@/components/NewQT/QTCamera.vue'
 import CheckLogin from '@/components/Common/CheckLogin.vue'
+import BackToTop from '@/components/Common/BackToTop.vue'
 
 export default {
   name: 'Chat',
@@ -128,7 +130,8 @@ export default {
     'Message-List': MessageList,
     'Message-From': MessageForm,
     'QTCamera': QTCamera,
-    CheckLogin:CheckLogin
+    CheckLogin:CheckLogin,
+    BackToTop:BackToTop
   },
   computed: {
     CarInfo: {
