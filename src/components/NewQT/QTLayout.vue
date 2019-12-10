@@ -32,7 +32,7 @@
             <v-toolbar dark color="primary"> 
               <v-toolbar-title>
                 <v-icon medium>fas fa-edit</v-icon>
-                과거 정비이력
+                과거 정비이력  <span class="roCarNo">{{CarInfo.CarNo}}</span>
                 </v-toolbar-title>                 
               <v-spacer></v-spacer>
               <v-toolbar-items>
@@ -1383,5 +1383,10 @@ name: 'QTStep',
   min-width: 10px;
   margin: 0px;;
 }*/
-
+.roCarNo
+{
+  font-size: 0.9em;
+  color: yellow;
+  padding-left: 8px;
+}
 </style>

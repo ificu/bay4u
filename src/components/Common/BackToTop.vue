@@ -1,10 +1,10 @@
 <template>
 
   <div class="backTOTop"  v-if="isVisible">
-      <div class="relative">
-    <v-btn fab dark class="goTop" @click="backToTop" > 
-        <v-icon dark>fa-chevron-up</v-icon>
-    </v-btn>
+    <div class="relative">
+        <v-btn color="#90A4AE" dark depressed small fab class="goTop" @click="backToTop">
+            <v-icon  dark >fa-chevron-up</v-icon>
+        </v-btn>
     </div>
   </div>
     
