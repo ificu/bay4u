@@ -35,3 +35,14 @@ export function convertDynamoToString(str) {
 export function convertDynamoToArrayString(arr) {
     return arr.replace(/[*]empty[*]/gi," ");   
 }
+
+// 특정날짜 요일 조회
+export function getInputDayWeek(value) {
+    
+    var week = new Array('일', '월', '화', '수', '목', '금', '토');
+    
+    var today = new Date(value).getDay();
+    var todayLabel = week[today];
+    
+    return todayLabel;
+}

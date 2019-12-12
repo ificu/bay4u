@@ -32,7 +32,7 @@
             <v-toolbar dark color="primary"> 
               <v-toolbar-title>
                 <v-icon medium>fas fa-edit</v-icon>
-                과거 정비이력
+                과거 정비이력  <span class="roCarNo">{{CarInfo.CarNo}}</span>
                 </v-toolbar-title>                 
               <v-spacer></v-spacer>
               <v-toolbar-items>
@@ -336,6 +336,10 @@ name: 'QTStep',
         SEQ:0
       },
       roList: [],
+      sendDocId : '',
+      sendDealer : '',
+      qtInfoData : {},
+      saveQtCount : 0,
     }
   },
   methods: {
@@ -777,139 +781,247 @@ name: 'QTStep',
       },
       addNewQTRequest() {
         
-        var param = {};
-        param.BsnId = this.UserInfo.BsnID;
-        param.UserID = this.UserInfo.UserID;
-        param.CarNo = this.CarInfo.CarNo;
-        param.VinNo = this.CarInfo.VinNo;
-        if(Array.isArray(this.roList) && this.roList.length > 0  ){
-          
-          param.KTYPNR  = this.roList[0].KTYPNR ;
-          param.CD_CR_DTL = this.roList[0].CD_CR_DTL ;
-          param.MCODE = this.roList[0].MCODE ;
-          
-        }
-        else{
-          
-          param.KTYPNR  = '0' ;
-          param.CD_CR_DTL = '' ;
-          param.MCODE = '' ;
-         
-        }
-        
-        param.Memo = this.qtReqMemo;
-        if(this.qtRequest !== undefined || this.qtRequest !== null || this.qtRequest.length !== 0 )
-        {
-            param.RequestDataJSON = JSON.stringify(this.qtRequest);
-        }
+        var docId = '';
+        var now = new Date();
 
-        console.log('param : ' + JSON.stringify(param));
+        this.dealerList.forEach( dealer => {
+            
+          if(dealer.DEALER === 'PARTS')
+          {
+              console.log('부품지원센터 저장 !!');
 
-        axios({
-            method: 'POST',
-            url: Constant.SCPIF_URL + 'SaveQTData',
-            headers: Constant.JSON_HEADER,
-            data: param
-        })
-        .then((result) => {
-          console.log("======= SaveQTData result ========");
-          console.log(result.data);
+              // 부품지원센터
+              var param = {};
+              param.BsnId = this.UserInfo.BsnID;
+              param.UserID = this.UserInfo.UserID;
+              param.CarNo = this.CarInfo.CarNo;
+              param.VinNo = this.CarInfo.VinNo;
+              if(Array.isArray(this.roList) && this.roList.length > 0  ){
+                
+                param.KTYPNR  = this.roList[0].KTYPNR ;
+                param.CD_CR_DTL = this.roList[0].CD_CR_DTL ;
+                param.MCODE = this.roList[0].MCODE ;
+                
+              }
+              else{
+                
+                param.KTYPNR  = '0' ;
+                param.CD_CR_DTL = '' ;
+                param.MCODE = '' ;
+              
+              }
+              
+              param.Memo = this.qtReqMemo;
+              if(this.qtRequest !== undefined || this.qtRequest !== null || this.qtRequest.length !== 0 )
+              {
+                  param.RequestDataJSON = JSON.stringify(this.qtRequest);
+              }
 
-           var rtnCode = result.data.ReturnCode;
-           if(rtnCode === 0)
-           {
-             param = {};
-
-             var now = new Date();
-             var key = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
-                        + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
-             var imgKey = this.UserInfo.BsnID + now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
-                        + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
-
-              param.operation = "create";
-              param.tableName = "BAY4U_QT_LIST";
-              param.payload = {};
-              param.payload.Item = {};
-              param.payload.Item.ID = result.data.ReturnObject;
-              param.payload.Item.CarNo = convertStringToDynamo(this.CarInfo.CarNo);
-              param.payload.Item.CarVin = convertStringToDynamo(this.CarInfo.VinNo);
-              param.payload.Item.ReqDt = now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);
-              param.payload.Item.ReqSite = convertStringToDynamo(this.UserInfo.BsnID);
-              param.payload.Item.ReqName = convertStringToDynamo(this.UserInfo.Name);
-              param.payload.Item.ReqSeq = key;
-              param.payload.Item.ResDealer = "PARTS";
-              param.payload.Item.Memo = convertStringToDynamo(this.qtReqMemo);
-              param.payload.Item.IMG = imgKey;
-              //param.payload.Item.LineItem = JSON.stringify(this.qtRequest);
-              param.payload.Item.LineItem = convertArrayToDynamo(JSON.stringify(this.qtRequest));
-
+              console.log("======= webpos Request result ========");
               console.log(JSON.stringify(param));
 
               axios({
-                method: 'POST',
-                url: Constant.LAMBDA_URL,
-                headers: Constant.JSON_HEADER,
-                data: param
-              })
-              .then((result) => {
-                console.log("======= Data Save result ========");
-                console.log(result.data);
-                })
-              .catch((error) => {
-                console.log(error);
-              });
-
-              var qtInfoData = param.payload.Item;
-
-              param = {};
-
-              param.operation = "create";
-              param.tableName = "BAY4U_IMG";
-              param.payload = {};
-              param.payload.Item = {};
-              param.payload.Item.ID = imgKey;
-              param.payload.Item.IMG = this.captureImg;
-
-              axios({
                   method: 'POST',
-                  url: Constant.LAMBDA_URL,
+                  url: Constant.SCPIF_URL + 'SaveQTData',
                   headers: Constant.JSON_HEADER,
                   data: param
               })
               .then((result) => {
-                console.log("======= IMG Save result ========");
+                console.log("======= webpos result ========");
                 console.log(result.data);
-                })
+
+                var rtnCode = result.data.ReturnCode;
+                if(rtnCode === 0)
+                {
+                  docId = result.data.ReturnObject;  // 견적ID 
+                  // 견적저장
+                  this.saveQTData(docId , dealer.DEALER , dealer.TYPE);
+                }
+
+              })
               .catch((error) => {
                 console.log(error);
-              });                       
+              });
+          }
+          else{
 
-              //this.$router.push({name:'Chat', params:{chatid:1}});
-              this.$router.push({name:'Chat', 
-                                  params:{
-                                        chatid: result.data.ReturnObject, 
-                                        carNo: this.CarInfo.CarNo,
-                                        chatFrom: this.UserInfo.BsnID,
-                                        chatTo: "parts",
-                                        chatDate: now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2),
-                                        qtInfo : qtInfoData
-                                    }});
-           }
+              console.log('대리점 저장 !!');
+              now = new Date();
+              docId = this.UserInfo.BsnID + now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2)  + this.CarInfo.VinNo + 
+                      datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2) ;
+              // 견적저장
+              this.saveQTData(docId , dealer.DEALER, dealer.TYPE);
+          }
+
+        });
+    },
+    saveQTData(docId , dealer , dealerType)
+    {
+      this.saveQtCount++;
+      var now = new Date();
+      var key = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                  + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+      var imgKey = this.UserInfo.BsnID + now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                  + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
+      var param = {};
+      param.operation = "create";
+      param.tableName = "BAY4U_QT_LIST";
+      param.payload = {};
+      param.payload.Item = {};
+      param.payload.Item.ID = docId;
+      param.payload.Item.CarNo = convertStringToDynamo(this.CarInfo.CarNo);
+      param.payload.Item.CarVin = convertStringToDynamo(this.CarInfo.VinNo);
+      param.payload.Item.ReqDt = now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);
+      param.payload.Item.ReqSite = convertStringToDynamo(this.UserInfo.BsnID);
+      param.payload.Item.ReqName = convertStringToDynamo(this.UserInfo.Name);
+      param.payload.Item.ReqSeq = key;
+      param.payload.Item.ResDealer = dealer;
+      param.payload.Item.Memo = convertStringToDynamo(this.qtReqMemo);
+      param.payload.Item.IMG = imgKey;
+      //param.payload.Item.LineItem = JSON.stringify(this.qtRequest);
+      param.payload.Item.LineItem = convertArrayToDynamo(JSON.stringify(this.qtRequest));
+
+      if(dealerType === 'A')
+      {
+        this.qtInfoData = param.payload.Item;
+        this.sendDocId =  docId;
+        this.sendDealer = dealer;
+      }
+      console.log("======= QT Save result ========");
+      console.log(JSON.stringify(param));
+
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+        console.log("======= QT Save result ========");
+        console.log(result.data);
+
+        if(dealerType !== 'A')
+        {
+          this.saveChating(docId , dealer);
+        }
+
+        if( this.dealerList.length === this.saveQtCount )
+        {
+            this.goChating();
+        }
+
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
+      param = {};
+      param.operation = "create";
+      param.tableName = "BAY4U_IMG";
+      param.payload = {};
+      param.payload.Item = {};
+      param.payload.Item.ID = imgKey;
+      param.payload.Item.IMG = this.captureImg;
+
+      axios({
+          method: 'POST',
+          url: Constant.LAMBDA_URL,
+          headers: Constant.JSON_HEADER,
+          data: param
+      })
+      .then((result) => {
+        console.log("======= IMG Save result ========");
+        console.log(result.data);
 
         })
-        .catch((error) => {
-          console.log(error);
-        });
-      },
-      addCounter: function(idx) {
-        if(idx === undefined)
-        {
-           this.tempItem.ITM_QTY++;
-        }
-        else{
-          this.qtRequest[idx].ITM_QTY++;
-        }
-      },
+      .catch((error) => {
+        console.log(error);
+      }); 
+    },
+    goChating()
+    {
+      
+      console.log('SendDocId :', this.sendDocId);
+      console.log('SEndDealer :',this.sendDealer);      
+       console.log('SendQtInfo :',this.qtInfoData);    
+      // 대표 대리점 채팅 전송
+      var now = new Date();
+      this.$router.push({name:'Chat', 
+                        params:{
+                              chatid: this.sendDocId, 
+                              carNo: this.CarInfo.CarNo,
+                              chatFrom: this.UserInfo.BsnID,
+                              chatTo: this.sendDealer,
+                              chatDate: now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2),
+                              qtInfo : this.qtInfoData
+                          }});
+
+    },
+    saveChating(docId , dealer)
+    {
+      var msg = "";
+      if( this.CarInfo.CarNo === null ||  this.CarInfo.CarNo === ''){
+        msg = "미상차량에 대한 견적이 요청됐습니다.";
+      }
+      else{
+        msg = this.CarInfo.CarNo + " 차량에 대한 견적이 요청됐습니다.";
+      }
+      var now = new Date();
+      var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+          + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+      var chatMsg = {};
+      chatMsg.from = {'name' : this.UserInfo.BsnID};
+      chatMsg.to = {'name' : dealer};
+      chatMsg.msg  = msg;
+      chatMsg.reqTm = chatTime;
+      this.msgDatas = chatMsg;
+        
+      var param = {};
+      var id = this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+      var key = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
+      param.operation = "create";
+      param.tableName = "BAY4U_CHAT";
+      param.payload = {};
+      param.payload.Item = {};
+      param.payload.Item.ID = id;
+      param.payload.Item.DocID = docId;
+      param.payload.Item.ChatFrom = this.UserInfo.BsnID;
+      param.payload.Item.ChatTo =  dealer;
+      param.payload.Item.Message = chatMsg.msg;
+      param.payload.Item.Status = "0";
+      param.payload.Item.ReqTm = chatMsg.reqTm;
+      param.payload.Item.IMG = chatMsg.imgId;
+
+      console.log("Send Msg : ", JSON.stringify(param));
+
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+        console.log("======= Chat Save result ========");
+        console.log(result.data);
+        })
+      .catch((error) => {
+        console.log(error);
+      });
+    },
+     
+    addCounter: function(idx) {
+      if(idx === undefined)
+      {
+          this.tempItem.ITM_QTY++;
+      }
+      else{
+        this.qtRequest[idx].ITM_QTY++;
+      }
+    },
       subCounter: function(idx) {
 
         if(idx === undefined)
@@ -1383,5 +1495,10 @@ name: 'QTStep',
   min-width: 10px;
   margin: 0px;;
 }*/
-
+.roCarNo
+{
+  font-size: 0.9em;
+  color: yellow;
+  padding-left: 8px;
+}
 </style>
