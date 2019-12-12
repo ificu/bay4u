@@ -124,13 +124,17 @@ export default {
             this.UserInfo.EntNo = entNo;
           }
           else {
+
             this.$cookies.set('BsnID', siteCode, '86400s');
+            this.$cookies.set('UserID', id, '86400s');
             this.$cookies.set('UserNM', name, '86400s');
             this.$cookies.set('UserType', type, '86400s');
+            
             this.$router.push('/MainPage');
             this.UserInfo.UserID = id;
             this.UserInfo.BsnID = siteCode;
             this.UserInfo.Name = name;
+            this.UserInfo.UserType = type;
           }
         }
       });

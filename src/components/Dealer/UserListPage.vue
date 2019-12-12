@@ -6,8 +6,8 @@
         <label class="mdl-button mdl-js-button mdl-button--icon" for="sample6" v-on:click="showQTReqList()">
           <i class="material-icons">search</i>
         </label>
-        <div class="mdl-textfield__expandable-holder">
-          <input class="mdl-textfield__input" type="text" id="sample6">
+        <div class="mdl-textfield__expandable-holder" >
+          <input  class="mdl-textfield__input" type="text" id="sample6" v-model="searchText"  v-on:keypress.enter="showQTReqList">
           <label class="mdl-textfield__label" for="sample-expandable">Expandable Input</label>
         </div>
       </div>
@@ -73,7 +73,8 @@ export default {
     return {
       tabIndex: 0,
       qtReqList: [],
-      qtItemIndex: -1
+      qtItemIndex: -1,
+      searchText:''
     }
   },
   props:['chatInfo'],
@@ -130,6 +131,11 @@ export default {
         }
 
         this.qtReqList = result.data.Items;
+
+        if(this.searchText !== '')
+        {
+          this.qtReqList = this.searchQTList();
+        } 
         
       });
     },
@@ -144,6 +150,40 @@ export default {
     {
       this.$EventBus.$emit('init-qtInfo', null)
        this.qtItemIndex = -1
+    },
+    searchQTList(){
+
+      if(this.qtReqList.length > 0)
+      {
+          var arrSearch = this.qtReqList.filter(item => {
+            if(item.ReqName === this.searchText)
+            {
+              return true;
+            }
+            else{
+              return false;
+            }
+          });
+          
+          if(arrSearch.length > 0)
+          {
+              return arrSearch;
+          }
+          else{
+
+            arrSearch = this.qtReqList.filter(item => {
+              if(item.CarNo === this.searchText)
+              {
+                return true;
+              }
+              else{
+                return false;
+              }
+            });
+
+            return arrSearch;
+          }
+      }
     }
   },
   mounted(){
@@ -155,6 +195,10 @@ export default {
       this.UserInfo.BsnID = this.$cookies.get('BsnID');
     if(this.UserInfo.Name === '')
       this.UserInfo.Name = this.$cookies.get('UserNM');
+    if(this.UserInfo.UserID === '')
+      this.UserInfo.UserID = this.$cookies.get('UserID');
+    if(this.UserInfo.UserType === '')
+      this.UserInfo.UserType = this.$cookies.get('UserType');
 
     this.$EventBus.$on('update-chatMsg', docId => {  
       
@@ -350,5 +394,4 @@ export default {
   -webkit-appearance:none;
   -moz-appearance:none;
 }
-
 </style>
