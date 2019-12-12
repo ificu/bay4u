@@ -123,6 +123,7 @@ export default {
       resDealers: [],
       resDealerNm: [],
       docId : "",
+      dealer:"",
       showQTCamera: false,
     }
   },
@@ -154,7 +155,6 @@ export default {
   created : function() {
     if(this.$route.params.chatid !== undefined) {
 
-    
       // msgDatas 초기화
       this.$store.commit('InitMsgData');
 
@@ -174,10 +174,12 @@ export default {
       var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                 + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
 
+      this.dealer = this.$route.params.qtInfo.ResDealer;
+      console.log('route : ' , this.$route.params.qtInfo);
       var chatMsg = {};
       //chatMsg.from = {'name' : '나'};
       chatMsg.from = {'name' : this.UserInfo.BsnID};
-      chatMsg.to = {'name' : "parts"};
+      chatMsg.to = {'name' : this.dealer};
       chatMsg.msg  = msg;
       chatMsg.reqTm = chatTime;
       this.msgDatas = chatMsg;
@@ -189,7 +191,7 @@ export default {
       this.$sendMessage({
         name: this.UserInfo.BsnID,
         msg,
-        recv: "parts",
+        recv:  this.dealer,
         chatId: this.docId,
         reqTm : chatTime,
         qtInfo : this.$route.params.qtInfo,
@@ -272,7 +274,7 @@ export default {
 
       var chatMsg = {};
       chatMsg.from = {'name' : this.UserInfo.BsnID};
-      chatMsg.to = {'name' : "parts"};
+      chatMsg.to = {'name' : this.dealer};
       chatMsg.Chatid = this.docId;
       chatMsg.msg  = msg;
       chatMsg.reqTm  = chatTime;
@@ -281,7 +283,7 @@ export default {
         //name: this.$route.params.username,
         name: this.UserInfo.BsnID,
         msg,
-        recv: "parts",
+        recv: this.dealer,
         chatId: this.docId,
         chatDttm : chatTime,
       });
@@ -294,6 +296,7 @@ export default {
       if(item !== null) 
       {
         this.docId = item.ID;
+        this.dealer = item.ResDealer;
         this.showchating(item);
       }
     },
@@ -313,7 +316,7 @@ export default {
       param.payload.Item.ID = id;
       param.payload.Item.DocID = this.docId;
       param.payload.Item.ChatFrom = this.UserInfo.BsnID;
-      param.payload.Item.ChatTo = "parts";
+      param.payload.Item.ChatTo =  this.dealer;
       param.payload.Item.Message = chatMsg.msg;
       param.payload.Item.Status = "0";
       param.payload.Item.ReqTm = chatMsg.reqTm;
@@ -540,7 +543,7 @@ export default {
       var msg = '사진첨부';
       var chatMsg = {};
       chatMsg.from = {'name' : this.UserInfo.BsnID};
-      chatMsg.to = {'name' : "parts"};
+      chatMsg.to = {'name' : this.dealer};
       chatMsg.Chatid = this.docId;
       chatMsg.msg = msg;
       chatMsg.img = pic;
@@ -550,7 +553,7 @@ export default {
       this.$sendMessage({
         name: this.UserInfo.BsnID,
         msg,
-        recv: "parts",
+        recv: this.dealer,
         chatId: this.docId,
         imgId: key
       });

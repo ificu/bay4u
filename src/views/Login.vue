@@ -125,12 +125,14 @@ export default {
           }
           else {
             this.$cookies.set('BsnID', siteCode, '60000s');
+            this.$cookies.set('UserID', id, '60000s');
             this.$cookies.set('UserNM', name, '60000s');
             this.$cookies.set('UserType', type, '6000s');
             this.$router.push('/MainPage');
             this.UserInfo.UserID = id;
             this.UserInfo.BsnID = siteCode;
             this.UserInfo.Name = name;
+            this.UserInfo.UserType = type;
           }
         }
       });

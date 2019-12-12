@@ -248,6 +248,60 @@
                 </b-card-body>
               </b-collapse>
             </b-card>
+
+            <b-card no-body class="mb-1" v-for="(qtInfo , idx) in confirmQTdata2" v-bind:key="idx">
+              <b-card-header header-tag="header" role="tab">
+                <b-container>
+                  <b-row>
+                    <b-col align-self="center" class="history-date">{{setQtDate(qtInfo.ReqDt)}}</b-col>
+                    <b-col class="history-car">
+                      <b-row class="history-carNo">
+                        {{qtInfo.CarNo}}
+                      </b-row>
+                      <b-row  class="history-carType">
+                        {{qtInfo.ResDealerNm}}
+                      </b-row>
+                    </b-col>                    
+                    <b-col align-self="center" class="history-detailBtn">
+                      <b-button block href="#"  v-b-toggle="'accordion-' + idx"  variant="secondary" size="sm" v-on:click="GetQtList2(qtInfo)">
+                        <i v-if="!SOList1Toggle" class="fas fa-chevron-down"></i>
+                        <i v-if="SOList1Toggle"  class="fas fa-chevron-up"></i>
+                      </b-button>
+                    </b-col>              
+                  </b-row>
+                </b-container>
+              </b-card-header>
+              <b-collapse :id="'accordion-'+idx" accordion="my-accordion" role="tabpanel">
+                <b-card-body>
+                  <div class="history-detailConts">
+                    <ul>
+                      <!--<li>
+                        <div class="detailConts-dealer">대영 모터스</div>
+                      </li>-->
+                      <li  v-for="(item, index) in detailQTData2" v-bind:key = "index">
+                        <div>
+                          <div><span class="itemCode">{{item.itemCode}}</span> <span class="itemName">{{item.itemName}}</span> </div>
+                          <div><span class="itemBrand">{{item.itemBrand}}</span><span class="itemAfterNo"> {{item.afterNo}}</span></div>
+                        </div>
+                        <div v-if="item.AMT === 0" class="detailConts-amount">{{ item.AMT }}원</div>
+                        <div v-if="item.AMT !== 0" class="detailConts-amount">{{ item.AMT | localeNum}}원</div>
+                      </li>
+                    </ul>
+                    <div class="QTRes-footer">
+                      <div class="TotalInfo">
+                        <span class="TotalInfo-Title">합계금액</span>
+                        <span class="TotalInfo-Text">{{total2 | localeNum}}</span>
+                      </div>
+                    </div>
+                    <!--
+                    <div class="detailConts-compare">
+                      <b-button @click="showRODetailPageToggle">정비 명세서 작성</b-button>
+                    </div>
+                    -->
+                  </div>
+                </b-card-body>
+              </b-collapse>
+            </b-card>
           
             <!--
             <b-card no-body class="mb-1">
@@ -653,6 +707,7 @@ import CustomerDoc from '@/components/QTList/CustomerDoc.vue'
 import CustomerDocOption from '@/components/QTList/CustomerDocOption.vue'
 import CheckLogin from '@/components/Common/CheckLogin.vue'
 import Constant from '@/Constant';
+import {getInputDayWeek} from '@/utils/common.js'
 
 export default {
   name: 'QTList',
@@ -689,6 +744,8 @@ export default {
       },
       detailQTData:[],
       confirmQTdata: [],
+      detailQTData2:[],
+      confirmQTdata2: [],
     }
   },
   methods: {
@@ -825,7 +882,7 @@ export default {
           data: param
       })
       .then((result) => {
-          console.log("======= ROHistory Return result ========");     
+          console.log("======= QT LiST Return result ========");     
           console.log( JSON.stringify(result.data)); 
          
           this.rtnCode = result.data.ReturnCode;
@@ -883,8 +940,45 @@ export default {
       .catch((error) => {
           console.log(error);
       })   
+    },
+    GetConfirmQtList2()
+    {
+      this.confirmQTdata  = [];
+
+      var param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_QT_RETURN_LIST";
+      param.payload = {};
+      param.payload.FilterExpression = "ReqSite = :id";
+      param.payload.ExpressionAttributeValues = {};
+      var key = ":id";
+      param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
+
+      console.log("======= 견적확정 조회 Request result ========");
+      console.log(param); 
+
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+        console.log("======= QT Confirm result ========");
+        console.log( result.data.Items);
+        this.confirmQTdata2  = result.data.Items;
+      });  
+    },
+    GetQtList2(item){
+      this.detailQTData2 = JSON.parse(item.LineItem);
+    },
+    setQtDate(value)
+    {
+      var str = value + '';
+      return str.substring(5,7) + '/'+str.substring(8,10) + '(' + getInputDayWeek(value) +')';
     }
   },
+
   components: {
     QTDetailCompare,
     QTDetailSelect,
@@ -906,6 +1000,14 @@ export default {
           sum += (parseFloat(item.AMT));
         });
         return sum;
+    },
+
+    total2: function() {
+        let sum = 0;
+        this.detailQTData2.forEach(function(item) {
+          sum += (parseFloat(item.AMT));
+        });
+        return sum;
     }
   },
   created : function() {
@@ -919,6 +1021,7 @@ export default {
       this.UserInfo.BsnID = this.$cookies.get('BsnID');
 
     this.GetConfirmQtList();  
+    this.GetConfirmQtList2();
 
   }
 }
@@ -1145,10 +1248,19 @@ export default {
 }
 
 .history-detailConts .itemCode {
-  flex: 30%;
-  font-size: 0.8rem;
+  /*flex: 30%;*/
+  font-size: 1rem;
   font-weight: bold;
   color: #0D47A1;
+  padding-right: 5px;
+}
+.history-detailConts .itemBrand{
+  font-size: 0.7rem;
+  color: #6A1B9A;
+  padding-right: 4px;
+}
+.history-detailConts .itemAfterNo {
+  font-size: 0.7rem;
 }
 .history-detailConts .delvDay {
   flex: 10%;

@@ -74,7 +74,7 @@
         </b-tab>
         <b-tab title="견적 회신" :title-link-class="linkClass(1)">
           <b-card-text>
-            <div class="QT-Info">
+            <div class="QT-Info"  v-if="UserInfo.UserType === 'DEALER'">
               <!--
               <div class="CarInfo-Left">
                 <div>브랜드</div>
@@ -94,7 +94,7 @@
                 </div>
                 <div class="QT-Content">{{this.series}}</div>
             </div>   
-            <div class="QT-Info">
+            <div class="QT-Info"  v-if="UserInfo.UserType === 'DEALER'">
               <div class="QT-Title"><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>담당자 : </div>
               <div class="QT-Content">{{this.angentNm }}</div>
               <div class="QT-Title"><v-icon x-small  class="qt-icon">fas fa-angle-down</v-icon>견적상태 : </div>
@@ -107,12 +107,65 @@
               <div class="QTRes-Button">
                 <b-button-group size="sm">
                   <b-button variant="outline-secondary">엑셀 카피 자동 입력</b-button>
-                  <b-button variant="outline-secondary" v-on:click="GetQtList">견적서 자동 입력</b-button>
-                  <b-button variant="outline-secondary">선택 삭제</b-button>
-                  <b-button class="QTRes-ButtonAdd" variant="outline-secondary">부품 추가</b-button>
+                  <b-button variant="outline-secondary" v-on:click="GetQtList" v-if="UserInfo.UserType === 'DEALER'">견적서 자동 입력</b-button>
+                  <b-button variant="outline-secondary" @click="selectedDeleteItem">선택 삭제</b-button>
+                 <!-- <b-button class="QTRes-ButtonAdd" variant="outline-secondary">부품 추가</b-button>-->
+                <!--부품추가-->
+                 <v-dialog v-model="dialog" max-width="500px">
+                  <template v-slot:activator="{ on }">
+                    <b-button id="btnItmAdd" class="QTRes-ButtonAdd" variant="outline-secondary" v-on="on">부품 추가</b-button>
+                  </template>
+                  <v-card>
+                    <v-card-title>
+                     <!-- <span class="headline">{{ formTitle }}</span>-->
+                    </v-card-title>
+                    <v-card-text>
+                      <v-container>
+                        <v-row>
+                          <v-col cols="12" sm="6" md="4">
+                           <v-text-field v-model="editedItem.itemCode" label="부품번호"></v-text-field>
+                          </v-col>
+                          <v-col cols="12" sm="6" md="4">
+                             <v-text-field v-model="editedItem.itemBrand" label="브랜드"></v-text-field>
+                          </v-col>
+                          <v-col cols="12" sm="6" md="4">
+                              <v-text-field v-model="editedItem.carBrand" label="차종"></v-text-field>
+                          </v-col>
+                          <v-col cols="12" sm="6" md="4">
+                              <v-text-field v-model="editedItem.itemName" label="부품명"></v-text-field>
+                          </v-col>
+                          <v-col cols="12" sm="6" md="4">
+                              <v-text-field v-model="editedItem.afterNo" label="After No"></v-text-field>
+                          </v-col>
+                          <v-col cols="12" sm="6" md="4">
+                              <v-text-field v-model="editedItem.itemQty" label="수량"></v-text-field>
+                          </v-col>
+                          <v-col cols="12" sm="6" md="4">
+                              <v-text-field v-model="editedItem.itemPrice" label="단가"></v-text-field>
+                          </v-col>
+                          <v-col cols="12" sm="6" md="4">
+                              <v-text-field v-model="editedItem.AMT" label="금액"></v-text-field>
+                          </v-col>                    
+                        </v-row>
+                        <v-row>
+                          <v-col cols="12" lg="12">
+                              <v-text-field v-model="editedItem.memo" label="비고"></v-text-field>
+                          </v-col>
+                        </v-row>
+                      </v-container>
+                    </v-card-text>
+
+                    <v-card-actions>
+                      <v-spacer></v-spacer>
+                      <v-btn color="#00BFA5" outlined  @click="close">취소</v-btn>
+                      <v-btn color="#A1887F"  @click="addItem">{{btnEditText}}</v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
                 </b-button-group>
               </div>  
-            </div>       
+            </div>      
+            <!-- 
             <table class="QTRes-Table mdl-data-table mdl-js-data-table mdl-shadow--2dp">
               <thead>
                 <tr>
@@ -120,7 +173,6 @@
                   <th class="QTItem-Title mdl-data-table__cell--non-numeric">부 품 명</th>
                   <th class="QTItem-Brand mdl-data-table__cell--non-numeric">부품코드</th>
                   <th class="QTItem-Qty">수량</th>
-                  <!-- <th class="QTItem-Qty">재고여부</th>-->
                   <th class="QTItem-Qty">단가</th>
                   <th class="QTItem-Qty">금액</th>
                   <th class="QTItem-Qty mdl-data-table__cell--non-numeric">배송구분</th>
@@ -133,27 +185,159 @@
                   </td>
                   <td class="mdl-data-table__cell--non-numeric">{{qtItem.CONFIRM_ITM}}</td>
                   <td>{{qtItem.ORDER_QTY | localeNum}}</td>
-                  <!--<td>              
-                    <select>
-                      <option value="AUDI" selected>O</option>
-                      <option value="VW">X</option>
-                      <option value="BMW">소량</option>
-                    </select> 
-                  </td>-->
                   <td>{{qtItem.SAL_PRICE | localeNum}}</td>
                   <td>{{qtItem.AMT | localeNum}}</td>
                   <td class="mdl-data-table__cell--non-numeric">{{qtItem.DELV_DAY}}</td>
                 </tr>
               </tbody>
-            </table>
+            </table>-->
+            <div v-if="UserInfo.UserType === 'DEALER'">
+            <v-data-table
+              v-model="selected"
+              :headers="headers"
+              :items="detailQTData"
+              class="elevation-1"
+              fixed-header
+              height="390px"
+              :items-per-page="itemsPerPage"
+              hide-default-footer
+              no-data-text=''
+            >   
+              <!--header-->
+              <template v-slot:header.NM_ITM="{ header }">
+                <span class="header-item">{{ header.text }}</span>
+              </template>
+              <template v-slot:header.CONFIRM_ITM="{ header }">
+                <span class="header-item">{{ header.text }}</span>
+              </template>
+              <template v-slot:header.ORDER_QTY="{ header }">
+                <span class="header-item">{{ header.text }}</span>
+              </template>
+              <template v-slot:header.SAL_PRICE="{ header }">
+                <span class="header-item">{{ header.text }}</span>
+              </template>
+              <template v-slot:header.AMT="{ header }">
+                <span class="header-item">{{ header.text }}</span>
+              </template>
+              <template v-slot:header.DELV_DAY="{ header }">
+                <span class="header-item">{{ header.text }}</span>
+              </template>
+              <!-- contents -->
+              <template v-slot:item.NM_ITM="{ item }">
+               <div class="item-itemName" v-b-tooltip.hover :title=item.NM_ITM  >{{ item.NM_ITM }}</div>
+              </template>
+              <template v-slot:item.CONFIRM_ITM="{ item }">
+               <div class="item-itemcode">{{ item.CONFIRM_ITM }}</div>
+              </template>
+              <template v-slot:item.ORDER_QTY="{ item }">
+               <span class="item-numeric-qty">{{ item.ORDER_QTY | localeNum}}</span>
+              </template>
+              <template v-slot:item.SAL_PRICE="{ item }">
+               <span class="item-numeric">{{ item.SAL_PRICE | localeNum}}</span>
+              </template>
+              <template v-slot:item.AMT="{ item }">
+               <span class="item-numeric">{{ item.AMT | localeNum}}</span>
+              </template>
+              <template v-slot:item.DELV_DAY="{ item }">
+               <div class="item-delv">{{ item.DELV_DAY }}</div>
+              </template>
+            </v-data-table>
             <div class="QTRes-footer" v-if="showSum">
+              <div class="TotalInfo">
+                <span class="TotalInfo-Title">합계금액</span>
+                <span class="TotalInfo-Text">{{total | localeNum}}</span>
+                <span><b-button v-on:click="sendQTconfirmMsg()">견적 완료 알림</b-button></span>
+                <!--<v-btn @click="SendSMS" >SMS전송</v-btn>-->
+              </div>
+            </div>
+            </div>
+            <div  v-else>
+            <v-data-table
+              v-model="selected"
+              :headers="headers2"
+              :items="detailQTData"
+              class="elevation-1"
+              fixed-header
+              height="390px"
+              :items-per-page="itemsPerPage"
+              hide-default-footer
+              no-data-text=''
+              show-select
+              :single-select="singleSelect"
+              item-key="itemCode"
+            >      
+              <!--header-->
+              <template v-slot:header.itemCode="{ header }">
+                <span class="header-item2">{{ header.text }}</span>
+              </template>
+              <template v-slot:header.itemBrand="{ header }">
+                <span class="header-item2">{{ header.text }}</span>
+              </template>
+              <template v-slot:header.carBrand="{ header }">
+                <span class="header-item2">{{ header.text }}</span>
+              </template>
+              <template v-slot:header.itemName="{ header }">
+                <span class="header-item2">{{ header.text }}</span>
+              </template>
+              <template v-slot:header.afterNo="{ header }">
+                <span class="header-item2">{{ header.text }}</span>
+              </template>
+              <template v-slot:header.itemQty="{ header }">
+                <span class="header-item2">{{ header.text }}</span>
+              </template>
+              <template v-slot:header.itemPrice="{ header }">
+                <span class="header-item2">{{ header.text }}</span>
+              </template>
+              <template v-slot:header.AMT="{ header }">
+                <span class="header-item2">{{ header.text }}</span>
+              </template>
+              <template v-slot:header.memo="{ header }">
+                <span class="header-item2">{{ header.text }}</span>
+              </template>
+              <!-- contents -->
+              <template v-slot:item.itemCode="{ item }">
+               <span class="item-delv">{{ item.itemCode }}</span>
+              </template>
+              <template v-slot:item.itemBrand="{ item }">
+               <span class="item-delv">{{ item.itemBrand }}</span>
+              </template>   
+              <template v-slot:item.carBrand="{ item }">
+               <span class="item-delv">{{ item.carBrand }}</span>
+              </template> 
+              <template v-slot:item.itemName="{ item }">
+               <span class="item-delv">{{ item.itemName }}</span>
+              </template> 
+              <template v-slot:item.afterNo="{ item }">
+               <span class="item-delv">{{ item.afterNo }}</span>
+              </template> 
+              <template v-slot:item.itemQty="{ item }">
+               <span class="item-numeric-qty">{{ item.itemQty|localeNum}}</span>
+              </template>
+              <template v-slot:item.itemPrice="{ item }">
+               <span class="item-numeric">{{ item.itemPrice|localeNum}}</span>
+              </template>
+              <template v-slot:item.AMT="{ item }">
+               <span class="item-numeric">{{ item.AMT|localeNum}}</span>
+              </template>       
+              <template v-slot:item.action="{ item }">
+                <v-icon small class="mr-2" @click="editItem(item)" >
+                  edit
+                </v-icon>
+                <v-icon small @click="deleteItem(item)">
+                  delete
+                </v-icon>
+              </template>
+           
+            </v-data-table>
+            <div class="QTRes-footer">
                 <div class="TotalInfo">
                   <span class="TotalInfo-Title">합계금액</span>
                   <span class="TotalInfo-Text">{{total | localeNum}}</span>
-                  <span><b-button v-on:click="sendQTconfirmMsg()">견적 완료 알림</b-button></span>
+                  <span><b-button v-on:click="saveQTConfirm()">견적 완료 알림</b-button></span>
                   <!--<v-btn @click="SendSMS" >SMS전송</v-btn>-->
                 </div>
 
+            </div>
             </div>
           </b-card-text>
         </b-tab>
@@ -189,7 +373,7 @@
 </template>
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script>
-import {datePadding, convertDynamoToString , convertDynamoToArrayString} from '@/utils/common.js'
+import {datePadding, convertDynamoToString , convertDynamoToArrayString, convertArrayToDynamo} from '@/utils/common.js'
 import Constant from '@/Constant';
 
 export default {
@@ -208,7 +392,49 @@ export default {
       qtItems:[],
       siteInfo:[],
       showQTImageFlag:false,
-      itemImage:''
+      itemImage:'',
+      selected: [],
+      singleSelect:false,
+      dialog: false,
+      btnEditText:'추가',
+      headers: [
+          {
+            text: '브랜드',
+            align: 'center',
+            sortable: false,
+          },
+          { text: '부품명', value: 'NM_ITM',},
+          { text: '부품코드', value: 'CONFIRM_ITM' },
+          { text: '수량', value: 'ORDER_QTY' ,align: 'end', },
+          { text: '단가', value: 'SAL_PRICE' },
+          { text: '금액', value: 'AMT' },
+          { text: '배송구분', value: 'DELV_DAY' },
+        ],
+      headers2: [
+          { text: '부품번호', value: 'itemCode',},
+          { text: '브랜드', value: 'itemBrand',},
+          { text: '차종', value: 'carBrand',},
+          { text: '부품명',  value: 'itemName',},
+          { text: '애프터번호', value: 'afterNo',},
+          { text: '수량',  value: 'itemQty',},
+          { text: '단가', value: 'itemPrice', },
+          { text: '금액', value: 'AMT',},
+          { text: '비고', value: 'memo',},
+          { text: '', value: 'action', sortable: false },
+        ],
+      editedItem: {
+        seq:0,
+        itemCode: '',
+        itemBrand: '',
+        carBrand: '',
+        itemName: '',
+        afterNo: '',
+        itemQty:0,
+        itemPrice:0,
+        AMT:0,
+        memo:'',
+      },
+      itemsPerPage: -1,
     }
   },
   methods: {
@@ -226,7 +452,7 @@ export default {
       param.VinNo =  this.qtInfo.CarVin;
       param.RequestDataJSON = this.qtInfo.ID;
 
-      console.log("======= ROHistory Request result ========");
+      console.log("======= QT LIST Request result ========");
       console.log(param); 
 
       var rtnCode = "";
@@ -238,7 +464,7 @@ export default {
           data: param
       })
       .then((result) => {
-          console.log("======= ROHistory Return result ========");     
+          console.log("======= QT LIST Return result ========");     
           console.log(result.data); 
          
           this.rtnCode = result.data.ReturnCode;
@@ -253,6 +479,7 @@ export default {
               if(headQTData[0].ESTM_STS !== '1' && rtnQTData['ESTM_DTL'].Length !== 0)
               {
                 this.detailQTData = rtnQTData['ESTM_DTL'];
+                //console.log(JSON.stringify(rtnQTData['ESTM_DTL'])); 
                 this.showSum = !this.showSum; 
               }
 
@@ -271,6 +498,7 @@ export default {
       })   
     },
     SetQtInfo(){
+      console.log('UserType : ' , this.UserInfo );
       console.log("QT Info 설정" + JSON.stringify(this.qtInfo));  
       this.tabIndex = 0;
       
@@ -287,6 +515,10 @@ export default {
           this.qtInfo.Memo = "";
           this.qtItems = [];
         }
+
+        var btnAdd =  document.querySelector('#btnItmAdd');
+        btnAdd.removeAttribute("disabled", "true");
+       
       }
 
       // webpos견적 Data 초기화
@@ -421,6 +653,117 @@ export default {
           console.log(error);
       })   
 
+    },
+    editItem (item) {
+        this.btnEditText = '수정';
+        this.editedIndex = this.detailQTData.indexOf(item);
+        this.editedItem = Object.assign({}, item);
+        this.dialog = true;        
+      },
+    deleteItem (item) {
+      const index = this.detailQTData.indexOf(item);
+      confirm('삭제하시겠습니까?') && this.detailQTData.splice(index, 1);
+    },
+    selectedDeleteItem () {
+    
+      if(this.selected.length > 0 )
+      {
+          this.selected.forEach(item =>{
+             const index = this.detailQTData.indexOf(item);
+             this.detailQTData.splice(index, 1);
+          });
+      }
+    },
+    close () {
+      this.dialog = false
+      setTimeout(() => {
+        this.editedItem = Object.assign({}, this.defaultItem)
+        this.editedIndex = -1
+      }, 300)
+    },
+    addItem () {
+      this.btnEditText = '추가';
+      this.editedItem.seq = this.detailQTData.length + 1;
+      if (this.editedIndex > -1) {
+        Object.assign(this.detailQTData[this.editedIndex], this.editedItem)
+      } else {
+        this.detailQTData.push(this.editedItem)
+      }
+      this.close()
+    },
+    saveQTConfirm()
+    {
+      var now = new Date();
+      var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
+      var msg = this.qtInfo.CarNo + " 차량에 대한 견적이 완료됐습니다.";
+      var qtMsg = {};
+      qtMsg.from = {'name' : this.UserInfo.BsnID};
+      qtMsg.msg  = msg;
+      qtMsg.reqTm = chatTime;
+      this.$EventBus.$emit('send-QTConfirm' , qtMsg)
+
+      var param = {};
+
+      var id =  this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+      var ReqTm = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                        + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+     param.operation = "create";
+      param.tableName = "BAY4U_QT_RETURN_LIST";
+      param.payload = {};
+      param.payload.Item = {};
+      param.payload.Item.ID = id;
+      param.payload.Item.DocID = this.qtInfo.ID;  //docId
+      param.payload.Item.CarNo = this.qtInfo.CarNo;
+      param.payload.Item.ResDealer = this.UserInfo.BsnID;
+      param.payload.Item.ReqSite = this.qtInfo.ReqSite;
+      param.payload.Item.LineItem = convertArrayToDynamo(JSON.stringify(this.detailQTData));
+      param.payload.Item.ReqDt = now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);
+      param.payload.Item.ReqTm = ReqTm;
+      param.payload.Item.ReqId = this.UserInfo.UserID;
+              
+      console.log("======= QT Save Request ========");
+      console.log(JSON.stringify(param));
+
+      axios({
+          method: 'POST',
+          url: Constant.LAMBDA_URL,
+          headers: Constant.JSON_HEADER,
+          data: param
+      })
+      .then((result) => {
+        console.log("======= QT Save result ========");
+        console.log(result.data);
+        })
+      .catch((error) => {
+        console.log(error);
+      });
+    },
+    getQTConfirm()
+    {
+      var param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_QT_RETURN_LIST";
+      param.payload = {};
+      param.payload.FilterExpression = "DocID = :id";
+      param.payload.ExpressionAttributeValues = {};
+      var key = ":id";
+
+      param.payload.ExpressionAttributeValues[key] = this.qtInfo.ID;
+
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+        console.log("======= QT Confirm result ========");
+        console.log( result.data.Items[0].LineItem);
+        this.detailQTData = JSON.parse(result.data.Items[0].LineItem);
+      });
     }
   },
   computed:{
@@ -447,6 +790,10 @@ export default {
         this.qtInfo = qtItem;
         this.SetQtInfo();
         this.GetSiteInfo();
+        if(this.UserInfo.UserType !== 'DEALER')
+        {
+            this.getQTConfirm();
+        }
     });
 
     this.$EventBus.$on('init-qtInfo', chatItem => {   
@@ -460,7 +807,17 @@ export default {
         this.itemImage = img;
         this.showQTImageFlag = true;
     });    
+
   },
+  mounted: function()
+  {
+    if(this.qtInfo.length === 0)
+    {
+        var btnAdd =  document.querySelector('#btnItmAdd');
+        btnAdd.setAttribute("disabled", "true");
+    }
+  }
+
 }
 </script>
 
@@ -674,5 +1031,53 @@ export default {
   text-overflow: ellipsis;
   white-space: nowrap;
   width: 145px;
+}
+.header-item
+{
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #967d5f;
+  width: 100px;
+  /*
+   border:tomato solid 1px;
+  text-align: center;
+  */
+}
+.header-item2
+{
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #967d5f;
+}
+.item-itemName
+{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 200px;
+  font-size: 0.8rem;
+}
+.item-delv
+{
+  width: 55px;
+  font-size: 0.8rem;
+}
+.item-itemcode
+{
+   font-size: 0.8rem;
+   font-weight: bold;
+   width: 120px;
+}
+.item-numeric  {
+  width: 55px;
+  font-size: 0.8rem;
+  text-align: right;
+  float:right;
+}
+.item-numeric-qty  {
+  width: 35px;
+  font-size: 0.8rem;
+  text-align: right;
+  float:right;
 }
 </style>
