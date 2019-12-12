@@ -26,7 +26,7 @@
         <!-- 과거 정비이력 Popup / 차량번호 입력 -->
         <v-dialog v-model="showROHistDialog" transition="dialog-bottom-transition" >
           <template v-slot:activator="{ on: { click } }">
-            <v-text-field class="pr-4 pl-4 mb-n4" label="차량번호" v-model="CarInfo.CarNo" outlined dense color="success"  v-on:keypress.enter="checkWebPOSHist"></v-text-field>
+            <v-text-field class="pr-6 pl-4 mb-n4" label="차량번호" v-model="CarInfo.CarNo" outlined dense color="success" append-outer-icon="search" @click:append-outer="checkWebPOSHist" v-on:keypress.enter="checkWebPOSHist"></v-text-field>
           </template>
           <v-card>
             <v-toolbar dark color="primary"> 
@@ -50,7 +50,7 @@
             </v-card>
         </v-dialog>
 
-        <v-text-field label="차대번호" v-model="CarInfo.VinNo" outlined dense color="success"  class="pr-4 pl-4"  v-on:keypress.enter="checkWebPOSHist"></v-text-field>
+        <v-text-field label="차대번호" v-model="CarInfo.VinNo" outlined dense color="success"  class="pr-6 pl-4" append-outer-icon="search" @click:append-outer="checkWebPOSHist" v-on:keypress.enter="checkWebPOSHist"></v-text-field>
         <!--<v-text-field label="차량종류" outlined dense color="success" class="mt-n5"></v-text-field>-->
         <v-btn outlined small color="red darken-1" class="mt-n6 mb-4 mr-4 float-right" v-if="showVINSearchBtn" @click="checkCarVin">차대번호 조회</v-btn>
         <v-btn outlined small color="red darken-1" class="mt-n6 mb-4 mr-1 float-right" v-if="showROHistBtn" @click="showROHistDialog=!showROHistDialog">정비이력</v-btn>

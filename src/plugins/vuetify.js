@@ -20,6 +20,7 @@ export default new Vuetify({
                 warning: colors.yellow.lighten4, // #3F51B5
                 success: colors.teal.lighten3, // #3F51B5
             },
+
         },
     },
 });
