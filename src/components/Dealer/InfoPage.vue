@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <div class="InfoPage">
+    <div class="InfoPage" id="InfoPage">
       <b-card
         header="카센타 정보"
         header-text-variant="white"
@@ -33,7 +33,7 @@
                 <b-form-input v-model="this.qtInfo.CarVin"></b-form-input>
               </div>
               <div class="CarInfo-Button">
-                <v-btn class="ma-2" outlined fab color="#acd3ce" elevation="5" @click="showQTImage(qtInfo.IMG)">
+                <v-btn class="ma-2" id="CarInfo-Button" outlined fab color="#acd3ce" elevation="5" @click="showQTImage(qtInfo.IMG)">
                   사진<br>확인
                 </v-btn>             
               </div>              
@@ -175,6 +175,7 @@
                     </v-card-actions>
                   </v-card>
                 </v-dialog>
+
                 </b-button-group>
               </div>  
             </div>      
@@ -450,6 +451,7 @@ export default {
       itemsPerPage: -1,
       carBrand:['BENZ','BMW','AUDI','VW','FORD','VOLVO','JAGUAR','MASERATI','INFINITI','LEXUS','TOYOTA','HONDA'],
       afterBrand:['MANN','FRAM','BOSCH','TRW'],
+      testData: {},      
     }
   },
   methods: {
@@ -462,6 +464,9 @@ export default {
       } else {
         return ['text-secondary']
       }
+    },
+    clipboardTest() {
+      console.log("clipboard : ", JSON.stringify(this.testData));
     },
     GetQtList(){
       var param = {};
@@ -792,7 +797,6 @@ export default {
           get() { return this.$store.getters.UserInfo },
           set(value) { this.$store.dispatch('UpdateUserInfo',value) }
       },
-
       total: function() {
         let sum = 0;
         this.detailQTData.forEach(function(item) {
@@ -827,6 +831,17 @@ export default {
         this.showQTImageFlag = true;
     });    
 
+    //document.getElementById('InfoPage').addEventListener('paste', handlePaste, true);
+    //console.log('event..........', );
+
+    document.addEventListener('paste', function (event) {
+      var clipText = event.clipboardData.getData('Text');
+      console.log('clipText : ', clipText);
+      //CarInfo-Button
+      this.testData = "{'test':'"+clipText+"'}";
+      document.getElementById('excelCopy').click();
+      console.log('testData : ', this.testData);
+    });
   },
   mounted: function()
   {

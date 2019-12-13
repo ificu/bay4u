@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app class="chatApp">
     <div class="chatform">
       <b-card no-body>
         <!--<b-tabs v-model="tabIndex" card>
@@ -671,13 +671,13 @@ export default {
   height: 90%;
   background-color: beige;
 }*/
-.v-application{
+.chatApp{
   width: 100%;
   height: 100%;
 }
 .chatform{
   width: 100%;
-  height: 100%;
+  height: calc(100vh - 20px);
 }
 .chatform .card {
   position: relative;

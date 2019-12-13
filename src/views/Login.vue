@@ -98,7 +98,7 @@ export default {
           this.loginAlertMessage = "등록되지 않은 아이디 입니다.";
           this.loginAlert = true;          
         }
-        else {
+        else {  
           console.log("로그인 성공 : ", JSON.stringify(result));
           var id = result.data.Items[0].ID;
           var name = result.data.Items[0].NAME;
@@ -114,9 +114,9 @@ export default {
             this.loginAlert = true;   
           }
           else if(type === "SITE") {
-            this.$cookies.set('BsnID', siteCode, '6000s');
-            this.$cookies.set('UserNM', name, '6000s');
-            this.$cookies.set('UserType', type, '6000s');
+            this.$cookies.set('BsnID', siteCode, '86400s');
+            this.$cookies.set('UserNM', name, '86400s');
+            this.$cookies.set('UserType', type, '86400s');
             this.$router.push('/NewQT');
             this.UserInfo.UserID = id;
             this.UserInfo.BsnID = siteCode;
@@ -124,10 +124,12 @@ export default {
             this.UserInfo.EntNo = entNo;
           }
           else {
-            this.$cookies.set('BsnID', siteCode, '60000s');
-            this.$cookies.set('UserID', id, '60000s');
-            this.$cookies.set('UserNM', name, '60000s');
-            this.$cookies.set('UserType', type, '6000s');
+
+            this.$cookies.set('BsnID', siteCode, '86400s');
+            this.$cookies.set('UserID', id, '86400s');
+            this.$cookies.set('UserNM', name, '86400s');
+            this.$cookies.set('UserType', type, '86400s');
+            
             this.$router.push('/MainPage');
             this.UserInfo.UserID = id;
             this.UserInfo.BsnID = siteCode;
@@ -162,7 +164,7 @@ export default {
       if(type === "SITE") {
         this.$router.push('/NewQT');
       }
-      else {
+      else if(type === "DEALER") {
         this.$router.push('/MainPage');
       }
     }
