@@ -124,33 +124,46 @@
                       <v-container>
                         <v-row>
                           <v-col cols="12" sm="6" md="4">
-                           <v-text-field v-model="editedItem.itemCode" label="부품번호"></v-text-field>
+                           <v-text-field v-model="editedItem.itemCode" label="부품번호" @focus="$event.target.select()"></v-text-field>
                           </v-col>
                           <v-col cols="12" sm="6" md="4">
-                             <v-text-field v-model="editedItem.itemBrand" label="브랜드"></v-text-field>
+                            <v-combobox v-model="editedItem.itemBrand" :items="afterBrand" label="브랜드" ></v-combobox>    
+                             <!--<v-text-field v-model="editedItem.itemBrand" label="브랜드"></v-text-field>-->
                           </v-col>
                           <v-col cols="12" sm="6" md="4">
-                              <v-text-field v-model="editedItem.carBrand" label="차종"></v-text-field>
+                            <v-combobox v-model="editedItem.carBrand" :items="carBrand" label="차종" ></v-combobox>
+                             <!-- <v-text-field v-model="editedItem.carBrand" label="차종"></v-text-field>-->
                           </v-col>
                           <v-col cols="12" sm="6" md="4">
-                              <v-text-field v-model="editedItem.itemName" label="부품명"></v-text-field>
+                              <v-text-field v-model="editedItem.itemName" label="부품명" @focus="$event.target.select()"></v-text-field>
                           </v-col>
                           <v-col cols="12" sm="6" md="4">
-                              <v-text-field v-model="editedItem.afterNo" label="After No"></v-text-field>
+                              <v-text-field v-model="editedItem.afterNo" label="After No" @focus="$event.target.select()"></v-text-field>
                           </v-col>
                           <v-col cols="12" sm="6" md="4">
-                              <v-text-field v-model="editedItem.itemQty" label="수량"></v-text-field>
+                              <v-text-field :value="editedItem.itemQty  | localeNum" label="수량" 
+                              @input="value =>editedItem.itemQty = value"  
+                              @change="onCalculatorAMT"
+                              @focus="$event.target.select()"
+                              ></v-text-field>
                           </v-col>
                           <v-col cols="12" sm="6" md="4">
-                              <v-text-field v-model="editedItem.itemPrice" label="단가"></v-text-field>
+                              <v-text-field :value="editedItem.itemPrice | localeNum" label="단가"
+                                @input="value =>editedItem.itemPrice = value" 
+                                @change="onCalculatorAMT"
+                                @focus="$event.target.select()" 
+                                ></v-text-field>
                           </v-col>
                           <v-col cols="12" sm="6" md="4">
-                              <v-text-field v-model="editedItem.AMT" label="금액"></v-text-field>
+                              <v-text-field :value="editedItem.AMT | localeNum" label="금액"  
+                              @input="value => editedItem.AMT = value"
+                              @focus="$event.target.select()"
+                              ></v-text-field>
                           </v-col>                    
                         </v-row>
                         <v-row>
                           <v-col cols="12" lg="12">
-                              <v-text-field v-model="editedItem.memo" label="비고"></v-text-field>
+                              <v-text-field v-model="editedItem.memo" label="비고"  @focus="$event.target.select()"></v-text-field>
                           </v-col>
                         </v-row>
                       </v-container>
@@ -436,11 +449,17 @@ export default {
         AMT:0,
         memo:'',
       },
-      itemsPerPage: -1, 
+      itemsPerPage: -1,
+      carBrand:['BENZ','BMW','AUDI','VW','FORD','VOLVO','JAGUAR','MASERATI','INFINITI','LEXUS','TOYOTA','HONDA'],
+      afterBrand:['MANN','FRAM','BOSCH','TRW'],
+      testData: {},      
       txtQTConfirm: '견적 확정 회신', 
     }
   },
   methods: {
+    onCalculatorAMT(){
+     this.editedItem.AMT = this.editedItem.itemPrice * this.editedItem.itemQty;
+    },
     linkClass(idx) {
       if (this.tabIndex === idx) {
         return ['text-info']
@@ -655,7 +674,6 @@ export default {
       .catch((error) => {
           console.log(error);
       })   
-
     },
     editItem (item) {
         this.btnEditText = '수정';
@@ -713,7 +731,7 @@ export default {
                 + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
       var ReqTm = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                         + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
-     param.operation = "create";
+      param.operation = "create";
       param.tableName = "BAY4U_QT_RETURN_LIST";
       param.payload = {};
       param.payload.Item = {};
@@ -813,8 +831,10 @@ export default {
           sum += (parseFloat(item.AMT));
         });
         return sum;
-      }
+      },
+      
   },
+
   created: function(){
 
     this.$EventBus.$on('click-qtInfo', qtItem => {   
@@ -858,7 +878,6 @@ export default {
         btnAdd.setAttribute("disabled", "true");
     }
   }
-
 }
 </script>
 
