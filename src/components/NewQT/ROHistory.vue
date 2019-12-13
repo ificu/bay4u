@@ -59,6 +59,8 @@
 </template>
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script>
+import Constant from '@/Constant';
+
 export default {
     data() {
         return {
@@ -126,22 +128,17 @@ export default {
             var rtnCount = 0;
 
             axios({
-            method: 'POST',
-            //url:'http://iparts.sknetworks.co.kr/BAY4UService.svc/GetROItemList',
-            url:'https://bay4u.co.kr/scpif/GetROItemList',
-            headers:{
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            data: param
+                method: 'POST',
+                url: Constant.SCPIF_URL + 'GetROItemList',
+                headers: Constant.JSON_HEADER,
+                data: param
             })
             .then((result) => {
-
-            console.log("======= GetRoItem Return result ========");
-            console.log(result.data); 
-            this.rtnCode = result.data.ReturnCode;
-            this.rtnCount = Number(result.data.ReturnDataCount);
-            this.roitemList = JSON.parse(result.data.ReturnDataJSON);
+                    console.log("======= GetRoItem Return result ========");
+                console.log(result.data); 
+                this.rtnCode = result.data.ReturnCode;
+                this.rtnCount = Number(result.data.ReturnDataCount);
+                this.roitemList = JSON.parse(result.data.ReturnDataJSON);
 
             })
             .catch((error) => {
