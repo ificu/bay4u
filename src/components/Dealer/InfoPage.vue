@@ -109,7 +109,8 @@
                   <b-button variant="outline-secondary">엑셀 카피 자동 입력</b-button>
                   <b-button variant="outline-secondary" v-on:click="GetQtList" v-if="UserInfo.UserType === 'DEALER'">견적서 자동 입력</b-button>
                   <b-button variant="outline-secondary" @click="selectedDeleteItem">선택 삭제</b-button>
-                 <!-- <b-button class="QTRes-ButtonAdd" variant="outline-secondary">부품 추가</b-button>-->
+                  <b-button id="clipboardBtn" @click="clipboardAdd" style="display:none">test...</b-button>
+                  <!-- <b-button class="QTRes-ButtonAdd" variant="outline-secondary">부품 추가</b-button>-->
                 <!--부품추가-->
                  <v-dialog v-model="dialog" max-width="500px">
                   <template v-slot:activator="{ on }">
@@ -247,7 +248,7 @@
               <div class="TotalInfo">
                 <span class="TotalInfo-Title">합계금액</span>
                 <span class="TotalInfo-Text">{{total | localeNum}}</span>
-                <span><b-button v-on:click="sendQTconfirmMsg()">견적 완료 알림</b-button></span>
+                <span><b-button v-on:click="sendQTconfirmMsg()">{{txtQTConfirm}}</b-button></span>
                 <!--<v-btn @click="SendSMS" >SMS전송</v-btn>-->
               </div>
             </div>
@@ -334,7 +335,7 @@
                 <div class="TotalInfo">
                   <span class="TotalInfo-Title">합계금액</span>
                   <span class="TotalInfo-Text">{{total | localeNum}}</span>
-                  <span><b-button v-on:click="saveQTConfirm()">견적 완료 알림</b-button></span>
+                  <span><b-button v-on:click="saveQTConfirm()">{{txtQTConfirm}}</b-button></span>
                   <!--<v-btn @click="SendSMS" >SMS전송</v-btn>-->
                 </div>
 
@@ -435,8 +436,8 @@ export default {
         AMT:0,
         memo:'',
       },
-      itemsPerPage: -1,
-      testData: {},      
+      itemsPerPage: -1, 
+      txtQTConfirm: '견적 확정 회신', 
     }
   },
   methods: {
@@ -446,9 +447,6 @@ export default {
       } else {
         return ['text-secondary']
       }
-    },
-    clipboardTest() {
-      console.log("clipboard : ", JSON.stringify(this.testData));
     },
     GetQtList(){
       var param = {};
@@ -766,9 +764,38 @@ export default {
       })
       .then((result) => {
         console.log("======= QT Confirm result ========");
-        console.log( result.data.Items[0].LineItem);
+        console.log( result.data);
+        if(result.data.Items.length > 0)
+          this.txtQTConfirm = "견적 재회신";
+        else
+          this.txtQTConfirm = "견적확정 회신";
         this.detailQTData = JSON.parse(result.data.Items[0].LineItem);
       });
+    },
+    clipboardAdd() {
+      console.log("======= clipboardAdd ========");
+      var clipText = document.getElementById('clipboardBtn').value;
+
+      var copyData = clipText.split(/\r\n|\r|\n/);
+      console.log('copyData : ', copyData);
+
+      var idx = 0;
+      for(var item of copyData ){
+
+        this.editedItem.seq = idx++;
+        var val = item.split('	');
+        this.editedItem.itemCode = val[0];
+        this.editedItem.itemBrand =  val[1];
+        this.editedItem.carBrand =  val[2];
+        this.editedItem.itemName =  val[3];
+        this.editedItem.afterNo =  val[4];
+        this.editedItem.itemQty =  val[5].replace(',','');
+        this.editedItem.itemPrice =  val[6].replace(',','');
+        this.editedItem.AMT =  val[7].replace(',','');
+        this.editedItem.memo =  val[8];
+ 
+        this.detailQTData.push(this.editedItem);
+      }
     }
   },
   computed:{
@@ -794,9 +821,8 @@ export default {
         this.qtInfo = qtItem;
         this.SetQtInfo();
         this.GetSiteInfo();
-        if(this.UserInfo.UserType !== 'DEALER')
-        {
-            this.getQTConfirm();
+        if(this.UserInfo.UserType !== 'DEALER'){
+          this.getQTConfirm();
         }
     });
 
@@ -818,10 +844,10 @@ export default {
     document.addEventListener('paste', function (event) {
       var clipText = event.clipboardData.getData('Text');
       console.log('clipText : ', clipText);
-      //CarInfo-Button
-      this.testData = "{'test':'"+clipText+"'}";
-      document.getElementById('excelCopy').click();
-      console.log('testData : ', this.testData);
+      document.getElementById('clipboardBtn').value = clipText;
+      document.getElementById('clipboardBtn').click();
+
+      
     });
   },
   mounted: function()
