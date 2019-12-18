@@ -1,5 +1,5 @@
 <template lang="html">
-  <transition name="QTConfirm">
+  <transition name="QTOrder">
     <div class="modal-mask" @keyup.esc="$emit('close')">
       <div class="modal-wrapper">
         <div class="modal-container">
@@ -13,26 +13,13 @@
 
           <div class="modal-body">
             <div class="body-subTitle">
-              <h6>견적 요청 대리점</h6>
+              <h6>주문 요청 리스트</h6>
             </div>
-            <div class="body-dealer">
-              <div class="body-dealerTitle">대리점 리스트</div>
-              <div class="body-dealerList">
-                <slot name="list1">
-                </slot>
-              </div>
-            </div>
-            <div class="body-subTitle">
-              <h6>견적 요청 리스트</h6>
-            </div>
-
-            <div class="body-qtList">
-              <slot name="list2">
+            <div class="body-orderList">
+              <slot name="orderlist">
               </slot>
             </div>
-
           </div>
-
           <div class="modal-footer">
             <slot name="footer">
               <!--  -->
@@ -45,8 +32,13 @@
 </template>
 
 <style lang="css" scoped>
-
-.body-qtList
+.body-orderList
+{
+  height: 300px;
+  overflow:auto;
+  overflow-x:hidden;
+}
+.body-orderList
 {
   height: 300px;
   overflow:auto;

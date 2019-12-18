@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app v-scroll-stop="isScroll">
     <!-- 1. 차량번호/차대번호 촬영 인식 CARD -->
     <v-card class="mx-auto mb-2 mt-2" width="93%">
       <v-app-bar dark color="brown darken-2" height="40px">
@@ -200,9 +200,19 @@
 
     <!-- 부품 카테고리 팝업 -->
     <ItemCategory v-if="showItemCategory" @close="showItemCategory=false">
-      <h4 slot="header">{{categoryTitle}}</h4>
-      <span slot="body">
-        
+        <v-toolbar flat dense slot="header"> 
+          <v-toolbar-title class="Category-Title" >
+            <h4>{{categoryTitle}}</h4>
+          </v-toolbar-title>                 
+          <v-spacer></v-spacer>
+          <v-toolbar-items class="mt-2">
+            <span  @click="showItemCategory=false">
+              확인 <i class="fas fa-check"></i>
+            </span>
+          </v-toolbar-items>
+        </v-toolbar>
+      <!--<h4 >{{categoryTitle}}</h4>-->
+      <span slot="body">  
         <b-form-group>
           <b-form-checkbox
             v-for="item in categoryList"
@@ -216,9 +226,9 @@
           </b-form-checkbox>
         </b-form-group>
       </span>
-      <span slot="footer" @click="showItemCategory=false">
-        확인 <i class="fas fa-check"></i>
-      </span>
+      <!--  <span slot="footer" @click="showItemCategory=false">
+      확인 <i class="fas fa-check"></i>
+      </span>-->
     </ItemCategory>
 
     <!-- 견적 요청 확인 팝업 -->
@@ -341,6 +351,7 @@ name: 'QTStep',
       sendDealer : '',
       qtInfoData : {},
       saveQtCount : 0,
+      isScroll:false,
     }
   },
   methods: {
@@ -716,8 +727,10 @@ name: 'QTStep',
           this.tempItem.ITM_VAL = " ";
           this.tempItem.SEQ = 0;
         }
-
+        
         this.showQTConfirm = !this.showQTConfirm;
+       // this.isScroll = true;
+         
       },
       showItemCategoryModal(id) {
         var param = {};
@@ -1181,7 +1194,7 @@ name: 'QTStep',
           this.imgSize = "115";
         else
         this.imgSize = "100%";
-      }
+      },
     },
     components: {
       ItemCategory: ItemCategory,
@@ -1207,6 +1220,17 @@ name: 'QTStep',
     mounted() {
       datePadding();
       convertStringToDynamo();
+/*
+      var self = this;
+       window.addEventListener("scroll", function (e) {
+        if(self.showQTConfirm === true)
+        {
+          isScroll = true;
+        }
+        else{
+          isScroll = false;
+        }
+      });*/
     }
   }
 </script>
@@ -1416,7 +1440,7 @@ name: 'QTStep',
   padding-left: 20px;
 }
 .qtConfirm-itemList {
-  width: 90%;
+  width: 98%;
   margin: auto;
   border-style: solid;
   border-width: thin;
@@ -1425,7 +1449,7 @@ name: 'QTStep',
   font-size: 0.9rem;
   font-weight: bold;
   margin-bottom: 5px;
-  padding: 3px 5px;
+  padding: 3px 2px;
   display: flex;
 }
 .qtConfirm-itemDel {

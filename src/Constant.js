@@ -15,7 +15,7 @@ export default {
     IMGUPLOAD_HEADER: {'x-api-key': 'XbQmTVrXgo1obsXV6eMpO689ZGFkWzjK6Zzu2YeK', 'Content-Type': 'application/json'},
     IMG_URL: 'https://s3.ap-northeast-2.amazonaws.com/img.bay4u.co.kr/'*/
 
-    /* 개발계 */
+    /* 개발계  */
     LAMBDA_URL: 'https://mhq81lt4bf.execute-api.ap-northeast-2.amazonaws.com/prod/backendServiceTest',
     SCPIF_URL: 'https://bay4u.co.kr:444/scpif/',
     GOOGLE_URL: 'https://vision.googleapis.com/v1/images:annotate?key=AIzaSyApWMx0PYvexvPKJkmMA9lAwWvMC5K6FZU',
@@ -29,3 +29,4 @@ export default {
     IMGUPLOAD_HEADER: {'x-api-key': 'XbQmTVrXgo1obsXV6eMpO689ZGFkWzjK6Zzu2YeK', 'Content-Type': 'application/json'},
     IMG_URL: 'https://s3.ap-northeast-2.amazonaws.com/img.bay4u.co.kr/'
   };
+
