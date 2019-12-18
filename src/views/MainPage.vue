@@ -197,17 +197,17 @@ a:hover {
 }
 
 .page-content .content-userList{
-  flex: 20%;
+  flex: 15%;
   border-right: 1px solid #aaa;
   /*height: 100%;*/
   background: #f8f9fa;
 }
 .page-content .content-chatTab{
-  flex: 30%;
+  flex: 20%;
   padding: 10px;
   /*height: 100%;*/
 }
 .page-content .content-info{
-  flex: 50%;
+  flex: 55%;
 }
 </style>

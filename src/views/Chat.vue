@@ -106,7 +106,7 @@
 import Constant from '@/Constant';
 import MessageList from '@/components/Chat/ChatMessageList.vue';
 import MessageForm from '@/components/Chat/ChatMessageForm.vue';
-import {datePadding, convertStringToDynamo} from '@/utils/common.js'
+import {datePadding, convertStringToDynamo, dataURItoBlob} from '@/utils/common.js'
 import QTCamera from '@/components/NewQT/QTCamera.vue'
 import CheckLogin from '@/components/Common/CheckLogin.vue'
 import BackToTop from '@/components/Common/BackToTop.vue'
@@ -213,35 +213,12 @@ export default {
         chatMsg.Chatid = this.docId;
         chatMsg.reqTm = data.reqTm;
         if(data.imgId !== undefined) {       
-          var param = {};
-          param.operation = "list";
-          param.tableName = "BAY4U_IMG";
-          param.payload = {};
-          param.payload.FilterExpression = "ID = :id";
-          param.payload.ExpressionAttributeValues = {};
-          var key = ":id";
 
-          param.payload.ExpressionAttributeValues[key] = data.imgId;
+          chatMsg.img = Constant.IMG_URL + data.imgId;
+          chatMsg.imgId = data.imgId;    
 
-          axios({
-            method: 'POST',
-            url: Constant.LAMBDA_URL,
-            headers: Constant.JSON_HEADER,
-            data: param
-          })
-          .then((result) => {
-            console.log("======= Image Data result ========");
-            console.log(result.data);
-
-            chatMsg.img = result.data.Items[0].IMG;
-            chatMsg.imgId = data.imgId;    
-
-            this.msgDatas = chatMsg;
-          })
-          .catch((error) => {
-            console.log(error);
-            this.msgDatas = chatMsg;
-          });  
+          this.msgDatas = chatMsg;
+          
         }
         else {
           this.msgDatas = chatMsg;
@@ -398,38 +375,8 @@ export default {
     setImg(data)
     {
         data.forEach(element => { 
-          if(element.msgData.imgId !== undefined)
-          {
-            var param = {};
-            param.operation = "list";
-            param.tableName = "BAY4U_IMG";
-            param.payload = {};
-            param.payload.FilterExpression = "ID = :id";
-            param.payload.ExpressionAttributeValues = {};
-            var key = ":id";
-
-            param.payload.ExpressionAttributeValues[key] =  element.msgData.imgId;
-
-            console.log("======= Image Data request ========");
-            console.log(param.payload);
-    
-            axios({
-              method: 'POST',
-              url: Constant.LAMBDA_URL,
-              headers: Constant.JSON_HEADER,
-              data: param
-            })
-            .then((result) => {
-              console.log("======= Image Data result ========");
-              console.log(result.data);
-
-              element.msgData.img = result.data.Items[0].IMG;
-      
-            })
-            .catch((error) => {
-              console.log(error);
-          
-            });
+          if(element.msgData.imgId !== undefined) {
+            element.msgData.img = Constant.IMG_URL + element.msgData.imgId;
           }
           
         });
@@ -515,27 +462,38 @@ export default {
                 + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
 
       var param = {};
-
-      param.operation = "create";
-      param.tableName = "BAY4U_IMG";
-      param.payload = {};
-      param.payload.Item = {};
-      param.payload.Item.ID = key;
-      param.payload.Item.IMG = pic;
+      param.name = key + ".png";
+      param.type = "image/png";
 
       axios({
           method: 'POST',
-          url: Constant.LAMBDA_URL,
-          headers: Constant.JSON_HEADER,
+          url: Constant.IMGUPLOAD_URL,
+          headers: Constant.IMGUPLOAD_HEADER,
           data: param
       })
       .then((result) => {
         console.log("======= IMG Save result ========");
         console.log(result.data);
+
+        param = dataURItoBlob(pic);
+
+        axios({
+            method: 'PUT',
+            url: result.data.uploadURL,
+            data: param
+        })
+        .then((result) => {
+          console.log("======= IMG Upload result ========");
+          console.log(result);
+        })
+        .catch((error) => {
+          console.log(error);
+        }); 
+
       })
       .catch((error) => {
         console.log(error);
-      });    
+      }); 
       
       var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                 + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
@@ -547,7 +505,7 @@ export default {
       chatMsg.Chatid = this.docId;
       chatMsg.msg = msg;
       chatMsg.img = pic;
-      chatMsg.imgId = key;
+      chatMsg.imgId = key + ".png";
       chatMsg.reqTm  = chatTime;
       this.msgDatas = chatMsg;
       this.$sendMessage({
@@ -555,37 +513,11 @@ export default {
         msg,
         recv: this.dealer,
         chatId: this.docId,
-        imgId: key
+        imgId: key + ".png"
       });
       this.saveChatMsg(chatMsg);      
 
     },  
-    getImgData(imgId) {
-
-      var param = {};
-      param.operation = "list";
-      param.tableName = "BAY4U_IMG";
-      param.payload = {};
-      param.payload.FilterExpression = "ID = :id";
-      param.payload.ExpressionAttributeValues = {};
-      var key = ":id";
-
-      param.payload.ExpressionAttributeValues[key] = imgId;
-
-      axios({
-        method: 'POST',
-        url: Constant.LAMBDA_URL,
-        headers: Constant.JSON_HEADER,
-        data: param
-      })
-      .then((result) => {
-        console.log("======= Image Data result ========");
-        console.log(result.data);
-
-        return result.data.Items[0].IMG;
-      });        
-      return "";
-    },
     setReqDt(value)
     { 
       if(value !== undefined){
