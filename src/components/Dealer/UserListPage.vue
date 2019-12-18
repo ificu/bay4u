@@ -56,9 +56,10 @@
         </ul>-->
       </div>
     </b-tab>
+    <!--
     <b-tab title="대리점 대화목록" :title-link-class="linkClass(1)">
 
-    </b-tab>
+    </b-tab>-->
   </b-tabs>
   </div>   
 </template>
@@ -213,8 +214,8 @@ export default {
 
       // 값이 true가 아니면 현재 리스트에 없다는 의미으로 다시 조회해 와서 표시 하자.
       if(checkExist === false) {
-        console.log('checkExist : false');
-        console.log('docId : ' , docId.chatId);
+
+        console.log('docId.qtInfo : ' , docId.qtInfo);
 
         if(docId.qtInfo  !== undefined)
         {
@@ -223,6 +224,7 @@ export default {
           newQtData.CarNo   = docId.qtInfo.CarNo;
           newQtData.CarVin  = docId.qtInfo.CarVin;
           newQtData.ID  = docId.qtInfo.ID;
+          newQtData.IMG  = docId.qtInfo.IMG;
           newQtData.LineItem  = docId.qtInfo.LineItem;
           newQtData.Memo  = docId.qtInfo.Memo;
           newQtData.ReqDt  = docId.qtInfo.ReqDt;

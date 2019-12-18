@@ -200,7 +200,7 @@ a:hover {
   background: #f8f9fa;
 }
 .page-content .content-chatTab{
-  flex: 30%;
+  flex: 20%;
   padding: 10px;
   /*height: 100%;*/
 }

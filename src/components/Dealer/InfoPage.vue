@@ -280,6 +280,7 @@
               show-select
               :single-select="singleSelect"
               item-key="itemCode"
+              disable-sort=""
             >      
               <!--header-->
               <template v-slot:header.itemCode="{ header }">
@@ -580,7 +581,20 @@ export default {
       var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                 + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
 
-      var msg = this.qtInfo.CarNo + " 차량에 대한 견적이 완료됐습니다.";
+      var checkMsg = false;
+      var msg = '';
+
+      for(var msg of this.msgDatas) {
+        console.log('checkMsg : ', msg.msgData.msg);
+        if(msg.msgData.msg.indexOf('차량에 대한 견적이 완료') > 0) 
+          checkMsg = true;
+      }
+
+      if(checkMsg === false)
+        msg = this.qtInfo.CarNo + " 차량에 대한 견적이 완료됐습니다.";
+      else
+        msg = this.qtInfo.CarNo + " 차량에 대한 견적이 수정 후 재전송 되었습니다.";      
+
       var qtMsg = {};
       qtMsg.from = {'name' : this.UserInfo.BsnID};
       qtMsg.msg  = msg;
@@ -588,31 +602,11 @@ export default {
       this.$EventBus.$emit('send-QTConfirm' , qtMsg)
     },
     showQTImage(img) { 
+      console.log("QTInfo : ", this.qtInfo);
       console.log("Image : ", img);
       this.showQTImageFlag = true;
-      var param = {};
-      param.operation = "list";
-      param.tableName = "BAY4U_IMG";
-      param.payload = {};
-      param.payload.FilterExpression = "ID = :id";
-      param.payload.ExpressionAttributeValues = {};
-      var key = ":id";
+      this.itemImage = Constant.IMG_URL + img;
 
-      param.payload.ExpressionAttributeValues[key] = img;
-
-      axios({
-        method: 'POST',
-        url: Constant.LAMBDA_URL,
-        headers: Constant.JSON_HEADER,
-        data: param
-      })
-      .then((result) => {
-        console.log("======= Image Data result ========");
-        console.log(result.data);
-
-        this.itemImage = result.data.Items[0].IMG;
-        
-      });      
     },
     saveImage() {
       console.log("Info : ", this.qtInfo);
@@ -697,7 +691,20 @@ export default {
       var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                 + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
 
-      var msg = this.qtInfo.CarNo + " 차량에 대한 견적이 완료됐습니다.";
+      var checkMsg = false;
+      var msg = '';
+
+      for(var msg of this.msgDatas) {
+        console.log('checkMsg : ', msg);
+        if(msg.msgData.msg.indexOf('차량에 대한 견적이 완료') > 0)
+          checkMsg = true;
+      }
+
+      if(checkMsg === false)
+        msg = this.qtInfo.CarNo + " 차량에 대한 견적이 완료됐습니다.";
+      else
+        msg = this.qtInfo.CarNo + " 차량에 대한 견적이 수정 후 재전송 되었습니다.";
+
       var qtMsg = {};
       qtMsg.from = {'name' : this.UserInfo.BsnID};
       qtMsg.msg  = msg;
@@ -777,21 +784,22 @@ export default {
       console.log('copyData : ', copyData);
 
       var idx = 0;
-      for(var item of copyData ){
 
-        this.editedItem.seq = idx++;
+      for(var item of copyData ){
+        var newItem = {};
+        newItem.seq = idx++;
         var val = item.split('	');
-        this.editedItem.itemCode = val[0];
-        this.editedItem.itemBrand =  val[1];
-        this.editedItem.carBrand =  val[2];
-        this.editedItem.itemName =  val[3];
-        this.editedItem.afterNo =  val[4];
-        this.editedItem.itemQty =  val[5].replace(',','');
-        this.editedItem.itemPrice =  val[6].replace(',','');
-        this.editedItem.AMT =  val[7].replace(',','');
-        this.editedItem.memo =  val[8];
+        newItem.itemCode = val[0];
+        newItem.itemBrand =  val[1];
+        newItem.carBrand =  val[2];
+        newItem.itemName =  val[3];
+        newItem.afterNo =  val[4];
+        newItem.itemQty =  val[5].replace(',','');
+        newItem.itemPrice =  val[6].replace(',','');
+        newItem.AMT =  val[7].replace(',','');
+        newItem.memo =  val[8];
  
-        this.detailQTData.push(this.editedItem);
+        this.detailQTData.push(newItem);
       }
     }
   },
@@ -804,6 +812,10 @@ export default {
           get() { return this.$store.getters.UserInfo },
           set(value) { this.$store.dispatch('UpdateUserInfo',value) }
       },
+    msgDatas: {
+        get() { return this.$store.getters.msgDatas },
+        set(value) { this.$store.dispatch('UpdateMsgData',value) }
+    },        
       total: function() {
         let sum = 0;
         this.detailQTData.forEach(function(item) {

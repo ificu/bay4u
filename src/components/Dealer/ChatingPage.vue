@@ -77,7 +77,7 @@
 import Constant from '@/Constant';
 import MessageList from '@/components/Chat/ChatMessageList.vue';
 import MessageForm from '@/components/Chat/ChatMessageForm.vue';
-import {datePadding, convertStringToDynamo} from '@/utils/common.js'
+import {datePadding, convertStringToDynamo, dataURItoBlob} from '@/utils/common.js'
 import { async } from 'q';
 
 export default {
@@ -145,7 +145,14 @@ export default {
         chatMsg.Chatid = this.chatItem.ID;
         chatMsg.reqTm = data.reqTm;
 
-        if(data.imgId !== undefined) {       
+        if(data.imgId !== undefined) {   
+
+          chatMsg.img = Constant.IMG_URL + data.imgId;
+          chatMsg.imgId = data.imgId;    
+
+          this.msgDatas = chatMsg;
+          
+          /*
           var param = {};
           param.operation = "list";
           param.tableName = "BAY4U_IMG";
@@ -174,7 +181,7 @@ export default {
           .catch((error) => {
             console.log(error);
             this.msgDatas = chatMsg;
-          });  
+          });  */
         }
         else {
           this.msgDatas = chatMsg;
@@ -184,6 +191,7 @@ export default {
         var options = {
           body : data.msg
         };
+        console.log("ChatMessage Popup : ", data);
         new Notification('채팅 메시지 (' + data.from.name + ')', options);
         this.$EventBus.$emit('update-chatMsg', data);  
       }
@@ -394,36 +402,8 @@ export default {
     setImg(data)
     {
         data.forEach(element => { 
-          if(element.msgData.imgId !== undefined)
-          {
-            var param = {};
-            param.operation = "list";
-            param.tableName = "BAY4U_IMG";
-            param.payload = {};
-            param.payload.FilterExpression = "ID = :id";
-            param.payload.ExpressionAttributeValues = {};
-            var key = ":id";
-
-            param.payload.ExpressionAttributeValues[key] =  element.msgData.imgId;
-
-            console.log("======= Image Data request ========");
-            console.log(JSON.stringify(param));
-    
-            axios({
-              method: 'POST',
-              url: Constant.LAMBDA_URL,
-              headers: Constant.JSON_HEADER,
-              data: param
-            })
-            .then((result) => {
-              console.log("======= Image Data result ========");
-              console.log(result.data);
-              element.msgData.img = result.data.Items[0].IMG;
-            })
-            .catch((error) => {
-              console.log(error);
-          
-            });
+          if(element.msgData.imgId !== undefined){
+            element.msgData.img = Constant.IMG_URL + element.msgData.imgId;
           }
           
         });
@@ -462,8 +442,43 @@ export default {
       var key = this.UserInfo.BsnID + now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                 + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
 
-      var param = {};
+      var bolbData = dataURItoBlob(fileImage.src);
 
+      var param = {};
+      param.name = key + '.' + bolbData.type.replace('image/', '');
+      param.type = bolbData.type;
+
+      axios({
+          method: 'POST',
+          url: Constant.IMGUPLOAD_URL,
+          headers: Constant.IMGUPLOAD_HEADER,
+          data: param
+      })
+      .then((result) => {
+        console.log("======= IMG Save result ========");
+        console.log(result.data);
+
+        param = bolbData;
+
+        axios({
+            method: 'PUT',
+            url: result.data.uploadURL,
+            data: param
+        })
+        .then((result) => {
+          console.log("======= IMG Upload result ========");
+          console.log(result);
+        })
+        .catch((error) => {
+          console.log(error);
+        }); 
+
+      })
+      .catch((error) => {
+        console.log(error);
+      });       
+
+/*
       param.operation = "create";
       param.tableName = "BAY4U_IMG";
       param.payload = {};
@@ -486,7 +501,7 @@ export default {
       })
       .catch((error) => {
         console.log(error);
-      });    
+      });    */
       
       var now = new Date();
       var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
@@ -499,7 +514,7 @@ export default {
       chatMsg.Chatid = this.chatItem.ID;
       chatMsg.msg = msg;
       chatMsg.img = fileImage.src;
-      chatMsg.imgId = key;
+      chatMsg.imgId = key + '.' + bolbData.type.replace('image/', '');
       chatMsg.reqTm = chatTime;
       this.msgDatas = chatMsg;
       this.$sendMessage({
@@ -507,7 +522,7 @@ export default {
         msg,
         recv: this.chatItem.ReqSite,
         chatId: this.chatItem.ID,
-        imgId: key
+        imgId: key + '.' + bolbData.type.replace('image/', '')
       });
       this.saveChatMsg(chatMsg);     
 
@@ -523,26 +538,37 @@ export default {
       var key = this.UserInfo.BsnID + now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                 + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2) + this.dragFileSendCount;
 
-      var param = {};
-      param.operation = "create";
-      param.tableName = "BAY4U_IMG";
-      param.payload = {};
-      param.payload.Item = {};
-      param.payload.Item.ID = key;
-      param.payload.Item.IMG = fileImage.src;
+      var bolbData = dataURItoBlob(fileImage.src);
 
-      console.log("======= IMG Save request ========");
-      console.log(JSON.stringify(param));
+      var param = {};
+      param.name = key + '.' + bolbData.type.replace('image/', '');
+      param.type = bolbData.type;
 
       axios({
           method: 'POST',
-          url: Constant.LAMBDA_URL,
-          headers: Constant.JSON_HEADER,
+          url: Constant.IMGUPLOAD_URL,
+          headers: Constant.IMGUPLOAD_HEADER,
           data: param
       })
-      .then((result)  => {
+      .then((result) => {
         console.log("======= IMG Save result ========");
         console.log(result.data);
+
+        param = bolbData;
+
+        axios({
+            method: 'PUT',
+            url: result.data.uploadURL,
+            data: param
+        })
+        .then((result) => {
+          console.log("======= IMG Upload result ========");
+          console.log(result);
+        })
+        .catch((error) => {
+          console.log(error);
+        }); 
+
       })
       .catch((error) => {
         console.log(error);

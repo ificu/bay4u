@@ -292,7 +292,7 @@ import QTConfirm from '@/components/NewQT/QTConfirm.vue'
 import QTCamera from '@/components/NewQT/QTCamera.vue'
 import ROHistory from '@/components/NewQT/ROHistory.vue'
 import MessageBox from '@/components/Common/MessageBox.vue'
-import {datePadding, convertStringToDynamo, convertArrayToDynamo} from '@/utils/common.js'
+import {datePadding, convertStringToDynamo, convertArrayToDynamo, dataURItoBlob} from '@/utils/common.js'
 import Constant from '@/Constant';
 
 export default {
@@ -312,6 +312,7 @@ name: 'QTStep',
       showQTConfirm: false,             // 최종 견적 요청 확인 팝업
       showQTCamera: false,              // 카메라 쵤영을 위한 팝업
       captureImg: "",                   // 카메라에서 촬영된 차량번호 or 차대번호 이미지
+      captureBlobImg: '',
       swiperOption: {
           slidesPerView: 3,
           spaceBetween: 120,
@@ -359,8 +360,15 @@ name: 'QTStep',
         this.imgCaptureType = type;
       },
       updatePic(pic){
+        
+        if(pic.length < 100) {
+          alert("촬영된 이미지에 이상이 있습니다.\n다시 촬영해 주세요.");
+          return;
+        }
+        
         if(this.imgCaptureType === "CARNO") {
           this.captureImg = pic;
+          this.captureBlobImg = dataURItoBlob(pic);
           pic = pic.replace("data:image/png;base64,", "");
           this.CarInfo.CarNo = "이미지 인식 중...";
           this.CarInfo.VinNo = "이미지 인식 중...";
@@ -381,32 +389,45 @@ name: 'QTStep',
             "ITM_NM":"사진입력",
             "ITM_VAL": "사진Item-" + seq,
             "SEQ": seq,
-            "IMG": key
+            "IMG": key + ".png"
           };
           this.qtRequest.push(item);
 
           var param = {};
 
-          param.operation = "create";
-          param.tableName = "BAY4U_IMG";
-          param.payload = {};
-          param.payload.Item = {};
-          param.payload.Item.ID = key;
-          param.payload.Item.IMG = pic;
+          param.name = key + ".png";
+          param.type = "image/png";
 
           axios({
               method: 'POST',
-              url: Constant.LAMBDA_URL,
-              eaders: Constant.JSON_HEADER,
+              url: Constant.IMGUPLOAD_URL,
+              headers: Constant.IMGUPLOAD_HEADER,
               data: param
           })
           .then((result) => {
             console.log("======= IMG Save result ========");
             console.log(result.data);
+
+            param = dataURItoBlob(pic);
+
+            axios({
+                method: 'PUT',
+                url: result.data.uploadURL,
+                data: param
             })
+            .then((result) => {
+              console.log("======= IMG Upload result ========");
+              console.log(result);
+            })
+            .catch((error) => {
+              console.log(error);
+            }); 
+
+          })
           .catch((error) => {
             console.log(error);
-          });          
+          }); 
+
         }
       },
       // Google OCR API를 통해 이미지에서 차대번호 추출
@@ -891,7 +912,7 @@ name: 'QTStep',
       param.payload.Item.ReqSeq = key;
       param.payload.Item.ResDealer = dealer;
       param.payload.Item.Memo = convertStringToDynamo(this.qtReqMemo);
-      param.payload.Item.IMG = imgKey;
+      param.payload.Item.IMG = imgKey + ".png";;
       //param.payload.Item.LineItem = JSON.stringify(this.qtRequest);
       param.payload.Item.LineItem = convertArrayToDynamo(JSON.stringify(this.qtRequest));
 
@@ -930,24 +951,35 @@ name: 'QTStep',
       });
 
       param = {};
-      param.operation = "create";
-      param.tableName = "BAY4U_IMG";
-      param.payload = {};
-      param.payload.Item = {};
-      param.payload.Item.ID = imgKey;
-      param.payload.Item.IMG = this.captureImg;
+      param.name = imgKey + ".png";
+      param.type = "image/png";
 
       axios({
           method: 'POST',
-          url: Constant.LAMBDA_URL,
-          headers: Constant.JSON_HEADER,
+          url: Constant.IMGUPLOAD_URL,
+          headers: Constant.IMGUPLOAD_HEADER,
           data: param
       })
       .then((result) => {
         console.log("======= IMG Save result ========");
         console.log(result.data);
 
+        param = this.captureBlobImg;
+
+        axios({
+            method: 'PUT',
+            url: result.data.uploadURL,
+            data: param
         })
+        .then((result) => {
+          console.log("======= IMG Upload result ========");
+          console.log(result);
+        })
+        .catch((error) => {
+          console.log(error);
+        }); 
+
+      })
       .catch((error) => {
         console.log(error);
       }); 
