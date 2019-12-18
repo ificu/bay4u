@@ -15,11 +15,11 @@
             </slot>
           </div>
 
-          <div class="modal-footer">
+         <!-- <div class="modal-footer">
             <slot name="footer">
-              <!--  -->
+                
             </slot>
-          </div>
+          </div>-->
         </div>
       </div>
     </div>
@@ -48,12 +48,17 @@
 .modal-container {
   width: 300px;
   margin: 0px auto;
-  padding: 20px 30px;
+  padding: 10px 10px;
   background-color: #fff;
   border-radius: 2px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
   transition: all .3s ease;
   font-family: Helvetica, Arial, sans-serif;
+}
+
+.modal-header {
+  margin:  10px 0px;
+  padding: 0;
 }
 
 .modal-header h3 {
@@ -63,7 +68,7 @@
 }
 
 .modal-body {
-  margin: 20px 0;
+  margin: 0px 5px;
 }
 
 .modal-default-button {

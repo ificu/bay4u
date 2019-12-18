@@ -161,44 +161,53 @@ export default {
       this.showMainPage = false;
       this.showChatPage = true;
 
+      this.docId = this.$route.params.chatid;
+      this.dealer =  this.$route.params.qtInfo.ResDealer;  
+
       // 초기 메시지 입력
-      var msg = "";
-      if(this.$route.params.carNo === null || this.$route.params.carNo.length === 0){
-        msg = "미상차량에 대한 견적이 요청됐습니다.";
+  
+      if(this.$route.params.chatType !== undefined && this.$route.params.chatType === 'order'){
+        var item = {};
+        item.ID =  this.docId;
+        this.showchating(item);
       }
       else{
-        msg = this.$route.params.carNo + " 차량에 대한 견적이 요청됐습니다.";
-      }
 
-      var now = new Date();
-      var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
-                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+        var msg = "";
+        if(this.$route.params.carNo === null || this.$route.params.carNo.length === 0){
+          msg = "미상차량에 대한 견적이 요청됐습니다.";
+        }
+        else{
+          msg = this.$route.params.carNo + " 차량에 대한 견적이 요청됐습니다.";
+        }
 
-      this.dealer = this.$route.params.qtInfo.ResDealer;
-      console.log('route : ' , this.$route.params.qtInfo);
-      var chatMsg = {};
-      //chatMsg.from = {'name' : '나'};
-      chatMsg.from = {'name' : this.UserInfo.BsnID};
-      chatMsg.to = {'name' : this.dealer};
-      chatMsg.msg  = msg;
-      chatMsg.reqTm = chatTime;
-      this.msgDatas = chatMsg;
+        var now = new Date();
+        var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                  + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
 
-      this.docId = this.$route.params.chatid;
-  
-      this.saveChatMsg(chatMsg);
+        console.log('route : ' , this.$route.params.qtInfo);
+        var chatMsg = {};
+        //chatMsg.from = {'name' : '나'};
+        chatMsg.from = {'name' : this.UserInfo.BsnID};
+        chatMsg.to = {'name' : this.dealer};
+        chatMsg.msg  = msg;
+        chatMsg.reqTm = chatTime;
+        this.msgDatas = chatMsg;
 
-      this.$sendMessage({
-        name: this.UserInfo.BsnID,
-        msg,
-        recv:  this.dealer,
-        chatId: this.docId,
-        reqTm : chatTime,
-        qtInfo : this.$route.params.qtInfo,
-      });
+        this.saveChatMsg(chatMsg);
 
-      if(this.$route.params.append !== undefined) {
-        this.showAppend = true;
+        this.$sendMessage({
+          name: this.UserInfo.BsnID,
+          msg,
+          recv:  this.dealer,
+          chatId: this.docId,
+          reqTm : chatTime,
+          qtInfo : this.$route.params.qtInfo,
+        });
+
+        if(this.$route.params.append !== undefined) {
+          this.showAppend = true;
+        }
       }
     }
 

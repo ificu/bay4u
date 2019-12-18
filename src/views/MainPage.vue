@@ -6,15 +6,15 @@
       flat
     >
       <v-app-bar-nav-icon></v-app-bar-nav-icon>
-
       <v-toolbar-title><h2>수입차 부품 견적 시스템<img src="@/assets/logo.png"></h2></v-toolbar-title>
 
-      <v-spacer></v-spacer>
-
-      <v-btn icon>
+      <v-spacer></v-spacer> 
+      <div v-if="hidden">
+       <CheckLogin></CheckLogin>
+      </div>
+      <v-btn icon  @click="hidden = !hidden">
         <v-icon>mdi-dots-vertical</v-icon>
       </v-btn>
-
       <template v-slot:extension>
         <v-tabs
           v-model="tab"
@@ -37,8 +37,6 @@
         :value="'tab-' + i"
       >
         <v-card flat>
-
-
         <div class="page-content">
           <!-- Your content goes here -->
           <div class="content-userList">
@@ -64,9 +62,7 @@
           </MessageBox>
           
         </div>
-
-
-        </v-card>
+       </v-card>
       </v-tab-item>
     </v-tabs-items>
   </v-card>
@@ -77,13 +73,14 @@
 import UserListPage from '@/components/Dealer/UserListPage.vue'
 import ChatingPage from '@/components/Dealer/ChatingPage.vue'
 import InfoPage from '@/components/Dealer/InfoPage.vue'
-//import CheckLogin from '@/components/Common/CheckLogin.vue'
+import CheckLogin from '@/components/Common/CheckLogin.vue'
 import MessageBox from '@/components/Common/MessageBox.vue'
 
 export default {
   name: 'MainPage',
   data () {
     return {
+      hidden:false,
       showAlertMsg: false,
       showAlerMsgBtn: true,
       qtKey: '',
@@ -145,7 +142,7 @@ export default {
     UserListPage,
     ChatingPage,
     InfoPage,
-  //  CheckLogin,
+    CheckLogin,
     MessageBox
   },
   created : function() {
@@ -197,7 +194,7 @@ a:hover {
 }
 
 .page-content .content-userList{
-  flex: 20%;
+  flex: 15%;
   border-right: 1px solid #aaa;
   /*height: 100%;*/
   background: #f8f9fa;
@@ -208,6 +205,6 @@ a:hover {
   /*height: 100%;*/
 }
 .page-content .content-info{
-  flex: 50%;
+  flex: 55%;
 }
 </style>
