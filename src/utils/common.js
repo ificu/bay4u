@@ -3,12 +3,12 @@
 export function datePadding(n, digits) {
     var zero = '';
     var i = 0;
-    var chk = ''+n;
+    var chk = '' + n;
     chk = chk.toString();
-  
+
     if (chk.length < digits) {
-      for (i = 0; i < digits - chk.length; i++)
-        zero += '0';
+        for (i = 0; i < digits - chk.length; i++)
+            zero += '0';
     }
 
     return zero + chk;
@@ -18,14 +18,14 @@ export function datePadding(n, digits) {
 // DynamoDB에는 empty string을 입력 못하기 때문에 적당한 값으로 변경해 주어야 함.
 export function convertStringToDynamo(str) {
 
-    if(str === undefined || str === "" || str === null ) {
+    if (str === undefined || str === "" || str === null) {
         str = "*empty*"
     }
 
     return str;
 }
 export function convertArrayToDynamo(arr) {
-    var str = arr.replace(/\s/gi, "*empty*");     
+    var str = arr.replace(/\s/gi, "*empty*");
     return str;
 }
 export function convertDynamoToString(str) {
@@ -33,16 +33,28 @@ export function convertDynamoToString(str) {
 }
 
 export function convertDynamoToArrayString(arr) {
-    return arr.replace(/[*]empty[*]/gi," ");   
+    return arr.replace(/[*]empty[*]/gi, " ");
 }
 
 // 특정날짜 요일 조회
 export function getInputDayWeek(value) {
-    
+
     var week = new Array('일', '월', '화', '수', '목', '금', '토');
-    
+
     var today = new Date(value).getDay();
     var todayLabel = week[today];
-    
+
     return todayLabel;
+}
+
+export function arrayGroupBy(array, f) {
+    var groups = {};
+    array.forEach(function(o) {
+        var group = JSON.stringify(f(o));
+        groups[group] = groups[group] || [];
+        groups[group].push(o);
+    });
+    return Object.keys(groups).map(function(group) {
+        return groups[group];
+    })
 }

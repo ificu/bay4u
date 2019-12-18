@@ -271,7 +271,7 @@
               v-model="selected"
               :headers="headers2"
               :items="detailQTData"
-              class="elevation-1"
+              class="elevation-1 mytable"
               fixed-header
               height="390px"
               :items-per-page="itemsPerPage"
@@ -288,15 +288,15 @@
               <template v-slot:header.itemBrand="{ header }">
                 <span class="header-item2">{{ header.text }}</span>
               </template>
-              <template v-slot:header.carBrand="{ header }">
+             <!-- <template v-slot:header.carBrand="{ header }">
                 <span class="header-item2">{{ header.text }}</span>
-              </template>
+              </template>-->
               <template v-slot:header.itemName="{ header }">
                 <span class="header-item2">{{ header.text }}</span>
               </template>
-              <template v-slot:header.afterNo="{ header }">
+             <!-- <template v-slot:header.afterNo="{ header }">
                 <span class="header-item2">{{ header.text }}</span>
-              </template>
+              </template>-->
               <template v-slot:header.itemQty="{ header }">
                 <span class="header-item2">{{ header.text }}</span>
               </template>
@@ -316,15 +316,15 @@
               <template v-slot:item.itemBrand="{ item }">
                <span class="item-delv">{{ item.itemBrand }}</span>
               </template>   
-              <template v-slot:item.carBrand="{ item }">
+             <!-- <template v-slot:item.carBrand="{ item }">
                <span class="item-delv">{{ item.carBrand }}</span>
-              </template> 
+              </template> -->
               <template v-slot:item.itemName="{ item }">
                <span class="item-delv">{{ item.itemName }}</span>
               </template> 
-              <template v-slot:item.afterNo="{ item }">
+              <!--<template v-slot:item.afterNo="{ item }">
                <span class="item-delv">{{ item.afterNo }}</span>
-              </template> 
+              </template> -->
               <template v-slot:item.itemQty="{ item }">
                <span class="item-numeric-qty">{{ item.itemQty|localeNum}}</span>
               </template>
@@ -426,16 +426,15 @@ export default {
           { text: '배송구분', value: 'DELV_DAY' },
         ],
       headers2: [
-          { text: '부품번호', value: 'itemCode',},
-          { text: '브랜드', value: 'itemBrand',},
-          { text: '차종', value: 'carBrand',},
-          { text: '부품명',  value: 'itemName',},
-          { text: '애프터번호', value: 'afterNo',},
-          { text: '수량',  value: 'itemQty',},
-          { text: '단가', value: 'itemPrice', },
-          { text: '금액', value: 'AMT',},
-          { text: '비고', value: 'memo',},
-          { text: '', value: 'action', sortable: false },
+          { text: '부품번호', value: 'itemCode', align:'center', },
+          { text: '브랜드', value: 'itemBrand', align:'center',},
+          { text: '부품명',  value: 'itemName', align:'center',},
+         // { text: '애프터번호', value: 'afterNo', align:'center',},
+          { text: '수량',  value: 'itemQty', align:'end'},
+          { text: '단가', value: 'itemPrice',align:'end' },
+          { text: '금액', value: 'AMT',align:'end'},
+          { text: '비고', value: 'memo', sortable: false,},
+          { text: '', value: 'action', sortable: false, width:'80px', },
         ],
       editedItem: {
         seq:0,
@@ -587,26 +586,6 @@ export default {
       qtMsg.msg  = msg;
       qtMsg.reqTm = chatTime;
       this.$EventBus.$emit('send-QTConfirm' , qtMsg)
-      /*
-      var param = {};
-      param.system = "BAY4U";
-      param.telNo = "01085429796";
-      param.callbackNo = "01037329517";
-      param.msg = "테스트 전송 입니다.";
-
-      axios({
-        method: 'POST',
-        url: Constant.SCPIF_URL + 'SendSMS',
-        headers: Constant.JSON_HEADER,
-        data: param
-      })
-      .then((result) => {
-        console.log(result);
-      })
-      .catch((error) => {
-        console.log(error);
-      });      
-      */
     },
     showQTImage(img) { 
       console.log("Image : ", img);
@@ -649,7 +628,7 @@ export default {
     SendSMS()
     {
       var param = {};
-      param.TranPhone = "010-8542-9796";
+      param.TranPhone = "010-0000-0000";
       param.TranCallback = "1600-9691";
       param.TranMsg =  "모바일 견적요청이 완료되었습니다.";
 
@@ -743,7 +722,7 @@ export default {
       param.payload.Item.LineItem = convertArrayToDynamo(JSON.stringify(this.detailQTData));
       param.payload.Item.ReqDt = now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);
       param.payload.Item.ReqTm = ReqTm;
-      param.payload.Item.ReqId = this.UserInfo.UserID;
+      param.payload.Item.ResDealerNm = this.UserInfo.Name;
               
       console.log("======= QT Save Request ========");
       console.log(JSON.stringify(param));
@@ -1098,16 +1077,20 @@ export default {
   font-weight: bold;
   color: #967d5f;
   width: 100px;
-  /*
-   border:tomato solid 1px;
-  text-align: center;
-  */
 }
+/*
+.mytable {
+ 
+     border: #ff9999 solid 2px;
+}*/
+
 .header-item2
 {
   font-size: 0.8rem;
   font-weight: bold;
   color: #967d5f;
+  padding: 0;
+ 
 }
 .item-itemName
 {
@@ -1127,6 +1110,7 @@ export default {
    font-size: 0.8rem;
    font-weight: bold;
    width: 120px;
+
 }
 .item-numeric  {
   width: 55px;
@@ -1139,5 +1123,9 @@ export default {
   font-size: 0.8rem;
   text-align: right;
   float:right;
+}
+td.text-center{
+  font-size: 1.2em;
+  padding:0;
 }
 </style>

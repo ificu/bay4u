@@ -1,7 +1,7 @@
 <template>
   <div class="QTList">
     <b-tabs class="QTList-tab" justified v-model="tabIndex" v-if="showMainPage">
-      <b-tab title="부품요청 내역" :title-link-class="linkClass(0)" >
+      <!--<b-tab title="부품요청 내역" :title-link-class="linkClass(0)" >
         <div class="QTList-contents">
           <div class="QTList-title">
             <span>견적 요청 히스토리</span>
@@ -169,8 +169,8 @@
             </b-card>
           </div>
         </div>
-      </b-tab>
-      <b-tab title="견적확정 내역" :title-link-class="linkClass(1)" active>
+      </b-tab>-->
+      <b-tab title="견적확정 내역" :title-link-class="linkClass(0)" active>
         <div class="QTList-contents">
           <div class="QTList-title">
             <span>견적 확정 내역</span>
@@ -193,116 +193,200 @@
           </div>
 
           <div class="QTList-history">
-            
-            <b-card no-body class="mb-1" v-for="(qtInfo , idx) in confirmQTdata" v-bind:key="idx">
-              <b-card-header header-tag="header" role="tab">
+            <!--견적내역-->
+            <b-card no-body class="mb-1" v-for="(qtItem , idx) in qtReqList" v-bind:key="idx" >
+              <b-card-header header-tag="header" role="tab" header-class="card-header-qtlist">
                 <b-container>
                   <b-row>
-                    <b-col align-self="center" class="history-date">{{qtInfo.MONTH}}/{{qtInfo.DAY}}({{qtInfo.DAYWEEK}})</b-col>
+                    <b-col align-self="center" class="history-date">{{setQtDate(qtItem[0].ReqDt)}}</b-col>
                     <b-col class="history-car">
                       <b-row class="history-carNo">
-                        {{qtInfo.CAR_NO}}
-                      </b-row>
-                      <b-row  class="history-carType">
-                        {{qtInfo.AGENT_NM}}
+                        {{(qtItem[0].CarNo === "*empty*")?"미상차량" : qtItem[0].CarNo }}
                       </b-row>
                     </b-col>                    
                     <b-col align-self="center" class="history-detailBtn">
-                      <b-button block href="#"  v-b-toggle="'accordion-' + idx"  variant="secondary" size="sm" v-on:click="GetQtList(qtInfo)">
-                        <i v-if="!SOList1Toggle" class="fas fa-chevron-down"></i>
-                        <i v-if="SOList1Toggle"  class="fas fa-chevron-up"></i>
+                      <b-button block href="#"  v-b-toggle="'accordion-' + idx"  variant="secondary"  size="sm" v-on:click="showQtList(qtItem,idx)">
+                        <i class="fas fa-chevron-down" :id="'btnDetail'+idx"></i>
+                        <!--<i v-if="!SOList1Toggle" class="fas fa-chevron-down"></i>
+                        <i v-if="SOList1Toggle"  class="fas fa-chevron-up"></i>-->
                       </b-button>
-                    </b-col>              
+                    </b-col>               
                   </b-row>
                 </b-container>
               </b-card-header>
               <b-collapse :id="'accordion-'+idx" accordion="my-accordion" role="tabpanel">
-                <b-card-body>
+                <b-card-body body-class="card-body-qtList">
                   <div class="history-detailConts">
-                    <ul>
-                      <!--<li>
-                        <div class="detailConts-dealer">대영 모터스</div>
-                      </li>-->
-                      <li  v-for="(item, index) in detailQTData" v-bind:key = "index">
-                        <div>
-                          <div class="itemCode" > {{item.CONFIRM_ITM}}</div>
-                          <div class="itemName">{{item.NM_ITM}}</div>
+                    <!--견적요청 정보-->
+                    <b-card no-body class="mb-1">
+                       <b-card-header header-tag="header" role="tab" header-class="card-header-qtInfo">
+                        <b-container>
+                          <b-row>
+                            <b-col class="history-qtInfo">요청내역</b-col>
+                            <b-col class="history-qtInfo-detail">
+                              <b-row class="history-qtInfo-carNo">
+                                {{(qtItem[0].CarNo === "*empty*")?"미상차량" : qtItem[0].CarNo }}
+                              </b-row>
+                              <b-row  class="history-qtInfo-vinNo">
+                                {{qtItem[0].CarVin}}
+                              </b-row>
+                            </b-col>                    
+                            <b-col align-self="center" class="history-qtInfo-detailBtn">
+                              <b-button block href="#"  v-b-toggle="'accordion-qtReq'"  variant="secondary" size="sm" v-on:click="showQtReqItem(qtItem[0])">
+                                <i v-if="!SOList2Toggle" class="fas fa-chevron-down"></i>
+                                <i v-if="SOList2Toggle"  class="fas fa-chevron-up"></i>
+                              </b-button>
+                            </b-col>               
+                          </b-row>
+                        </b-container>
+                       </b-card-header>
+                      <b-collapse :id="'accordion-qtReq'" accordion="my-accordion2" role="tabpanel">
+                          <b-card-body>
+                          <div class="history-detailConts">
+                            <ul>
+                              <li  v-for="(item, index) in qtReqItem" v-bind:key = "index">
+                              <div>
+                                <div><span class="itemCode">{{item.ITM_NM}}</span> <span class="itemName">{{item.ITM_QTY}}개</span> </div>
+                              </div>
+                              </li>
+                            </ul>
+                          </div>
+                        </b-card-body>
+                      </b-collapse>
+                    </b-card>
+                    <!--견적확정 정보-->
+                    <!--부품지원-->
+                    <b-card no-body class="mb-1" v-for="(qtInfo , idx) in confirmQTdata" v-bind:key="idx">
+                    <b-card-header header-tag="header" role="tab" header-class="card-header-webpos">
+                      <b-container>
+                        <b-row>
+                          <b-col align-self="center" class="history-webpos-date">{{qtInfo.MONTH}}/{{qtInfo.DAY}}({{qtInfo.DAYWEEK}})</b-col>
+                          <b-col class="history-webpo-car">
+                            <b-row class="history-carNo">
+                              {{qtInfo.CAR_NO}}
+                            </b-row>
+                            <b-row  class="history-carType">
+                              {{qtInfo.AGENT_NM}}
+                            </b-row>
+                          </b-col>                    
+                          <b-col align-self="center" class="history-webpos-detailBtn">
+                            <b-button block href="#"  v-b-toggle="'accordion-' + idx"  variant="secondary" size="sm" v-on:click="GetWebposQtList(qtInfo)">
+                              <i v-if="!SOList1Toggle" class="fas fa-chevron-down"></i>
+                              <i v-if="SOList1Toggle"  class="fas fa-chevron-up"></i>
+                            </b-button>
+                          </b-col>              
+                        </b-row>
+                      </b-container>
+                    </b-card-header>
+                    <b-collapse :id="'accordion-'+idx" accordion="my-accordion" role="tabpanel">
+                      <b-card-body>
+                        <div class="history-detailConts-webpos">
+                          <ul>
+                            <li  v-for="(item, index) in detailQTData" v-bind:key = "index">
+                              <div>
+                                <div class="itemCode" > {{item.CONFIRM_ITM}}</div>
+                                <div class="itemName">{{item.NM_ITM}}</div>
+                              </div>
+                              <div v-if="item.AMT === 0" class="detailConts-amount">{{ item.AMT }}원</div>
+                              <div v-if="item.AMT !== 0" class="detailConts-amount">{{ item.AMT | localeNum}}원</div>
+                              <div class="delvDay">{{item.DELV_DAY}}</div>
+                            </li>
+                          </ul>
+                          <div class="QTRes-footer">
+                            <div class="TotalInfo">
+                              <span class="TotalInfo-Title">합계금액</span>
+                              <span class="TotalInfo-Text">{{total | localeNum}}</span>
+                            </div>
+                          </div>
+                          <!--
+                          <div class="detailConts-compare">
+                            <b-button @click="showRODetailPageToggle">정비 명세서 작성</b-button>
+                          </div>
+                          -->
                         </div>
-                        <div v-if="item.AMT === 0" class="detailConts-amount">{{ item.AMT }}원</div>
-                        <div v-if="item.AMT !== 0" class="detailConts-amount">{{ item.AMT | localeNum}}원</div>
-                        <div class="delvDay">{{item.DELV_DAY}}</div>
-                      </li>
-                    </ul>
-                    <div class="QTRes-footer">
-                      <div class="TotalInfo">
-                        <span class="TotalInfo-Title">합계금액</span>
-                        <span class="TotalInfo-Text">{{total | localeNum}}</span>
-                      </div>
-                    </div>
-                    <!--
-                    <div class="detailConts-compare">
-                      <b-button @click="showRODetailPageToggle">정비 명세서 작성</b-button>
-                    </div>
-                    -->
+                      </b-card-body>
+                    </b-collapse>
+                  </b-card>
+                    <!--일반 대리점-->
+                     <b-card no-body class="mb-1" v-for="(qtInfo , idx) in confirmQTdata2" v-bind:key="idx" >
+                       <b-card-header header-tag="header" role="tab" header-class="card-header-qtRes">
+                        <b-container>
+                          <b-row>
+                            <b-col class="history-qtInfo">견적회신</b-col>
+                            <b-col class="history-qtInfo-detail">
+                              <b-row class="history-qtInfo-carNo">
+                                {{(qtInfo.CarNo === "*empty*")?"미상차량" : qtInfo.CarNo }}
+                              </b-row>
+                              <b-row  class="history-qtInfo-vinNo">
+                                {{qtInfo.ResDealerNm}}
+                              </b-row>
+                            </b-col>                    
+                            <b-col align-self="center" class="history-qtInfo-detailBtn">
+                              <b-button block href="#"  v-b-toggle="'accordion-qtRes-' + idx"  variant="secondary" size="sm" v-on:click="GetQtList2(qtInfo,idx )">
+                               <i class="fas fa-chevron-down" :id="'btnIcon'+idx"></i>
+                               <!--<i v-if="!SOList3Toggle" class="fas fa-chevron-down"></i>
+                                <i v-if="SOList3Toggle"  class="fas fa-chevron-up"></i>-->
+                              </b-button>
+                            </b-col>             
+                          </b-row>
+                        </b-container>
+                       </b-card-header>
+                      <b-collapse :id="'accordion-qtRes-'+idx" accordion="my-accordion3" role="tabpanel">
+                      <b-card-body>
+                        <b-container class ="pt-0 pl-1 pr-0">
+                          <b-row v-for="(item, index) in detailQTData2" v-bind:key = "index">
+                            <b-col class ="pt-0 pl-1">
+                              <div>
+                                <div><span class="itemCode">{{item.itemCode}}</span> <span class="itemName">{{item.itemName}}</span> </div>
+                                <div><span class="itemBrand">{{item.itemBrand}}</span><span class="itemAfterNo"> {{item.afterNo}}</span></div>
+                              </div>
+                            </b-col>
+                            <b-col class="pl-0 pr-0"><span>{{ item.itemQty }}</span></b-col>
+                            <b-col class="pl-0 pr-0">
+                              <span v-if="item.itemPrice === 0" class="qt-item-price">{{ item.itemPrice | localeNum}}</span>
+                              <span v-if="item.itemPrice !== 0" class="qt-item-price">{{ item.itemPrice | localeNum}}</span>
+                            </b-col>
+                            <b-col class="pl-0">
+                              <span v-if="item.AMT === 0" class="detailConts-amount">{{ item.AMT | localeNum}}원</span>
+                              <span v-if="item.AMT !== 0" class="detailConts-amount">{{ item.AMT | localeNum}}원</span>
+                            </b-col>
+                          </b-row>
+                          <div class="QTRes-footer">
+                            <div class="TotalInfo">
+                              <v-btn color="#4E342E" dark depressed class="mr-3" @click="showQTOrderPopup(qtInfo)" >주문하기</v-btn>
+                              <span class="TotalInfo-Title">합계금액</span>
+                              <span class="TotalInfo-Text">{{total2 | localeNum}}</span>
+                            </div>
+                          </div>
+                        </b-container>
+                        <!--
+                        <div class="history-detailConts">
+                          <ul>
+                            <li  v-for="(item, index) in detailQTData2" v-bind:key = "index">
+                              <div>
+                                <div><span class="itemCode">{{item.itemCode}}</span> <span class="itemName">{{item.itemName}}</span> </div>
+                                <div><span class="itemBrand">{{item.itemBrand}}</span><span class="itemAfterNo"> {{item.afterNo}}</span></div>
+                              </div>
+                              <div v-if="item.AMT === 0" class="detailConts-amount">{{ item.AMT }}원</div>
+                              <div v-if="item.AMT !== 0" class="detailConts-amount">{{ item.AMT | localeNum}}원</div>
+                            </li>
+                          </ul>
+                          <div class="QTRes-footer">
+                            <div class="TotalInfo">
+                              <span class="TotalInfo-Title">합계금액</span>
+                              <span class="TotalInfo-Text">{{total2 | localeNum}}</span>
+                            </div>
+                          </div>
+                        </div>-->
+                        
+                      </b-card-body>
+                      </b-collapse>
+                     </b-card>
                   </div>
                 </b-card-body>
               </b-collapse>
             </b-card>
 
-            <b-card no-body class="mb-1" v-for="(qtInfo , idx) in confirmQTdata2" v-bind:key="idx">
-              <b-card-header header-tag="header" role="tab">
-                <b-container>
-                  <b-row>
-                    <b-col align-self="center" class="history-date">{{setQtDate(qtInfo.ReqDt)}}</b-col>
-                    <b-col class="history-car">
-                      <b-row class="history-carNo">
-                        {{qtInfo.CarNo}}
-                      </b-row>
-                      <b-row  class="history-carType">
-                        {{qtInfo.ResDealerNm}}
-                      </b-row>
-                    </b-col>                    
-                    <b-col align-self="center" class="history-detailBtn">
-                      <b-button block href="#"  v-b-toggle="'accordion-' + idx"  variant="secondary" size="sm" v-on:click="GetQtList2(qtInfo)">
-                        <i v-if="!SOList1Toggle" class="fas fa-chevron-down"></i>
-                        <i v-if="SOList1Toggle"  class="fas fa-chevron-up"></i>
-                      </b-button>
-                    </b-col>              
-                  </b-row>
-                </b-container>
-              </b-card-header>
-              <b-collapse :id="'accordion-'+idx" accordion="my-accordion" role="tabpanel">
-                <b-card-body>
-                  <div class="history-detailConts">
-                    <ul>
-                      <!--<li>
-                        <div class="detailConts-dealer">대영 모터스</div>
-                      </li>-->
-                      <li  v-for="(item, index) in detailQTData2" v-bind:key = "index">
-                        <div>
-                          <div><span class="itemCode">{{item.itemCode}}</span> <span class="itemName">{{item.itemName}}</span> </div>
-                          <div><span class="itemBrand">{{item.itemBrand}}</span><span class="itemAfterNo"> {{item.afterNo}}</span></div>
-                        </div>
-                        <div v-if="item.AMT === 0" class="detailConts-amount">{{ item.AMT }}원</div>
-                        <div v-if="item.AMT !== 0" class="detailConts-amount">{{ item.AMT | localeNum}}원</div>
-                      </li>
-                    </ul>
-                    <div class="QTRes-footer">
-                      <div class="TotalInfo">
-                        <span class="TotalInfo-Title">합계금액</span>
-                        <span class="TotalInfo-Text">{{total2 | localeNum}}</span>
-                      </div>
-                    </div>
-                    <!--
-                    <div class="detailConts-compare">
-                      <b-button @click="showRODetailPageToggle">정비 명세서 작성</b-button>
-                    </div>
-                    -->
-                  </div>
-                </b-card-body>
-              </b-collapse>
-            </b-card>
-          
             <!--
             <b-card no-body class="mb-1">
               <b-card-header header-tag="header" role="tab">
@@ -420,6 +504,189 @@
               </b-collapse>
             </b-card>
 -->            
+          </div>
+        </div>
+      </b-tab>
+      <b-tab title="주문내역" :title-link-class="linkClass(1)">
+        <div class="QTList-contents">
+          <div class="QTList-title">
+            <span>주문내역</span>
+            <CheckLogin></CheckLogin>
+          </div>
+          <div class="QTList-search">
+            <b-input-group>
+              <b-dropdown slot="prepend" v-bind:text="dropdownQT">
+                <b-dropdown-item @click="dropdownQT='대리점'">대리점</b-dropdown-item>
+                <b-dropdown-item @click="dropdownQT='차량번호'">차량번호</b-dropdown-item>
+                <b-dropdown-item @click="dropdownQT='날짜'">날짜</b-dropdown-item>
+              </b-dropdown>
+
+              <b-form-input></b-form-input>
+
+              <b-input-group-append>
+                <b-button><i class="fas fa-search"></i></b-button>
+              </b-input-group-append>
+            </b-input-group>
+          </div>
+
+          <div class="QTList-history">
+            <b-card no-body class="mb-1" v-for="(item , idx) in orderHistory" v-bind:key="idx">
+              <b-card-header header-tag="header" role="tab">
+                <b-container>
+                  <b-row>
+                    <b-col align-self="center" class="history-date">{{setQtDate(item.ReqDt)}}</b-col>
+                    <b-col class="history-car">
+                      <b-row class="history-carNo">
+                       {{item.CarNo}}
+                      </b-row>
+                      <b-row  class="history-carType">
+                        {{item.ResDealerNm}}
+                      </b-row>
+                    </b-col>
+                    <b-col align-self="center" class="history-detailBtn">
+                      <b-button block href="#"  v-b-toggle="'ROaccordion' + idx"  variant="secondary" size="sm" @click="GetOrderDetail(item)">
+                        <i v-if="!ROList1Toggle" class="fas fa-chevron-down"></i>
+                        <i v-if="ROList1Toggle"  class="fas fa-chevron-up"></i>
+                      </b-button>
+                    </b-col>
+                  </b-row>
+                </b-container>
+              </b-card-header>
+              <b-collapse :id="'ROaccordion'+idx" accordion="my-accordion" role="tabpanel">
+                <b-card-body>
+                  <div class="history-detailConts">
+                    <ul>
+                      <li v-for="(ordItem, idx) in orderdetail" v-bind:key="idx">
+                        <div class="detailConts-title detailConts-subtotal">{{ordItem.itemCode}}</div>
+                        <div class="detailConts-amount detailConts-subtotal">{{ordItem.AMT}}원</div>
+                      </li>
+                    <!--  <li>
+                        <div class="detailConts-title detailConts-subtotal">브레이크 패드 교환</div>
+                        <div class="detailConts-amount detailConts-subtotal">160,000원</div>
+                      </li>
+                      <li>
+                        <div class="detailConts-title detailConts-subtotal">기타</div>
+                        <div class="detailConts-amount detailConts-subtotal">5,000원</div>
+                      </li>
+                      -->
+                      <li>
+                        <div class="detailConts-title detailConts-total">총 합계</div>
+                        <div class="detailConts-amount detailConts-total">325,000원</div>
+                      </li>
+                    </ul>
+                    <!--<div class="detailConts-compare">
+                      <b-button @click="showRODetailPageToggle">명세서 수정</b-button>
+                      <b-button @click="showCustomerDocOptionPageToggle">고객 명세서 발송</b-button>
+                    </div>-->
+                  </div>
+                </b-card-body>
+              </b-collapse>
+            </b-card>
+            <!--
+            <b-card no-body class="mb-1">
+              <b-card-header header-tag="header" role="tab">
+                <b-container>
+                  <b-row>
+                    <b-col align-self="center" class="history-date">8/5(월)</b-col>
+                    <b-col class="history-car">
+                      <b-row class="history-carNo">
+                        61거6440
+                      </b-row>
+                      <b-row  class="history-carType">
+                        BMW i8
+                      </b-row>
+                    </b-col>
+                    <b-col align-self="center" class="history-detailBtn">
+                      <b-button block href="#" v-b-toggle.ROaccordion-2 variant="secondary" size="sm" @click="ROList2Toggle = !ROList2Toggle">
+                        <i v-if="!ROList2Toggle" class="fas fa-chevron-down"></i>
+                        <i v-if="ROList2Toggle"  class="fas fa-chevron-up"></i>
+                      </b-button>
+                    </b-col>
+                  </b-row>
+                </b-container>
+              </b-card-header>
+              <b-collapse id="ROaccordion-2" accordion="my-accordion" role="tabpanel">
+                <b-card-body>
+                  <div class="history-detailConts">
+                    <ul>
+                      <li>
+                        <div class="detailConts-title detailConts-subtotal">오일 교환</div>
+                        <div class="detailConts-amount detailConts-subtotal">120,000원</div>
+                      </li>
+                      <li>
+                        <div class="detailConts-title detailConts-subtotal">브레이크 패드 교환</div>
+                        <div class="detailConts-amount detailConts-subtotal">160,000원</div>
+                      </li>
+                      <li>
+                        <div class="detailConts-title detailConts-subtotal">기타</div>
+                        <div class="detailConts-amount detailConts-subtotal">5,000원</div>
+                      </li>
+                      <li>
+                        <div class="detailConts-title detailConts-total">총 합계</div>
+                        <div class="detailConts-amount detailConts-total">325,000원</div>
+                      </li>
+                    </ul>
+                    <div class="detailConts-compare">
+                      <b-button @click="showRODetailPageToggle">명세서 수정</b-button>
+                      <b-button @click="showCustomerDocOptionPageToggle">고객 명세서 발송</b-button>
+                    </div>
+                  </div>
+                </b-card-body>
+              </b-collapse>
+            </b-card>
+
+            <b-card no-body class="mb-1">
+              <b-card-header header-tag="header" role="tab">
+                <b-container>
+                  <b-row>
+                    <b-col align-self="center" class="history-date">8/5(월)</b-col>
+                    <b-col class="history-car">
+                      <b-row class="history-carNo">
+                        11서8137
+                      </b-row>
+                      <b-row  class="history-carType">
+                        BMW X3
+                      </b-row>
+                    </b-col>
+                    <b-col align-self="center" class="history-detailBtn">
+                      <b-button block href="#" v-b-toggle.ROaccordion-3 variant="secondary" size="sm" @click="ROList3Toggle = !ROList3Toggle">
+                        <i v-if="!ROList3Toggle" class="fas fa-chevron-down"></i>
+                        <i v-if="ROList3Toggle"  class="fas fa-chevron-up"></i>
+                      </b-button>
+                    </b-col>
+                  </b-row>
+                </b-container>
+              </b-card-header>
+              <b-collapse id="ROaccordion-3" accordion="my-accordion" role="tabpanel">
+                <b-card-body>
+                  <div class="history-detailConts">
+                    <ul>
+                      <li>
+                        <div class="detailConts-title detailConts-subtotal">오일 교환</div>
+                        <div class="detailConts-amount detailConts-subtotal">120,000원</div>
+                      </li>
+                      <li>
+                        <div class="detailConts-title detailConts-subtotal">브레이크 패드 교환</div>
+                        <div class="detailConts-amount detailConts-subtotal">160,000원</div>
+                      </li>
+                      <li>
+                        <div class="detailConts-title detailConts-subtotal">기타</div>
+                        <div class="detailConts-amount detailConts-subtotal">5,000원</div>
+                      </li>
+                      <li>
+                        <div class="detailConts-title detailConts-total">총 합계</div>
+                        <div class="detailConts-amount detailConts-total">325,000원</div>
+                      </li>
+                    </ul>
+                    <div class="detailConts-compare">
+                      <b-button @click="showRODetailPageToggle">명세서 수정</b-button>
+                      <b-button @click="showCustomerDocOptionPageToggle">고객 명세서 발송</b-button>
+                    </div>
+                  </div>
+                </b-card-body>
+              </b-collapse>
+            </b-card>
+            -->
           </div>
         </div>
       </b-tab>
@@ -695,6 +962,34 @@
         </span>
       </router-link >
     </div>
+
+    
+    <!-- 주문 요청 확인 팝업 -->
+    <QTOrder v-if="showQTOrder" @close="showQTOrder=false">
+      <span slot="header">{{orderData.ResDealerNm}} 대리점에 <br> 주문요청을 보냅니다</span>
+      <span slot="orderlist">
+        <div class="order-itemList" v-for="(item, index) in orderList" v-bind:key="index">
+          <span class="order-itemCode">{{item.itemCode}}</span> / <span class="order-itemName"> {{item.itemName}}</span>
+          <input v-model="item.itemQty" type="number" class="order-itemqty" @change="calculatorAMT(item)" @focus="$event.target.select()"/>
+          <!--<span >{{item.AMT }}개</span>-->
+          <span v-if="item.itemPrice === 0" class="order-itemPrice">{{ item.itemPrice | localeNum}}원</span>
+          <span v-if="item.itemPrice !== 0" class="order-itemPrice">{{ item.itemPrice | localeNum}}원</span>
+          <i class="order-item-btn fas fa-times-circle"  @click="removeItem(item)"></i>
+        </div>
+        <div class="QTRes-footer">
+          <div class="TotalInfo">
+           <span class="TotalInfo-Title">합계금액</span>
+            <span class="TotalInfo-Text">{{total3 | localeNum}}</span>
+          </div>
+        </div>
+      </span>
+      <span slot="footer">
+        주문 하시겠습니까?
+        <b-button class="submit-YES" @click="SaveOrder()">YES</b-button>
+        <b-button class="submit-NO" @click="showQTOrder=false">NO</b-button>
+      </span>
+    </QTOrder>
+
   </div>
 </template>
 
@@ -706,8 +1001,9 @@ import QTtoRODetail from '@/components/QTList/QTtoRODetail.vue'
 import CustomerDoc from '@/components/QTList/CustomerDoc.vue'
 import CustomerDocOption from '@/components/QTList/CustomerDocOption.vue'
 import CheckLogin from '@/components/Common/CheckLogin.vue'
+import QTOrder from '@/components/QTList/QTOrder.vue'
 import Constant from '@/Constant';
-import {getInputDayWeek} from '@/utils/common.js'
+import {getInputDayWeek , convertDynamoToArrayString, arrayGroupBy, datePadding ,convertArrayToDynamo} from '@/utils/common.js'
 
 export default {
   name: 'QTList',
@@ -742,10 +1038,18 @@ export default {
             clickable: true
           }
       },
+      qtReqList:[],
+      qtReqItem:[],
       detailQTData:[],
       confirmQTdata: [],
       detailQTData2:[],
       confirmQTdata2: [],
+      showQTOrder:false,
+      orderData:[],
+      orderDealerName:"",
+      orderList:[],
+      orderHistory:[],
+      orderdetail:[]
     }
   },
   methods: {
@@ -821,7 +1125,7 @@ export default {
         return ['bg-light', 'text-secondary', 'font-weight-light']
       }
     },
-    showQTReqList() {
+    GetQTReqList() {
       var param = {};
       param.operation = "list";
       param.tableName = "BAY4U_QT_LIST";
@@ -830,8 +1134,6 @@ export default {
       param.payload.ExpressionAttributeValues = {};
       var key = ":id";
       param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
-
-       console.log("chating list pram : " + JSON.stringify(param));
 
       axios({
         method: 'POST',
@@ -842,26 +1144,24 @@ export default {
       .then((result) => {
         console.log("======= QT List result ========");
         console.log(result.data.Items);
-        this.qtReqList = result.data.Items;
-        /*
-        if(Array.isArray(this.qtReqList))
+
+        if(Array.isArray(result.data.Items))
         {
-            console.log(this.qtReqList);
-            console.log("TRUE");
-            
+          result.data.Items.sort(function(a, b){
+            return (a.ReqSeq < b.ReqSeq) ? 1 : -1;
+          });
         }
 
-        result.data.Items.forEach(element => { 
-         if(this.resDealers.indexOf(element['ResDealer']) === -1)
-         {
-            this.resDealers.push(element['ResDealer']);
-         }
+        var qtGroupList = arrayGroupBy(result.data.Items, function(item)
+        {
+          return [item.CarNo, item.ReqDt];
         });
-*/
+
+        this.qtReqList =  qtGroupList;
+
       });
     },
-
-    GetQtList(item){
+    GetWebposQtList(item){
 
       this.detailQTData = [];
       var param = {};
@@ -941,18 +1241,20 @@ export default {
           console.log(error);
       })   
     },
-    GetConfirmQtList2()
+    GetConfirmQtList2(item)
     {
-      this.confirmQTdata  = [];
-
+      console.log('Item : ' , item);
+    
       var param = {};
       param.operation = "list";
       param.tableName = "BAY4U_QT_RETURN_LIST";
       param.payload = {};
-      param.payload.FilterExpression = "ReqSite = :id";
+      param.payload.FilterExpression = "ResDealer = :id and ReqDt = :reqDt";
       param.payload.ExpressionAttributeValues = {};
       var key = ":id";
-      param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
+      var key2 = ":reqDt";
+      param.payload.ExpressionAttributeValues[key] = item[0].ResDealer;
+      param.payload.ExpressionAttributeValues[key2] = item[0].ReqDt;
 
       console.log("======= 견적확정 조회 Request result ========");
       console.log(param); 
@@ -969,13 +1271,203 @@ export default {
         this.confirmQTdata2  = result.data.Items;
       });  
     },
-    GetQtList2(item){
+    GetQtList2(item , index){
+      this.SOList3Toggle = !this.SOList3Toggle;
       this.detailQTData2 = JSON.parse(item.LineItem);
+
+      var btnAdd = document.querySelector("#btnIcon" + index);
+      
+      if(this.SOList3Toggle){
+        btnAdd.setAttribute("class", "fas fa-chevron-up");
+      }
+      else{
+        btnAdd.setAttribute("class", "fas fa-chevron-down");
+      }
+    },
+    GetOrderHistory()
+    {
+      var param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_ORDER_LIST";
+      param.payload = {};
+      param.payload.FilterExpression = "ReqSite = :id";
+      param.payload.ExpressionAttributeValues = {};
+      var key = ":id";
+      param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
+     
+      console.log("======= 주문내역 조회 Request result ========");
+      console.log(param); 
+
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+        console.log("=======주문내역 조회 result ========");
+        console.log( result.data.Items);
+        this.orderHistory  = result.data.Items;
+      });  
+      
+    },
+    GetOrderDetail(item)
+    {
+      this.ROList1Toggle = !this.ROList1Toggle
+      this.orderdetail = JSON.parse(item.LineItem);
     },
     setQtDate(value)
     {
       var str = value + '';
       return str.substring(5,7) + '/'+str.substring(8,10) + '(' + getInputDayWeek(value) +')';
+    },
+    showQtList(item, index)
+    {
+      this.SOList1Toggle = !this.SOList1Toggle;
+      this.qtReqItem = [];
+      this.GetConfirmQtList2(item);
+      this.GetConfirmQtList(item);
+
+      var btnAdd = document.querySelector("#btnDetail" + index);
+
+      if(this.SOList1Toggle){
+        btnAdd.setAttribute("class", "fas fa-chevron-up");
+      }
+      else{
+        btnAdd.setAttribute("class", "fas fa-chevron-down");
+      }
+    },
+    showQtReqItem(item)
+    {
+      this.SOList2Toggle = !this.SOList2Toggle;
+      console.log(item.LineItem);
+      this.qtReqItem = [];
+      this.qtReqItem =  JSON.parse(convertDynamoToArrayString(item.LineItem));
+    },
+    showQTOrderPopup(item)
+    {
+      this.orderData = item;
+      this.showQTOrder = !this.showQTOrder;
+     // this.orderDealerName = item.ResDealerNm;
+      this.orderList = JSON.parse(item.LineItem);
+
+      console.log(this.orderData);
+    },
+    removeItem(item) {
+
+      this.orderList = this.orderList.filter(it => it.itemCode != item.itemCode);
+    },
+    calculatorAMT(item){
+     
+      item.AMT = item.itemPrice * item.itemQty;
+    },
+    SaveOrder()
+    {
+      var now = new Date();
+      var id =  this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+      var ReqTm = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                        + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+      var param = {};
+      param.operation = "create";
+      param.tableName = "BAY4U_ORDER_LIST";
+      param.payload = {};
+      param.payload.Item = {};
+      param.payload.Item.ID = id;
+      param.payload.Item.DocID = this.orderData.DocID;  //docId
+      param.payload.Item.CarNo = this.orderData.CarNo;
+      param.payload.Item.ReqSite =  this.UserInfo.BsnID
+      param.payload.Item.ReqSiteNm = this.UserInfo.Name;
+      param.payload.Item.ResDealer = this.orderData.ResDealer;
+      param.payload.Item.ResDealerNm = this.orderData.ResDealerNm;
+      param.payload.Item.LineItem = convertArrayToDynamo(JSON.stringify(this.orderList));
+      param.payload.Item.ReqDt = now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);
+      param.payload.Item.ReqTm = ReqTm;
+         
+      console.log("======= Order Request ========");
+      console.log(JSON.stringify(param));
+
+      axios({
+          method: 'POST',
+          url: Constant.LAMBDA_URL,
+          headers: Constant.JSON_HEADER,
+          data: param
+      })
+      .then((result) => {
+        console.log("======= Order result ========");
+        console.log(result.data);
+        this.goChating();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    },
+    goChating()
+    {
+      var msg = this.orderData.CarNo + " 차량에 대한 주문이 요청됐습니다.";
+      var now = new Date();
+      var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+          + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+      var chatMsg = {};
+      chatMsg.from = {'name' : this.UserInfo.BsnID};
+      chatMsg.to = {'name' : this.orderData.ResDealer};
+      chatMsg.msg  = msg;
+      chatMsg.reqTm = chatTime;
+      this.msgDatas = chatMsg;
+        
+      var param = {};
+      var id = this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+      var key = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
+      param.operation = "create";
+      param.tableName = "BAY4U_CHAT";
+      param.payload = {};
+      param.payload.Item = {};
+      param.payload.Item.ID = id;
+      param.payload.Item.DocID = this.orderData.DocID;
+      param.payload.Item.ChatFrom = this.UserInfo.BsnID;
+      param.payload.Item.ChatTo =  this.orderData.ResDealer;
+      param.payload.Item.Message = chatMsg.msg;
+      param.payload.Item.Status = "0";
+      param.payload.Item.ReqTm = chatMsg.reqTm;
+
+      console.log("Send Msg : ", JSON.stringify(param));
+
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+        console.log("======= Chat Save result ========");
+        console.log(result.data);
+
+        this.$sendMessage({
+          name: this.UserInfo.BsnID,
+          msg,
+          recv:  this.orderData.ResDealer,
+          chatId: this.orderData.DocID,
+          reqTm : chatMsg.reqTm,
+        });
+
+        this.$router.push({name:'Chat', 
+            params:{
+                  chatid: this.orderData.DocID, 
+                  carNo: this.orderData.CarNo,
+                  chatFrom: this.UserInfo.BsnID,
+                  chatTo: this.orderData.ResDealer,
+                  chatDate: now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2),
+                  qtInfo : this.orderData,
+                  chatType:'order',
+              }});
+
+      })
+      .catch((error) => {
+        console.log(error);
+      });
     }
   },
 
@@ -985,7 +1477,8 @@ export default {
     QTtoRODetail,
     CustomerDoc,
     CustomerDocOption,
-    CheckLogin:CheckLogin  
+    CheckLogin:CheckLogin,
+    QTOrder:QTOrder
   },
   computed: {
     
@@ -1008,20 +1501,31 @@ export default {
           sum += (parseFloat(item.AMT));
         });
         return sum;
+    },
+
+    total3: function() {
+        let sum = 0;
+        this.orderList.forEach(function(item) {
+          sum += (parseFloat(item.AMT));
+        });
+        return sum;
     }
   },
   created : function() {
     //this.showQTReqList();
 
     if(this.$route !== undefined && this.$route.name === "QTList" ) {
-         this.GetConfirmQtList();
+       //  this.GetConfirmQtList();
+      this.GetQTReqList();
+      this.GetOrderHistory();
     }
 
     if(this.UserInfo.BsnID === '')
-      this.UserInfo.BsnID = this.$cookies.get('BsnID');
+    this.UserInfo.BsnID = this.$cookies.get('BsnID');
 
-    this.GetConfirmQtList();  
-    this.GetConfirmQtList2();
+    this.GetQTReqList();
+    this.GetOrderHistory();
+  //  this.GetConfirmQtList();  
 
   }
 }
@@ -1068,16 +1572,80 @@ export default {
   border: none;
 }
 
+.card-header-qtlist{
+  background-color:#004883;
+  color: #fff;
+  padding-top : 0px;
+  padding-bottom : 0px;
+}
+.card-body-qtList{
+  margin :0px 0px;
+  padding-left: 0px;
+  padding-right: 0px;
+  margin-top: 0px;
+  border:#fff 1px solid;
+}
+.card-header-qtInfo
+{
+  background-color: #fcf4df;
+  padding-top : 0px;
+  padding-bottom : 0px;
+  padding-left: 0;
+  padding-right: 10px;
+}
+.history-qtInfo {
+  font-size: 0.9rem;
+  font-weight: bold;
+  flex:30%;
+}
+.history-qtInfo-detail {
+  flex:55%;
+  padding: 0;
+}
+.history-qtInfo-carNo {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+.history-qtInfo-vinNo {
+  font-size: 0.7rem;
+}
+.history-qtInfo-detailBtn{
+  flex:5%;
+  padding: 0px;
+}
+.card-header-qtRes {
+  background-color: #ADD8E6;
+  padding-top : 0px;
+  padding-bottom : 0px;
+  padding-left: 0;
+  padding-right: 10px;
+}
+/*
 .card-header {
   background-color: #fcf4df;
   padding-top : 0px;
   padding-bottom : 0px;
-}
+}*/
 
 .card-header .container {
   padding-top : 0px;
   padding-bottom : 0px;
 }
+
+.card-header-webpos {
+  background-color: #ADD8E6;
+  padding-top : 0px;
+  padding-bottom : 0px;
+  padding-left: 0;
+  padding-right: 10px;
+}
+
+.card-header-webpos .container {
+  padding-top : 0px;
+  padding-bottom : 0px;
+  height:50px;
+}
+
 
 .QTList-history {
   margin:auto;
@@ -1088,6 +1656,7 @@ export default {
 .QTList-history .list-group .list-group-item {
   padding: 5px;
   background-color: #e4e4e4;
+ 
 }
 .history-detailConts {
   background-color: #f9f9f9;
@@ -1097,13 +1666,33 @@ export default {
 
 .history-detailConts ul {
   list-style-type: none;
-  padding-left: 0px;
+   margin: -10px;
+}
+
+.qt-item-price{
+  font-size: 0.9rem;
 }
 
 .history-date {
   font-size: 1.2rem;
   font-weight: bold;
   flex:15%;
+}
+.history-webpos-date {
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding-top: 0px;
+}
+.history-webpo-car {
+  flex:40%;
+  padding-top: 0px;
+}
+
+.history-webpos-detailBtn {
+  /*flex:15%;*/
+  text-align: right; 
+  padding: 5px 10px;
+  width: 60px;
 }
 .history-car {
   flex:40%;
@@ -1126,7 +1715,17 @@ export default {
 .history-detailConts {
   padding: 20px;
 }*/
+
 .history-detailConts li {
+  display: flex;
+  align-items:center;
+}
+.history-detailConts-webpos
+{
+   padding: 10px 15px;
+}
+.history-detailConts-webpos li
+{
   display: flex;
   align-items:center;
 }
@@ -1146,10 +1745,9 @@ export default {
 }
 .detailConts-amount {
   flex: 25%;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: bold;
   text-align: right;
- /* color: #ff9999;*/
   color: #EA4335;
 }
 .detailConts-status {
@@ -1300,5 +1898,61 @@ export default {
     text-align: center;
     white-space: nowrap;
     border-radius: 0.25rem;
+}
+.order-itemList {
+  width: 98%;
+  margin: auto;
+  border-style: solid;
+  border-width: thin;
+  border-radius: 5px;
+  border-color: #ddd;
+  margin-bottom: 5px;
+  padding: 3px 2px;
+  display: flex;
+}
+.order-itemCode {
+  font-size: 0.9em;
+  font-weight: bold;
+  margin-right: 5px;
+  margin-left: 5px;
+}
+.order-itemName {
+  font-size: 0.8em;
+  margin-right: 5px;
+  margin-left: 5px;
+}
+.order-itemqty
+{
+  width:25px;
+  font-size: 0.8em;
+  margin-right: 5px;
+  margin-left: 5px;
+  border:gray 1px solid;
+}
+.order-itemPrice{
+  margin-right: 5px;
+  margin-left: 5px;
+  font-size: 0.8em;
+}
+.order-item-btn{
+  float: right;
+}
+.submit-YES {
+  margin:auto;
+  flex: 50%;
+  margin-right: 5px;
+  background-color: #acd3ce;
+  color: #333;
+  font-weight: bold;
+  border-color: #cccccc;
+  margin-left: 10px;
+}
+.submit-NO {
+  margin:auto;
+  flex: 50%;
+  margin-left: 5px;
+  background-color: #afabab;
+  border: none;
+  color: #ececec;
 }
 </style>
