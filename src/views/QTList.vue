@@ -204,7 +204,7 @@
                         {{(qtItem[0].CarNo === "*empty*")?"미상차량" : qtItem[0].CarNo }}
                       </b-row>
                     </b-col>                    
-                    <b-col align-self="center" class="history-detailBtn">
+                    <b-col align-self="center" class="history-detailHeaderBtn">
                       <b-button block href="#"  v-b-toggle="'accordion-' + idx"  variant="secondary"  size="sm" v-on:click="showQtList(qtItem,idx)">
                         <i class="fas fa-chevron-down" :id="'btnDetail'+idx"></i>
                         <!--<i v-if="!SOList1Toggle" class="fas fa-chevron-down"></i>
@@ -1681,6 +1681,7 @@ export default {
   margin:auto;
   width: 90%;
   padding-top: 20px;
+  margin-bottom: 60px;
 }
 
 .QTList-history .list-group .list-group-item {
@@ -1691,12 +1692,13 @@ export default {
 .history-detailConts {
   background-color: #f9f9f9;
   margin: -20px;
-  padding: 20px;
+  padding: 5px 20px 5px 20px
 }
 
 .history-detailConts ul {
   list-style-type: none;
    margin: -10px;
+   padding: 10px 0px;
 }
 
 .qt-item-price{
@@ -1740,6 +1742,16 @@ export default {
   /*background-color: #E50914;*/
   padding: 1px;
   width: 60px;
+}
+.history-detailHeaderBtn {
+  flex:15%;
+  text-align: right; 
+  padding: 1px;
+  width: 60px;
+}
+.history-detailHeaderBtn .btn-block {
+  background-color: #fcf4df;
+  color: #333;
 }
 /*
 .history-detailConts {
