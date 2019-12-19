@@ -357,6 +357,84 @@
             </div>
           </b-card-text>
         </b-tab>
+        <b-tab title="주문 내역" :title-link-class="linkClass(2)"  v-if="UserInfo.UserType !== 'DEALER'">
+          <b-card-text>
+            <div class="QTRes-List">
+              <div class="QTRes-Title">
+                <v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>주문 상세
+              </div>  
+            </div>      
+            <div>
+            <v-data-table
+              :headers="headers3"
+              :items="orderHistory"
+              class="elevation-1 mytable"
+              fixed-header
+              height="390px"
+              :items-per-page="itemsPerPage"
+              hide-default-footer
+              no-data-text=''
+              :single-select="singleSelect"
+              item-key="itemCode"
+              disable-sort=""
+            >      
+              <!--header-->
+              <template v-slot:header.itemCode="{ header }">
+                <span class="header-item2">{{ header.text }}</span>
+              </template>
+              <template v-slot:header.itemBrand="{ header }">
+                <span class="header-item2">{{ header.text }}</span>
+              </template>
+              <template v-slot:header.itemName="{ header }">
+                <span class="header-item2">{{ header.text }}</span>
+              </template>
+             <template v-slot:header.itemQty="{ header }">
+                <span class="header-item2">{{ header.text }}</span>
+              </template>
+              <template v-slot:header.itemPrice="{ header }">
+                <span class="header-item2">{{ header.text }}</span>
+              </template>
+              <template v-slot:header.AMT="{ header }">
+                <span class="header-item2">{{ header.text }}</span>
+              </template>
+              <!-- contents -->
+              <template v-slot:item.itemCode="{ item }">
+               <span class="item-delv">{{ item.itemCode }}</span>
+              </template>
+              <template v-slot:item.itemBrand="{ item }">
+               <span class="item-delv">{{ item.itemBrand }}</span>
+              </template>   
+             <template v-slot:item.itemName="{ item }">
+               <span class="item-delv">{{ item.itemName }}</span>
+              </template> 
+             <template v-slot:item.itemQty="{ item }">
+               <span class="item-numeric-qty">{{ item.itemQty|localeNum}}</span>
+              </template>
+              <template v-slot:item.itemPrice="{ item }">
+               <span class="item-numeric">{{ item.itemPrice|localeNum}}</span>
+              </template>
+              <template v-slot:item.AMT="{ item }">
+               <span class="item-numeric">{{ item.AMT|localeNum}}</span>
+              </template>       
+            <!--  <template v-slot:item.action="{ item }">
+                <v-icon small class="mr-2" @click="editItem(item)" >
+                  edit
+                </v-icon>
+                <v-icon small @click="deleteItem(item)">
+                  delete
+                </v-icon>
+              </template>-->
+           
+            </v-data-table>
+            <div class="QTRes-footer">
+                <div class="TotalInfo">
+                  <span class="TotalInfo-Title">합계금액</span>
+                  <span class="TotalInfo-Text">{{total2 | localeNum}}</span>
+                </div>
+            </div>
+            </div>
+          </b-card-text>
+        </b-tab>
         </b-tabs>
       </b-card>   
 
@@ -437,6 +515,14 @@ export default {
           { text: '비고', value: 'memo', sortable: false,},
           { text: '', value: 'action', sortable: false, width:'80px', },
         ],
+      headers3: [
+          { text: '부품번호', value: 'itemCode', align:'center', },
+          { text: '브랜드', value: 'itemBrand', align:'center',},
+          { text: '부품명',  value: 'itemName', align:'center',},
+          { text: '수량',  value: 'itemQty', align:'end'},
+          { text: '단가', value: 'itemPrice',align:'end' },
+          { text: '금액', value: 'AMT',align:'end'},
+        ],
       editedItem: {
         seq:0,
         itemCode: '',
@@ -454,6 +540,7 @@ export default {
       afterBrand:['MANN','FRAM','BOSCH','TRW'],
       testData: {},      
       txtQTConfirm: '견적 확정 회신', 
+      orderHistory:[],
     }
   },
   methods: {
@@ -801,7 +888,34 @@ export default {
  
         this.detailQTData.push(newItem);
       }
-    }
+    },
+    GetOrderHistory()
+    {
+      var param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_ORDER_LIST";
+      param.payload = {};
+      param.payload.FilterExpression = "DocID = :id";
+      param.payload.ExpressionAttributeValues = {};
+      var key = ":id";
+      param.payload.ExpressionAttributeValues[key] = this.qtInfo.ID;
+     
+      console.log("======= 주문내역 조회 Request result ========");
+      console.log(param); 
+
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+        console.log("=======주문내역 조회 result ========");
+        console.log( result.data.Items[0].LineItem);
+        this.orderHistory  = JSON.parse(result.data.Items[0].LineItem);
+      });  
+      
+    },
   },
   computed:{
       CarInfo: {
@@ -823,6 +937,14 @@ export default {
         });
         return sum;
       },
+      total2: function()
+      {
+        let sum = 0;
+        this.orderHistory.forEach(function(item) {
+          sum += (parseFloat(item.AMT));
+        });
+        return sum;
+      }
       
   },
 
@@ -834,6 +956,7 @@ export default {
         this.GetSiteInfo();
         if(this.UserInfo.UserType !== 'DEALER'){
           this.getQTConfirm();
+          this.GetOrderHistory();
         }
     });
 

@@ -715,11 +715,11 @@
 
           <div class="QTList-history">
             <b-card no-body class="mb-1">
-              <b-card-header header-tag="header" role="tab">
+              <b-card-header header-tag="header" role="tab" header-class="card-header-order">
                 <b-container>
                   <b-row>
-                    <b-col align-self="center" class="history-date">8/7(수)</b-col>
-                    <b-col class="history-car">
+                    <b-col align-self="center" class="history-ro-date">8/7(수)</b-col>
+                    <b-col class="history-ro-car">
                       <b-row class="history-carNo">
                         43마4297
                       </b-row>
@@ -1677,6 +1677,27 @@ export default {
   padding-top: 2px;
 }
 
+.card-header-ro {
+  background-color: #fcf4df;
+  padding-top : 0px;
+  padding-bottom : 0px;
+}
+.card-header-ro .container {
+  padding-top : 0px;
+  padding-bottom : 0px;
+  height:50px;
+}
+.history-ro-date {
+  font-size: 1.2rem;
+  font-weight: bold;
+  flex:15%;
+  padding-top: 0;
+}
+.history-ro-car {
+  flex:40%;
+  padding-top: 2px;
+}
+
 .QTList-history {
   margin:auto;
   width: 90%;
@@ -1809,6 +1830,7 @@ export default {
 }
 .detailConts-compare {
   text-align: center;
+  margin-top: 20px;
 }
 .detailConts-compare button {
   font-weight: bold;
