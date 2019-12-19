@@ -531,11 +531,11 @@
 
           <div class="QTList-history">
             <b-card no-body class="mb-1" v-for="(item , idx) in orderHistory" v-bind:key="idx">
-              <b-card-header header-tag="header" role="tab">
+              <b-card-header header-tag="header" role="tab" header-class="card-header-order">
                 <b-container>
                   <b-row>
-                    <b-col align-self="center" class="history-date">{{setQtDate(item.ReqDt)}}</b-col>
-                    <b-col class="history-car">
+                    <b-col align-self="center" class="history-order-date">{{setQtDate(item.ReqDt)}}</b-col>
+                    <b-col class="history-order-car">
                       <b-row class="history-carNo">
                        {{item.CarNo}}
                       </b-row>
@@ -558,7 +558,8 @@
                     <ul>
                       <li v-for="(ordItem, idx) in orderdetail" v-bind:key="idx">
                         <div class="detailConts-title detailConts-subtotal">{{ordItem.itemCode}}</div>
-                        <div class="detailConts-amount detailConts-subtotal">{{ordItem.AMT}}원</div>
+                        <div class="detailConts-title detailConts-subtotal2">{{ordItem.itemName}}</div>
+                        <div class="detailConts-amount detailConts-subtotal">{{ordItem.AMT | localeNum}}원</div>
                       </li>
                     <!--  <li>
                         <div class="detailConts-title detailConts-subtotal">브레이크 패드 교환</div>
@@ -571,7 +572,7 @@
                       -->
                       <li>
                         <div class="detailConts-title detailConts-total">총 합계</div>
-                        <div class="detailConts-amount detailConts-total">325,000원</div>
+                        <div class="detailConts-amount detailConts-total">{{total4 | localeNum}}원</div>
                       </li>
                     </ul>
                     <!--<div class="detailConts-compare">
@@ -1509,6 +1510,15 @@ export default {
           sum += (parseFloat(item.AMT));
         });
         return sum;
+    },
+
+    total4: function()
+    {
+      let sum = 0;
+        this.orderdetail.forEach(function(item) {
+          sum += (parseFloat(item.AMT));
+        });
+        return sum;
     }
   },
   created : function() {
@@ -1573,7 +1583,7 @@ export default {
 }
 
 .card-header-qtlist{
-  background-color:#004883;
+  background-color:#4E342E;
   color: #fff;
   padding-top : 0px;
   padding-bottom : 0px;
@@ -1646,6 +1656,26 @@ export default {
   height:50px;
 }
 
+.card-header-order {
+  background-color: #fcf4df;
+  padding-top : 0px;
+  padding-bottom : 0px;
+}
+.card-header-order .container {
+  padding-top : 0px;
+  padding-bottom : 0px;
+  height:50px;
+}
+.history-order-date {
+  font-size: 1.2rem;
+  font-weight: bold;
+  flex:15%;
+  padding-top: 0;
+}
+.history-order-car {
+  flex:40%;
+  padding-top: 2px;
+}
 
 .QTList-history {
   margin:auto;
@@ -1756,10 +1786,14 @@ export default {
   color: #999;
 }
 .detailConts-subtotal {
-  color: #999;
+  color: #0D47A1;
+}
+.detailConts-subtotal2 {
+  font-size: 0.9em;
 }
 .detailConts-total {
   font-size: 1.2rem;
+  margin-top: 15px;
 }
 .detailConts-compare {
   text-align: center;
