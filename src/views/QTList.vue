@@ -559,6 +559,7 @@
                       <li v-for="(ordItem, idx) in orderdetail" v-bind:key="idx">
                         <div class="detailConts-title detailConts-subtotal">{{ordItem.itemCode}}</div>
                         <div class="detailConts-title detailConts-subtotal2">{{ordItem.itemName}}</div>
+                        <div class="detailConts-title detailConts-subtotal3">{{ordItem.itemQty}}개</div>
                         <div class="detailConts-amount detailConts-subtotal">{{ordItem.AMT | localeNum}}원</div>
                       </li>
                     <!--  <li>
@@ -1795,7 +1796,7 @@ export default {
   font-weight: bold;
 }
 .detailConts-amount {
-  flex: 25%;
+  flex: 30%;
   font-size: 0.9rem;
   font-weight: bold;
   text-align: right;
@@ -1811,6 +1812,11 @@ export default {
 }
 .detailConts-subtotal2 {
   font-size: 0.9em;
+  flex:30%
+}
+.detailConts-subtotal3 {
+  font-size: 0.9em;
+  flex:10%
 }
 .detailConts-total {
   font-size: 1.2rem;
