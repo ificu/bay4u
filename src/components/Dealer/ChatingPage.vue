@@ -4,7 +4,7 @@
       <b-card no-body>
         <!--<b-tabs v-model="tabIndex" card>
           <b-tab title="대화 목록" :title-link-class="linkClass(0)" active >-->
-            <div  class="Chating-Title">{{chatItem.ReqName}} {{ chatItem.CarNo }} </div>
+            <div  class="Chating-Title">{{chatItem.ReqName}} {{ (chatItem.CarNo==='*empty*') ?'미상차량': chatItem.CarNo}} </div>
               <b-card-text>
                  <div v-if="showChatArea" >
                    <div class="Chating-page">

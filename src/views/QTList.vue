@@ -184,10 +184,10 @@
                 <b-dropdown-item @click="dropdownQT='날짜'">날짜</b-dropdown-item>
               </b-dropdown>
 
-              <b-form-input></b-form-input>
+              <b-form-input v-model="qtSearchText" v-on:keypress.enter="GetQTReqList"></b-form-input>
 
               <b-input-group-append>
-                <b-button><i class="fas fa-search"></i></b-button>
+                <b-button @click="GetQTReqList"><i class="fas fa-search"></i></b-button>
               </b-input-group-append>
             </b-input-group>
           </div>
@@ -206,9 +206,15 @@
                     </b-col>                    
                     <b-col align-self="center" class="history-detailBtn">
                       <b-button block href="#"  v-b-toggle="'accordion-' + idx"  variant="secondary"  size="sm" v-on:click="showQtList(qtItem,idx)">
-                        <i class="fas fa-chevron-down" :id="'btnDetail'+idx"></i>
+                        <!--<i class="fas fa-chevron-down" :id="'btnDetail'+idx"></i>-->
                         <!--<i v-if="!SOList1Toggle" class="fas fa-chevron-down"></i>
                         <i v-if="SOList1Toggle"  class="fas fa-chevron-up"></i>-->
+                      <span class="when-opened">
+                        <i class="fa fa-chevron-up" aria-hidden="true"></i>
+                      </span>
+                      <span class="when-closed">
+                        <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                      </span>
                       </b-button>
                     </b-col>               
                   </b-row>
@@ -232,15 +238,22 @@
                               </b-row>
                             </b-col>                    
                             <b-col align-self="center" class="history-qtInfo-detailBtn">
-                              <b-button block href="#"  v-b-toggle="'accordion-qtReq'"  variant="secondary" size="sm" v-on:click="showQtReqItem(qtItem[0])">
-                                <i v-if="!SOList2Toggle" class="fas fa-chevron-down"></i>
-                                <i v-if="SOList2Toggle"  class="fas fa-chevron-up"></i>
+                              <b-button block href="#"  v-b-toggle="'accordion-qtReq'"  variant="secondary" size="sm" v-on:click="showQtReqItem(qtItem[0])"
+                              >
+                                <!--<i v-if="!SOList2Toggle" class="fas fa-chevron-down"></i>
+                                <i v-if="SOList2Toggle"  class="fas fa-chevron-up"></i>-->
+                                <span class="when-opened">
+                                  <i class="fa fa-chevron-up" aria-hidden="true"></i>
+                                </span>
+                                <span class="when-closed">
+                                    <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                                </span>
                               </b-button>
                             </b-col>               
                           </b-row>
                         </b-container>
                        </b-card-header>
-                      <b-collapse :id="'accordion-qtReq'" accordion="my-accordion2" role="tabpanel">
+                      <b-collapse :id="'accordion-qtReq'" accordion="my-accordion2" role="tabpanel" v-model="visible" >
                           <b-card-body>
                           <div class="history-detailConts">
                             <ul>
@@ -271,14 +284,20 @@
                           </b-col>                    
                           <b-col align-self="center" class="history-webpos-detailBtn">
                             <b-button block href="#"  v-b-toggle="'accordion-' + idx"  variant="secondary" size="sm" v-on:click="GetWebposQtList(qtInfo)">
-                              <i v-if="!SOList1Toggle" class="fas fa-chevron-down"></i>
-                              <i v-if="SOList1Toggle"  class="fas fa-chevron-up"></i>
+                              <!--<i v-if="!SOList1Toggle" class="fas fa-chevron-down"></i>
+                              <i v-if="SOList1Toggle"  class="fas fa-chevron-up"></i>-->
+                              <span class="when-opened">
+                                  <i class="fa fa-chevron-up" aria-hidden="true"></i>
+                              </span>
+                              <span class="when-closed">
+                                    <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                              </span>
                             </b-button>
                           </b-col>              
                         </b-row>
                       </b-container>
                     </b-card-header>
-                    <b-collapse :id="'accordion-'+idx" accordion="my-accordion" role="tabpanel">
+                    <b-collapse :id="'accordion-'+idx" accordion="my-accordion" role="tabpanel"  v-model="visible2">
                       <b-card-body>
                         <div class="history-detailConts-webpos">
                           <ul>
@@ -323,15 +342,21 @@
                             </b-col>                    
                             <b-col align-self="center" class="history-qtInfo-detailBtn">
                               <b-button block href="#"  v-b-toggle="'accordion-qtRes-' + idx"  variant="secondary" size="sm" v-on:click="GetQtList2(qtInfo,idx )">
-                               <i class="fas fa-chevron-down" :id="'btnIcon'+idx"></i>
+                               <!--<i class="fas fa-chevron-down" :id="'btnIcon'+idx"></i>-->
                                <!--<i v-if="!SOList3Toggle" class="fas fa-chevron-down"></i>
                                 <i v-if="SOList3Toggle"  class="fas fa-chevron-up"></i>-->
+                                <span class="when-opened">
+                                  <i class="fa fa-chevron-up" aria-hidden="true"></i>
+                                </span>
+                                <span class="when-closed">
+                                    <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                                </span>
                               </b-button>
                             </b-col>             
                           </b-row>
                         </b-container>
                        </b-card-header>
-                      <b-collapse :id="'accordion-qtRes-'+idx" accordion="my-accordion3" role="tabpanel">
+                      <b-collapse :id="'accordion-qtRes-'+idx" accordion="my-accordion3" role="tabpanel"  v-model="visible3">
                       <b-card-body>
                         <b-container class ="pt-0 pl-1 pr-0">
                           <b-row v-for="(item, index) in detailQTData2" v-bind:key = "index">
@@ -515,16 +540,16 @@
           </div>
           <div class="QTList-search">
             <b-input-group>
-              <b-dropdown slot="prepend" v-bind:text="dropdownQT">
-                <b-dropdown-item @click="dropdownQT='대리점'">대리점</b-dropdown-item>
-                <b-dropdown-item @click="dropdownQT='차량번호'">차량번호</b-dropdown-item>
-                <b-dropdown-item @click="dropdownQT='날짜'">날짜</b-dropdown-item>
+              <b-dropdown slot="prepend" v-bind:text="dropdownSO">
+                <b-dropdown-item @click="dropdownSO='대리점'">대리점</b-dropdown-item>
+                <b-dropdown-item @click="dropdownSO='차량번호'">차량번호</b-dropdown-item>
+                <b-dropdown-item @click="dropdownSO='날짜'">날짜</b-dropdown-item>
               </b-dropdown>
 
-              <b-form-input></b-form-input>
+              <b-form-input v-model="ordSearchText"  v-on:keypress.enter="GetOrderHistory"></b-form-input>
 
               <b-input-group-append>
-                <b-button><i class="fas fa-search"></i></b-button>
+                <b-button  @click="GetOrderHistory"><i class="fas fa-search"></i></b-button>
               </b-input-group-append>
             </b-input-group>
           </div>
@@ -545,8 +570,14 @@
                     </b-col>
                     <b-col align-self="center" class="history-detailBtn">
                       <b-button block href="#"  v-b-toggle="'ROaccordion' + idx"  variant="secondary" size="sm" @click="GetOrderDetail(item)">
-                        <i v-if="!ROList1Toggle" class="fas fa-chevron-down"></i>
-                        <i v-if="ROList1Toggle"  class="fas fa-chevron-up"></i>
+                        <!--<i v-if="!ROList1Toggle" class="fas fa-chevron-down"></i>
+                        <i v-if="ROList1Toggle"  class="fas fa-chevron-up"></i>-->
+                        <span class="when-opened">
+                          <i class="fa fa-chevron-up" aria-hidden="true"></i>
+                        </span>
+                        <span class="when-closed">
+                          <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                        </span>
                       </b-button>
                     </b-col>
                   </b-row>
@@ -874,7 +905,7 @@
         </div>
       </b-tab>
     </b-tabs>
-
+<BackToTop></BackToTop>
     <div class="QTList-Contents" v-if="showQTComparePage">
       <span type="button" class="headerBar-Back" v-on:click="showMainPageToggle">
         <i class="fas fa-angle-double-left"></i>
@@ -1004,6 +1035,7 @@ import CustomerDoc from '@/components/QTList/CustomerDoc.vue'
 import CustomerDocOption from '@/components/QTList/CustomerDocOption.vue'
 import CheckLogin from '@/components/Common/CheckLogin.vue'
 import QTOrder from '@/components/QTList/QTOrder.vue'
+import BackToTop from '@/components/Common/BackToTop.vue'
 import Constant from '@/Constant';
 import {getInputDayWeek , convertDynamoToArrayString, arrayGroupBy, datePadding ,convertArrayToDynamo} from '@/utils/common.js'
 
@@ -1051,7 +1083,12 @@ export default {
       orderDealerName:"",
       orderList:[],
       orderHistory:[],
-      orderdetail:[]
+      orderdetail:[],
+      qtSearchText:'',
+      ordSearchText:'',
+      visible:true,
+      visible2:true,
+      visible3:true
     }
   },
   methods: {
@@ -1128,14 +1165,79 @@ export default {
       }
     },
     GetQTReqList() {
+      
+      var now = new Date();
+      var beforeDate = new Date();
+      beforeDate.setDate(beforeDate.getDate() -7);
+      var startDate = beforeDate.getFullYear() + '-' + datePadding(beforeDate.getMonth()+1,2) +'-'+ datePadding(beforeDate.getDate(),2);
+      var endDate = now.getFullYear() + '-' + datePadding(now.getMonth()+1,2) +'-'+ datePadding(now.getDate(),2);
+      
+      var filter = "ReqSite = :id";
+      if(this.qtSearchText === '')
+      {
+        filter = "ReqSite = :id and ReqDt between :startDt and :endDt";
+      }
+      else{
+
+        var searchCase = this.dropdownQT;
+        switch (searchCase) {
+          case '차량번호' :
+            console.log('차량번호 검색!!');
+            filter = "ReqSite = :id and CarNo = :carNo";
+            break;
+          case '대리점' :
+            console.log('대리점 검색!!');
+            filter = "ReqSite = :id and ResDealer = :resDealer";
+            break;
+          case '날짜' :
+            console.log('날짜 검색!!');
+            filter = "ReqSite = :id and ReqDt = :reqDt";
+            break;
+          default :
+            break;
+        }
+      }
+
       var param = {};
       param.operation = "list";
       param.tableName = "BAY4U_QT_LIST";
       param.payload = {};
-      param.payload.FilterExpression = "ReqSite = :id";
+      param.payload.FilterExpression = filter;
       param.payload.ExpressionAttributeValues = {};
+      
       var key = ":id";
       param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
+
+      if(this.qtSearchText === '')
+      {
+        var key2 = ":startDt";
+        var key3 = ":endDt";
+        param.payload.ExpressionAttributeValues[key2] = startDate;
+        param.payload.ExpressionAttributeValues[key3] = endDate;
+      }
+     else{
+
+        var searchCase = this.dropdownQT;
+        switch (searchCase) {
+          case '차량번호' :
+            var key2 = ":carNo";
+            param.payload.ExpressionAttributeValues[key2] = this.qtSearchText;
+            break;
+          case '대리점' :
+            var key2 = ":resDealer";
+            param.payload.ExpressionAttributeValues[key2] = this.qtSearchText;
+            break;
+          case '날짜' :
+            var key2 = ":reqDt";
+            param.payload.ExpressionAttributeValues[key2] = this.qtSearchText;
+            break;
+          default :
+            break;
+        }
+      }
+
+      console.log("======= QT Request result ========");
+      console.log(JSON.stringify(param));
 
       axios({
         method: 'POST',
@@ -1245,18 +1347,19 @@ export default {
     },
     GetConfirmQtList2(item)
     {
-      console.log('Item : ' , item);
+      //console.log('Item : ' , item);
     
       var param = {};
       param.operation = "list";
       param.tableName = "BAY4U_QT_RETURN_LIST";
       param.payload = {};
-      param.payload.FilterExpression = "ResDealer = :id and ReqDt = :reqDt";
+      //param.payload.FilterExpression = "ResDealer = :id and ReqDt = :reqDt";
+      param.payload.FilterExpression = "DocID = :id";
       param.payload.ExpressionAttributeValues = {};
       var key = ":id";
       var key2 = ":reqDt";
-      param.payload.ExpressionAttributeValues[key] = item[0].ResDealer;
-      param.payload.ExpressionAttributeValues[key2] = item[0].ReqDt;
+      param.payload.ExpressionAttributeValues[key] = item[0].ID;
+     // param.payload.ExpressionAttributeValues[key2] = item[0].ReqDt;
 
       console.log("======= 견적확정 조회 Request result ========");
       console.log(param); 
@@ -1279,24 +1382,81 @@ export default {
 
       var btnAdd = document.querySelector("#btnIcon" + index);
       
-      if(this.SOList3Toggle){
+     /* if(this.SOList3Toggle){
         btnAdd.setAttribute("class", "fas fa-chevron-up");
       }
       else{
         btnAdd.setAttribute("class", "fas fa-chevron-down");
-      }
+      }*/
     },
     GetOrderHistory()
     {
+      var now = new Date();
+      var beforeDate = new Date();
+      beforeDate.setDate(beforeDate.getDate() -7);
+      var startDate = beforeDate.getFullYear() + '-' + datePadding(beforeDate.getMonth()+1,2) +'-'+ datePadding(beforeDate.getDate(),2);
+      var endDate = now.getFullYear() + '-' + datePadding(now.getMonth()+1,2) +'-'+ datePadding(now.getDate(),2);
+      
+      var filter = "ReqSite = :id";
+      if(this.ordSearchText === '')
+      {
+        filter = "ReqSite = :id and ReqDt between :startDt and :endDt";
+      }
+      else{
+
+        var searchCase = this.dropdownSO;
+        switch (searchCase) {
+          case '차량번호' :
+            filter = "ReqSite = :id and CarNo = :carNo";
+            break;
+          case '대리점' :
+            filter = "ReqSite = :id and ResDealerNm = :resDealer";
+            break;
+          case '날짜' :
+            filter = "ReqSite = :id and ReqDt = :reqDt";
+            break;
+          default :
+            break;
+        }
+      }
+
       var param = {};
       param.operation = "list";
       param.tableName = "BAY4U_ORDER_LIST";
       param.payload = {};
-      param.payload.FilterExpression = "ReqSite = :id";
+      param.payload.FilterExpression = filter;
       param.payload.ExpressionAttributeValues = {};
       var key = ":id";
       param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
      
+     if(this.ordSearchText === '')
+      {
+        var key2 = ":startDt";
+        var key3 = ":endDt";
+        param.payload.ExpressionAttributeValues[key2] = startDate;
+        param.payload.ExpressionAttributeValues[key3] = endDate;
+      }
+     else{
+
+        var searchCase = this.dropdownSO;
+        switch (searchCase) {
+          case '차량번호' :
+            var key2 = ":carNo";
+            param.payload.ExpressionAttributeValues[key2] = this.ordSearchText;
+            break;
+          case '대리점' :
+            var key2 = ":resDealer";
+            param.payload.ExpressionAttributeValues[key2] = this.ordSearchText;
+            break;
+          case '날짜' :
+            var key2 = ":reqDt";
+            param.payload.ExpressionAttributeValues[key2] = this.ordSearchText;
+            break;
+          default :
+            break;
+        }
+      }
+
       console.log("======= 주문내역 조회 Request result ========");
       console.log(param); 
 
@@ -1326,22 +1486,22 @@ export default {
     showQtList(item, index)
     {
       this.SOList1Toggle = !this.SOList1Toggle;
+      this.visible = false;
+      this.visible2 = false;
+      this.visible3 = false;
       this.qtReqItem = [];
       this.GetConfirmQtList2(item);
       this.GetConfirmQtList(item);
 
       var btnAdd = document.querySelector("#btnDetail" + index);
-
-      if(this.SOList1Toggle){
-        btnAdd.setAttribute("class", "fas fa-chevron-up");
-      }
-      else{
-        btnAdd.setAttribute("class", "fas fa-chevron-down");
-      }
+    },
+    collapseAll(){
+      this.$refs.collapsible.map(c => c.collapsed = true)
     },
     showQtReqItem(item)
     {
       this.SOList2Toggle = !this.SOList2Toggle;
+   
       console.log(item.LineItem);
       this.qtReqItem = [];
       this.qtReqItem =  JSON.parse(convertDynamoToArrayString(item.LineItem));
@@ -1480,7 +1640,8 @@ export default {
     CustomerDoc,
     CustomerDocOption,
     CheckLogin:CheckLogin,
-    QTOrder:QTOrder
+    QTOrder:QTOrder,
+    BackToTop:BackToTop
   },
   computed: {
     
@@ -2016,5 +2177,9 @@ export default {
   background-color: #afabab;
   border: none;
   color: #ececec;
+}
+.collapsed > .when-opened,
+:not(.collapsed) > .when-closed {
+  display: none;
 }
 </style>
