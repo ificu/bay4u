@@ -206,7 +206,7 @@
           </v-toolbar-title>                 
           <v-spacer></v-spacer>
           <v-toolbar-items class="mt-2">
-            <span  @click="showItemCategory=false">
+            <span class="Category-Confirm"  @click="showItemCategory=false">
               확인 <i class="fas fa-check"></i>
             </span>
           </v-toolbar-items>
@@ -1430,6 +1430,10 @@ name: 'QTStep',
 
 .NewQT-footer a span i {
   font-size: 2.5rem;
+}
+
+.Category-Confirm {
+  color: #ea4335;
 }
 
 .swiper-slide {

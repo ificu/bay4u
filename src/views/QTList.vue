@@ -1745,7 +1745,7 @@ export default {
 }
 
 .card-header-qtlist{
-  background-color:#4E342E;
+  background-color: #967d5f;
   color: #fff;
   padding-top : 0px;
   padding-bottom : 0px;
