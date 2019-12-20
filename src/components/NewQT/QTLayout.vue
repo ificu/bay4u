@@ -1136,7 +1136,7 @@ name: 'QTStep',
           return false;
         }
         */
-        if(this.CarInfo.VinNo === undefined || this.CarInfo.VinNo === null || this.CarInfo.VinNo.length === 0 )
+        if(this.CarInfo.VinNo === undefined || this.CarInfo.VinNo === null || this.CarInfo.VinNo.length === 0 || this.CarInfo.VinNo === "국토부 차대번호 조회 중...")
         {
           this.alertMsg = "차대번호가 없습니다.\n차대번호 없이 요청하시겠습니까?"
           this.showAlertMsg = !this.showAlertMsg;

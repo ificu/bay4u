@@ -170,7 +170,7 @@
           </div>
         </div>
       </b-tab>-->
-      <b-tab title="견적확정 내역" :title-link-class="linkClass(0)" active>
+      <b-tab title="견적확정 내역" :title-link-class="linkClass(0)">
         <div class="QTList-contents">
           <div class="QTList-title">
             <span>견적 확정 내역</span>
@@ -283,7 +283,7 @@
                             </b-row>
                           </b-col>                    
                           <b-col align-self="center" class="history-webpos-detailBtn">
-                            <b-button block href="#"  v-b-toggle="'accordion-' + idx"  variant="secondary" size="sm" v-on:click="GetWebposQtList(qtInfo)">
+                            <b-button block href="#"  v-b-toggle="'accordion-webpos-' + idx"  variant="secondary" size="sm" v-on:click="GetWebposQtList(qtInfo)">
                               <!--<i v-if="!SOList1Toggle" class="fas fa-chevron-down"></i>
                               <i v-if="SOList1Toggle"  class="fas fa-chevron-up"></i>-->
                               <span class="when-opened">
@@ -297,7 +297,7 @@
                         </b-row>
                       </b-container>
                     </b-card-header>
-                    <b-collapse :id="'accordion-'+idx" accordion="my-accordion" role="tabpanel"  v-model="visible2">
+                    <b-collapse :id="'accordion-webpos-'+idx" accordion="my-accordion4" role="tabpanel"  v-model="visible2">
                       <b-card-body>
                         <div class="history-detailConts-webpos">
                           <ul>
@@ -546,10 +546,10 @@
                 <b-dropdown-item @click="dropdownSO='날짜'">날짜</b-dropdown-item>
               </b-dropdown>
 
-              <b-form-input v-model="ordSearchText"  v-on:keypress.enter="GetOrderHistory"></b-form-input>
+              <b-form-input v-model="ordSearchText"  v-on:keypress.enter="GetOrderHistory('','')"></b-form-input>
 
               <b-input-group-append>
-                <b-button  @click="GetOrderHistory"><i class="fas fa-search"></i></b-button>
+                <b-button  @click="GetOrderHistory('','')"><i class="fas fa-search"></i></b-button>
               </b-input-group-append>
             </b-input-group>
           </div>
@@ -583,7 +583,7 @@
                   </b-row>
                 </b-container>
               </b-card-header>
-              <b-collapse :id="'ROaccordion'+idx" accordion="my-accordion" role="tabpanel">
+              <b-collapse :id="'ROaccordion'+idx" accordion="my-accordion" role="tabpanel" :visible="linkToggle(idx)" >
                 <b-card-body>
                   <div class="history-detailConts">
                     <ul>
@@ -797,7 +797,7 @@
                 </b-card-body>
               </b-collapse>
             </b-card>
-
+<!--
             <b-card no-body class="mb-1">
               <b-card-header header-tag="header" role="tab">
                 <b-container>
@@ -901,6 +901,7 @@
                 </b-card-body>
               </b-collapse>
             </b-card>
+            -->
           </div>
         </div>
       </b-tab>
@@ -1045,6 +1046,7 @@ export default {
     return {
       customerDocOption: "",
       tabIndex: 0,
+      orderToggleIndex:-1,
       dropdownQT: '차량번호',
       dropdownSO: '차량번호',
       dropdownRO: '차량번호',
@@ -1088,7 +1090,8 @@ export default {
       ordSearchText:'',
       visible:true,
       visible2:true,
-      visible3:true
+      visible3:true,
+      orderVisible:false
     }
   },
   methods: {
@@ -1162,6 +1165,16 @@ export default {
         return ['bg-white', 'text-warning', 'font-weight-bold']
       } else {
         return ['bg-light', 'text-secondary', 'font-weight-light']
+      }
+    },
+    linkToggle(idx)
+    {
+      if(this.orderToggleIndex === idx)
+      {
+        return true;
+      }
+      else{
+        return false;
       }
     },
     GetQTReqList() {
@@ -1311,12 +1324,13 @@ export default {
           console.log(error);
       })   
     },
-    GetConfirmQtList()
+    GetConfirmQtList(item)
     {
       this.confirmQTdata  = [];
 
       var param = {};
       param.BsnId = this.UserInfo.BsnID;
+      param.RequestDataJSON = item[0].ID;
 
       console.log("======= 견적확정 조회 Request result ========");
       console.log(param); 
@@ -1389,8 +1403,9 @@ export default {
         btnAdd.setAttribute("class", "fas fa-chevron-down");
       }*/
     },
-    GetOrderHistory()
+    GetOrderHistory(docId ,orderID)
     {
+      
       var now = new Date();
       var beforeDate = new Date();
       beforeDate.setDate(beforeDate.getDate() -7);
@@ -1469,7 +1484,20 @@ export default {
       .then((result) => {
         console.log("=======주문내역 조회 result ========");
         console.log( result.data.Items);
+
+        if(Array.isArray(result.data.Items))
+        {
+          result.data.Items.sort(function(a, b){
+            return (a.ReqDt < b.ReqDt) ? 1 : -1;
+          });
+        }
+
         this.orderHistory  = result.data.Items;
+        if(docId !== ''  && orderID !== '')
+        {
+          this.showOrderItem(docId , orderID);
+        } 
+
       });  
       
     },
@@ -1558,15 +1586,15 @@ export default {
       .then((result) => {
         console.log("======= Order result ========");
         console.log(result.data);
-        this.goChating();
+        this.goChating(id);
       })
       .catch((error) => {
         console.log(error);
       });
     },
-    goChating()
+    goChating(val)
     {
-      var msg = this.orderData.CarNo + " 차량에 대한 주문이 요청됐습니다.";
+      var msg =  this.orderData.CarNo + " 차량 부품 주문 요청 완료!!";
       var now = new Date();
       var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
           + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
@@ -1594,6 +1622,8 @@ export default {
       param.payload.Item.Message = chatMsg.msg;
       param.payload.Item.Status = "0";
       param.payload.Item.ReqTm = chatMsg.reqTm;
+      param.payload.Item.ChatType = "O";
+      param.payload.Item.RefID = val;
 
       console.log("Send Msg : ", JSON.stringify(param));
 
@@ -1630,6 +1660,15 @@ export default {
       .catch((error) => {
         console.log(error);
       });
+    },
+    showOrderItem(docId , orderID)
+    {
+      console.log('docId : ' , docId);
+      if(Array.isArray(this.orderHistory)){
+        var index =  this.orderHistory.findIndex(i => i.DocID === docId);
+        console.log('index:' , index);
+        this.orderToggleIndex = index;
+      } 
     }
   },
 
@@ -1688,16 +1727,35 @@ export default {
 
     if(this.$route !== undefined && this.$route.name === "QTList" ) {
        //  this.GetConfirmQtList();
+      var docID = '';
+      if(this.$route.params.DocID !== undefined)
+      {
+        docID = this.$route.params.DocID;
+      }
+      var orderID = '';
+      if(this.$route.params.OrderID !== undefined)
+      {
+        orderID = this.$route.params.OrderID;
+      }
+      this.GetQTReqList();
+      this.GetOrderHistory(docID, orderID);
+       
+      // 주문요청 완료 채팅에서 넘어왔을 때
+      if(this.$route.params.Type !== undefined) {
+        if(this.$route.params.Type === 'order')
+        {
+          this.tabIndex = 1;
+        }
+      }
+    }
+    else{
+      if(this.UserInfo.BsnID === '')
+      this.UserInfo.BsnID = this.$cookies.get('BsnID');
+
       this.GetQTReqList();
       this.GetOrderHistory();
+    //  this.GetConfirmQtList();  
     }
-
-    if(this.UserInfo.BsnID === '')
-    this.UserInfo.BsnID = this.$cookies.get('BsnID');
-
-    this.GetQTReqList();
-    this.GetOrderHistory();
-  //  this.GetConfirmQtList();  
 
   }
 }

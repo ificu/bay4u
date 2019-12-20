@@ -385,6 +385,8 @@ export default {
           chatMsg.reqTm = element['ReqTm'];
           chatMsg.imgId = element['IMG']; 
           chatMsg.img = ''; 
+          chatMsg.ChatType = element['ChatType'];
+          chatMsg.RefID = element['RefID'];
 
           this.msgDatas = chatMsg;
              
