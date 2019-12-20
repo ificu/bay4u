@@ -26,7 +26,7 @@
             <div class="Car-Info">
               <div class="CarInfo-Left">
                 <div><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>차량번호</div>
-                <b-form-input v-model="this.qtInfo.CarNo"></b-form-input>
+                <b-form-input  :value="(this.qtInfo.CarNo==='*empty*')?'미상차량' : this.qtInfo.CarNo"></b-form-input>
               </div>
               <div class="CarInfo-Right">
                 <div><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>차대번호</div>
@@ -774,6 +774,9 @@ export default {
     },
     saveQTConfirm()
     {
+      
+      if(this.detailQTData.length === 0) return;
+
       var now = new Date();
       var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                 + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
@@ -837,6 +840,8 @@ export default {
     },
     getQTConfirm()
     {
+      this.detailQTData = [];
+
       var param = {};
       param.operation = "list";
       param.tableName = "BAY4U_QT_RETURN_LIST";
@@ -891,6 +896,7 @@ export default {
     },
     GetOrderHistory()
     {
+      this.orderHistory = [];
       var param = {};
       param.operation = "list";
       param.tableName = "BAY4U_ORDER_LIST";

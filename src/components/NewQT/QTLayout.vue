@@ -869,7 +869,7 @@ name: 'QTStep',
                 {
                   docId = result.data.ReturnObject;  // 견적ID 
                   // 견적저장
-                  this.saveQTData(docId , dealer.DEALER , dealer.TYPE);
+                  this.saveQTData(docId , dealer.DEALER, dealer.DEALER_NAME , dealer.TYPE);
                 }
 
               })
@@ -884,12 +884,12 @@ name: 'QTStep',
               docId = this.UserInfo.BsnID + now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2)  + this.CarInfo.VinNo + 
                       datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2) ;
               // 견적저장
-              this.saveQTData(docId , dealer.DEALER, dealer.TYPE);
+              this.saveQTData(docId , dealer.DEALER,  dealer.DEALER_NAME ,dealer.TYPE);
           }
 
         });
     },
-    saveQTData(docId , dealer , dealerType)
+    saveQTData(docId , dealer , dealerNm, dealerType)
     {
       this.saveQtCount++;
       var now = new Date();
@@ -911,6 +911,7 @@ name: 'QTStep',
       param.payload.Item.ReqName = convertStringToDynamo(this.UserInfo.Name);
       param.payload.Item.ReqSeq = key;
       param.payload.Item.ResDealer = dealer;
+      param.payload.Item.ResDealerNm = dealerNm;
       param.payload.Item.Memo = convertStringToDynamo(this.qtReqMemo);
       param.payload.Item.IMG = imgKey + ".png";;
       //param.payload.Item.LineItem = JSON.stringify(this.qtRequest);

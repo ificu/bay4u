@@ -2,7 +2,7 @@
   <div class="UserListPage">
   <b-tabs class="UserList-Tab"  v-model="tabIndex" content-class="mt-3" fill>
     <b-tab  class="tabPage1" title="카센터 대화목록" active :title-link-class="linkClass(0)">
-      <div class="Chat-search mdl-textfield mdl-js-textfield mdl-textfield--expandable">
+      <!--<div class="Chat-search mdl-textfield mdl-js-textfield mdl-textfield--expandable">
         <label class="mdl-button mdl-js-button mdl-button--icon" for="sample6" v-on:click="showQTReqList()">
           <i class="material-icons">search</i>
         </label>
@@ -10,14 +10,26 @@
           <input  class="mdl-textfield__input" type="text" id="sample6" v-model="searchText"  v-on:keypress.enter="showQTReqList">
           <label class="mdl-textfield__label" for="sample-expandable">Expandable Input</label>
         </div>
-      </div>
+      </div>-->
+     <div class="Chat-search">
+       <v-text-field
+          v-model="searchText"
+           :append-icon="'fas fa-search'"
+            filled
+            rounded
+            dense
+            type="text" 
+            @click:append="showQTReqList"
+            v-on:keypress.enter="showQTReqList"
+          ></v-text-field>
+     </div>
 
       <div class="Chat-list">
         <ul>
           <li v-for="(qtReq, index) in qtReqList" v-bind:key = "index" v-on:click="SetQTInfo(qtReq,index)" :class="{selectItem : selectedList(index)}">
             <i class="Carcenter-type fas fa-wrench" style="color:#fbc02e;" v-if="qtReq.isRead === true"></i>     
             <i class="Carcenter-type fas fa-wrench" style="color:red;" v-else-if="qtReq.isRead === false"></i>          
-            <p class="Carcenter-name">{{qtReq.ReqName}} ({{qtReq.CarNo}})<br>{{qtReq.ReqDt}}</p>
+            <p class="Carcenter-name">{{qtReq.ReqName}} ({{(qtReq.CarNo === "*empty*")?"미상차량" : qtReq.CarNo}})<br>{{qtReq.ReqDt}}</p>
             <span type="button" class="Chat-detail">
               <i class="fas fa-angle-double-right"></i>
             </span>            
@@ -66,6 +78,7 @@
 
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script>
+import {datePadding} from '@/utils/common.js'
 import Constant from '@/Constant';
 
 export default {
@@ -99,14 +112,41 @@ export default {
 
       this.initQTData();
 
+      var now = new Date();
+      var beforeDate = new Date();
+      beforeDate.setDate(beforeDate.getDate() -7);
+      var startDate = beforeDate.getFullYear() + '-' + datePadding(beforeDate.getMonth()+1,2) +'-'+ datePadding(beforeDate.getDate(),2);
+      var endDate = now.getFullYear() + '-' + datePadding(now.getMonth()+1,2) +'-'+ datePadding(now.getDate(),2);
+      
+      var filter = "ResDealer = :id";
+      if(this.searchText === '')
+      {
+          filter = "ResDealer = :id and ReqDt between :startDt and :endDt";
+      }
+      else{
+        filter = "ResDealer = :id and ( CarNo = :searchText or ReqName = :searchText or ReqDt = :searchText  )";
+      }
+
       var param = {};
       param.operation = "list";
       param.tableName = "BAY4U_QT_LIST";
       param.payload = {};
-      param.payload.FilterExpression = "ResDealer = :id";
+      param.payload.FilterExpression = filter;
       param.payload.ExpressionAttributeValues = {};
       var key = ":id";
       param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
+      
+      if(this.searchText === '')
+      {
+        var key2 = ":startDt";
+        var key3 = ":endDt";
+        param.payload.ExpressionAttributeValues[key2] = startDate;
+        param.payload.ExpressionAttributeValues[key3] = endDate;
+      }
+      else{
+        var key2 = ":searchText";
+        param.payload.ExpressionAttributeValues[key2] = this.searchText;
+      }
 
       console.log("======= QT Request result ========");
       console.log(JSON.stringify(param));
@@ -132,12 +172,12 @@ export default {
         }
 
         this.qtReqList = result.data.Items;
-
+/*
         if(this.searchText !== '')
         {
           this.qtReqList = this.searchQTList();
         } 
-        
+*/        
       });
     },
     SetQTInfo(item , idx)
@@ -324,7 +364,7 @@ export default {
   right: 0;
   left:0;
 }
-
+/*
 .Chat-search {
   border: 1px solid #aaa;
   border-radius: 50px;
@@ -332,7 +372,8 @@ export default {
   padding: 5px;
   padding-left: 15px;
   margin-bottom: 20px;
-}
+}*/
+
 .Chat-search label {
   margin-top: -10px;
 }
