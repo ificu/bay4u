@@ -1665,9 +1665,11 @@ export default {
     {
       console.log('docId : ' , docId);
       if(Array.isArray(this.orderHistory)){
-        var index =  this.orderHistory.findIndex(i => i.DocID === docId);
+        let index =  this.orderHistory.findIndex(i => i.DocID === docId);
         console.log('index:' , index);
         this.orderToggleIndex = index;
+        let item = this.orderHistory[index];
+        this.GetOrderDetail(item);
       } 
     }
   },
