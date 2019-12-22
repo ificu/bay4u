@@ -532,7 +532,6 @@ export default {
       this.dragFileSendCount++;
 
       var fileImage = document.querySelector('#dragDropImg');
-      console.log('Img Path :' , fileImage.src);
       console.log('dragFileSendCount : ' , this.dragFileSendCount)
       var now = new Date();
       var key = this.UserInfo.BsnID + now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
@@ -585,7 +584,7 @@ export default {
       chatMsg.Chatid = this.chatItem.ID;
       chatMsg.msg = msg;
       chatMsg.img = fileImage.src;
-      chatMsg.imgId = key;
+      chatMsg.imgId = key + '.' + bolbData.type.replace('image/', '');
       chatMsg.reqTm = chatTime;
       this.msgDatas = chatMsg;
       this.$sendMessage({
@@ -593,7 +592,7 @@ export default {
         msg,
         recv: this.chatItem.ReqSite,
         chatId: this.chatItem.ID,
-        imgId: key
+        imgId: key + '.' + bolbData.type.replace('image/', '')
       });
 
       this.saveChatMsg(chatMsg);     
