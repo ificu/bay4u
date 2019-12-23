@@ -1,5 +1,6 @@
 <template>
-  <v-app v-scroll-stop="isScroll">
+  <v-app>
+ <!-- <v-app v-scroll-stop="isScroll">-->
     <!-- 1. 차량번호/차대번호 촬영 인식 CARD -->
     <v-card class="mx-auto mb-2 mt-2" width="93%">
       <v-app-bar dark color="brown darken-2" height="40px">
@@ -351,7 +352,7 @@ name: 'QTStep',
       sendDealer : '',
       qtInfoData : {},
       saveQtCount : 0,
-      isScroll:false,
+     // isScroll:false,
     }
   },
   methods: {
@@ -990,7 +991,7 @@ name: 'QTStep',
       
       console.log('SendDocId :', this.sendDocId);
       console.log('SEndDealer :',this.sendDealer);      
-       console.log('SendQtInfo :',this.qtInfoData);    
+      console.log('SendQtInfo :',this.qtInfoData);    
       // 대표 대리점 채팅 전송
       var now = new Date();
       this.$router.push({name:'Chat', 

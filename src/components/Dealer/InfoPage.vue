@@ -550,7 +550,7 @@ export default {
       },
       itemsPerPage: -1,
       carBrand:['BENZ','BMW','AUDI','VW','FORD','VOLVO','JAGUAR','MASERATI','INFINITI','LEXUS','TOYOTA','HONDA'],
-      afterBrand:['MANN','FRAM','BOSCH','TRW'],
+      afterBrand:['MANN','FRAM','MEYLE','BOSCH','TRW'],
       testData: {},      
       txtQTConfirm: '견적 확정 회신', 
       orderHistory:[],
@@ -846,6 +846,7 @@ export default {
       .then((result) => {
         console.log("======= QT Save result ========");
         console.log(result.data);
+        this.txtQTConfirm = "견적 재회신";
         })
       .catch((error) => {
         console.log(error);
@@ -933,15 +934,15 @@ export default {
         data: param
       })
       .then((result) => {
-        console.log("=======주문내역 조회 result ========");
-        console.log( result.data.Items[0].LineItem);
-        if(result.data.Items[0].LineItem.length > 0 ){
+        if(result.data.Items.length > 0 && result.data.Items[0].LineItem.length > 0 ){
+          console.log("=======주문내역 조회 result ========");
+          console.log( result.data.Items[0].LineItem);
           this.tabIndex = 2;
+          this.orderHistory  = JSON.parse(result.data.Items[0].LineItem);
         }
         else{
            this.tabIndex = 1 ;
         }
-        this.orderHistory  = JSON.parse(result.data.Items[0].LineItem);
       });  
       
     },

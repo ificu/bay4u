@@ -194,7 +194,7 @@ export default {
         chatMsg.reqTm = chatTime;
         this.msgDatas = chatMsg;
 
-        this.saveChatMsg(chatMsg);
+        this.saveChatMsg(chatMsg,'Q');
 
         this.$sendMessage({
           name: this.UserInfo.BsnID,
@@ -273,7 +273,7 @@ export default {
         chatId: this.docId,
         chatDttm : chatTime,
       });
-      this.saveChatMsg(chatMsg);
+      this.saveChatMsg(chatMsg,'D');
     },
     chatingToggle(item) {
 
@@ -286,7 +286,7 @@ export default {
         this.showchating(item);
       }
     },
-    saveChatMsg(chatMsg) {
+    saveChatMsg(chatMsg, chatType) {
       var param = {};
 
       var now = new Date();
@@ -307,6 +307,8 @@ export default {
       param.payload.Item.Status = "0";
       param.payload.Item.ReqTm = chatMsg.reqTm;
       param.payload.Item.IMG = chatMsg.imgId;
+      param.payload.Item.ChatType = chatType;
+      param.payload.Item.RefID = ' ';
 
       console.log("Send Msg : ", JSON.stringify(param));
 
