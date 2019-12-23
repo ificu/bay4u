@@ -222,7 +222,7 @@ export default {
           chatId: this.chatItem.ID,
           reqTm : qtMsg.reqTm,
         });
-
+        
         this.saveChatMsg(qtMsg);
     });
 
@@ -309,6 +309,18 @@ export default {
       param.payload.Item.Status = "0";
       param.payload.Item.ReqTm = chatMsg.reqTm;
       param.payload.Item.IMG = chatMsg.imgId;
+      if(chatMsg.ChatType !== undefined){
+        param.payload.Item.ChatType = chatMsg.ChatType;
+      }
+      else{
+         param.payload.Item.ChatType = "D";
+      }
+      if(chatMsg.RefID !== undefined){
+        param.payload.Item.RefID = chatMsg.RefID;
+      }
+      else{
+         param.payload.Item.RefID = " ";
+      }
 
       console.log("======= Chat Save Request ========");
       console.log(JSON.stringify(param));

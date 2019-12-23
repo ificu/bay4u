@@ -184,10 +184,10 @@
                 <b-dropdown-item @click="dropdownQT='날짜'">날짜</b-dropdown-item>
               </b-dropdown>
 
-              <b-form-input v-model="qtSearchText" v-on:keypress.enter="GetQTReqList"></b-form-input>
+              <b-form-input v-model="qtSearchText" v-on:keypress.enter="GetQTReqList('','')"></b-form-input>
 
               <b-input-group-append>
-                <b-button @click="GetQTReqList"><i class="fas fa-search"></i></b-button>
+                <b-button @click="GetQTReqList('','')"><i class="fas fa-search"></i></b-button>
               </b-input-group-append>
             </b-input-group>
           </div>
@@ -220,8 +220,8 @@
                   </b-row>
                 </b-container>
               </b-card-header>
-              <b-collapse :id="'accordion-'+idx" accordion="my-accordion" role="tabpanel">
-                <b-card-body body-class="card-body-qtList">
+              <b-collapse :id="'accordion-'+idx" accordion="my-accordion" role="tabpanel" :visible="linkToggleQt(idx)">
+                <b-card-body body-class="card-body-qtList" v-for="(qtReqInfo , idx2) in qtItem" v-bind:key="idx2" >
                   <div class="history-detailConts">
                     <!--견적요청 정보-->
                     <b-card no-body class="mb-1">
@@ -231,15 +231,14 @@
                             <b-col class="history-qtInfo">요청내역</b-col>
                             <b-col class="history-qtInfo-detail">
                               <b-row class="history-qtInfo-carNo">
-                                {{(qtItem[0].CarNo === "*empty*")?"미상차량" : qtItem[0].CarNo }}
+                                {{(qtReqInfo.CarNo === "*empty*")?"미상차량" : qtReqInfo.CarNo }}
                               </b-row>
                               <b-row  class="history-qtInfo-vinNo">
-                                {{qtItem[0].CarVin}}
+                                {{qtReqInfo.CarVin}}
                               </b-row>
                             </b-col>                    
                             <b-col align-self="center" class="history-qtInfo-detailBtn">
-                              <b-button block href="#"  v-b-toggle="'accordion-qtReq'"  variant="secondary" size="sm" v-on:click="showQtReqItem(qtItem[0])"
-                              >
+                              <b-button block href="#"  v-b-toggle="'accordion-qtReq'+idx2"  variant="secondary" size="sm" v-on:click="showQtReqItem(qtReqInfo)">
                                 <!--<i v-if="!SOList2Toggle" class="fas fa-chevron-down"></i>
                                 <i v-if="SOList2Toggle"  class="fas fa-chevron-up"></i>-->
                                 <span class="when-opened">
@@ -253,8 +252,8 @@
                           </b-row>
                         </b-container>
                        </b-card-header>
-                      <b-collapse :id="'accordion-qtReq'" accordion="my-accordion2" role="tabpanel" v-model="visible" >
-                          <b-card-body>
+                      <b-collapse :id="'accordion-qtReq'+idx2" accordion="my-accordion2" role="tabpanel" >
+                        <b-card-body>
                           <div class="history-detailConts">
                             <ul>
                               <li  v-for="(item, index) in qtReqItem" v-bind:key = "index">
@@ -269,38 +268,39 @@
                     </b-card>
                     <!--견적확정 정보-->
                     <!--부품지원-->
-                    <b-card no-body class="mb-1" v-for="(qtInfo , idx) in confirmQTdata" v-bind:key="idx">
-                    <b-card-header header-tag="header" role="tab" header-class="card-header-webpos">
-                      <b-container>
-                        <b-row>
-                          <b-col align-self="center" class="history-webpos-date">{{qtInfo.MONTH}}/{{qtInfo.DAY}}({{qtInfo.DAYWEEK}})</b-col>
-                          <b-col class="history-webpo-car">
-                            <b-row class="history-carNo">
-                              {{qtInfo.CAR_NO}}
-                            </b-row>
-                            <b-row  class="history-carType">
-                              {{qtInfo.AGENT_NM}}
-                            </b-row>
-                          </b-col>  
-                          <b-col class="history-qtInfo-chat">
-                              <span @click="goQTChating(qtInfo)"><i class ="fas fa-comment-dots"></i></span>
-                          </b-col>                   
-                          <b-col align-self="center" class="history-webpos-detailBtn">
-                            <b-button block href="#"  v-b-toggle="'accordion-webpos-' + idx"  variant="secondary" size="sm" v-on:click="GetWebposQtList(qtInfo)">
-                              <!--<i v-if="!SOList1Toggle" class="fas fa-chevron-down"></i>
-                              <i v-if="SOList1Toggle"  class="fas fa-chevron-up"></i>-->
-                              <span class="when-opened">
-                                  <i class="fa fa-chevron-up" aria-hidden="true"></i>
-                              </span>
-                              <span class="when-closed">
-                                    <i class="fas fa-chevron-down" aria-hidden="true"></i>
-                              </span>
-                            </b-button>
-                          </b-col>              
-                        </b-row>
-                      </b-container>
-                    </b-card-header>
-                    <b-collapse :id="'accordion-webpos-'+idx" accordion="my-accordion4" role="tabpanel"  v-model="visible2">
+                    <!--<b-card no-body class="mb-1" v-for="(qtInfo , idx) in confirmQTdata" v-bind:key="idx">-->
+                    <b-card no-body class="mb-1" v-if="showConfirmVlue(qtReqInfo.ID)">
+                      <b-card-header header-tag="header" role="tab" header-class="card-header-webpos">
+                        <b-container>
+                          <b-row>
+                            <b-col align-self="center" class="history-webpos-date">{{GetConfirmValue(qtReqInfo.ID,"MONTH")}}/{{GetConfirmValue(qtReqInfo.ID,"qtInfo.DAY")}}({{GetConfirmValue(qtReqInfo.ID,"DAYWEEK")}})</b-col>
+                            <b-col class="history-webpo-car">
+                              <b-row class="history-carNo">
+                               {{GetConfirmValue(qtReqInfo.ID,"CAR_NO")}} 
+                              </b-row>
+                              <b-row  class="history-carType">
+                                {{GetConfirmValue(qtReqInfo.ID,"AGENT_NM")}} 
+                              </b-row>
+                            </b-col>  
+                            <b-col class="history-qtInfo-chat">
+                                <span @click="goQTChating(qtReqInfo)"><i class ="fas fa-comment-dots"></i></span>
+                            </b-col>                   
+                            <b-col align-self="center" class="history-webpos-detailBtn">
+                              <b-button block href="#"  v-b-toggle="'accordion-webpos-' + idx"  variant="secondary" size="sm" v-on:click="GetWebposQtList(qtReqInfo)">
+                                <!--<i v-if="!SOList1Toggle" class="fas fa-chevron-down"></i>
+                                <i v-if="SOList1Toggle"  class="fas fa-chevron-up"></i>-->
+                                <span class="when-opened">
+                                    <i class="fa fa-chevron-up" aria-hidden="true"></i>
+                                </span>
+                                <span class="when-closed">
+                                      <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                                </span>
+                              </b-button>
+                            </b-col>              
+                          </b-row>
+                        </b-container>
+                      </b-card-header>
+                    <b-collapse :id="'accordion-webpos-'+idx" accordion="my-accordion4" role="tabpanel">
                       <b-card-body>
                         <div class="history-detailConts-webpos">
                           <ul>
@@ -330,24 +330,25 @@
                     </b-collapse>
                   </b-card>
                     <!--일반 대리점-->
-                     <b-card no-body class="mb-1" v-for="(qtInfo , idx) in confirmQTdata2" v-bind:key="idx" >
+                    <!-- <b-card no-body class="mb-1" v-for="(qtInfo , idx3) in confirmQTdata2" v-bind:key="idx3" >-->
+                      <b-card no-body class="mb-1" v-if="showConfirmVlue2(qtReqInfo.ID)" >
                        <b-card-header header-tag="header" role="tab" header-class="card-header-qtRes">
                         <b-container>
                           <b-row>
                             <b-col class="history-qtInfo">견적회신</b-col>
                             <b-col class="history-qtInfo-detail">
                               <b-row class="history-qtInfo-carNo">
-                                {{(qtInfo.CarNo === "*empty*")?"미상차량" : qtInfo.CarNo }}
+                                {{(GetConfirmValue2(qtReqInfo.ID,"CarNo") === "*empty*")?"미상차량" : GetConfirmValue2(qtReqInfo.ID,"CarNo") }}
                               </b-row>
                               <b-row  class="history-qtInfo-vinNo">
-                                {{qtInfo.ResDealerNm}}
+                                {{GetConfirmValue2(qtReqInfo.ID,"ResDealerNm")}}
                               </b-row>
                             </b-col>
                             <b-col class="history-qtInfo-chat">
-                              <span @click="goQTChating(qtInfo)"><i class ="fas fa-comment-dots"></i></span>
+                              <span @click="goQTChating(GetConfirmValue2(qtReqInfo.ID))"><i class ="fas fa-comment-dots"></i></span>
                             </b-col>                
                             <b-col align-self="center" class="history-qtInfo-detailBtn">
-                              <b-button block href="#"  v-b-toggle="'accordion-qtRes-' + idx"  variant="secondary" size="sm" v-on:click="GetQtList2(qtInfo,idx )">
+                              <b-button block href="#"  v-b-toggle="'accordion-qtRes-' + idx2"  variant="secondary" size="sm" v-on:click="GetQtList2(GetConfirmValue2(qtReqInfo.ID))">
                                <!--<i class="fas fa-chevron-down" :id="'btnIcon'+idx"></i>-->
                                <!--<i v-if="!SOList3Toggle" class="fas fa-chevron-down"></i>
                                 <i v-if="SOList3Toggle"  class="fas fa-chevron-up"></i>-->
@@ -362,7 +363,7 @@
                           </b-row>
                         </b-container>
                        </b-card-header>
-                      <b-collapse :id="'accordion-qtRes-'+idx" accordion="my-accordion3" role="tabpanel"  v-model="visible3">
+                      <b-collapse :id="'accordion-qtRes-'+idx2" accordion="my-accordion3" role="tabpanel" :visible="linkToggleQtConfirm2(1)">
                       <b-card-body>
                         <b-container class ="pt-0 pl-1 pr-0">
                           <b-row v-for="(item, index) in detailQTData2" v-bind:key = "index">
@@ -1053,6 +1054,8 @@ export default {
       customerDocOption: "",
       tabIndex: 0,
       orderToggleIndex:-1,
+      qtToggleIndex:-1,
+      qtConfrToggleIndex2:-1,
       dropdownQT: '차량번호',
       dropdownSO: '차량번호',
       dropdownRO: '차량번호',
@@ -1094,9 +1097,9 @@ export default {
       orderdetail:[],
       qtSearchText:'',
       ordSearchText:'',
-      visible:true,
-      visible2:true,
-      visible3:true,
+    //  visible:true,
+    //  visible2:true,
+    //  visible3:true,
       orderVisible:false
     }
   },
@@ -1183,7 +1186,28 @@ export default {
         return false;
       }
     },
-    GetQTReqList() {
+    linkToggleQt(idx)
+    {
+      if(this.qtToggleIndex === idx)
+      {
+        return true;
+      }
+      else{
+        return false;
+      }
+    },
+    linkToggleQtConfirm2(idx)
+    {
+      if(this.qtConfrToggleIndex2 === idx)
+      {
+        console.log('ind3' , idx);
+        return true;
+      }
+      else{
+        return false;
+      }
+    },
+    GetQTReqList(docId ,refID) {
       
       var now = new Date();
       var beforeDate = new Date();
@@ -1234,7 +1258,7 @@ export default {
         param.payload.ExpressionAttributeValues[key2] = startDate;
         param.payload.ExpressionAttributeValues[key3] = endDate;
       }
-     else{
+      else{
 
         var searchCase = this.dropdownQT;
         switch (searchCase) {
@@ -1282,16 +1306,23 @@ export default {
 
         this.qtReqList =  qtGroupList;
 
+        // 채팅에서 넘어왔을 경우
+        if(docId !== ''  && refID !== '')
+        {
+          this.showQtItem(docId , refID);
+        } 
+
       });
     },
     GetWebposQtList(item){
-
+      
+      console.log('aaa ;' , item);
       this.detailQTData = [];
       var param = {};
-      param.BsnId = item.BSN_ID;
-      param.CarNo = item.CAR_NO;
-      param.VinNo = item.VIN_NO;
-      param.RequestDataJSON = item.ESTM_ID;
+      param.BsnId = item.ReqSite;
+      param.CarNo = item.CarNo;
+      param.VinNo = item.CarVin;
+      param.RequestDataJSON = item.ID;
 
       console.log("======= QT Detail Request result ========");
       console.log(param); 
@@ -1330,13 +1361,77 @@ export default {
           console.log(error);
       })   
     },
+    showConfirmVlue(docId)
+    {
+        if(Array.isArray(this.confirmQTdata)){
+        let index =  this.confirmQTdata.findIndex(i => i.ESTM_ID === docId);
+        if(index >= 0)
+        {
+          return true;
+        }
+        else{
+          return false;
+        }  
+      } 
+    },
+    showConfirmVlue2(docId)
+    {
+        
+        if(Array.isArray(this.confirmQTdata2)){
+        let index =  this.confirmQTdata2.findIndex(i => i.DocID === docId);
+       // console.log('data : ', this.confirmQTdata2);
+      //  console.log('docId ' ,docId );
+       // console.log('index222' ,index );
+        if(index >= 0)
+        {
+          return true;
+        }
+        else{
+          return false;
+        }  
+      } 
+    },
+    GetConfirmValue(docId,key)
+    {
+      let str = "";
+      if(Array.isArray(this.confirmQTdata)){
+        let index =  this.confirmQTdata.findIndex(i => i.ESTM_ID === docId);
+        if(index >= 0)
+        {
+            str =  this.confirmQTdata[index][key];
+        }
+        else{
+          str = "";
+        }  
+      } 
+      return str;
+    },
+    GetConfirmValue2(docId,key)
+    {
+      if(Array.isArray(this.confirmQTdata2)){
+        let index =  this.confirmQTdata2.findIndex(i => i.DocID === docId);
+        if(index >= 0)
+        {
+          if(key!== undefined){
+            return this.confirmQTdata2[index][key];
+          }
+          else{
+            return  this.confirmQTdata2[index];
+          }
+        }
+        else{
+          return "";
+        }  
+      } 
+    },
     GetConfirmQtList(item)
     {
       this.confirmQTdata  = [];
-
+      console.log('확정조회 : ' ,item );
       var param = {};
       param.BsnId = this.UserInfo.BsnID;
-      param.RequestDataJSON = item[0].ID;
+      param.CarNo = item[0].CarNo;
+      param.RequestDataJSON = item[0].ReqDt;
 
       console.log("======= 견적확정 조회 Request result ========");
       console.log(param); 
@@ -1365,21 +1460,20 @@ export default {
           console.log(error);
       })   
     },
-    GetConfirmQtList2(item)
+    GetConfirmQtList2(item , index)
     {
-      //console.log('Item : ' , item);
-    
+      
       var param = {};
       param.operation = "list";
       param.tableName = "BAY4U_QT_RETURN_LIST";
       param.payload = {};
-      //param.payload.FilterExpression = "ResDealer = :id and ReqDt = :reqDt";
-      param.payload.FilterExpression = "DocID = :id";
+      param.payload.FilterExpression = "CarNo = :id and ReqDt = :reqDt";
+      //param.payload.FilterExpression = "DocID = :id";
       param.payload.ExpressionAttributeValues = {};
       var key = ":id";
       var key2 = ":reqDt";
-      param.payload.ExpressionAttributeValues[key] = item[0].ID;
-     // param.payload.ExpressionAttributeValues[key2] = item[0].ReqDt;
+      param.payload.ExpressionAttributeValues[key] = item[0].CarNo;
+      param.payload.ExpressionAttributeValues[key2] = item[0].ReqDt;
 
       console.log("======= 견적확정 조회 Request result ========");
       console.log(param); 
@@ -1391,16 +1485,23 @@ export default {
         data: param
       })
       .then((result) => {
-        console.log("======= QT Confirm result ========");
+        console.log("======= 견적확정 조회 Response result ========");
         console.log( result.data.Items);
         this.confirmQTdata2  = result.data.Items;
+
+        if(index >= 0)
+        {
+          // 채팅에서 넘어왔을 경우 상세 조회
+          this.qtConfrToggleIndex2 = index;
+          this.GetQtList2(this.GetConfirmValue2(item[0].ID));
+        }
+
       });  
     },
-    GetQtList2(item , index){
+    GetQtList2(item){
+      console.log('aaa' , item);
       this.SOList3Toggle = !this.SOList3Toggle;
-      this.detailQTData2 = JSON.parse(item.LineItem);
-
-      var btnAdd = document.querySelector("#btnIcon" + index);
+      this.detailQTData2 = JSON.parse(convertDynamoToArrayString(item.LineItem));
       
      /* if(this.SOList3Toggle){
         btnAdd.setAttribute("class", "fas fa-chevron-up");
@@ -1520,9 +1621,10 @@ export default {
     showQtList(item, index)
     {
       this.SOList1Toggle = !this.SOList1Toggle;
-      this.visible = false;
-      this.visible2 = false;
-      this.visible3 = false;
+      //this.visible = false;
+      //this.visible2 = false;
+      //this.visible3 = false;
+      this.qtConfrToggleIndex2 = -1;
       this.qtReqItem = [];
       this.GetConfirmQtList2(item);
       this.GetConfirmQtList(item);
@@ -1535,8 +1637,6 @@ export default {
     showQtReqItem(item)
     {
       this.SOList2Toggle = !this.SOList2Toggle;
-   
-      console.log(item.LineItem);
       this.qtReqItem = [];
       this.qtReqItem =  JSON.parse(convertDynamoToArrayString(item.LineItem));
     },
@@ -1678,16 +1778,45 @@ export default {
         this.GetOrderDetail(item);
       } 
     },
+    showQtItem(docId , refID)
+    {
+      // 채팅에서 넘어왔을 경우 처리
+      if(Array.isArray(this.qtReqList)){
+        
+        let index = -1;
+        for(var i=0; i <= this.qtReqList.length; i++)
+        {
+          index = this.qtReqList[i].findIndex(element => element.ID === docId);
+          if(index >= 0){
+             console.log('index:' , index);
+             this.qtToggleIndex = i;
+             this.GetConfirmQtList(this.qtReqList[i]);
+             this.GetConfirmQtList2(this.qtReqList[i] , index);
+           
+             break;
+          }
+        }
+      } 
+    },
     goQTChating(item)
     {   
       
       let qtInfoKeys =  Object.keys(item);
-      let docId = item.DocID;
-      if((qtInfoKeys.find(element => element === 'ESTM_ID')) !== undefined)
-      {
+      let docId = '';
+      if((qtInfoKeys.find(element => element === 'ESTM_ID')) !== undefined){
         docId = item.ESTM_ID;
       }
-      console.log('go chat : ' , qtInfoKeys.find(element => element === 'ESTM_ID'));
+
+      if((qtInfoKeys.find(element => element === 'DocID')) !== undefined){
+        docId = item.DocID;
+      }
+
+      if((qtInfoKeys.find(element => element === 'ID')) !== undefined){
+        docId = item.ID;
+      }
+      
+      console.log('go chat : ' , docId);
+
       let now = new Date();
       // 견적요청 채팅창으로 이동
       this.$router.push({name:'Chat', 
@@ -1757,35 +1886,46 @@ export default {
     //this.showQTReqList();
 
     if(this.$route !== undefined && this.$route.name === "QTList" ) {
-       //  this.GetConfirmQtList();
       var docID = '';
       if(this.$route.params.DocID !== undefined)
       {
         docID = this.$route.params.DocID;
       }
-      var orderID = '';
-      if(this.$route.params.OrderID !== undefined)
+      var RefID = '';
+      if(this.$route.params.RefID !== undefined)
       {
-        orderID = this.$route.params.OrderID;
+        RefID = this.$route.params.RefID;
       }
-      this.GetQTReqList();
-      this.GetOrderHistory(docID, orderID);
-       
-      // 주문요청 완료 채팅에서 넘어왔을 때
+      
       if(this.$route.params.Type !== undefined) {
+        if(this.$route.params.Type === 'qt')
+        {
+          // 견적확정 채팅에서 넘어왔을 경우
+          this.tabIndex = 0;
+          this.GetQTReqList(docID ,RefID);
+          this.GetOrderHistory('', '');
+      
+        }
         if(this.$route.params.Type === 'order')
         {
+          // 주문요청 완료 채팅에서 넘어왔을 경우
           this.tabIndex = 1;
+          this.GetQTReqList('','');
+          this.GetOrderHistory(docID, RefID);
         }
+      }
+      else{
+          this.GetQTReqList('','');
+          this.GetOrderHistory('', '');
       }
     }
     else{
       if(this.UserInfo.BsnID === '')
       this.UserInfo.BsnID = this.$cookies.get('BsnID');
 
-      this.GetQTReqList();
-      this.GetOrderHistory();
-    //  this.GetConfirmQtList();  
+      this.GetQTReqList('','');
+      this.GetOrderHistory('','');
+
     }
 
   }

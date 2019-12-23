@@ -5,8 +5,8 @@
           <div v-if="msg.msgData.from.name === UserInfo.BsnID">
             <div class="Chating-me">
                 <div class="Chating-me-contents" v-if="msg.msgData.imgId === undefined">
-                    <span class="order-chat" v-if="msg.msgData.ChatType !== undefined && msg.msgData.ChatType ==='O'" @click="goOrderLsit(msg.msgData)"> {{msg.msgData.msg}}</span>
-                    <span v-else> {{msg.msgData.msg}}</span>
+                    <span class="order-chat" v-if="msg.msgData.ChatType !== undefined && msg.msgData.ChatType ==='O'" @click="goChating(msg.msgData,'order')"> {{msg.msgData.msg}}</span>
+                    <span v-else>{{msg.msgData.msg}}</span>
                 </div>
                 <div class="Chating-me-contents" v-if="msg.msgData.imgId !== undefined">
                     <v-img class="grey lighten-3"  v-bind:src="msg.msgData.img" max-width="200px" @click="$EventBus.$emit('click-showImage' , msg.msgData.img)"></v-img>
@@ -20,8 +20,9 @@
             <div class="Chating-dealer">
               <div class="Chating-icon"> <img src="@/assets/user-icon.png"> </div>
               <div class="Chating-dealer-contents" v-if="msg.msgData.imgId === undefined">
-                  <span class="order-chat" v-if="msg.msgData.ChatType !== undefined && msg.msgData.ChatType ==='O'"> {{msg.msgData.msg}}</span>
-                  <span v-else> {{msg.msgData.msg}}</span>
+                  <span class="order-chat" v-if="msg.msgData.ChatType !== undefined && msg.msgData.ChatType ==='O'">{{msg.msgData.msg}}</span>
+                  <span v-else-if="msg.msgData.ChatType !== undefined && msg.msgData.ChatType ==='R'" @click="goChating(msg.msgData,'qt')">{{msg.msgData.msg}}</span>
+                  <span v-else>{{msg.msgData.msg}}</span>
               </div>
               <div class="Chating-dealer-contents" v-if="msg.msgData.imgId !== undefined">
                   <v-img class="grey lighten-3"  v-bind:src="msg.msgData.img" max-width="200px" @click="$EventBus.$emit('click-showImage' , msg.msgData.img)"></v-img>
@@ -69,16 +70,15 @@ export default {
         return "";
       }
     },
-    goOrderLsit(msg)
+    goChating(msg , chatType)
     { 
- 
       this.$router.push({name:'QTList', 
                       params:{
                             DocID: msg.Chatid, 
-                            OrderID: msg.RefID,
-                            Type:'order'
+                            RefID: msg.RefID,
+                            Type:chatType
                       }});
-    }
+    },
   }
 };
 </script>

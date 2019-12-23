@@ -808,15 +808,17 @@ export default {
       else
         msg = this.qtInfo.CarNo + " 차량에 대한 견적이 수정 후 재전송 되었습니다.";
 
+      var id =  this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
       var qtMsg = {};
       qtMsg.from = {'name' : this.UserInfo.BsnID};
       qtMsg.msg  = msg;
       qtMsg.reqTm = chatTime;
+      qtMsg.ChatType = "R";
+      qtMsg.RefID = id;
       this.$EventBus.$emit('send-QTConfirm' , qtMsg)
 
       var param = {};
 
-      var id =  this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                 + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
       var ReqTm = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                         + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
@@ -882,7 +884,7 @@ export default {
         else{
           this.txtQTConfirm = "견적확정 회신";
         }
-        this.detailQTData = JSON.parse(result.data.Items[0].LineItem);
+        this.detailQTData = JSON.parse(convertDynamoToArrayString(result.data.Items[0].LineItem));
          
       });
     },
