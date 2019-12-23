@@ -1810,8 +1810,7 @@ export default {
       if((qtInfoKeys.find(element => element === 'DocID')) !== undefined){
         docId = item.DocID;
       }
-
-      if((qtInfoKeys.find(element => element === 'ID')) !== undefined){
+      else if((qtInfoKeys.find(element => element === 'ID')) !== undefined){
         docId = item.ID;
       }
       
