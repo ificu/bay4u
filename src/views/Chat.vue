@@ -166,7 +166,7 @@ export default {
 
       // 초기 메시지 입력
   
-      if(this.$route.params.chatType !== undefined && this.$route.params.chatType === 'order'){
+      if(this.$route.params.chatType !== undefined && (this.$route.params.chatType === 'order' || this.$route.params.chatType === 'qt')){
         var item = {};
         item.ID =  this.docId;
         this.showchating(item);

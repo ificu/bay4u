@@ -281,7 +281,10 @@
                             <b-row  class="history-carType">
                               {{qtInfo.AGENT_NM}}
                             </b-row>
-                          </b-col>                    
+                          </b-col>  
+                          <b-col class="history-qtInfo-chat">
+                              <span @click="goQTChating(qtInfo)"><i class ="fas fa-comment-dots"></i></span>
+                          </b-col>                   
                           <b-col align-self="center" class="history-webpos-detailBtn">
                             <b-button block href="#"  v-b-toggle="'accordion-webpos-' + idx"  variant="secondary" size="sm" v-on:click="GetWebposQtList(qtInfo)">
                               <!--<i v-if="!SOList1Toggle" class="fas fa-chevron-down"></i>
@@ -339,7 +342,10 @@
                               <b-row  class="history-qtInfo-vinNo">
                                 {{qtInfo.ResDealerNm}}
                               </b-row>
-                            </b-col>                    
+                            </b-col>
+                            <b-col class="history-qtInfo-chat">
+                              <span @click="goQTChating(qtInfo)"><i class ="fas fa-comment-dots"></i></span>
+                            </b-col>                
                             <b-col align-self="center" class="history-qtInfo-detailBtn">
                               <b-button block href="#"  v-b-toggle="'accordion-qtRes-' + idx"  variant="secondary" size="sm" v-on:click="GetQtList2(qtInfo,idx )">
                                <!--<i class="fas fa-chevron-down" :id="'btnIcon'+idx"></i>-->
@@ -1586,13 +1592,13 @@ export default {
       .then((result) => {
         console.log("======= Order result ========");
         console.log(result.data);
-        this.goChating(id);
+        this.goOrderChating(id);
       })
       .catch((error) => {
         console.log(error);
       });
     },
-    goChating(val)
+    goOrderChating(val)
     {
       var msg =  this.orderData.CarNo + " 차량 부품 주문 요청 완료!!";
       var now = new Date();
@@ -1671,6 +1677,29 @@ export default {
         let item = this.orderHistory[index];
         this.GetOrderDetail(item);
       } 
+    },
+    goQTChating(item)
+    {   
+      
+      let qtInfoKeys =  Object.keys(item);
+      let docId = item.DocID;
+      if((qtInfoKeys.find(element => element === 'ESTM_ID')) !== undefined)
+      {
+        docId = item.ESTM_ID;
+      }
+      console.log('go chat : ' , qtInfoKeys.find(element => element === 'ESTM_ID'));
+      let now = new Date();
+      // 견적요청 채팅창으로 이동
+      this.$router.push({name:'Chat', 
+        params:{
+              chatid: docId, 
+              carNo: item.CarNo,
+              chatFrom: this.UserInfo.BsnID,
+              chatTo: item.ResDealer,
+              chatDate: now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2),
+              qtInfo : item,
+              chatType:'qt',
+          }});
     }
   },
 
@@ -1831,8 +1860,18 @@ export default {
   flex:30%;
 }
 .history-qtInfo-detail {
-  flex:55%;
+  flex:50%;
   padding: 0;
+}
+.history-qtInfo-chat {
+  flex:10%;
+  padding: 0;
+  margin-top: 9px;
+  
+}
+.history-qtInfo-chat i{
+  color:#0D47A1;
+  font-size: 2.0em;
 }
 .history-qtInfo-carNo {
   font-size: 1.1rem;
@@ -1966,7 +2005,7 @@ export default {
 .history-webpos-detailBtn {
   /*flex:15%;*/
   text-align: right; 
-  padding: 5px 10px;
+  padding: 2px 2px;
   width: 60px;
 }
 .history-car {
