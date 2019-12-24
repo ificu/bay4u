@@ -940,7 +940,7 @@ export default {
           console.log("=======주문내역 조회 result ========");
           console.log( result.data.Items[0].LineItem);
           this.tabIndex = 2;
-          this.orderHistory  = JSON.parse(result.data.Items[0].LineItem);
+          this.orderHistory  = JSON.parse(convertDynamoToArrayString(result.data.Items[0].LineItem));
         }
         else{
            this.tabIndex = 1 ;

@@ -369,11 +369,11 @@
                           <b-row v-for="(item, index) in detailQTData2" v-bind:key = "index">
                             <b-col class ="pt-0 pl-1">
                               <div>
-                                <div><span class="itemCode">{{item.itemCode}}</span> <span class="itemName">{{item.itemName}}</span> </div>
-                                <div><span class="itemBrand">{{item.itemBrand}}</span><span class="itemAfterNo"> {{item.afterNo}}</span></div>
+                                <div><span class="dealer-itemCode">{{item.itemCode}}</span><span class="dealer-itemName">{{item.itemName}}</span> </div>
+                                <div><span class="dealer-itemBrand">{{item.itemBrand}}</span></div>
                               </div>
                             </b-col>
-                            <b-col class="pl-0 pr-0"><span>{{ item.itemQty }}</span></b-col>
+                            <b-col class="pl-0 pr-0"><span class="dealer-itemQty">{{ item.itemQty }}</span></b-col>
                             <b-col class="pl-0 pr-0">
                               <span v-if="item.itemPrice === 0" class="qt-item-price">{{ item.itemPrice | localeNum}}</span>
                               <span v-if="item.itemPrice !== 0" class="qt-item-price">{{ item.itemPrice | localeNum}}</span>
@@ -385,7 +385,7 @@
                           </b-row>
                           <div class="QTRes-footer">
                             <div class="TotalInfo">
-                              <v-btn color="#4E342E" dark depressed class="mr-3" @click="showQTOrderPopup(qtInfo)" >주문하기</v-btn>
+                              <v-btn color="#4E342E" dark depressed class="mr-3" @click="showQTOrderPopup(GetConfirmValue2(qtReqInfo.ID))" >주문하기</v-btn>
                               <span class="TotalInfo-Title">합계금액</span>
                               <span class="TotalInfo-Text">{{total2 | localeNum}}</span>
                             </div>
@@ -1645,7 +1645,7 @@ export default {
       this.orderData = item;
       this.showQTOrder = !this.showQTOrder;
      // this.orderDealerName = item.ResDealerNm;
-      this.orderList = JSON.parse(item.LineItem);
+      this.orderList = JSON.parse(convertDynamoToArrayString(item.LineItem));
 
       console.log(this.orderData);
     },
@@ -2309,6 +2309,30 @@ export default {
 .footer-selected {
   color : #5d4038;
 }
+
+/*일반대리점 견적회신 */
+.dealer-itemCode
+{
+  font-size: 0.8em;
+  font-weight: bold;
+  color: #0D47A1;
+}
+.dealer-itemName{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.7rem;
+}
+.dealer-itemBrand
+{
+  font-size: 0.7rem;
+  color: #6A1B9A;
+}
+/*
+.dealer-itemQty
+{
+  font-size: 0.7rem;
+}*/
 
 .history-detailConts .itemName{
   overflow: hidden;
