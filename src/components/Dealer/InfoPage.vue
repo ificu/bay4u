@@ -895,23 +895,77 @@ export default {
       var copyData = clipText.split(/\r\n|\r|\n/);
       console.log('copyData : ', copyData);
 
-      var idx = 0;
-
-      for(var item of copyData ){
+      if(copyData[0].indexOf('차종	부품명	애프터번호') > -1) { // 해당 문구가 있다면 화면에서 카피한 케이스
+        var idx = -1;
+        var itemIdx = 1;
         var newItem = {};
-        newItem.seq = idx++;
-        var val = item.split('	');
-        newItem.itemCode = val[0];
-        newItem.itemBrand =  val[1];
-        newItem.carBrand =  val[2];
-        newItem.itemName =  val[3];
-        newItem.afterNo =  val[4];
-        newItem.itemQty =  val[5].replace(',','');
-        newItem.itemPrice =  val[6].replace(',','');
-        newItem.AMT =  val[7].replace(',','');
-        newItem.memo =  val[8];
- 
-        this.detailQTData.push(newItem);
+        this.detailQTData = [];
+
+        for(var item of copyData ){
+          console.log('item : ', item);
+          if(item === '삭제 '){
+            idx = 0;
+          }
+
+          if(idx >= 0) {
+            console.log('idx : ', idx);
+
+            if(idx === 1) {
+              var itemElem = item.split('	');
+              newItem.itemCode = itemElem[0];
+              newItem.itemBrand = itemElem[1];
+            }
+            if(idx === 2) {
+              newItem.carBrand = item;
+            }
+            if(idx === 3) {
+              newItem.itemName = item;
+            }
+            if(idx === 4) {
+              if(isNaN(item) === false && item.length <= 2) {idx++;} // 애프터 품번 자리에 2자리 이하의 숫자가 들어갔다면 애프터는 비워지고 숫자가 들어온 케이스 임.
+              else newItem.memo = item;
+            }
+            if(idx === 5) {
+              newItem.itemQty = item.replace(',','');
+            }
+            if(idx === 6) {
+              newItem.itemPrice = item.replace(',','');
+            }
+            if(idx === 7) {
+              newItem.AMT = item.replace(',','');
+            }
+
+            if(item === '[수정]'){
+              newItem.seq = itemIdx++;
+              this.detailQTData.push(newItem);
+              console.log('detailQTData : ', this.detailQTData);
+              newItem = {};
+            }
+
+            idx++;
+            console.log('newItem : ', newItem);
+          }
+        }
+      }
+      else {  // 아니면 엑셀에서 카피한 케이스
+        var idx = 0;
+
+        for(var item of copyData ){
+          var newItem = {};
+          newItem.seq = idx++;
+          var val = item.split('	');
+          newItem.itemCode = val[0];
+          newItem.itemBrand =  val[1];
+          newItem.carBrand =  val[2];
+          newItem.itemName =  val[3];
+          newItem.afterNo =  val[4];
+          newItem.itemQty =  val[5].replace(',','');
+          newItem.itemPrice =  val[6].replace(',','');
+          newItem.AMT =  val[7].replace(',','');
+          newItem.memo =  val[8];
+  
+          this.detailQTData.push(newItem);
+        }
       }
     },
     GetOrderHistory()
