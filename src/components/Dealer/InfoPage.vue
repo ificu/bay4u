@@ -285,7 +285,7 @@
               :items="detailQTData"
               class="elevation-1 mytable"
               fixed-header
-              height="350px"
+              height="calc(100vh - 475px)"
               :items-per-page="itemsPerPage"
               hide-default-footer
               no-data-text=''
@@ -382,7 +382,7 @@
               :items="orderHistory"
               class="elevation-1 mytable"
               fixed-header
-              height="350px"
+              height="calc(100vh - 450px)"
               :items-per-page="itemsPerPage"
               hide-default-footer
               no-data-text=''
@@ -1182,9 +1182,14 @@ export default {
 .QTReq-List {
   font-weight: bold;
   color: #5d4038;
+  height: calc(100vh - 575px);
 }
 .QTReq-Table {
   width: 100%;
+  display: block;
+  overflow-y: scroll;
+  height: 400px;
+  height: calc(100vh - 600px);
 }
 .QTReq-Memo {
   font-weight: bold;
@@ -1230,23 +1235,20 @@ export default {
   color: #967d5f;
 }
 .QTItem-Qty{
-  width: 20%;
+  width: 15%;
   font-weight: bold;
   color: #967d5f;
 }
 .QTItem-String{
-  width: 40%;
+  width: 5%;
   font-weight: bold;
   color: #967d5f;
   text-align: center;
 }
 
-/*
 .QT-Detail {
-  height: 100%;
-  margin-top: -30px;
-  margin-right: 0px;
-}*/
+  height: calc(100vh - 307px);
+}
 
 .QTRes-footer{
   padding: 0.5rem 1rem;
