@@ -100,6 +100,7 @@
   </div>
 </template>
 
+<!--<script src="https://unpkg.com/axios/dist/axios.min.js"></script>-->
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script>
 //import { mapMutations, mapState } from 'vuex';
@@ -110,6 +111,8 @@ import {datePadding, convertStringToDynamo, dataURItoBlob} from '@/utils/common.
 import QTCamera from '@/components/NewQT/QTCamera.vue'
 import CheckLogin from '@/components/Common/CheckLogin.vue'
 import BackToTop from '@/components/Common/BackToTop.vue'
+
+const axios = require('axios').default;
 
 export default {
   name: 'Chat',

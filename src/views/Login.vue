@@ -53,10 +53,10 @@
   </div>
 </template>
 
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<!--<script src="https://unpkg.com/axios/dist/axios.min.js"></script>-->
 <script>
 import Constant from '@/Constant';
-
+const axios = require('axios').default;
 export default {
   name: 'Login',
   data () {

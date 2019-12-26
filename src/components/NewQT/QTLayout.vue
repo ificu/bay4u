@@ -286,7 +286,8 @@
   </v-app>  
 </template>
 
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<!--<script src="https://unpkg.com/axios/dist/axios.min.js"></script>-->
+<script src="http://code.jquery.com/jquery-latest.min.js"></script>
 <script>
 import ItemCategory from '@/components/NewQT/ItemCategory.vue'
 import QTConfirm from '@/components/NewQT/QTConfirm.vue'
@@ -295,6 +296,8 @@ import ROHistory from '@/components/NewQT/ROHistory.vue'
 import MessageBox from '@/components/Common/MessageBox.vue'
 import {datePadding, convertStringToDynamo, convertArrayToDynamo, dataURItoBlob} from '@/utils/common.js'
 import Constant from '@/Constant';
+
+const axios = require('axios').default;
 
 export default {
 name: 'QTStep',

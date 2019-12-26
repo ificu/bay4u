@@ -16,6 +16,7 @@ import BootstrapVue from 'bootstrap-vue'
 import VueAwesomeSwiper from 'vue-awesome-swiper'
 import Directives from './plugins/directives';
 import VueScrollStop from 'vue-scroll-stop'
+import axios from 'axios'
 
 import './utils/filters';
 
@@ -26,6 +27,7 @@ Vue.use(VueAwesomeSwiper)
 Vue.use(Directives)
 Vue.use(VueCookies)
 Vue.use(VueScrollStop)
+Vue.use(axios)
 
 Vue.prototype.$EventBus = new Vue();
 

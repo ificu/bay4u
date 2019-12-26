@@ -477,11 +477,13 @@
     </div>   
   </v-app>
 </template>
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<!--<script src="https://unpkg.com/axios/dist/axios.min.js"></script>-->
+<script src="http://code.jquery.com/jquery-latest.min.js"></script>
 <script>
 import {datePadding, convertDynamoToString , convertDynamoToArrayString, convertArrayToDynamo} from '@/utils/common.js'
 import Constant from '@/Constant';
 
+const axios = require('axios').default;
 export default {
   name: 'InfoPage',
   data () {
@@ -706,7 +708,6 @@ export default {
       console.log("Image : ", img);
       this.showQTImageFlag = true;
       this.itemImage = Constant.IMG_URL + img;
-
     },
     saveImage() {
       console.log("Info : ", this.qtInfo);

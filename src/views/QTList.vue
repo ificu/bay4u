@@ -179,12 +179,12 @@
           <div class="QTList-search">
             <b-input-group>
               <b-dropdown slot="prepend" v-bind:text="dropdownQT">
-                <b-dropdown-item @click="dropdownQT='대리점'">대리점</b-dropdown-item>
-                <b-dropdown-item @click="dropdownQT='차량번호'">차량번호</b-dropdown-item>
-                <b-dropdown-item @click="dropdownQT='날짜'">날짜</b-dropdown-item>
+                <b-dropdown-item @click="dropdownQT='대리점';sampletxtQT='';">대리점</b-dropdown-item>
+                <b-dropdown-item @click="dropdownQT='차량번호';sampletxtQT='';">차량번호</b-dropdown-item>
+                <b-dropdown-item @click="dropdownQT='날짜';sampletxtQT='2019-12-01';">날짜</b-dropdown-item>
               </b-dropdown>
 
-              <b-form-input v-model="qtSearchText" v-on:keypress.enter="GetQTReqList('','')"></b-form-input>
+              <b-form-input v-model="qtSearchText" v-on:keypress.enter="GetQTReqList('','')" :placeholder="sampletxtQT"></b-form-input>
 
               <b-input-group-append>
                 <b-button @click="GetQTReqList('','')"><i class="fas fa-search"></i></b-button>
@@ -225,43 +225,44 @@
                   <div class="history-detailConts">
                     <!--견적요청 정보-->
                     <b-card no-body class="mb-1">
-                       <b-card-header header-tag="header" role="tab" header-class="card-header-qtInfo">
+                      <b-card-header header-tag="header" role="tab" header-class="card-header-qtInfo">
                         <b-container>
-                          <b-row>
-                            <b-col class="history-qtInfo">요청내역</b-col>
-                            <b-col class="history-qtInfo-detail">
-                              <b-row class="history-qtInfo-carNo">
+                           <b-row>
+                              <b-col class="history-qtInfo">요청내역</b-col>
+                              <b-col class="history-qtInfo-detail">
+                                <b-row class="history-qtInfo-carNo">
                                 {{(qtReqInfo.CarNo === "*empty*")?"미상차량" : qtReqInfo.CarNo }}
-                              </b-row>
-                              <b-row  class="history-qtInfo-vinNo">
+                                </b-row>
+                                <b-row  class="history-qtInfo-vinNo">
                                 {{qtReqInfo.CarVin}}
-                              </b-row>
-                            </b-col>                    
-                            <b-col align-self="center" class="history-qtInfo-detailBtn">
-                              <b-button block href="#"  v-b-toggle="'accordion-qtReq'+idx2"  variant="secondary" size="sm" v-on:click="showQtReqItem(qtReqInfo)">
+                                </b-row>
+                              </b-col>                    
+                              <b-col align-self="center" class="history-qtInfo-detailBtn">
+                                <b-button block href="#"  v-b-toggle="'accordion-qtReq'+idx2"  variant="secondary" size="sm" v-on:click="showQtReqItem(qtReqInfo)">
                                 <!--<i v-if="!SOList2Toggle" class="fas fa-chevron-down"></i>
                                 <i v-if="SOList2Toggle"  class="fas fa-chevron-up"></i>-->
                                 <span class="when-opened">
                                   <i class="fa fa-chevron-up" aria-hidden="true"></i>
                                 </span>
                                 <span class="when-closed">
-                                    <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                                  <i class="fas fa-chevron-down" aria-hidden="true"></i>
                                 </span>
-                              </b-button>
-                            </b-col>               
+                                </b-button>
+                              </b-col>               
                           </b-row>
                         </b-container>
-                       </b-card-header>
-                      <b-collapse :id="'accordion-qtReq'+idx2" accordion="my-accordion2" role="tabpanel" >
+                      </b-card-header>
+                      <b-collapse :id="'accordion-qtReq'+idx2" accordion="my-accordion2" role="tabpanel" :visible="linkToggleQtReq(idx2)" >
                         <b-card-body>
                           <div class="history-detailConts">
-                            <ul>
-                              <li  v-for="(item, index) in qtReqItem" v-bind:key = "index">
-                              <div>
-                                <div><span class="itemCode">{{item.ITM_NM}}</span> <span class="itemName">{{item.ITM_QTY}}개</span> </div>
-                              </div>
-                              </li>
-                            </ul>
+                          <ul>
+                            <li v-for="(item, index) in qtReqItem" v-bind:key = "index">
+                            <div>
+                            <div><span class="itemCode">{{item.ITM_NM}}</span> <span class="itemName">{{item.ITM_QTY}}개</span> </div>
+                            </div>
+                            </li>
+                          </ul>
+                          <div class="qtReq-image" ><span>사진첨부</span><span @click="showQTImage(qtItem[0].IMG)"><i class="fas fa-image"></i></span></div>
                           </div>
                         </b-card-body>
                       </b-collapse>
@@ -273,7 +274,7 @@
                       <b-card-header header-tag="header" role="tab" header-class="card-header-webpos">
                         <b-container>
                           <b-row>
-                            <b-col align-self="center" class="history-webpos-date">{{GetConfirmValue(qtReqInfo.ID,"MONTH")}}/{{GetConfirmValue(qtReqInfo.ID,"qtInfo.DAY")}}({{GetConfirmValue(qtReqInfo.ID,"DAYWEEK")}})</b-col>
+                            <b-col align-self="center" class="history-webpos-date">{{GetConfirmValue(qtReqInfo.ID,"MONTH")}}/{{GetConfirmValue(qtReqInfo.ID,"DAY")}}({{GetConfirmValue(qtReqInfo.ID,"DAYWEEK")}})</b-col>
                             <b-col class="history-webpo-car">
                               <b-row class="history-carNo">
                                {{GetConfirmValue(qtReqInfo.ID,"CAR_NO")}} 
@@ -301,32 +302,40 @@
                         </b-container>
                       </b-card-header>
                     <b-collapse :id="'accordion-webpos-'+idx" accordion="my-accordion4" role="tabpanel">
-                      <b-card-body>
+                      <b-card-body class ="pt-1 pl-1 pr-1">
                         <div class="history-detailConts-webpos">
                           <ul>
-                            <li  v-for="(item, index) in detailQTData" v-bind:key = "index">
-                              <div>
-                                <div class="itemCode" > {{item.CONFIRM_ITM}}</div>
-                                <div class="itemName">{{item.NM_ITM}}</div>
+                            <li v-for="(item, index) in detailQTData" v-bind:key = "index">
+                              <div class="webpos-item">
+                                <span class="webpos-itemName">{{item.NM_ITM}}</span>
+                                <span class="webpos-itemCode">{{item.CONFIRM_ITM}}</span>
                               </div>
-                              <div v-if="item.AMT === 0" class="detailConts-amount">{{ item.AMT }}원</div>
-                              <div v-if="item.AMT !== 0" class="detailConts-amount">{{ item.AMT | localeNum}}원</div>
-                              <div class="delvDay">{{item.DELV_DAY}}</div>
+                              <div class="webpos-itemQty"><span>{{item.ORDER_QTY}}개</span></div>
+                              <div class="webpos-itemPrice">
+                                <span v-if="item.PRC_PRICE === 0" >{{ item.PRC_PRICE }}</span>
+                                <span v-if="item.PRC_PRICE !== 0" >{{ item.PRC_PRICE | localeNum}}</span>
+                                <span v-if="item.SAL_PRICE === 0" >({{ item.SAL_PRICE }})</span>
+                                <span v-if="item.SAL_PRICE !== 0" >({{ item.SAL_PRICE | localeNum}})</span>
+                              </div>
+                              <div class="webpos-amt">
+                                <span v-if="item.AMT_PRC === 0">{{ item.AMT_PRC }}</span>
+                                <span v-if="item.AMT_PRC !== 0">{{ item.AMT_PRC | localeNum}}</span>
+                                <span v-if="item.AMT === 0">({{ item.AMT }})</span>
+                                <span v-if="item.AMT !== 0">({{ item.AMT | localeNum}})</span>
+                              </div>
+                              <div class="webpos-delvDay"><span>{{item.DELV_DAY}}</span></div>
                             </li>
                           </ul>
-                          <div class="QTRes-footer">
-                            <div class="TotalInfo">
-                              <span class="TotalInfo-Title">합계금액</span>
-                              <span class="TotalInfo-Text">{{total | localeNum}}</span>
-                            </div>
-                          </div>
-                          <!--
-                          <div class="detailConts-compare">
-                            <b-button @click="showRODetailPageToggle">정비 명세서 작성</b-button>
-                          </div>
-                          -->
                         </div>
                       </b-card-body>
+                      <b-card-footer>
+                        <div class="QTRes-footer">
+                          <div class="TotalInfo">
+                            <span class="TotalInfo-Title">합계</span>
+                            <span class="TotalInfo-Text">{{total | localeNum}}원</span>
+                          </div>
+                        </div>
+                      </b-card-footer>
                     </b-collapse>
                   </b-card>
                     <!--일반 대리점-->
@@ -348,7 +357,7 @@
                               <span @click="goQTChating(GetConfirmValue2(qtReqInfo.ID))"><i class ="fas fa-comment-dots"></i></span>
                             </b-col>                
                             <b-col align-self="center" class="history-qtInfo-detailBtn">
-                              <b-button block href="#"  v-b-toggle="'accordion-qtRes-' + idx2"  variant="secondary" size="sm" v-on:click="GetQtList2(GetConfirmValue2(qtReqInfo.ID))">
+                              <b-button block href="#"  v-b-toggle="'accordion-qtDealer-' + idx2"  variant="secondary" size="sm" v-on:click="GetQtList2(GetConfirmValue2(qtReqInfo.ID))">
                                <!--<i class="fas fa-chevron-down" :id="'btnIcon'+idx"></i>-->
                                <!--<i v-if="!SOList3Toggle" class="fas fa-chevron-down"></i>
                                 <i v-if="SOList3Toggle"  class="fas fa-chevron-up"></i>-->
@@ -363,33 +372,33 @@
                           </b-row>
                         </b-container>
                        </b-card-header>
-                      <b-collapse :id="'accordion-qtRes-'+idx2" accordion="my-accordion3" role="tabpanel" :visible="linkToggleQtConfirm2(1)">
+                      <b-collapse :id="'accordion-qtDealer-'+idx2" accordion="my-accordion3" role="tabpanel" :visible="linkToggleQtConfirm2(idx2)">
                       <b-card-body>
                         <b-container class ="pt-0 pl-1 pr-0">
                           <b-row v-for="(item, index) in detailQTData2" v-bind:key = "index">
                             <b-col class ="pt-0 pl-1">
-                              <div>
-                                <div><span class="dealer-itemCode">{{item.itemCode}}</span><span class="dealer-itemName">{{item.itemName}}</span> </div>
+                            <div class="dealer-qtInfo">
+                              <div class="dealer-item">
                                 <div><span class="dealer-itemBrand">{{item.itemBrand}}</span></div>
+                                <div><span class="dealer-itemCode">{{item.itemCode}}</span> / <span class="dealer-itemName">{{item.itemName}}</span></div>
                               </div>
-                            </b-col>
-                            <b-col class="pl-0 pr-0"><span class="dealer-itemQty">{{ item.itemQty }}</span></b-col>
-                            <b-col class="pl-0 pr-0">
-                              <span v-if="item.itemPrice === 0" class="qt-item-price">{{ item.itemPrice | localeNum}}</span>
-                              <span v-if="item.itemPrice !== 0" class="qt-item-price">{{ item.itemPrice | localeNum}}</span>
-                            </b-col>
-                            <b-col class="pl-0">
-                              <span v-if="item.AMT === 0" class="detailConts-amount">{{ item.AMT | localeNum}}원</span>
-                              <span v-if="item.AMT !== 0" class="detailConts-amount">{{ item.AMT | localeNum}}원</span>
+                              <div class="dealer-Price">
+                                <span v-if="item.AMT === 0" class="dealer-itemAmount">{{ item.AMT | localeNum}}원</span>
+                                <span v-if="item.AMT !== 0" class="dealer-itemAmount">{{ item.AMT | localeNum}}원</span>
+                                <span v-if="item.itemPrice === 0" class="dealer-itemPrice">{{ item.itemPrice | localeNum}}</span>
+                                <span v-if="item.itemPrice !== 0" class="dealer-itemPrice">{{ item.itemPrice | localeNum}}</span>
+                                <span class="dealer-itemQty">{{ item.itemQty }}개</span>
+                              </div>
+                            </div>
                             </b-col>
                           </b-row>
-                          <div class="QTRes-footer">
+                          <!--<div class="QTRes-footer">
                             <div class="TotalInfo">
                               <v-btn color="#4E342E" dark depressed class="mr-3" @click="showQTOrderPopup(GetConfirmValue2(qtReqInfo.ID))" >주문하기</v-btn>
                               <span class="TotalInfo-Title">합계금액</span>
                               <span class="TotalInfo-Text">{{total2 | localeNum}}</span>
                             </div>
-                          </div>
+                          </div>-->
                         </b-container>
                         <!--
                         <div class="history-detailConts">
@@ -412,6 +421,15 @@
                         </div>-->
                         
                       </b-card-body>
+                      <b-card-footer>
+                        <div class="QTRes-footer">
+                          <div class="TotalInfo">
+                              <v-btn color="#4E342E" dark depressed class="mr-3" @click="showQTOrderPopup(GetConfirmValue2(qtReqInfo.ID))" >주문하기</v-btn>
+                              <span class="TotalInfo-Title">합계</span>
+                              <span class="TotalInfo-Text">{{total2 | localeNum}}원</span>
+                          </div>
+                        </div>
+                      </b-card-footer>
                       </b-collapse>
                      </b-card>
                   </div>
@@ -548,12 +566,12 @@
           <div class="QTList-search">
             <b-input-group>
               <b-dropdown slot="prepend" v-bind:text="dropdownSO">
-                <b-dropdown-item @click="dropdownSO='대리점'">대리점</b-dropdown-item>
-                <b-dropdown-item @click="dropdownSO='차량번호'">차량번호</b-dropdown-item>
-                <b-dropdown-item @click="dropdownSO='날짜'">날짜</b-dropdown-item>
+                <b-dropdown-item @click="dropdownSO='대리점';sampletxtSO=''">대리점</b-dropdown-item>
+                <b-dropdown-item @click="dropdownSO='차량번호';sampletxtSO=''">차량번호</b-dropdown-item>
+                <b-dropdown-item @click="dropdownSO='날짜';sampletxtSO='2019-12-01'">날짜</b-dropdown-item>
               </b-dropdown>
 
-              <b-form-input v-model="ordSearchText"  v-on:keypress.enter="GetOrderHistory('','')"></b-form-input>
+              <b-form-input v-model="ordSearchText"  v-on:keypress.enter="GetOrderHistory('','')" :placeholder="sampletxtSO"></b-form-input>
 
               <b-input-group-append>
                 <b-button  @click="GetOrderHistory('','')"><i class="fas fa-search"></i></b-button>
@@ -913,7 +931,7 @@
         </div>
       </b-tab>
     </b-tabs>
-<BackToTop></BackToTop>
+    <BackToTop></BackToTop>
     <div class="QTList-Contents" v-if="showQTComparePage">
       <span type="button" class="headerBar-Back" v-on:click="showMainPageToggle">
         <i class="fas fa-angle-double-left"></i>
@@ -962,20 +980,20 @@
       <v-app>  
       <CustomerDocOption  v-if="showCustomerDocOptionPage" @close="showCustomerDocPageToggle">
                 
-          <h4 slot="header">고객 명세서 출력 옵션</h4>
-          <span slot="body">
-            <v-container fluid>
-              <v-switch class="mb-n4" v-model="customerDocOption" label="카센터 정보" value input-value="true" disabled></v-switch>
-              <v-switch class="mb-n4" v-model="customerDocOption" label="차량 정보" value input-value="true" disabled></v-switch>
-              <v-switch class="mb-n4" v-model="customerDocOption" label="공임 내역" value="공임 내역"></v-switch>
-              <v-switch class="mb-n4" v-model="customerDocOption" label="부품상세 내역" value="부품상세 내역"></v-switch>
-              <v-switch class="mb-n4" v-model="customerDocOption" label="할인 내역" value="할인 내역"></v-switch>
-              <v-switch class="mb-n4" v-model="customerDocOption" label="총 가격" value input-value="true" disabled></v-switch>
-            </v-container>
-          </span>
-          <span slot="footer" @click="showCustomerDocPageToggle">
-            확인 <i class="fas fa-check"></i>
-          </span>
+        <h4 slot="header">고객 명세서 출력 옵션</h4>
+        <span slot="body">
+          <v-container fluid>
+            <v-switch class="mb-n4" v-model="customerDocOption" label="카센터 정보" value input-value="true" disabled></v-switch>
+            <v-switch class="mb-n4" v-model="customerDocOption" label="차량 정보" value input-value="true" disabled></v-switch>
+            <v-switch class="mb-n4" v-model="customerDocOption" label="공임 내역" value="공임 내역"></v-switch>
+            <v-switch class="mb-n4" v-model="customerDocOption" label="부품상세 내역" value="부품상세 내역"></v-switch>
+            <v-switch class="mb-n4" v-model="customerDocOption" label="할인 내역" value="할인 내역"></v-switch>
+            <v-switch class="mb-n4" v-model="customerDocOption" label="총 가격" value input-value="true" disabled></v-switch>
+          </v-container>
+        </span>
+        <span slot="footer" @click="showCustomerDocPageToggle">
+          확인 <i class="fas fa-check"></i>
+        </span>
                 
       </CustomerDocOption>
       </v-app>  
@@ -1004,7 +1022,6 @@
       </router-link >
     </div>
 
-    
     <!-- 주문 요청 확인 팝업 -->
     <QTOrder v-if="showQTOrder" @close="showQTOrder=false">
       <span slot="header">{{orderData.ResDealerNm}} 대리점에 <br> 주문요청을 보냅니다</span>
@@ -1030,11 +1047,30 @@
         <b-button class="submit-NO" @click="showQTOrder=false">NO</b-button>
       </span>
     </QTOrder>
+  <v-app>
+    <v-dialog v-model="showQTImageFlag" width="500px">
+        <v-card>
+          <v-card-title class="headline" >이미지 확인</v-card-title>
+          <v-img class="grey lighten-3 mr-4 ml-4"  v-bind:src="itemImage" max-width="800px"></v-img>
 
+          <v-card-actions>
+            <v-spacer></v-spacer>  
+            <v-btn
+              color="#00BFA5"
+              outlined
+              @click="showQTImageFlag = false; itemImage = '';"
+            >
+              닫기
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>  
+  </v-app>
   </div>
 </template>
 
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<!--<script src="https://unpkg.com/axios/dist/axios.min.js"></script>-->
+<script src="http://code.jquery.com/jquery-latest.min.js"></script>
 <script>
 import QTDetailCompare from '@/components/QTList/QTDetailCompare.vue'
 import QTDetailSelect from '@/components/QTList/QTDetailSelect.vue'
@@ -1047,6 +1083,8 @@ import BackToTop from '@/components/Common/BackToTop.vue'
 import Constant from '@/Constant';
 import {getInputDayWeek , convertDynamoToArrayString, arrayGroupBy, datePadding ,convertArrayToDynamo} from '@/utils/common.js'
 
+const axios = require('axios').default;
+
 export default {
   name: 'QTList',
   data () {
@@ -1055,10 +1093,13 @@ export default {
       tabIndex: 0,
       orderToggleIndex:-1,
       qtToggleIndex:-1,
-      qtConfrToggleIndex2:-1,
+      qtReqToggleIndex:-1,
+      qtConfrnToggleIndex2:-1,
       dropdownQT: '차량번호',
       dropdownSO: '차량번호',
       dropdownRO: '차량번호',
+      sampletxtQT: '',
+      sampletxtSO: '',
       QTList1Toggle:false,
       QTList2Toggle:false,
       QTList3Toggle:false,
@@ -1097,10 +1138,11 @@ export default {
       orderdetail:[],
       qtSearchText:'',
       ordSearchText:'',
-    //  visible:true,
-    //  visible2:true,
-    //  visible3:true,
-      orderVisible:false
+      showQTImageFlag:false,
+      itemImage:'',
+     // visible:false,
+     // visible2:false,
+     // visible3:true,
     }
   },
   methods: {
@@ -1178,8 +1220,7 @@ export default {
     },
     linkToggle(idx)
     {
-      if(this.orderToggleIndex === idx)
-      {
+      if(this.orderToggleIndex === idx){
         return true;
       }
       else{
@@ -1188,8 +1229,16 @@ export default {
     },
     linkToggleQt(idx)
     {
-      if(this.qtToggleIndex === idx)
-      {
+      if(this.qtToggleIndex === idx){
+        return true;
+      }
+      else{
+        return false;
+      }
+    },
+    linkToggleQtReq(idx)
+    {
+      if(this.qtReqToggleIndex === idx){
         return true;
       }
       else{
@@ -1198,9 +1247,7 @@ export default {
     },
     linkToggleQtConfirm2(idx)
     {
-      if(this.qtConfrToggleIndex2 === idx)
-      {
-        console.log('ind3' , idx);
+      if(this.qtConfrnToggleIndex2 === idx){ 
         return true;
       }
       else{
@@ -1316,7 +1363,6 @@ export default {
     },
     GetWebposQtList(item){
       
-      console.log('aaa ;' , item);
       this.detailQTData = [];
       var param = {};
       param.BsnId = item.ReqSite;
@@ -1492,14 +1538,12 @@ export default {
         if(index >= 0)
         {
           // 채팅에서 넘어왔을 경우 상세 조회
-          this.qtConfrToggleIndex2 = index;
+          this.qtConfrnToggleIndex2 = index;
           this.GetQtList2(this.GetConfirmValue2(item[0].ID));
         }
-
       });  
     },
     GetQtList2(item){
-      console.log('aaa' , item);
       this.SOList3Toggle = !this.SOList3Toggle;
       this.detailQTData2 = JSON.parse(convertDynamoToArrayString(item.LineItem));
       
@@ -1624,21 +1668,20 @@ export default {
       //this.visible = false;
       //this.visible2 = false;
       //this.visible3 = false;
-      this.qtConfrToggleIndex2 = -1;
+      this.orderToggleIndex = -1;
+      this.qtToggleIndex = -1;
+      this.qtReqToggleIndex = -1;
+      this.qtConfrnToggleIndex2 = -1;
+      
       this.qtReqItem = [];
       this.GetConfirmQtList2(item);
       this.GetConfirmQtList(item);
-
-      var btnAdd = document.querySelector("#btnDetail" + index);
-    },
-    collapseAll(){
-      this.$refs.collapsible.map(c => c.collapsed = true)
     },
     showQtReqItem(item)
     {
-      this.SOList2Toggle = !this.SOList2Toggle;
+      //this.SOList2Toggle = !this.SOList2Toggle;
       this.qtReqItem = [];
-      this.qtReqItem =  JSON.parse(convertDynamoToArrayString(item.LineItem));
+      this.qtReqItem = JSON.parse(convertDynamoToArrayString(item.LineItem)); 
     },
     showQTOrderPopup(item)
     {
@@ -1646,8 +1689,7 @@ export default {
       this.showQTOrder = !this.showQTOrder;
      // this.orderDealerName = item.ResDealerNm;
       this.orderList = JSON.parse(convertDynamoToArrayString(item.LineItem));
-
-      console.log(this.orderData);
+      //console.log(this.orderData);
     },
     removeItem(item) {
 
@@ -1828,7 +1870,16 @@ export default {
               qtInfo : item,
               chatType:'qt',
           }});
-    }
+    },
+    showQTImage(img) { 
+
+      if(img !== undefined)
+      {
+        this.showQTImageFlag = true;
+        console.log('img :' , Constant.IMG_URL + img);
+        this.itemImage = Constant.IMG_URL + img;
+      }
+    },
   },
 
   components: {
@@ -1926,8 +1977,7 @@ export default {
       this.GetOrderHistory('','');
 
     }
-
-  }
+  },
 }
 </script>
 
@@ -2097,7 +2147,6 @@ export default {
   flex:40%;
   padding-top: 2px;
 }
-
 .QTList-history {
   margin:auto;
   width: 90%;
@@ -2108,7 +2157,6 @@ export default {
 .QTList-history .list-group .list-group-item {
   padding: 5px;
   background-color: #e4e4e4;
- 
 }
 .history-detailConts {
   background-color: #f9f9f9;
@@ -2118,12 +2166,22 @@ export default {
 
 .history-detailConts ul {
   list-style-type: none;
-   margin: -10px;
-   padding: 10px 0px;
+  margin: -10px;
+  padding: 10px 0px;
 }
-
-.qt-item-price{
-  font-size: 0.9rem;
+.qtReq-image{
+  margin-left:-10px;
+}
+.qtReq-image span{
+  margin-right: 10px;
+}
+.qtReq-image span:nth-child(1){
+  margin-top: 0px;
+  vertical-align:4px;
+}
+.qtReq-image span:nth-child(2){
+  font-size: 1.5em;
+  color:#848180;
 }
 
 .history-date {
@@ -2183,15 +2241,8 @@ export default {
   display: flex;
   align-items:center;
 }
-.history-detailConts-webpos
-{
-   padding: 10px 15px;
-}
-.history-detailConts-webpos li
-{
-  display: flex;
-  align-items:center;
-}
+
+
 .detailConts-dealer {
   margin-top: 5px;
   font-size: 1rem;
@@ -2281,7 +2332,6 @@ export default {
 .QTList-Options {
   z-index: 200;
 }
-
 .QTList-footer {
   z-index: 100;
   position: fixed;
@@ -2294,7 +2344,6 @@ export default {
   border-top: 1px solid #bebebe;
   background: #eeeeee;
 }
-
 .QTList-footer a {
   flex:25%;
   text-align: center;
@@ -2310,29 +2359,111 @@ export default {
   color : #5d4038;
 }
 
+/* 부품지원센터 견적회신 */
+.history-detailConts-webpos
+{
+   padding: 0px;
+   display: flex;
+}
+.history-detailConts-webpos span
+{
+   font-size: 0.8em;
+}
+.webpos-item{
+  margin-left: 10px;
+}
+.webpos-itemName{
+  display: inline-block;
+  /*overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  width:110px;*/
+}
+.webpos-itemCode{
+  color:#000;
+}
+.webpos-itemQty{
+ width:30px;
+ margin-left:10px;
+}
+.webpos-itemQty span{
+ float:right;
+}
+.webpos-itemPrice
+{
+  margin-left:10px;
+  width: 50px;
+}
+.webpos-itemPrice span
+{
+  float:right;
+}
+.webpos-amt
+{
+  margin-left:10px;
+  width: 50px;
+}
+.webpos-amt span
+{
+  float:right;
+  font-size: 0.9em;
+  font-weight: bold;
+}
+.webpos-delvDay{
+  flex:20%
+}
+.webpos-delvDay span{
+  float: right;
+  margin-right:10px;
+}
+
 /*일반대리점 견적회신 */
+.dealer-qtInfo{
+  display: flex;
+  margin: -4px;
+}
+.dealer-item
+{
+  flex:60%;
+}
+.dealer-Price{
+  flex: 40%;
+  margin-top: 10px;
+}
+.dealer-Price span{
+  float: right;
+}
+.dealer-Price span:last-child{
+  float: left;
+}
 .dealer-itemCode
 {
   font-size: 0.8em;
-  font-weight: bold;
-  color: #0D47A1;
 }
 .dealer-itemName{
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 0.7rem;
+  font-size: 0.8rem;
 }
 .dealer-itemBrand
 {
-  font-size: 0.7rem;
-  color: #6A1B9A;
+  font-size: 0.8rem;
 }
-/*
 .dealer-itemQty
 {
-  font-size: 0.7rem;
-}*/
+  font-size: 0.8rem;
+}
+.dealer-itemPrice{
+  font-size: 0.8rem;
+  padding: 0px 5px;
+}
+.dealer-itemAmount{
+  font-size: 0.8rem;
+  font-weight: bold;
+  text-align: right;
+ /* color: #EA4335;*/
+}
 
 .history-detailConts .itemName{
   overflow: hidden;
@@ -2356,12 +2487,6 @@ export default {
 }
 .history-detailConts .itemAfterNo {
   font-size: 0.7rem;
-}
-.history-detailConts .delvDay {
-  flex: 10%;
-  margin-left: 6px;
-  font-size: 0.7rem;
-  color: #999;
 }
 
 .QTRes-footer{

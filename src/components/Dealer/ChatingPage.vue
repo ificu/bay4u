@@ -71,14 +71,16 @@
   </v-app>
 </template>
 
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<!--<script src="https://unpkg.com/axios/dist/axios.min.js"></script>-->
+<script src="http://code.jquery.com/jquery-latest.min.js"></script>
 <script>
+const axios = require('axios').default;
+
 //import { mapMutations, mapState } from 'vuex';
 import Constant from '@/Constant';
 import MessageList from '@/components/Chat/ChatMessageList.vue';
 import MessageForm from '@/components/Chat/ChatMessageForm.vue';
 import {datePadding, convertStringToDynamo, dataURItoBlob} from '@/utils/common.js'
-import { async } from 'q';
 
 export default {
   name: 'ChatingPage',
