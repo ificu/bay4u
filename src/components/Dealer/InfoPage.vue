@@ -19,11 +19,14 @@
           </div>
         </b-card-text>
       </b-card>
-      <b-card no-body class="QT-Detail">
-        <b-tabs v-model="tabIndex" card active-nav-item-class="font-weight-bold" >
-        <b-tab title="견적 요청" :title-link-class="linkClass(0)">
-          <b-card-text>
-            <div class="Car-Info">
+      <b-card
+        header="차량 정보"
+        header-text-variant="white"
+        header-tag="header"
+        header-bg-variant="dark"
+      >
+        <b-card-text>
+          <div class="Car-Info">
               <div class="CarInfo-Left">
                 <div><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>차량번호</div>
                 <b-form-input  :value="(this.qtInfo.CarNo==='*empty*')?'미상차량' : this.qtInfo.CarNo"></b-form-input>
@@ -37,47 +40,7 @@
                   사진<br>확인
                 </v-btn>             
               </div>              
-            </div>   
-            <div class="QTReq-List">
-              <v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>견적요청 상세    
-              <table class="QTReq-Table mdl-data-table mdl-js-data-table mdl-shadow--2dp">
-                <thead>
-                  <tr>
-                    <th class="QTItem-Title mdl-data-table__cell--non-numeric">요청 부품</th>
-                    <th class="QTItem-Qty">수량</th>
-                    <th class="QTItem-String">첨부파일</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(item , index) in qtItems" :key="index">
-                    <td class="mdl-data-table__cell--non-numeric">{{item.ITM_NM}}</td>
-                    <td>{{item.ITM_QTY}}</td>
-                    <td>
-                      <v-btn outlined small color="#00BFA5" class="float-right" v-if="item.IMG !== undefined" @click="showQTImage(item.IMG)">사진 확인</v-btn>
-                    </td>
-                  </tr>
-                  <!--
-                  <tr>
-                    <td class="mdl-data-table__cell--non-numeric">오일 필터</td>
-                    <td>1</td>
-                  </tr>
-                  -->
-                </tbody>
-              </table>
-            </div>   
-            <div class="QTReq-Memo">
-              <v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>Memo
-              <b-form-textarea
-                id="textarea"
-                rows="3"
-                max-rows="6"
-                v-model="this.qtInfo.Memo"
-              ></b-form-textarea>   
-            </div>      
-          </b-card-text>
-        </b-tab>
-        <b-tab title="견적 회신" :title-link-class="linkClass(1)">
-          <b-card-text>
+            </div>  
             <div class="QT-Info"  v-if="UserInfo.UserType === 'DEALER'">
               <!--
               <div class="CarInfo-Left">
@@ -98,6 +61,48 @@
                 </div>
                 <div class="QT-Content">{{this.series}}</div>
             </div>   
+        </b-card-text>
+      </b-card>
+      <b-card no-body class="QT-Detail">
+        <b-tabs v-model="tabIndex" card active-nav-item-class="font-weight-bold" >
+        <b-tab title="견적 요청" :title-link-class="linkClass(0)">
+          <b-card-text> 
+            <div class="QTReq-List"><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>견적요청 상세</div>       
+            <table class="QTReq-Table mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+              <thead>
+                <tr>
+                  <th class="QTItem-Title mdl-data-table__cell--non-numeric">요청 부품</th>
+                  <th class="QTItem-Qty">수량</th>
+                  <th class="QTItem-String">첨부파일</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(item , index) in qtItems" :key="index">
+                  <td class="mdl-data-table__cell--non-numeric">{{item.ITM_NM}}</td>
+                  <td>{{item.ITM_QTY}}</td>
+                  <td>
+                    <v-btn outlined small color="#00BFA5" class="float-right" v-if="item.IMG !== undefined" @click="showQTImage(item.IMG)">사진 확인</v-btn>
+                  </td>
+                </tr>
+                <!--
+                <tr>
+                  <td class="mdl-data-table__cell--non-numeric">오일 필터</td>
+                  <td>1</td>
+                </tr>
+                -->
+              </tbody>
+            </table>
+            <div class="QTReq-Memo"><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>Memo</div>
+            <b-form-textarea
+              id="textarea"
+              rows="3"
+              max-rows="6"
+              v-model="this.qtInfo.Memo"
+            ></b-form-textarea>         
+          </b-card-text>
+        </b-tab>
+        <b-tab title="견적 회신" :title-link-class="linkClass(1)">
+          <b-card-text>
             <div class="QT-Info"  v-if="UserInfo.UserType === 'DEALER'">
               <div class="QT-Title"><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>담당자 : </div>
               <div class="QT-Content">{{this.angentNm }}</div>
@@ -110,12 +115,13 @@
               </div>  
               <div class="QTRes-Button">
                 <b-button-group size="sm">
+                  <!--<b-button variant="outline-secondary">엑셀 카피 자동 입력</b-button>-->
                   <b-button variant="outline-secondary" v-on:click="GetQtList" v-if="UserInfo.UserType === 'DEALER'">견적서 자동 입력</b-button>
                   <b-button variant="outline-secondary" @click="selectedDeleteItem">선택 삭제</b-button>
                   <b-button id="clipboardBtn" @click="clipboardAdd" style="display:none">test...</b-button>
                   <!-- <b-button class="QTRes-ButtonAdd" variant="outline-secondary">부품 추가</b-button>-->
                 <!--부품추가-->
-                 <v-dialog v-model="dialog" max-width="500px">
+                 <v-dialog v-model="dialog" width="90%" >
                   <template v-slot:activator="{ on }">
                     <b-button id="btnItmAdd" class="QTRes-ButtonAdd" variant="outline-secondary" v-on="on">부품 추가</b-button>
                   </template>
@@ -124,52 +130,55 @@
                      <!-- <span class="headline">{{ formTitle }}</span>-->
                     </v-card-title>
                     <v-card-text>
-                      <v-container>
+                      <!--<v-container>-->
                         <v-row>
-                          <v-col cols="12" sm="6" md="4">
+                          <v-col cols="12" sm="6" md="2">
                            <v-text-field v-model="editedItem.itemCode" label="부품번호" @focus="$event.target.select()"></v-text-field>
                           </v-col>
-                          <v-col cols="12" sm="6" md="4">
+                          <v-col cols="12" sm="6" lg="1">
                             <v-combobox v-model="editedItem.itemBrand" :items="afterBrand" label="브랜드" ></v-combobox>    
                              <!--<v-text-field v-model="editedItem.itemBrand" label="브랜드"></v-text-field>-->
                           </v-col>
-                          <v-col cols="12" sm="6" md="4">
+                          <v-col cols="12" sm="6" lg="1">
                             <v-combobox v-model="editedItem.carBrand" :items="carBrand" label="차종" ></v-combobox>
                              <!-- <v-text-field v-model="editedItem.carBrand" label="차종"></v-text-field>-->
                           </v-col>
-                          <v-col cols="12" sm="6" md="4">
+                          <v-col cols="12" sm="6" md="2">
                               <v-text-field v-model="editedItem.itemName" label="부품명" @focus="$event.target.select()"></v-text-field>
                           </v-col>
-                          <v-col cols="12" sm="6" md="4">
+                          <!--<v-col cols="12" sm="6" md="2">
                               <v-text-field v-model="editedItem.afterNo" label="After No" @focus="$event.target.select()"></v-text-field>
-                          </v-col>
-                          <v-col cols="12" sm="6" md="4">
+                          </v-col>-->
+                          <v-col cols="12" sm="6" md="1">
                               <v-text-field :value="editedItem.itemQty  | localeNum" label="수량" 
                               @input="value =>editedItem.itemQty = value"  
                               @change="onCalculatorAMT"
                               @focus="$event.target.select()"
                               ></v-text-field>
                           </v-col>
-                          <v-col cols="12" sm="6" md="4">
+                          <v-col cols="12" sm="6" md="1">
                               <v-text-field :value="editedItem.itemPrice | localeNum" label="단가"
                                 @input="value =>editedItem.itemPrice = value" 
                                 @change="onCalculatorAMT"
                                 @focus="$event.target.select()" 
                                 ></v-text-field>
                           </v-col>
-                          <v-col cols="12" sm="6" md="4">
+                          <v-col cols="12" sm="6" md="1">
                               <v-text-field :value="editedItem.AMT | localeNum" label="금액"  
                               @input="value => editedItem.AMT = value"
                               @focus="$event.target.select()"
                               ></v-text-field>
+                          </v-col>
+                          <v-col cols="12" md="2">
+                              <v-text-field v-model="editedItem.memo" label="비고"  @focus="$event.target.select()"></v-text-field>
                           </v-col>                    
                         </v-row>
-                        <v-row>
+                       <!-- <v-row>
                           <v-col cols="12" lg="12">
                               <v-text-field v-model="editedItem.memo" label="비고"  @focus="$event.target.select()"></v-text-field>
                           </v-col>
-                        </v-row>
-                      </v-container>
+                        </v-row>-->
+                     <!-- </v-container>-->
                     </v-card-text>
 
                     <v-card-actions>
@@ -216,7 +225,7 @@
               :items="detailQTData"
               class="elevation-1"
               fixed-header
-              height="390px"
+              height="350px"
               :items-per-page="itemsPerPage"
               hide-default-footer
               no-data-text=''
@@ -468,11 +477,13 @@
     </div>   
   </v-app>
 </template>
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<!--<script src="https://unpkg.com/axios/dist/axios.min.js"></script>-->
+<script src="http://code.jquery.com/jquery-latest.min.js"></script>
 <script>
 import {datePadding, convertDynamoToString , convertDynamoToArrayString, convertArrayToDynamo} from '@/utils/common.js'
 import Constant from '@/Constant';
 
+const axios = require('axios').default;
 export default {
   name: 'InfoPage',
   data () {
@@ -493,6 +504,7 @@ export default {
       selected: [],
       singleSelect:false,
       dialog: false,
+     // carinfoHeight:'height:130px;',
       btnEditText:'추가',
       headers: [
           {
@@ -540,7 +552,7 @@ export default {
       },
       itemsPerPage: -1,
       carBrand:['BENZ','BMW','AUDI','VW','FORD','VOLVO','JAGUAR','MASERATI','INFINITI','LEXUS','TOYOTA','HONDA'],
-      afterBrand:['MANN','FRAM','BOSCH','TRW'],
+      afterBrand:['MANN','FRAM','MEYLE','BOSCH','TRW'],
       testData: {},      
       txtQTConfirm: '견적 확정 회신', 
       orderHistory:[],
@@ -696,7 +708,6 @@ export default {
       console.log("Image : ", img);
       this.showQTImageFlag = true;
       this.itemImage = Constant.IMG_URL + img;
-
     },
     saveImage() {
       console.log("Info : ", this.qtInfo);
@@ -798,15 +809,17 @@ export default {
       else
         msg = this.qtInfo.CarNo + " 차량에 대한 견적이 수정 후 재전송 되었습니다.";
 
+      var id =  this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
       var qtMsg = {};
       qtMsg.from = {'name' : this.UserInfo.BsnID};
       qtMsg.msg  = msg;
       qtMsg.reqTm = chatTime;
+      qtMsg.ChatType = "R";
+      qtMsg.RefID = id;
       this.$EventBus.$emit('send-QTConfirm' , qtMsg)
 
       var param = {};
 
-      var id =  this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                 + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
       var ReqTm = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                         + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
@@ -836,6 +849,7 @@ export default {
       .then((result) => {
         console.log("======= QT Save result ========");
         console.log(result.data);
+        this.txtQTConfirm = "견적 재회신";
         })
       .catch((error) => {
         console.log(error);
@@ -864,11 +878,15 @@ export default {
       .then((result) => {
         console.log("======= QT Confirm result ========");
         console.log( result.data);
-        if(result.data.Items.length > 0)
+        if(result.data.Items.length > 0){
           this.txtQTConfirm = "견적 재회신";
-        else
+          this.GetOrderHistory();
+        }
+        else{
           this.txtQTConfirm = "견적확정 회신";
-        this.detailQTData = JSON.parse(result.data.Items[0].LineItem);
+        }
+        this.detailQTData = JSON.parse(convertDynamoToArrayString(result.data.Items[0].LineItem));
+         
       });
     },
     clipboardAdd() {
@@ -973,9 +991,15 @@ export default {
         data: param
       })
       .then((result) => {
-        console.log("=======주문내역 조회 result ========");
-        console.log( result.data.Items[0].LineItem);
-        this.orderHistory  = JSON.parse(result.data.Items[0].LineItem);
+        if(result.data.Items.length > 0 && result.data.Items[0].LineItem.length > 0 ){
+          console.log("=======주문내역 조회 result ========");
+          console.log( result.data.Items[0].LineItem);
+          this.tabIndex = 2;
+          this.orderHistory  = JSON.parse(convertDynamoToArrayString(result.data.Items[0].LineItem));
+        }
+        else{
+           this.tabIndex = 1 ;
+        }
       });  
       
     },
@@ -1019,7 +1043,6 @@ export default {
         this.GetSiteInfo();
         if(this.UserInfo.UserType !== 'DEALER'){
           this.getQTConfirm();
-          this.GetOrderHistory();
         }
     });
 

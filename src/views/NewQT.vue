@@ -174,11 +174,14 @@
 
 </template>
 
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<!--<script src="https://unpkg.com/axios/dist/axios.min.js"></script>-->
+<script src="http://code.jquery.com/jquery-latest.min.js"></script>
 <script>
 import ItemCategory from '@/components/NewQT/ItemCategory.vue'
 import QTConfirm from '@/components/NewQT/QTConfirm.vue'
 import Constant from '@/Constant';
+
+const axios = require('axios').default;
 
 export default {
   name: 'NewQT',

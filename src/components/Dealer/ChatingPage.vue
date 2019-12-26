@@ -71,14 +71,16 @@
   </v-app>
 </template>
 
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<!--<script src="https://unpkg.com/axios/dist/axios.min.js"></script>-->
+<script src="http://code.jquery.com/jquery-latest.min.js"></script>
 <script>
+const axios = require('axios').default;
+
 //import { mapMutations, mapState } from 'vuex';
 import Constant from '@/Constant';
 import MessageList from '@/components/Chat/ChatMessageList.vue';
 import MessageForm from '@/components/Chat/ChatMessageForm.vue';
 import {datePadding, convertStringToDynamo, dataURItoBlob} from '@/utils/common.js'
-import { async } from 'q';
 
 export default {
   name: 'ChatingPage',
@@ -222,7 +224,7 @@ export default {
           chatId: this.chatItem.ID,
           reqTm : qtMsg.reqTm,
         });
-
+        
         this.saveChatMsg(qtMsg);
     });
 
@@ -309,6 +311,18 @@ export default {
       param.payload.Item.Status = "0";
       param.payload.Item.ReqTm = chatMsg.reqTm;
       param.payload.Item.IMG = chatMsg.imgId;
+      if(chatMsg.ChatType !== undefined){
+        param.payload.Item.ChatType = chatMsg.ChatType;
+      }
+      else{
+         param.payload.Item.ChatType = "D";
+      }
+      if(chatMsg.RefID !== undefined){
+        param.payload.Item.RefID = chatMsg.RefID;
+      }
+      else{
+         param.payload.Item.RefID = " ";
+      }
 
       console.log("======= Chat Save Request ========");
       console.log(JSON.stringify(param));
@@ -385,6 +399,8 @@ export default {
           chatMsg.reqTm = element['ReqTm'];
           chatMsg.imgId = element['IMG']; 
           chatMsg.img = ''; 
+          chatMsg.ChatType = element['ChatType'];
+          chatMsg.RefID = element['RefID'];
 
           this.msgDatas = chatMsg;
              

@@ -100,6 +100,7 @@
   </div>
 </template>
 
+<!--<script src="https://unpkg.com/axios/dist/axios.min.js"></script>-->
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script>
 //import { mapMutations, mapState } from 'vuex';
@@ -110,6 +111,8 @@ import {datePadding, convertStringToDynamo, dataURItoBlob} from '@/utils/common.
 import QTCamera from '@/components/NewQT/QTCamera.vue'
 import CheckLogin from '@/components/Common/CheckLogin.vue'
 import BackToTop from '@/components/Common/BackToTop.vue'
+
+const axios = require('axios').default;
 
 export default {
   name: 'Chat',
@@ -166,7 +169,7 @@ export default {
 
       // 초기 메시지 입력
   
-      if(this.$route.params.chatType !== undefined && this.$route.params.chatType === 'order'){
+      if(this.$route.params.chatType !== undefined && (this.$route.params.chatType === 'order' || this.$route.params.chatType === 'qt')){
         var item = {};
         item.ID =  this.docId;
         this.showchating(item);
@@ -194,7 +197,7 @@ export default {
         chatMsg.reqTm = chatTime;
         this.msgDatas = chatMsg;
 
-        this.saveChatMsg(chatMsg);
+        this.saveChatMsg(chatMsg,'Q');
 
         this.$sendMessage({
           name: this.UserInfo.BsnID,
@@ -273,7 +276,7 @@ export default {
         chatId: this.docId,
         chatDttm : chatTime,
       });
-      this.saveChatMsg(chatMsg);
+      this.saveChatMsg(chatMsg,'D');
     },
     chatingToggle(item) {
 
@@ -286,7 +289,7 @@ export default {
         this.showchating(item);
       }
     },
-    saveChatMsg(chatMsg) {
+    saveChatMsg(chatMsg, chatType) {
       var param = {};
 
       var now = new Date();
@@ -307,6 +310,8 @@ export default {
       param.payload.Item.Status = "0";
       param.payload.Item.ReqTm = chatMsg.reqTm;
       param.payload.Item.IMG = chatMsg.imgId;
+      param.payload.Item.ChatType = chatType;
+      param.payload.Item.RefID = ' ';
 
       console.log("Send Msg : ", JSON.stringify(param));
 
@@ -372,6 +377,8 @@ export default {
           chatMsg.reqTm = element['ReqTm'];
           chatMsg.imgId = element['IMG']; 
           chatMsg.img = ''; 
+          chatMsg.ChatType = element['ChatType'];
+          chatMsg.RefID = element['RefID'];
 
           this.msgDatas = chatMsg;    
         });

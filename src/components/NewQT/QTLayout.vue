@@ -1,5 +1,6 @@
 <template>
-  <v-app v-scroll-stop="isScroll">
+  <v-app>
+ <!-- <v-app v-scroll-stop="isScroll">-->
     <!-- 1. 차량번호/차대번호 촬영 인식 CARD -->
     <v-card class="mx-auto mb-2 mt-2" width="93%">
       <v-app-bar dark color="brown darken-2" height="40px">
@@ -285,7 +286,8 @@
   </v-app>  
 </template>
 
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<!--<script src="https://unpkg.com/axios/dist/axios.min.js"></script>-->
+<script src="http://code.jquery.com/jquery-latest.min.js"></script>
 <script>
 import ItemCategory from '@/components/NewQT/ItemCategory.vue'
 import QTConfirm from '@/components/NewQT/QTConfirm.vue'
@@ -294,6 +296,8 @@ import ROHistory from '@/components/NewQT/ROHistory.vue'
 import MessageBox from '@/components/Common/MessageBox.vue'
 import {datePadding, convertStringToDynamo, convertArrayToDynamo, dataURItoBlob} from '@/utils/common.js'
 import Constant from '@/Constant';
+
+const axios = require('axios').default;
 
 export default {
 name: 'QTStep',
@@ -351,7 +355,7 @@ name: 'QTStep',
       sendDealer : '',
       qtInfoData : {},
       saveQtCount : 0,
-      isScroll:false,
+     // isScroll:false,
     }
   },
   methods: {
@@ -990,7 +994,7 @@ name: 'QTStep',
       
       console.log('SendDocId :', this.sendDocId);
       console.log('SEndDealer :',this.sendDealer);      
-       console.log('SendQtInfo :',this.qtInfoData);    
+      console.log('SendQtInfo :',this.qtInfoData);    
       // 대표 대리점 채팅 전송
       var now = new Date();
       this.$router.push({name:'Chat', 
@@ -1136,7 +1140,7 @@ name: 'QTStep',
           return false;
         }
         */
-        if(this.CarInfo.VinNo === undefined || this.CarInfo.VinNo === null || this.CarInfo.VinNo.length === 0 )
+        if(this.CarInfo.VinNo === undefined || this.CarInfo.VinNo === null || this.CarInfo.VinNo.length === 0 || this.CarInfo.VinNo === "국토부 차대번호 조회 중...")
         {
           this.alertMsg = "차대번호가 없습니다.\n차대번호 없이 요청하시겠습니까?"
           this.showAlertMsg = !this.showAlertMsg;

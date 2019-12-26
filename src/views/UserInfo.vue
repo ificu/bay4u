@@ -9,7 +9,7 @@
         <img src="@/assets/user-icon.png">
       </div>
       <div class="UserInfo-info">
-        <div class="info-name">No.1 카센터</div>
+        <div class="info-name">{{UserInfo.Name}}</div>
         <div class="info-tel">02-266-5011</div>
         <div class="info-tel">010-2222-3534</div>
         <div class="info-addr">서울 성남시 분당구 성남대로343번길 9</div>
@@ -75,7 +75,13 @@ export default {
   components: {
     MaintenanceMaster: MaintenanceMaster,
     CheckLogin:CheckLogin
-  }
+  },
+   computed:{
+      UserInfo: {
+          get() { return this.$store.getters.UserInfo },
+          set(value) { this.$store.dispatch('UpdateUserInfo',value) }
+      },
+    },
 }
 </script>
 

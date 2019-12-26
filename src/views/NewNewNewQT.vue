@@ -34,11 +34,14 @@
 
 </template>
 
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<!--<script src="https://unpkg.com/axios/dist/axios.min.js"></script>-->
+<script src="http://code.jquery.com/jquery-latest.min.js"></script>
 <script>
 
 import QTLayout from '@/components/NewQT/QTLayout.vue'
 import CheckLogin from '@/components/Common/CheckLogin.vue'
+
+const axios = require('axios').default;
 
 export default {
   name: 'NewQT',
