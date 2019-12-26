@@ -67,38 +67,42 @@
         <b-tabs v-model="tabIndex" card active-nav-item-class="font-weight-bold" >
         <b-tab title="견적 요청" :title-link-class="linkClass(0)">
           <b-card-text> 
-            <div class="QTReq-List"><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>견적요청 상세</div>       
-            <table class="QTReq-Table mdl-data-table mdl-js-data-table mdl-shadow--2dp">
-              <thead>
-                <tr>
-                  <th class="QTItem-Title mdl-data-table__cell--non-numeric">요청 부품</th>
-                  <th class="QTItem-Qty">수량</th>
-                  <th class="QTItem-String">첨부파일</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(item , index) in qtItems" :key="index">
-                  <td class="mdl-data-table__cell--non-numeric">{{item.ITM_NM}}</td>
-                  <td>{{item.ITM_QTY}}</td>
-                  <td>
-                    <v-btn outlined small color="#00BFA5" class="float-right" v-if="item.IMG !== undefined" @click="showQTImage(item.IMG)">사진 확인</v-btn>
-                  </td>
-                </tr>
-                <!--
-                <tr>
-                  <td class="mdl-data-table__cell--non-numeric">오일 필터</td>
-                  <td>1</td>
-                </tr>
-                -->
-              </tbody>
-            </table>
-            <div class="QTReq-Memo"><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>Memo</div>
-            <b-form-textarea
-              id="textarea"
-              rows="3"
-              max-rows="6"
-              v-model="this.qtInfo.Memo"
-            ></b-form-textarea>         
+            <div class="QTReq-List">
+              <v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>견적요청 상세    
+              <table class="QTReq-Table mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+                <thead>
+                  <tr>
+                    <th class="QTItem-Title mdl-data-table__cell--non-numeric">요청 부품</th>
+                    <th class="QTItem-Qty">수량</th>
+                    <th class="QTItem-String">첨부파일</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(item , index) in qtItems" :key="index">
+                    <td class="mdl-data-table__cell--non-numeric">{{item.ITM_NM}}</td>
+                    <td>{{item.ITM_QTY}}</td>
+                    <td>
+                      <v-btn outlined small color="#00BFA5" class="float-right" v-if="item.IMG !== undefined" @click="showQTImage(item.IMG)">사진 확인</v-btn>
+                    </td>
+                  </tr>
+                  <!--
+                  <tr>
+                    <td class="mdl-data-table__cell--non-numeric">오일 필터</td>
+                    <td>1</td>
+                  </tr>
+                  -->
+                </tbody>
+              </table>
+            </div>   
+            <div class="QTReq-Memo">
+              <v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>Memo
+              <b-form-textarea
+                id="textarea"
+                rows="3"
+                max-rows="6"
+                v-model="this.qtInfo.Memo"
+              ></b-form-textarea>   
+            </div>      
           </b-card-text>
         </b-tab>
         <b-tab title="견적 회신" :title-link-class="linkClass(1)">
@@ -285,7 +289,7 @@
               :items="detailQTData"
               class="elevation-1 mytable"
               fixed-header
-              height="calc(100vh - 475px)"
+              height="calc(100vh - 620px)"
               :items-per-page="itemsPerPage"
               hide-default-footer
               no-data-text=''
@@ -382,7 +386,7 @@
               :items="orderHistory"
               class="elevation-1 mytable"
               fixed-header
-              height="calc(100vh - 450px)"
+              height="calc(100vh - 600px)"
               :items-per-page="itemsPerPage"
               hide-default-footer
               no-data-text=''
@@ -1182,14 +1186,14 @@ export default {
 .QTReq-List {
   font-weight: bold;
   color: #5d4038;
-  height: calc(100vh - 575px);
+  height: calc(100vh - 650px);
 }
 .QTReq-Table {
   width: 100%;
   display: block;
   overflow-y: scroll;
   height: 400px;
-  height: calc(100vh - 600px);
+  height: calc(100vh - 670px);
 }
 .QTReq-Memo {
   font-weight: bold;
@@ -1247,7 +1251,7 @@ export default {
 }
 
 .QT-Detail {
-  height: calc(100vh - 307px);
+  height: calc(100vh - 460px);
 }
 
 .QTRes-footer{
