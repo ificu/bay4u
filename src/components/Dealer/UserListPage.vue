@@ -15,7 +15,9 @@
        <v-text-field
           v-model="searchText"
            :append-icon="'fas fa-search'"
+            class = "mb-n3"
             filled
+            height = "60px"
             rounded
             dense
             type="text" 
@@ -388,7 +390,7 @@ export default {
 .Chat-list ul {
   list-style-type: none;
   padding: 0px;
-  height: 98%; 
+  height: calc(100vh - 270px); 
   overflow: auto;
 }
 

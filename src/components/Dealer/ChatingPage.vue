@@ -706,7 +706,7 @@ export default {
 }
 .chatform .card {
   position: relative;
-  height: 87%;
+  height: calc(100vh - 140px);
   width: 100%;
 }
 .Chating-page {
