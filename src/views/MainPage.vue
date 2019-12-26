@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card class="mainPage-web">
     <v-toolbar
       color="#9e9e9e"
       dark
@@ -185,6 +185,10 @@ a:hover {
 
 .mdl-layout__tab-panel {
   height: 100%;
+}
+
+.mainPage-web {
+  overflow-y: hidden;
 }
 
 .page-content {
