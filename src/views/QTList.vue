@@ -262,7 +262,7 @@
                             </div>
                             </li>
                           </ul>
-                          <div class="qtReq-image" ><span>사진첨부</span><span @click="showQTImage(qtItem[0].IMG)"><i class="fas fa-image"></i></span></div>
+                          <div class="qtReq-image"><span>사진첨부</span><span @click="showQTImage(qtItem[0].IMG)"><i class="fas fa-image"></i></span></div>
                           </div>
                         </b-card-body>
                       </b-collapse>
@@ -373,54 +373,52 @@
                         </b-container>
                        </b-card-header>
                       <b-collapse :id="'accordion-qtDealer-'+idx2" accordion="my-accordion3" role="tabpanel" :visible="linkToggleQtConfirm2(idx2)">
-                      <b-card-body>
-                        <b-container class ="pt-0 pl-1 pr-0">
-                          <b-row v-for="(item, index) in detailQTData2" v-bind:key = "index">
-                            <b-col class ="pt-0 pl-1">
-                            <div class="dealer-qtInfo">
-                              <div class="dealer-item">
-                                <div><span class="dealer-itemBrand">{{item.itemBrand}}</span></div>
-                                <div><span class="dealer-itemCode">{{item.itemCode}}</span> / <span class="dealer-itemName">{{item.itemName}}</span></div>
-                              </div>
-                              <div class="dealer-Price">
-                                <span v-if="item.AMT === 0" class="dealer-itemAmount">{{ item.AMT | localeNum}}원</span>
-                                <span v-if="item.AMT !== 0" class="dealer-itemAmount">{{ item.AMT | localeNum}}원</span>
-                                <span v-if="item.itemPrice === 0" class="dealer-itemPrice">{{ item.itemPrice | localeNum}}</span>
-                                <span v-if="item.itemPrice !== 0" class="dealer-itemPrice">{{ item.itemPrice | localeNum}}</span>
-                                <span class="dealer-itemQty">{{ item.itemQty }}개</span>
-                              </div>
-                            </div>
-                            </b-col>
-                          </b-row>
-                          <!--<div class="QTRes-footer">
-                            <div class="TotalInfo">
-                              <v-btn color="#4E342E" dark depressed class="mr-3" @click="showQTOrderPopup(GetConfirmValue2(qtReqInfo.ID))" >주문하기</v-btn>
-                              <span class="TotalInfo-Title">합계금액</span>
-                              <span class="TotalInfo-Text">{{total2 | localeNum}}</span>
-                            </div>
-                          </div>-->
-                        </b-container>
-                        <!--
-                        <div class="history-detailConts">
-                          <ul>
-                            <li  v-for="(item, index) in detailQTData2" v-bind:key = "index">
-                              <div>
-                                <div><span class="itemCode">{{item.itemCode}}</span> <span class="itemName">{{item.itemName}}</span> </div>
-                                <div><span class="itemBrand">{{item.itemBrand}}</span><span class="itemAfterNo"> {{item.afterNo}}</span></div>
-                              </div>
-                              <div v-if="item.AMT === 0" class="detailConts-amount">{{ item.AMT }}원</div>
-                              <div v-if="item.AMT !== 0" class="detailConts-amount">{{ item.AMT | localeNum}}원</div>
-                            </li>
-                          </ul>
-                          <div class="QTRes-footer">
-                            <div class="TotalInfo">
-                              <span class="TotalInfo-Title">합계금액</span>
-                              <span class="TotalInfo-Text">{{total2 | localeNum}}</span>
-                            </div>
+                        <b-card-body class ="pt-1 pl-1 pr-1">
+                          <div class="dealer-qtInfo">
+                            <ul>
+                              <li v-for="(item, index) in detailQTData2" v-bind:key = "index">
+                                <div class="dealer-item">
+                                  <div><span class="dealer-itemBrand">{{item.itemBrand}}</span></div>
+                                  <div><span class="dealer-itemCode">{{item.itemCode}}</span> / <span class="dealer-itemName">{{item.itemName}}</span></div>
+                                </div>
+                                <div class="dealer-Price">
+                                  <span v-if="item.AMT === 0" class="dealer-itemAmount">{{ item.AMT | localeNum}}원</span>
+                                  <span v-if="item.AMT !== 0" class="dealer-itemAmount">{{ item.AMT | localeNum}}원</span>
+                                  <span v-if="item.itemPrice === 0" class="dealer-itemPrice">{{ item.itemPrice | localeNum}}</span>
+                                  <span v-if="item.itemPrice !== 0" class="dealer-itemPrice">{{ item.itemPrice | localeNum}}</span>
+                                  <span class="dealer-itemQty">{{ item.itemQty }}개</span>
+                                  
+                                </div>
+                                <div class="dealer-delv">
+                                  <div><span>{{item.delv}}</span></div>
+                                  <div>
+                                    <span v-if="item.memo !== undefined && item.memo !== ''" class="dealer-memo-on" @click="showResmemoPopup(item)"><i class="fas fa-lightbulb"></i></span>
+                                    <span v-if="item.memo === undefined" class="dealer-memo-off"><i class="far fa-lightbulb"></i></span>
+                                  </div>
+                                </div>
+                              </li>
+                            </ul>
                           </div>
-                        </div>-->
-                        
-                      </b-card-body>
+                          <!--<b-container>
+                            <b-row v-for="(item, index) in detailQTData2" v-bind:key = "index">
+                              <b-col class ="pt-0 pl-1">
+                              <div class="dealer-qtInfo">
+                                <div class="dealer-item">
+                                  <div><span class="dealer-itemBrand">{{item.itemBrand}}</span></div>
+                                  <div><span class="dealer-itemCode">{{item.itemCode}}</span> / <span class="dealer-itemName">{{item.itemName}}</span></div>
+                                </div>
+                                <div class="dealer-Price">
+                                  <span v-if="item.AMT === 0" class="dealer-itemAmount">{{ item.AMT | localeNum}}원</span>
+                                  <span v-if="item.AMT !== 0" class="dealer-itemAmount">{{ item.AMT | localeNum}}원</span>
+                                  <span v-if="item.itemPrice === 0" class="dealer-itemPrice">{{ item.itemPrice | localeNum}}</span>
+                                  <span v-if="item.itemPrice !== 0" class="dealer-itemPrice">{{ item.itemPrice | localeNum}}</span>
+                                  <span class="dealer-itemQty">{{ item.itemQty }}개</span>
+                                </div>
+                              </div>
+                              </b-col>
+                            </b-row>
+                          </b-container>-->
+                        </b-card-body>
                       <b-card-footer>
                         <div class="QTRes-footer">
                           <div class="TotalInfo">
@@ -1064,7 +1062,25 @@
             </v-btn>
           </v-card-actions>
         </v-card>
-      </v-dialog>  
+    </v-dialog>  
+    <v-dialog v-model="showResMemo" width="400px">
+        <v-card>
+          <v-card-title class="headline"><i class="far fa-lightbulb"></i>비고</v-card-title>
+          <v-card-text>
+          {{resMemo}}
+         </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>  
+            <v-btn
+              color="#00BFA5"
+              outlined
+              @click="showResMemo = false;resMemo=''"
+            >
+              닫기
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+    </v-dialog>  
   </v-app>
   </div>
 </template>
@@ -1140,6 +1156,8 @@ export default {
       ordSearchText:'',
       showQTImageFlag:false,
       itemImage:'',
+      showResMemo :false,
+      resMemo:'',
      // visible:false,
      // visible2:false,
      // visible3:true,
@@ -1655,7 +1673,7 @@ export default {
     GetOrderDetail(item)
     {
       this.ROList1Toggle = !this.ROList1Toggle
-      this.orderdetail = JSON.parse(item.LineItem);
+      this.orderdetail = JSON.parse(convertDynamoToArrayString(item.LineItem));
     },
     setQtDate(value)
     {
@@ -1880,6 +1898,12 @@ export default {
         this.itemImage = Constant.IMG_URL + img;
       }
     },
+    showResmemoPopup(item)
+    {
+      console.log('item : ', item);
+      this.showResMemo = !this.showResMemo;
+      this.resMemo = item.memo;
+    }
   },
 
   components: {
@@ -2420,15 +2444,21 @@ export default {
 /*일반대리점 견적회신 */
 .dealer-qtInfo{
   display: flex;
-  margin: -4px;
+  padding: 0;
+}
+.dealer-qtInfo ul{
+  width: 100%;
+}
+.dealer-qtInfo span{
+  font-size: 0.8em;
 }
 .dealer-item
 {
-  flex:60%;
+  margin-left: 10px;
+  flex:50%;
 }
 .dealer-Price{
-  flex: 40%;
-  margin-top: 10px;
+  flex: 35%;
 }
 .dealer-Price span{
   float: right;
@@ -2436,6 +2466,28 @@ export default {
 .dealer-Price span:last-child{
   float: left;
 }
+.dealer-delv{
+  float: right;
+  padding: 0px 6px;
+}
+.dealer-delv .dealer-memo-on
+{
+  font-size: 1.3em;
+  color:#FFBB00;
+}
+.dealer-delv .dealer-memo-off
+{
+  font-size: 1.2em;
+  color:#696565;
+}
+.dealer-itemPrice{
+  padding: 0px 5px;
+}
+.dealer-itemAmount{
+  font-weight: bold;
+  text-align: right;
+}
+/*
 .dealer-itemCode
 {
   font-size: 0.8em;
@@ -2454,16 +2506,8 @@ export default {
 {
   font-size: 0.8rem;
 }
-.dealer-itemPrice{
-  font-size: 0.8rem;
-  padding: 0px 5px;
-}
-.dealer-itemAmount{
-  font-size: 0.8rem;
-  font-weight: bold;
-  text-align: right;
- /* color: #EA4335;*/
-}
+*/
+
 
 .history-detailConts .itemName{
   overflow: hidden;

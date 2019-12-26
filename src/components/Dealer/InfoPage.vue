@@ -173,9 +173,12 @@
                               @focus="$event.target.select()"
                               ></v-text-field>
                           </v-col>
+                          <v-col cols="12" md="1">
+                            <v-combobox v-model="editedItem.delv" :items="delvType" label="배송구분"></v-combobox>
+                          </v-col>    
                           <v-col cols="12" md="2">
                               <v-text-field v-model="editedItem.memo" label="비고"  @focus="$event.target.select()"></v-text-field>
-                          </v-col>                    
+                          </v-col>               
                         </v-row>
                        <!-- <v-row>
                           <v-col cols="12" lg="12">
@@ -552,11 +555,13 @@ export default {
         itemQty:0,
         itemPrice:0,
         AMT:0,
+        delv:'택배',
         memo:'',
       },
       itemsPerPage: -1,
       carBrand:['BENZ','BMW','AUDI','VW','FORD','VOLVO','JAGUAR','MASERATI','INFINITI','LEXUS','TOYOTA','HONDA'],
       afterBrand:['MANN','FRAM','MEYLE','BOSCH','TRW'],
+      delvType:['택배','퀵'],
       testData: {},      
       txtQTConfirm: '견적 확정 회신', 
       orderHistory:[],
