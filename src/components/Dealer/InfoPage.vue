@@ -143,10 +143,9 @@
                             <v-combobox v-model="editedItem.itemBrand" :items="afterBrand" label="브랜드" ></v-combobox>    
                              <!--<v-text-field v-model="editedItem.itemBrand" label="브랜드"></v-text-field>-->
                           </v-col>
-                          <v-col cols="12" sm="6" lg="1">
+                          <!--<v-col cols="12" sm="6" lg="1">
                             <v-combobox v-model="editedItem.carBrand" :items="carBrand" label="차종" ></v-combobox>
-                             <!-- <v-text-field v-model="editedItem.carBrand" label="차종"></v-text-field>-->
-                          </v-col>
+                          </v-col>-->
                           <v-col cols="12" sm="6" md="2">
                               <v-text-field v-model="editedItem.itemName" label="부품명" @focus="$event.target.select()"></v-text-field>
                           </v-col>
