@@ -34,20 +34,27 @@
               <v-toolbar-title>
                 <v-icon medium>fas fa-edit</v-icon>
                 과거 정비이력  <span class="roCarNo">{{CarInfo.CarNo}}</span>
-                </v-toolbar-title>                 
+              </v-toolbar-title>                 
               <v-spacer></v-spacer>
               <v-toolbar-items>
-                  <!--<v-btn dark text @click="dialog = false">Save</v-btn>-->
+                <!--<v-btn dark text @click="dialog = false">Save</v-btn>-->
               </v-toolbar-items>
               <v-btn icon dark @click="showROHistDialog = false">
                 <v-icon>mdi-close</v-icon>
               </v-btn>
             </v-toolbar>
             <v-card-text>
-              <v-container>
+              <v-container class="mx-n2 pe-0">
                 <ROHistory :RoHistoryData="roList"></ROHistory>
               </v-container>
-            </v-card-text>         
+            </v-card-text>    
+            <v-card-actions>
+              <v-row  align="center" justify="end" class="mt-n6 mb-4 mr-4" >
+                <v-btn color="#4E342E" dark depressed @click="goOrderList(CarInfo.CarNo)"> 
+                  과거주문내역조회
+                </v-btn>
+              </v-row>
+            </v-card-actions>     
             </v-card>
         </v-dialog>
 
@@ -665,7 +672,16 @@ name: 'QTStep',
             console.log(result.data); 
             if(result.data.ReturnDataCount > 0) {
               this.showROHistBtn = true;
+
+              if(Array.isArray(result.data.ReturnDataJSON))
+              {
+                 result.data.ReturnDataJSON.sort(function(a, b){
+                  return (a.DC_DY_BSN > b.DC_DY_BSN) ? 1 : -1;
+                });
+              }
+
               this.roList = JSON.parse(result.data.ReturnDataJSON);
+              
               this.CarInfo.VinNo = result.data.ReturnObject;
             }
             else if (result.data.ReturnObject !== "" && result.data.ReturnObject !== null) {
@@ -1200,6 +1216,16 @@ name: 'QTStep',
         else
         this.imgSize = "100%";
       },
+      goOrderList(value)
+      {
+        this.$router.push({name:'QTList', 
+                  params:{
+                        DocID: '', 
+                        RefID: '',
+                        CarNo: value,
+                        Type: 'orderHistory'
+                  }});
+      }
     },
     components: {
       ItemCategory: ItemCategory,

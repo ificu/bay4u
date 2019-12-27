@@ -569,10 +569,10 @@
                 <b-dropdown-item @click="dropdownSO='날짜';sampletxtSO='2019-12-01'">날짜</b-dropdown-item>
               </b-dropdown>
 
-              <b-form-input v-model="ordSearchText"  v-on:keypress.enter="GetOrderHistory('','')" :placeholder="sampletxtSO"></b-form-input>
+              <b-form-input v-model="ordSearchText"  v-on:keypress.enter="GetOrderHistory('','','')" :placeholder="sampletxtSO"></b-form-input>
 
               <b-input-group-append>
-                <b-button  @click="GetOrderHistory('','')"><i class="fas fa-search"></i></b-button>
+                <b-button  @click="GetOrderHistory('','','')"><i class="fas fa-search"></i></b-button>
               </b-input-group-append>
             </b-input-group>
           </div>
@@ -1098,6 +1098,7 @@ import QTOrder from '@/components/QTList/QTOrder.vue'
 import BackToTop from '@/components/Common/BackToTop.vue'
 import Constant from '@/Constant';
 import {getInputDayWeek , convertDynamoToArrayString, arrayGroupBy, datePadding ,convertArrayToDynamo} from '@/utils/common.js'
+import { isArray } from 'util'
 
 const axios = require('axios').default;
 
@@ -1572,9 +1573,16 @@ export default {
         btnAdd.setAttribute("class", "fas fa-chevron-down");
       }*/
     },
-    GetOrderHistory(docId ,orderID)
+    GetOrderHistory(docId ,orderID, seachText)
     {
       
+      // 과거주문 내역 조회일 경우
+      if(seachText !== '')
+      {
+        this.dropdownSO = '차량번호';
+        this.ordSearchText = seachText;
+      }
+
       var now = new Date();
       var beforeDate = new Date();
       beforeDate.setDate(beforeDate.getDate() -7);
@@ -1970,6 +1978,11 @@ export default {
       {
         RefID = this.$route.params.RefID;
       }
+      var CarNo = '';
+      if(this.$route.params.CarNo !== undefined)
+      {
+        CarNo = this.$route.params.CarNo;
+      }
       
       if(this.$route.params.Type !== undefined) {
         if(this.$route.params.Type === 'qt')
@@ -1977,20 +1990,26 @@ export default {
           // 견적확정 채팅에서 넘어왔을 경우
           this.tabIndex = 0;
           this.GetQTReqList(docID ,RefID);
-          this.GetOrderHistory('', '');
-      
+          this.GetOrderHistory('', '','');
         }
         if(this.$route.params.Type === 'order')
         {
           // 주문요청 완료 채팅에서 넘어왔을 경우
           this.tabIndex = 1;
           this.GetQTReqList('','');
-          this.GetOrderHistory(docID, RefID);
+          this.GetOrderHistory(docID, RefID,'');
+        }
+        if(this.$route.params.Type === 'orderHistory')
+        {
+          // 과거주문내역 조회로 넘어왔을 경우
+          this.tabIndex = 1;
+          this.GetQTReqList('','');
+          this.GetOrderHistory('', '',CarNo);
         }
       }
       else{
           this.GetQTReqList('','');
-          this.GetOrderHistory('', '');
+          this.GetOrderHistory('', '','');
       }
     }
     else{
@@ -1998,8 +2017,7 @@ export default {
       this.UserInfo.BsnID = this.$cookies.get('BsnID');
 
       this.GetQTReqList('','');
-      this.GetOrderHistory('','');
-
+      this.GetOrderHistory('','','');
     }
   },
 }
@@ -2265,8 +2283,6 @@ export default {
   display: flex;
   align-items:center;
 }
-
-
 .detailConts-dealer {
   margin-top: 5px;
   font-size: 1rem;
@@ -2448,13 +2464,15 @@ export default {
 }
 .dealer-qtInfo ul{
   width: 100%;
+  margin: 0px;
+  padding:0px;
 }
 .dealer-qtInfo span{
-  font-size: 0.8em;
+  font-size: 0.9em;
 }
 .dealer-item
 {
-  margin-left: 10px;
+  margin-left: 2px;
   flex:50%;
 }
 .dealer-Price{
@@ -2468,7 +2486,9 @@ export default {
 }
 .dealer-delv{
   float: right;
-  padding: 0px 6px;
+  text-align: center;
+  margin:0px;
+  padding: 0px 5px;
 }
 .dealer-delv .dealer-memo-on
 {
