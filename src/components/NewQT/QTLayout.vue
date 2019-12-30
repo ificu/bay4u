@@ -34,20 +34,27 @@
               <v-toolbar-title>
                 <v-icon medium>fas fa-edit</v-icon>
                 과거 정비이력  <span class="roCarNo">{{CarInfo.CarNo}}</span>
-                </v-toolbar-title>                 
+              </v-toolbar-title>                 
               <v-spacer></v-spacer>
               <v-toolbar-items>
-                  <!--<v-btn dark text @click="dialog = false">Save</v-btn>-->
+                <!--<v-btn dark text @click="dialog = false">Save</v-btn>-->
               </v-toolbar-items>
               <v-btn icon dark @click="showROHistDialog = false">
                 <v-icon>mdi-close</v-icon>
               </v-btn>
             </v-toolbar>
             <v-card-text>
-              <v-container>
+              <v-container class="mx-n2 pe-0">
                 <ROHistory :RoHistoryData="roList"></ROHistory>
               </v-container>
-            </v-card-text>         
+            </v-card-text>    
+            <v-card-actions>
+              <v-row  align="center" justify="end" class="mt-n6 mb-4 mr-4" >
+                <v-btn color="#4E342E" dark depressed @click="goOrderList(CarInfo.CarNo)"> 
+                  과거주문내역조회
+                </v-btn>
+              </v-row>
+            </v-card-actions>     
             </v-card>
         </v-dialog>
 
@@ -260,9 +267,38 @@
     <QTConfirm v-if="showQTConfirm" @close="showQTConfirm=false">
       <span slot="header">총 {{dealerCount}}개 대리점에 <br> 견적요청을 보냅니다</span>
       <span slot="list1">
+        <v-list shaped dense>
+          <v-list-item-group v-model="selectedDealer" multiple>
+            <v-list-item v-for="(dealer, index) in dealerList" v-bind:key="index"
+              :value="dealer"
+              active-class="brown--text text--accent-4"
+            >
+             <template v-slot:default="{ active, toggle }">
+                <v-list-item-action  class="ml-n4 mt-1">
+                  <v-checkbox
+                    :input-value="active"
+                    :true-value="dealer"
+                    color="brown accent-4"
+                    @click="toggle"
+                  ></v-checkbox>
+                </v-list-item-action>
+                <v-list-item-content class="ml-n5 pt-0 qtConfirm-dealerList">
+                  <v-list-item-title>
+                    <span>{{dealer.DEALER_NAME}}</span>
+                    <span v-if="dealer.TYPE ==='A'"><i class="fas fa-star"></i></span>
+                  </v-list-item-title>
+                </v-list-item-content>
+              </template>
+            </v-list-item>
+          </v-list-item-group>
+        </v-list>
+        <!--
         <ul class="qtConfirm-dealerList">
-          <li v-for="(dealer, index) in dealerList" v-bind:key="index">{{dealer.DEALER_NAME}}</li>
-        </ul>
+          <li v-for="(dealer, index) in dealerList" v-bind:key="index">
+            <span>{{dealer.DEALER_NAME}}</span>
+            <span v-if="dealer.TYPE ==='A'"><i class="fas fa-star"></i></span>
+          </li>
+        </ul>-->
       </span>
       <span slot="list2">
         <div class="qtConfirm-itemList" v-for="(item, index) in qtRequest" v-bind:key="index">
@@ -330,7 +366,7 @@ name: 'QTStep',
       e6: 1,
       text: '',
       itmQty: 1,
-      dealerCount: 0,
+    //  dealerCount: 0,
       categoryTitle: "",
       categoryList: [],                 // DB에서 조회해 온 견적 요청 부품 군 리스트
       selectedCategory: [],             // 견적 요청 부품 군 중 선택된 리스트
@@ -377,6 +413,7 @@ name: 'QTStep',
       roList: [],
       sendDocId : '',
       sendDealer : '',
+      senddealerNm : '',
       qtInfoData : {},
       saveQtCount : 0,
      // isScroll:false,
@@ -384,6 +421,7 @@ name: 'QTStep',
       brandList: [
         '차종 선택', 'BMW', 'BENZ', 'AUDI', 'VW', 'FORD', 'LEXUS', '기타'
       ],     
+      selectedDealer: [],
     }
   },
   methods: {
@@ -693,7 +731,16 @@ name: 'QTStep',
             console.log(result.data); 
             if(result.data.ReturnDataCount > 0) {
               this.showROHistBtn = true;
+
+              if(Array.isArray(result.data.ReturnDataJSON))
+              {
+                 result.data.ReturnDataJSON.sort(function(a, b){
+                  return (a.DC_DY_BSN > b.DC_DY_BSN) ? 1 : -1;
+                });
+              }
+
               this.roList = JSON.parse(result.data.ReturnDataJSON);
+              
               this.CarInfo.VinNo = result.data.ReturnObject;
             }
             else if (result.data.ReturnObject !== "" && result.data.ReturnObject !== null) {
@@ -733,8 +780,17 @@ name: 'QTStep',
         .then((result) => {
           console.log("======= dealerList result ========");
           console.log(result.data);
-          this.dealerCount = result.data.Count;
+          if(Array.isArray(result.data.Items))
+          {
+            result.data.Items.sort(function(a, b){
+            return (a.TYPE < b.TYPE) ? 1 : -1;
+            });
+          }
+
           this.dealerList = result.data.Items;
+
+          let mainDealer = this.dealerList.find(element => element.TYPE === 'A')
+          this.selectedDealer = [mainDealer];
         });
 
         // 기타부품 체크
@@ -850,7 +906,9 @@ name: 'QTStep',
         var docId = '';
         var now = new Date();
 
-        this.dealerList.forEach( dealer => {
+        console.log('selectedDealer :' ,  this.selectedDealer);
+
+        this.selectedDealer.forEach( dealer => {
             
           if(dealer.DEALER === 'PARTS')
           {
@@ -903,7 +961,6 @@ name: 'QTStep',
                   // 견적저장
                   this.saveQTData(docId , dealer.DEALER, dealer.DEALER_NAME , dealer.TYPE);
                 }
-
               })
               .catch((error) => {
                 console.log(error);
@@ -955,6 +1012,7 @@ name: 'QTStep',
         this.qtInfoData = param.payload.Item;
         this.sendDocId =  docId;
         this.sendDealer = dealer;
+        this.sendDealerNm = dealerNm;
       }
       console.log("======= QT Save result ========");
       console.log(JSON.stringify(param));
@@ -1033,7 +1091,8 @@ name: 'QTStep',
                               chatFrom: this.UserInfo.BsnID,
                               chatTo: this.sendDealer,
                               chatDate: now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2),
-                              qtInfo : this.qtInfoData
+                              qtInfo : this.qtInfoData,
+                              chatDealerNm : this.sendDealerNm
                           }});
 
     },
@@ -1074,6 +1133,8 @@ name: 'QTStep',
       param.payload.Item.Status = "0";
       param.payload.Item.ReqTm = chatMsg.reqTm;
       param.payload.Item.IMG = chatMsg.imgId;
+      param.payload.Item.ChatType = 'Q';
+      param.payload.Item.RefID = ' ';
 
       console.log("Send Msg : ", JSON.stringify(param));
 
@@ -1121,6 +1182,13 @@ name: 'QTStep',
         }
       },
       checkQtData() {
+         
+         if(this.selectedDealer.length === 0)
+         {
+            this.alertMsg = "선택한 견적요청 대리점이 없습니다.\n대리점을 선택 해 주세요."
+            this.showAlertMsg = !this.showAlertMsg;
+            return false;
+         }
 
         if(this.UserInfo === null){
           //alert("로그인 정보가 없습니다. \r 다시 로그인 해주세요.");
@@ -1229,6 +1297,16 @@ name: 'QTStep',
         else
         this.imgSize = "100%";
       },
+      goOrderList(value)
+      {
+        this.$router.push({name:'QTList', 
+                  params:{
+                        DocID: '', 
+                        RefID: '',
+                        CarNo: value,
+                        Type: 'orderHistory'
+                  }});
+      }
     },
     components: {
       ItemCategory: ItemCategory,
@@ -1249,6 +1327,12 @@ name: 'QTStep',
       msgDatas: {
           get() { return this.$store.getters.msgDatas },
           set(value) { this.$store.dispatch('UpdateSetMsgData',value) }
+      },
+
+      dealerCount: function() {
+        let dealerCount = 0;
+        dealerCount = this.selectedDealer.length;
+        return dealerCount;
       },
     },
     mounted() {
@@ -1472,10 +1556,19 @@ name: 'QTStep',
 .swiper-slide {
   height: 160px;
 }
-
+/*
 .qtConfirm-dealerList {
   margin-bottom: 0px;
   padding-left: 20px;
+}*/
+.qtConfirm-dealerList span:nth-child(1){
+  font-size: 1.1em;
+}
+.qtConfirm-dealerList span:nth-child(2){
+  color:#FFBB00;
+  margin-right: 5px;
+  float:right;
+  text-align: end;
 }
 .qtConfirm-itemList {
   width: 98%;
