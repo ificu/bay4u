@@ -170,8 +170,8 @@
           </div>
         </div>
       </b-tab>-->
-      <b-tab title="견적확정 내역" :title-link-class="linkClass(0)">
-        <div class="QTList-contents">
+      <b-tab title="견적확정 내역" :title-link-class="linkClass(0)" class="p-0 border bg-light">
+        <div class="QTList-contents" >
           <div class="QTList-title">
             <span>견적 확정 내역</span>
             <CheckLogin></CheckLogin>
@@ -1313,7 +1313,7 @@ export default {
       param.payload = {};
       param.payload.FilterExpression = filter;
       param.payload.ExpressionAttributeValues = {};
-      
+
       var key = ":id";
       param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
 
@@ -1492,7 +1492,7 @@ export default {
     GetConfirmQtList(item)
     {
       this.confirmQTdata  = [];
-      console.log('확정조회 : ' ,item );
+      
       var param = {};
       param.BsnId = this.UserInfo.BsnID;
       param.CarNo = item[0].CarNo;
@@ -1967,6 +1967,9 @@ export default {
   created : function() {
     //this.showQTReqList();
 
+    if(this.UserInfo.BsnID === '')
+    this.UserInfo.BsnID = this.$cookies.get('BsnID');
+
     if(this.$route !== undefined && this.$route.name === "QTList" ) {
       var docID = '';
       if(this.$route.params.DocID !== undefined)
@@ -2033,6 +2036,7 @@ export default {
 #acd3ce : 옅은 녹색
 #967d5f : 옅은 브라운
 */
+
 .QTList-tab {
   padding: 5px;
   font-size: 0.9rem;
@@ -2040,7 +2044,7 @@ export default {
 
 .QTList-title {
   margin:auto;
-  width: 90%;
+  width: 96%;
   padding-top: 15px;
   margin-bottom: 10px;
   font-size: 1.5rem;
@@ -2054,7 +2058,7 @@ export default {
 
 .QTList-search {
   margin:auto;
-  width: 90%;
+  width: 96%;
 }
 .QTList-search .input-group .input-group-prepend .dropdown .btn {
   background-color: #696565;
@@ -2191,7 +2195,7 @@ export default {
 }
 .QTList-history {
   margin:auto;
-  width: 90%;
+  width: 96%;
   padding-top: 20px;
   margin-bottom: 60px;
 }
@@ -2407,10 +2411,11 @@ export default {
 }
 .history-detailConts-webpos span
 {
-   font-size: 0.8em;
+   font-size: 0.94em;
 }
 .webpos-item{
   margin-left: 10px;
+  width: 140px;
 }
 .webpos-itemName{
   display: inline-block;
@@ -2424,7 +2429,7 @@ export default {
 }
 .webpos-itemQty{
  width:30px;
- margin-left:10px;
+ margin-left:2px;
 }
 .webpos-itemQty span{
  float:right;
@@ -2468,7 +2473,7 @@ export default {
   padding:0px;
 }
 .dealer-qtInfo span{
-  font-size: 0.9em;
+  font-size: 0.95em;
 }
 .dealer-item
 {
