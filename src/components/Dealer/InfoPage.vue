@@ -143,10 +143,9 @@
                             <v-combobox v-model="editedItem.itemBrand" :items="afterBrand" label="브랜드" ></v-combobox>    
                              <!--<v-text-field v-model="editedItem.itemBrand" label="브랜드"></v-text-field>-->
                           </v-col>
-                          <v-col cols="12" sm="6" lg="1">
+                          <!--<v-col cols="12" sm="6" lg="1">
                             <v-combobox v-model="editedItem.carBrand" :items="carBrand" label="차종" ></v-combobox>
-                             <!-- <v-text-field v-model="editedItem.carBrand" label="차종"></v-text-field>-->
-                          </v-col>
+                          </v-col>-->
                           <v-col cols="12" sm="6" md="2">
                               <v-text-field v-model="editedItem.itemName" label="부품명" @focus="$event.target.select()"></v-text-field>
                           </v-col>
@@ -173,9 +172,12 @@
                               @focus="$event.target.select()"
                               ></v-text-field>
                           </v-col>
+                          <v-col cols="12" md="1">
+                            <v-combobox v-model="editedItem.delv" :items="delvType" label="배송구분"></v-combobox>
+                          </v-col>    
                           <v-col cols="12" md="2">
                               <v-text-field v-model="editedItem.memo" label="비고"  @focus="$event.target.select()"></v-text-field>
-                          </v-col>                    
+                          </v-col>               
                         </v-row>
                        <!-- <v-row>
                           <v-col cols="12" lg="12">
@@ -552,11 +554,13 @@ export default {
         itemQty:0,
         itemPrice:0,
         AMT:0,
+        delv:'택배',
         memo:'',
       },
       itemsPerPage: -1,
       carBrand:['BENZ','BMW','AUDI','VW','FORD','VOLVO','JAGUAR','MASERATI','INFINITI','LEXUS','TOYOTA','HONDA'],
       afterBrand:['MANN','FRAM','MEYLE','BOSCH','TRW'],
+      delvType:['택배','퀵'],
       testData: {},      
       txtQTConfirm: '견적 확정 회신', 
       orderHistory:[],

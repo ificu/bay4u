@@ -12,7 +12,8 @@
             <i class="Dealer-type fas fa-wrench" style="color:#fbc02e;"></i>
             <div class="Chart-qtinfo">
               <span class="Chart-carInfo">{{(qtReq.CarNo === "*empty*")?"미상차량" : qtReq.CarNo }}</span> / 
-              <span  class="Chart-date">{{setReqDt(qtReq.ReqDt)}}</span></div>
+              <span  class="Chart-date">{{setReqDt(qtReq.ReqDt)}}</span>
+            </div>
             <span class="Dealer-name">{{SetDealerNm(qtReq.ResDealer)}}</span>
             <span type="button" class="Chat-detail">
               <i class="fas fa-angle-double-right"></i>
@@ -50,7 +51,7 @@
       <span type="button" class="headerBar-Back" v-on:click="chatingToggle(null)">
         <i class="fas fa-angle-double-left"></i>
       </span>
-      <p class="headerBar-title">채팅</p>
+      <p class="headerBar-title">{{chatDealerName}}</p>
     </div>
     <div class="Chating-page" v-if="showChatPage">
       <Message-List :msgs="msgDatas" class="msg-list"></Message-List>
@@ -128,6 +129,7 @@ export default {
       docId : "",
       dealer:"",
       showQTCamera: false,
+      chatDealerName : '',
     }
   },
   components: {
@@ -182,6 +184,11 @@ export default {
         }
         else{
           msg = this.$route.params.carNo + " 차량에 대한 견적이 요청됐습니다.";
+        }
+
+         if(this.$route.params.chatDealerNm !== undefined)
+        {
+          this.chatDealerName = this.$route.params.chatDealerNm;
         }
 
         var now = new Date();
@@ -286,6 +293,8 @@ export default {
       {
         this.docId = item.ID;
         this.dealer = item.ResDealer;
+        this.chatDealerName = item.ResDealerNm;
+       
         this.showchating(item);
       }
     },

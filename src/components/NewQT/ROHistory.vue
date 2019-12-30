@@ -2,14 +2,20 @@
 <v-row align="center">
     <div class="roHistoryCarinfo"><v-icon small class="carInfo-icon">fas fa-car</v-icon>{{carName}}</div>
     <v-divider></v-divider>
-    <div>       
-    <v-expansion-panels focusable>
+    <div>     
+    <v-expansion-panels accordion focusable>
         <v-expansion-panel
             v-for="(roItem,i) in roList"
             :key="i"
         >
-        <v-expansion-panel-header  class="roHistory-header" @click="GetRoItem(roItem)">
+        <v-expansion-panel-header class="roHistory-header" @click="GetRoItem(roItem)">
             <v-row no-gutters>
+                <div class="roHistory-title"><v-icon small class="roHistory-icon">mdi-wrench</v-icon>{{roItem.RO_NM}}</div>
+                <div class="roHistory-detail">
+                    <div><!--<v-icon x-small class="roHistory-icon">fas fa-tachometer-alt</v-icon>-->{{roItem.DST_CR | localeNum}} Km</div>
+                    <div class="roHistory-date"><!--<v-icon x-small class="roHistory-icon">fas fa-calendar-alt</v-icon>-->{{roItem.DC_DY_BSN}}</div>
+                </div>
+          
                 <!--
                 <v-col cols="12">    
                     <v-icon small color="#A9A9A9">mdi-wrench</v-icon> {{roItem.RO_NM}}                        
@@ -21,8 +27,6 @@
                    <b>{{roItem.RO_AMT | localeNum}}원</b>   
                 </v-col>
                 -->
-                <div class="roHistory-title"><v-icon small class="roHistory-icon">mdi-wrench</v-icon>{{roItem.RO_NM}}</div>
-                <div class="roHistory-date"><v-icon x-small class="roHistory-icon">fas fa-calendar-alt</v-icon>{{roItem.DC_DY_BSN}}</div>
                <!-- <div class="roHistory-amount"><v-icon x-small class="roHistory-icon">far fa-credit-card</v-icon>{{roItem.RO_AMT | localeNum}}원</div>-->
             </v-row>
             <template v-slot:actions>
@@ -159,10 +163,9 @@ export default {
 </script>
 <style scoped>
 .roHistory-header{
-    margin: 0px;
-    padding-left : 10px;
-    padding-top : 12px;
-    padding-bottom : 5px;
+    width: 100%px;
+    padding : 0px 10px;
+    display:flex;
 }
 .roHistory-icon{
   color:#DCDCDC;  
@@ -173,33 +176,35 @@ export default {
   margin-right: 0.2rem;
 }
 .roHistoryCarinfo{
-    color:#000000;
+    color:#000;
     font-size: 0.9rem;
     font-weight: bold;
 }
 .roHistory-title {
-  flex: 90%;
-  font-size: 1rem;
-  font-weight: bold;
-  margin-bottom:5px;
-  font-family: 'Noto Sans KR', sans-serif;
-}
-
-.roHistory-date  {
-    flex: 70%;
-    font-size: 0.8rem;
+    flex: 60%;
+    font-size: 1rem;
     font-weight: bold;
-    text-align: right;
-    color:#F65314;
-    vertical-align:initial;
-    margin-bottom:1px;
+    margin-bottom:5px;
     font-family: 'Noto Sans KR', sans-serif;
+}
+.roHistory-detail{
+    flex: 40%;
+    font-size: 0.8rem;
+    color: #0D47A1;
+    font-family: 'Noto Sans KR', sans-serif;
+}
+.roHistory-detail div{
+    float:right;
+    margin-right: 4px;
+}
+.roHistory-date  {
+    vertical-align:initial;
+    margin-top: 3px;
 }
 .roHistory-content
 {
     display:flex;
 }
-
 .roHistory-brand
 {
     font-size: 0.8rem;

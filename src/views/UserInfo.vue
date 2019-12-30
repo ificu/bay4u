@@ -10,9 +10,9 @@
       </div>
       <div class="UserInfo-info">
         <div class="info-name">{{UserInfo.Name}}</div>
-        <div class="info-tel">02-266-5011</div>
-        <div class="info-tel">010-2222-3534</div>
-        <div class="info-addr">서울 성남시 분당구 성남대로343번길 9</div>
+        <div class="info-tel">{{siteInfo.TEL}}</div>
+        <div class="info-tel">{{siteInfo.HP}}</div>
+        <div class="info-addr">{{siteInfo.ADDR}}</div>
       </div>
       <div class="UserInfo-itemMaster">
         <div class="itemMaster-title">내 부품 마스터</div>
@@ -58,30 +58,61 @@
 <script>
 import MaintenanceMaster from '@/components/UserInfo/MaintenanceMaster.vue'
 import CheckLogin from '@/components/Common/CheckLogin.vue'
+import Constant from '@/Constant';
+
+const axios = require('axios').default;
 
 export default {
   name: 'UserInfo',
   data () {
     return {
       text: '',
-      showMaintenanceMaster: false
+      showMaintenanceMaster: false,
+      siteInfo:[],
     }
   },
   methods: {
     showMaintenanceMasterModal() {
       this.showMaintenanceMaster = !this.showMaintenanceMaster;
-    }
+    },
+    GetSiteInfo(){
+      this.showSiteInfo = false;
+      var param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_SITE";
+      param.payload = {};
+      param.payload.FilterExpression = "CODE = :id";
+      param.payload.ExpressionAttributeValues = {};
+      var key = ":id";
+
+      param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
+
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+        console.log("======= Site result ========");
+        console.log(result.data);
+        this.siteInfo = result.data.Items[0];
+      });
+    },
   },
   components: {
     MaintenanceMaster: MaintenanceMaster,
     CheckLogin:CheckLogin
   },
-   computed:{
+  computed:{
       UserInfo: {
           get() { return this.$store.getters.UserInfo },
           set(value) { this.$store.dispatch('UpdateUserInfo',value) }
       },
-    },
+  },
+  mounted(){
+    this.GetSiteInfo();
+  }
 }
 </script>
 
