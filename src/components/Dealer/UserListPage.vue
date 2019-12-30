@@ -393,7 +393,7 @@ export default {
 .Chat-list ul {
   list-style-type: none;
   padding: 0px;
-  height: calc(100vh - 270px); 
+  height: calc(100vh - 225px); 
   overflow: auto;
 }
 

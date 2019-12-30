@@ -52,6 +52,30 @@
         </v-dialog>
 
         <v-text-field label="차대번호" v-model="CarInfo.VinNo" outlined dense color="success"  class="pr-6 pl-4" append-outer-icon="search" @click:append-outer="checkWebPOSHist" v-on:keypress.enter="checkWebPOSHist"></v-text-field>
+
+        <v-row class = "mb-8 mt-n6 ml-1 mr-12">
+          <v-col cols="10">
+            <v-select
+              v-model="brandSelected"
+              :items="brandList"
+              menu-props="auto"
+              label="Select"
+              hide-details
+              append-outer-icon="fas fa-car"
+              single-line
+              solo
+            ></v-select>
+          </v-col>
+          <v-col cols="2">
+            <img height='25' v-if="brandSelected === 'AUDI'" style="align-self:center" src="@/assets/BRAND-AUDI.png">
+            <img height='40' v-if="brandSelected === 'BENZ'" style="align-self:center" src="@/assets/BRAND-BENZ.png">
+            <img height='40' v-if="brandSelected === 'BMW'" style="align-self:center" src="@/assets/BRAND-BMW.png">
+            <img height='25' v-if="brandSelected === 'FORD'" style="align-self:center" src="@/assets/BRAND-FORD.png">
+            <img height='40' v-if="brandSelected === 'LEXUS'" style="align-self:center" src="@/assets/BRAND-LEXUS.png">
+            <img height='40' v-if="brandSelected === 'VW'" style="align-self:center" src="@/assets/BRAND-VW.png">
+          </v-col>
+        </v-row>
+
         <!--<v-text-field label="차량종류" outlined dense color="success" class="mt-n5"></v-text-field>-->
         <v-btn outlined small color="red darken-1" class="mt-n6 mb-4 mr-4 float-right" v-if="showVINSearchBtn" @click="checkCarVin">차대번호 조회</v-btn>
         <v-btn outlined small color="red darken-1" class="mt-n6 mb-4 mr-1 float-right" v-if="showROHistBtn" @click="showROHistDialog=!showROHistDialog">정비이력</v-btn>
@@ -356,6 +380,10 @@ name: 'QTStep',
       qtInfoData : {},
       saveQtCount : 0,
      // isScroll:false,
+      brandSelected: '차종 선택',
+      brandList: [
+        '차종 선택', 'BMW', 'BENZ', 'AUDI', 'VW', 'FORD', 'LEXUS', '기타'
+      ],     
     }
   },
   methods: {
@@ -910,6 +938,7 @@ name: 'QTStep',
       param.payload.Item.ID = docId;
       param.payload.Item.CarNo = convertStringToDynamo(this.CarInfo.CarNo);
       param.payload.Item.CarVin = convertStringToDynamo(this.CarInfo.VinNo);
+      param.payload.Item.CarBrand = this.brandSelected;
       param.payload.Item.ReqDt = now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);
       param.payload.Item.ReqSite = convertStringToDynamo(this.UserInfo.BsnID);
       param.payload.Item.ReqName = convertStringToDynamo(this.UserInfo.Name);

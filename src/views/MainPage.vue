@@ -4,9 +4,10 @@
       color="#9e9e9e"
       dark
       flat
+      height = '30px'
     >
       <v-app-bar-nav-icon></v-app-bar-nav-icon>
-      <v-toolbar-title><h2>수입차 부품 견적 시스템<img src="@/assets/logo.png"></h2></v-toolbar-title>
+      <v-toolbar-title class="mt-3"><h4>수입차 부품 견적 시스템<img height = "25px" src="@/assets/logo.png"></h4></v-toolbar-title>
 
       <v-spacer></v-spacer> 
       <div v-if="hidden">
@@ -174,7 +175,7 @@ html,body {height:100%; overflow:hidden}
   font-weight: bold;
 }
 
-h2 {
+h4 {
   color: white;
   font-weight: bold;
 }
@@ -183,17 +184,13 @@ a:hover {
   text-decoration: none;
 }
 
-.mdl-layout__tab-panel {
-  height: 100%;
-}
-
 .mainPage-web {
   overflow-y: hidden;
 }
 
 .page-content {
   display: flex;
-  height: calc(100vh - 120px);
+  height: calc(100vh - 80px);
   /*background-color: aqua;*/
 }
 
