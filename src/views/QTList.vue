@@ -198,6 +198,14 @@
               <b-card-header header-tag="header" role="tab" header-class="card-header-qtlist">
                 <b-container>
                   <b-row>
+                    <b-col align-self="center" class="history-brand">
+                      <img height='18' v-if="qtItem[0].CarBrand === 'AUDI'" style="align-self:center" src="@/assets/BRAND-AUDI.png">
+                      <img height='30' v-if="qtItem[0].CarBrand === 'BENZ'" style="align-self:center" src="@/assets/BRAND-BENZ.png">
+                      <img height='30' v-if="qtItem[0].CarBrand === 'BMW'" style="align-self:center" src="@/assets/BRAND-BMW.png">
+                      <img height='30' v-if="qtItem[0].CarBrand === 'FORD'" style="align-self:center" src="@/assets/BRAND-FORD.png">
+                      <img height='25' v-if="qtItem[0].CarBrand === 'LEXUS'" style="align-self:center" src="@/assets/BRAND-LEXUS.png">
+                      <img height='30' v-if="qtItem[0].CarBrand === 'VW'" style="align-self:center" src="@/assets/BRAND-VW.png">
+                    </b-col>                    
                     <b-col align-self="center" class="history-date">{{setQtDate(qtItem[0].ReqDt)}}</b-col>
                     <b-col class="history-car">
                       <b-row class="history-carNo">
@@ -262,7 +270,7 @@
                             </div>
                             </li>
                           </ul>
-                          <div class="qtReq-image"><span>사진첨부</span><span @click="showQTImage(qtItem[0].IMG)"><i class="fas fa-image"></i></span></div>
+                          <div class="qtReq-image"><span>차량번호/차대번호 사진촬영</span><span @click="showQTImage(qtItem[0].IMG)"><i class="fas fa-image"></i></span></div>
                           </div>
                         </b-card-body>
                       </b-collapse>
@@ -2253,6 +2261,7 @@ export default {
 }
 .history-car {
   flex:40%;
+  margin-right: -15px;
 }
 .history-carNo {
   font-size: 1.1rem;
@@ -2267,6 +2276,12 @@ export default {
   /*background-color: #E50914;*/
   padding: 1px;
   width: 60px;
+}
+.history-brand {
+  flex:20%;
+  max-width:20px;
+  margin-right: 20px;
+  margin-left: -25px;
 }
 .history-detailHeaderBtn {
   flex:15%;

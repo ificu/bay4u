@@ -17,7 +17,6 @@
            :append-icon="'fas fa-search'"
             class = "mb-n3"
             filled
-            height = "60px"
             rounded
             dense
             type="text" 
@@ -25,7 +24,24 @@
             v-on:keypress.enter="showQTReqList"
           ></v-text-field>
      </div>
+          <v-row
+            align="center"
+            justify="center"
+            class = "ml-1 mr-1 mb-2"
+          >
+            <v-btn-toggle
+              color="red"
+              v-model="toggle_exclusive"
+              rounded
+              dense
+            >
+              <v-btn @click="showQTReqList(0)">당일</v-btn>
+              <v-btn @click="showQTReqList(1)">어제</v-btn>
+              <v-btn @click="showQTReqList(2)">일주일</v-btn>
+              <v-btn @click="showQTReqList(3)">한달</v-btn>
 
+            </v-btn-toggle>
+          </v-row>
       <div class="Chat-list">
         <ul>
           <li v-for="(qtReq, index) in qtReqList" v-bind:key = "index" v-on:click="SetQTInfo(qtReq,index)" :class="{selectItem : selectedList(index)}">
@@ -93,7 +109,8 @@ export default {
       tabIndex: 0,
       qtReqList: [],
       qtItemIndex: -1,
-      searchText:''
+      searchText:'',
+      toggle_exclusive: undefined
     }
   },
   props:['chatInfo'],
@@ -112,17 +129,44 @@ export default {
       } else {
         return false
       }
-    },
-    showQTReqList() {
+    },/*      <v-btn @click="showQTReqList(0)">당일</v-btn>
+              <v-btn @click="showQTReqList(1)">어제</v-btn>
+              <v-btn @click="showQTReqList(2)">일주일</v-btn>
+              <v-btn @click="showQTReqList(3)">한달</v-btn> */
+    showQTReqList(idx) {
+      console.log("showQTReqList??????????????????????? : ", idx);
 
       this.initQTData();
 
       var now = new Date();
       var beforeDate = new Date();
-      beforeDate.setDate(beforeDate.getDate() -7);
-      var startDate = beforeDate.getFullYear() + '-' + datePadding(beforeDate.getMonth()+1,2) +'-'+ datePadding(beforeDate.getDate(),2);
-      var endDate = now.getFullYear() + '-' + datePadding(now.getMonth()+1,2) +'-'+ datePadding(now.getDate(),2);
-      
+      var startDate, endDate;
+
+      if(idx === 0) {
+        startDate = now.getFullYear() + '-' + datePadding(now.getMonth()+1,2) +'-'+ datePadding(now.getDate(),2);
+        endDate = startDate;
+      }
+      else if(idx === 1) {
+        beforeDate.setDate(beforeDate.getDate() - 1);
+        startDate = beforeDate.getFullYear() + '-' + datePadding(beforeDate.getMonth()+1,2) +'-'+ datePadding(beforeDate.getDate(),2);
+        endDate = startDate;
+      }
+      else if(idx === 2) {
+        beforeDate.setDate(beforeDate.getDate() - 7);
+        startDate = beforeDate.getFullYear() + '-' + datePadding(beforeDate.getMonth()+1,2) +'-'+ datePadding(beforeDate.getDate(),2);
+        endDate = now.getFullYear() + '-' + datePadding(now.getMonth()+1,2) +'-'+ datePadding(now.getDate(),2);
+      }
+      else if(idx === 3) {
+        beforeDate.setMonth(beforeDate.getMonth() - 1);
+        startDate = beforeDate.getFullYear() + '-' + datePadding(beforeDate.getMonth()+1,2) +'-'+ datePadding(beforeDate.getDate(),2);
+        endDate = now.getFullYear() + '-' + datePadding(now.getMonth()+1,2) +'-'+ datePadding(now.getDate(),2);
+      }
+      else {
+        beforeDate.setDate(beforeDate.getDate() - 7);
+        startDate = beforeDate.getFullYear() + '-' + datePadding(beforeDate.getMonth()+1,2) +'-'+ datePadding(beforeDate.getDate(),2);
+        endDate = now.getFullYear() + '-' + datePadding(now.getMonth()+1,2) +'-'+ datePadding(now.getDate(),2);
+      }
+
       var filter = "ResDealer = :id";
       if(this.searchText === '')
       {
