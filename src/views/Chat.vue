@@ -9,7 +9,13 @@
       <div class="Chat-list">
         <ul>
           <li v-for="(qtReq, index) in qtReqList" v-bind:key = "index" v-on:click="chatingToggle(qtReq)">
-            <i class="Dealer-type fas fa-wrench" style="color:#fbc02e;"></i>
+            <img height='25' v-if="qtReq.CarBrand === 'AUDI'" style="align-self:center" src="@/assets/BRAND-AUDI.png">
+            <img height='25' v-else-if="qtReq.CarBrand === 'BENZ'" style="align-self:center" src="@/assets/BRAND-BENZ.png">
+            <img height='25' v-else-if="qtReq.CarBrand === 'BMW'" style="align-self:center" src="@/assets/BRAND-BMW.png">
+            <img height='25' v-else-if="qtReq.CarBrand === 'FORD'" style="align-self:center" src="@/assets/BRAND-FORD.png">
+            <img height='25' v-else-if="qtReq.CarBrand === 'LEXUS'" style="align-self:center" src="@/assets/BRAND-LEXUS.png">
+            <img height='25' v-else-if="qtReq.CarBrand === 'VW'" style="align-self:center" src="@/assets/BRAND-VW.png">
+            <i v-else class="Dealer-type fas fa-wrench" style="color:#fbc02e;"></i>
             <div class="Chart-qtinfo">
               <span class="Chart-carInfo">{{(qtReq.CarNo === "*empty*")?"미상차량" : qtReq.CarNo }}</span> / 
               <span  class="Chart-date">{{setReqDt(qtReq.ReqDt)}}</span>

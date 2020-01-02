@@ -722,13 +722,12 @@ export default {
 }
 .chatform .card {
   position: relative;
-  height: calc(100vh - 140px);
+  height: calc(100vh - 100px);
   width: 100%;
 }
 .Chating-page {
     background-color: #ddd;
     position: absolute;
-  /*min-height: calc(90vh - 50px - 80px);*/
     width: 100%;
     height: 92%;
 }
