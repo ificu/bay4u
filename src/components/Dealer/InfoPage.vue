@@ -160,14 +160,14 @@
                               ></v-text-field>
                           </v-col>
                           <v-col cols="12" sm="6" md="1">
-                              <v-text-field :value="editedItem.itemPrice | localeNum" label="단가"
+                              <v-text-field :value="editedItem.itemPrice " label="단가"
                                 @input="value =>editedItem.itemPrice = value" 
                                 @change="onCalculatorAMT"
                                 @focus="$event.target.select()" 
                                 ></v-text-field>
                           </v-col>
                           <v-col cols="12" sm="6" md="1">
-                              <v-text-field :value="editedItem.AMT | localeNum " label="금액"  
+                              <v-text-field :value="editedItem.AMT " label="금액"  
                               @input="value => editedItem.AMT = value"
                               @focus="$event.target.select()"
                               ></v-text-field>
