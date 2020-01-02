@@ -33,13 +33,14 @@
                 <v-icon color="primary">$expand</v-icon>
             </template> 
         </v-expansion-panel-header>
-        <v-expansion-panel-content>
+        <v-expansion-panel-content class="ml-n4 mr-n4">
             <div v-for="(item,idx) in roitemList" :key="idx">
             <div class="roHistory-content">
                 <div class="roHistory-itemcode">{{item.ID_ITM}}</div>
-                <div class="roHistory-amount">{{item.MO_PRC_REG | localeNum}} 원</div>
+                <div class="roHistory-itemName">{{item.NM_ITM}}</div>
+               
             </div>
-                <div class="roHistory-brand">{{item.NM_ITM}}</div>
+                 <!--<div class="roHistory-amount">{{item.MO_PRC_REG | localeNum}} 원</div>-->
             </div>
             <!--<div class="roHistory-content"><v-icon small class="roHistory-icon">fas fa-car</v-icon> {{roItem.NM_CR_TEC}} </div>-->
             <!--<v-list-item three-line>
@@ -205,18 +206,18 @@ export default {
 {
     display:flex;
 }
-.roHistory-brand
+.roHistory-itemName
 {
     font-size: 0.8rem;
     margin-top: 5px;
-    margin-right:30px;
+    text-align: right;
 }
 .roHistory-itemcode
 {
     font-size: 0.9rem;
     margin-top: 5px;
     font-weight: bold;
-    flex:50%;
+    flex:40%;
 }
 
 .roHistory-amount{
