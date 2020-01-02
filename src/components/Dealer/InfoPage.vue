@@ -167,7 +167,7 @@
                                 ></v-text-field>
                           </v-col>
                           <v-col cols="12" sm="6" md="1">
-                              <v-text-field :value="editedItem.AMT | localeNum" label="금액"  
+                              <v-text-field :value="editedItem.AMT | localeNum " label="금액"  
                               @input="value => editedItem.AMT = value"
                               @focus="$event.target.select()"
                               ></v-text-field>
@@ -792,6 +792,7 @@ export default {
       } else {
         this.detailQTData.push(this.editedItem)
       }
+
       this.close()
     },
     saveQTConfirm()
@@ -817,7 +818,8 @@ export default {
       else
         msg = this.qtInfo.CarNo + " 차량에 대한 견적이 수정 후 재전송 되었습니다.";
 
-      var id =  this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+      var id =  this.UserInfo.BsnID + this.qtInfo.ReqSite + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2)
+      + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);;
       var qtMsg = {};
       qtMsg.from = {'name' : this.UserInfo.BsnID};
       qtMsg.msg  = msg;
@@ -862,6 +864,7 @@ export default {
       .catch((error) => {
         console.log(error);
       });
+   
     },
     getQTConfirm()
     {
@@ -884,16 +887,17 @@ export default {
         data: param
       })
       .then((result) => {
-        console.log("======= QT Confirm result ========");
+        console.log("======= QT Confirm result========");
         console.log( result.data);
+
         if(result.data.Items.length > 0){
           this.txtQTConfirm = "견적 재회신";
           this.GetOrderHistory();
+          this.detailQTData = JSON.parse(convertDynamoToArrayString(result.data.Items[0].LineItem));
         }
         else{
           this.txtQTConfirm = "견적확정 회신";
         }
-        this.detailQTData = JSON.parse(convertDynamoToArrayString(result.data.Items[0].LineItem));
          
       });
     },

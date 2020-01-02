@@ -239,7 +239,7 @@
                                     {{qtReqInfo.QTData.SERIES}}
                                   </span>
                                   <span v-if="qtReqInfo.DealerFlag !=='WEBPOS'">
-                                     {{qtReqInfo.CarVin}}
+                                     {{(qtReqInfo.QTData.CarBrand === "*empty*") ?'': qtReqInfo.QTData.CarBrand}}  {{(qtReqInfo.QTData.CarSeries === "*empty*") ? '' : qtReqInfo.QTData.CarSeries }}
                                   </span>
                                 </b-row>
                               </b-col>                    
@@ -260,11 +260,11 @@
                       </b-card-header>
                       <b-collapse :id="'accordion-qtReq'+idx2" accordion="my-accordion2" role="tabpanel" :visible="linkToggleQtReq(idx2)" >
                         <b-card-body>
-                          <div class="history-detailConts">
+                          <div class="history-detailConts" style="position: relative">
                             <ul>
                               <li v-for="(item, index) in qtReqItem" v-bind:key = "index">
                               <div>
-                              <div><span class="itemCode">{{item.ITM_NM}}</span> <span class="itemName">{{item.ITM_QTY}}개</span> </div>
+                              <div><span class="itemCode">{{item.ITM_NM}}</span> <span class="itemName">{{item.ITM_QTY}}개</span></div>
                               </div>
                               </li>
                             </ul>
@@ -274,6 +274,7 @@
                               <span class="qtReq-reqTitle" v-if="qtReqInfo.QTData.Memo !=='*empty*'" >메모</span>
                               <span class="qtReq-reqIcon" v-if="qtReqInfo.QTData.Memo !=='*empty*'" @click="showResmemoPopup(qtReqInfo.QTData)" ><i class="far fa-sticky-note"></i></span>
                             </div>
+                            <div class="history-detailConts-carvin"><span>{{(qtReqInfo.CarVin === '99999999999999999')? "미상차량" : qtReqInfo.CarVin}}</span></div>
                           </div>
                         </b-card-body>
                       </b-collapse>
@@ -320,7 +321,7 @@
                             </b-row>
                           </b-container>
                         </b-card-header>
-                      <b-collapse :id="'accordion-webpos-'+idx2" accordion="my-accordion4" role="tabpanel">
+                      <b-collapse :id="'accordion-webpos-'+idx2" accordion="my-accordion4" role="tabpanel" :visible="linkToggleQtConfirm(idx2)">
                         <b-card-body class ="pt-1 pl-1 pr-1">
                           <div class="history-detailConts-webpos">
                             <ul>
@@ -372,9 +373,9 @@
                                   </b-col>
                               </b-row>
                               <b-row>
-                                  <span id="disabled-wrapper" class="qtInfo-detail-carType">{{confrimInfo.CarType}}</span>
+                                  <span id="disabled-wrapper" class="qtInfo-detail-carType">{{qtReqInfo.QTData.CarBrand}} {{qtReqInfo.QTData.CarSeries}}</span>
                                   <b-tooltip target="disabled-wrapper">
-                                    {{confrimInfo.CarType}}
+                                    {{qtReqInfo.QTData.CarBrand}} {{qtReqInfo.QTData.CarSeries}}
                                   </b-tooltip>
                               </b-row>
                             </b-col>
@@ -382,7 +383,7 @@
                               <span v-if="qtReqInfo.WebposOnly ==='N'" @click="goQTChating(qtReqInfo)"><i class ="fas fa-comment-dots"></i></span>
                             </b-col>                
                             <b-col class="response-detailBtn">
-                              <b-button block href="#"  v-b-toggle="'accordion-qtDealer-' + idx2"  variant="secondary" size="sm" v-on:click="showResItem(confrimInfo)">
+                              <b-button block href="#"  v-b-toggle="'accordion-qtDealer-' + idx2"  variant="secondary" size="sm" v-on:click="showResItem2(confrimInfo)">
                                 <!--<i class="fas fa-chevron-down" :id="'btnIcon'+idx"></i>-->
                                 <!--<i v-if="!SOList3Toggle" class="fas fa-chevron-down"></i>
                                 <i v-if="SOList3Toggle"  class="fas fa-chevron-up"></i>-->
@@ -447,7 +448,7 @@
                       <b-card-footer>
                         <div class="QTRes-footer">
                           <div class="TotalInfo">
-                              <v-btn color="#4E342E" dark depressed class="mr-3" @click="showQTOrderPopup(GetConfirmValue2(qtReqInfo.ID))" >주문하기</v-btn>
+                              <v-btn color="#4E342E" dark depressed class="mr-3" @click="showQTOrderPopup(confrimInfo)" >주문하기</v-btn>
                               <span class="TotalInfo-Title">합계</span>
                               <span class="TotalInfo-Text">{{total2 | localeNum}}원</span>
                           </div>
@@ -1048,7 +1049,7 @@
 
     <!-- 주문 요청 확인 팝업 -->
     <QTOrder v-if="showQTOrder" @close="showQTOrder=false">
-      <span slot="header">{{orderData.ResDealerNm}} 대리점에 <br> 주문요청을 보냅니다</span>
+      <span slot="header">{{orderData.DealerName}} 대리점에 <br> 주문요청을 보냅니다</span>
       <span slot="orderlist">
         <div class="order-itemList" v-for="(item, index) in orderList" v-bind:key="index">
           <span class="order-itemCode">{{item.itemCode}}</span> / <span class="order-itemName"> {{item.itemName}}</span>
@@ -1138,6 +1139,7 @@ export default {
       orderToggleIndex:-1,
       qtToggleIndex:-1,
       qtReqToggleIndex:-1,
+      qtConfrnToggleIndex:-1,
       qtConfrnToggleIndex2:-1,
       dropdownQT: '차량번호',
       dropdownSO: '차량번호',
@@ -1286,6 +1288,15 @@ export default {
     linkToggleQtReq(idx)
     {
       if(this.qtReqToggleIndex === idx){
+        return true;
+      }
+      else{
+        return false;
+      }
+    },
+    linkToggleQtConfirm(idx)
+    {
+      if(this.qtConfrnToggleIndex === idx){ 
         return true;
       }
       else{
@@ -1445,7 +1456,7 @@ export default {
             //param.payload.ExpressionAttributeValues[key2] = this.qtSearchText;
             break;
           case '날짜' :
-            //param.payload.ExpressionAttributeValues[key2] = this.qtSearchText;
+            param.RequestDataJSON = this.qtSearchText;
             break;
           default :
             break;
@@ -1653,20 +1664,9 @@ export default {
         {
           // 채팅에서 넘어왔을 경우 상세 조회
           this.qtConfrnToggleIndex2 = index;
-          this.GetQtList2(this.GetConfirmValue2(item[0].ID));
+          //this.GetQtList2(this.GetConfirmValue2(item[0].ID));
         }
       });  
-    },
-    GetQtList2(item){
-      this.SOList3Toggle = !this.SOList3Toggle;
-      this.detailQTData2 = JSON.parse(convertDynamoToArrayString(item.LineItem));
-      
-     /* if(this.SOList3Toggle){
-        btnAdd.setAttribute("class", "fas fa-chevron-up");
-      }
-      else{
-        btnAdd.setAttribute("class", "fas fa-chevron-down");
-      }*/
     },
     GetOrderHistory(docId ,orderID, seachText)
     {
@@ -1803,7 +1803,7 @@ export default {
 
       console.log('item : ' , item);
     },
-    GetWebposResData(item){
+    GetWebposResData(item, index){
      
       item.forEach(el =>{
 
@@ -1847,14 +1847,24 @@ export default {
                     //console.log('element : ',element);
                     let resQtItem = {};
                     resQtItem.ID = element.ESTM_ID;
+                    resQtItem.DocID = element.ESTM_ID;
                     resQtItem.CarNo = element.CAR_NO;
                     resQtItem.DealerName = '부품지원센터';
+                    resQtItem.DealerCode = 'PARTS';
                     resQtItem.DealerAgent = element.AGENT_NM;
                     resQtItem.ResFlag = 'WEBPOS';
                     resQtItem.CarType = element.SERIES;
                     resQtItem.ResDetail = dtlQtData;
                     el.ResQTData.push(resQtItem);              
                   });
+
+                  if(index >= 0)
+                  {
+                    // 채팅에서 넘어왔을 경우 상세 조회
+                    this.qtConfrnToggleIndex = index;
+                    console.log('item11 : ' ,item);
+                    this.showResItem(item[index].ResQTData[0])
+                  } 
                 }
               }
             }
@@ -1865,7 +1875,7 @@ export default {
 
       });  
     },
-    GetDealerResData(item) { 
+    GetDealerResData(item, index) { 
 
       console.log('dealer item :', item);
 
@@ -1897,19 +1907,31 @@ export default {
 
             let resQtItem = {};
             resQtItem.ID = element.ID;
+            resQtItem.DocID = element.DocID;
             resQtItem.CarNo = element.CarNo;
             resQtItem.DealerName = element.ResDealerNm;
+            resQtItem.DealerCode = element.ResDealer;
             resQtItem.DealerAgent = '';
             resQtItem.ResFlag = 'BAY4U'
             resQtItem.CarType ='';
             resQtItem.ResDetail = JSON.parse(element.LineItem);
-
             el.ResQTData.push(resQtItem);
 
           });
+
+          if(index >= 0)
+          {
+            // 채팅에서 넘어왔을 경우 상세 조회
+            this.qtConfrnToggleIndex2 = index;
+            
+            if(item[index].ResQTData.length > 0)
+            {
+              this.showResItem2(item[index].ResQTData[0])
+            }
+          }
         });  
       });
-      
+
     },
     showQtReqItem(item)
     {
@@ -1935,13 +1957,26 @@ export default {
       this.detailQTData = [];
       this.detailQTData = item.ResDetail;
     },
+    showResItem2(item){
+      this.SOList3Toggle = !this.SOList3Toggle;
+      
+      console.log('resItem :', item);
+      this.detailQTData2 = [];
+      if(item.ResDetail !== undefined)
+      {
+        this.detailQTData2 = JSON.parse(convertDynamoToArrayString(JSON.stringify(item.ResDetail)));
+      }
+      //this.detailQTData2 = JSON.parse(convertDynamoToArrayString(item.LineItem));
+    },
     showQTOrderPopup(item)
     {
       this.orderData = item;
+      console.log(this.orderData);
       this.showQTOrder = !this.showQTOrder;
-     // this.orderDealerName = item.ResDealerNm;
-      this.orderList = JSON.parse(convertDynamoToArrayString(item.LineItem));
-      //console.log(this.orderData);
+      this.orderDealerName = item.DealerName;
+      this.orderList = JSON.parse(convertDynamoToArrayString(JSON.stringify(item.ResDetail)));
+     // this.orderList = JSON.parse(convertDynamoToArrayString(item.ResDetail));
+      
     },
     removeItem(item) {
 
@@ -1968,8 +2003,8 @@ export default {
       param.payload.Item.CarNo = this.orderData.CarNo;
       param.payload.Item.ReqSite =  this.UserInfo.BsnID
       param.payload.Item.ReqSiteNm = this.UserInfo.Name;
-      param.payload.Item.ResDealer = this.orderData.ResDealer;
-      param.payload.Item.ResDealerNm = this.orderData.ResDealerNm;
+      param.payload.Item.ResDealer = this.orderData.DealerCode;
+      param.payload.Item.ResDealerNm = this.orderData.DealerName;
       param.payload.Item.LineItem = convertArrayToDynamo(JSON.stringify(this.orderList));
       param.payload.Item.ReqDt = now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);
       param.payload.Item.ReqTm = ReqTm;
@@ -2000,7 +2035,7 @@ export default {
           + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
       var chatMsg = {};
       chatMsg.from = {'name' : this.UserInfo.BsnID};
-      chatMsg.to = {'name' : this.orderData.ResDealer};
+      chatMsg.to = {'name' : this.orderData.DealerCode};
       chatMsg.msg  = msg;
       chatMsg.reqTm = chatTime;
       this.msgDatas = chatMsg;
@@ -2018,7 +2053,7 @@ export default {
       param.payload.Item.ID = id;
       param.payload.Item.DocID = this.orderData.DocID;
       param.payload.Item.ChatFrom = this.UserInfo.BsnID;
-      param.payload.Item.ChatTo =  this.orderData.ResDealer;
+      param.payload.Item.ChatTo =  this.orderData.DealerCode;
       param.payload.Item.Message = chatMsg.msg;
       param.payload.Item.Status = "0";
       param.payload.Item.ReqTm = chatMsg.reqTm;
@@ -2040,7 +2075,7 @@ export default {
         this.$sendMessage({
           name: this.UserInfo.BsnID,
           msg,
-          recv:  this.orderData.ResDealer,
+          recv:  this.orderData.DealerCode,
           chatId: this.orderData.DocID,
           reqTm : chatMsg.reqTm,
         });
@@ -2050,7 +2085,7 @@ export default {
                   chatid: this.orderData.DocID, 
                   carNo: this.orderData.CarNo,
                   chatFrom: this.UserInfo.BsnID,
-                  chatTo: this.orderData.ResDealer,
+                  chatTo: this.orderData.DealerCode,
                   chatDate: now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2),
                   qtInfo : this.orderData,
                   chatType:'order',
@@ -2077,6 +2112,8 @@ export default {
       // 채팅에서 넘어왔을 경우 처리
       if(Array.isArray(this.qtReqList)){
         
+        console.log('채팅에서 넘어옴 ! ' , docId , refID) ; 
+          
         let index = -1;
         for(var i=0; i <= this.qtReqList.length; i++)
         {
@@ -2084,8 +2121,11 @@ export default {
           if(index >= 0){
              console.log('index:' , index);
              this.qtToggleIndex = i;
-             this.GetConfirmQtList(this.qtReqList[i]);
-             this.GetConfirmQtList2(this.qtReqList[i] , index);
+            // this.GetConfirmQtList(this.qtReqList[i]);
+            // this.GetConfirmQtList2(this.qtReqList[i] , index);
+
+            this.GetDealerResData(this.qtReqList[i], index);
+            this.GetWebposResData(this.qtReqList[i], index);
            
              break;
           }
@@ -2457,7 +2497,14 @@ export default {
 .history-detailConts {
   background-color: #f9f9f9;
   margin: -20px;
-  padding: 5px 20px 5px 20px
+  padding: 5px 20px 5px 20px;
+}
+.history-detailConts-carvin
+{
+  position:absolute;
+  top: 0;
+  right: 10px;
+  margin-top: 5px;
 }
 
 .history-detailConts ul {
@@ -2750,6 +2797,16 @@ export default {
 }
 .dealer-qtInfo span{
   font-size: 0.95em;
+}
+.dealer-qtInfo li
+{ 
+  margin:0px 6px;
+  border-top:lightgrey 1px solid;
+}
+.dealer-qtInfo li:nth-child(1)
+{ 
+  margin:0px 6px;
+  border-top:#fff 1px solid;
 }
 .dealer-item
 {
