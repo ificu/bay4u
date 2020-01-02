@@ -677,12 +677,12 @@ export default {
           this.qtItems = [];
         }
 
-        if(this.qtInfo.CarBrand === undefined) this.qtInfo.CarBrand = "차종 선택";
-
         var btnAdd =  document.querySelector('#btnItmAdd');
         btnAdd.removeAttribute("disabled", "true");
        
       }
+
+      if(this.qtInfo.CarBrand === undefined) this.qtInfo.CarBrand = "차종 선택";
 
       // webpos견적 Data 초기화
       this.series = '';
@@ -980,13 +980,11 @@ export default {
         this.detailQTData = [];
 
         for(var item of copyData ){
-          console.log('item : ', item);
           if(item === '삭제 '){
             idx = 0;
           }
 
           if(idx >= 0) {
-            console.log('idx : ', idx);
 
             if(idx === 1) {
               var itemElem = item.split('	');
@@ -995,6 +993,8 @@ export default {
             }
             if(idx === 2) {
               newItem.carBrand = item;
+              if(this.carBrand.includes(item))
+                this.qtInfo.CarBrand = item;
             }
             if(idx === 3) {
               newItem.itemName = item;
@@ -1021,7 +1021,6 @@ export default {
             }
 
             idx++;
-            console.log('newItem : ', newItem);
           }
         }
       }
