@@ -238,9 +238,10 @@
                            <b-row>
                               <b-col class="pl-2 pr-2 pt-1 pb-0 request-qtInfo">견적요청</b-col>
                               <b-col class="request-qtInfo-detail">
-                                <b-row class="history-qtInfo-carNo">
-                                  <span v-if="qtReqInfo.CarNo === ''">차량번호 미입력</span>
-                                  <span v-if="qtReqInfo.CarNo !== ''"> {{(qtReqInfo.CarNo === "*empty*")?"미상차량" : qtReqInfo.CarNo }}</span>
+                                <b-row>
+                                  <span class="history-qtInfo-carNo" v-if="qtReqInfo.CarNo === ''">차량번호 미입력</span>
+                                  <span class="history-qtInfo-carNo" v-if="qtReqInfo.CarNo !== ''"> {{(qtReqInfo.CarNo === "*empty*")?"미상차량" : qtReqInfo.CarNo }}</span>
+                                  <span class="history-qtInfo-dealer">{{qtReqInfo.QTData.ResDealerNm}}</span>
                                 </b-row>
                                 <b-row class="request-qtInfo-carType">
                                   <span v-if="qtReqInfo.DealerFlag ==='WEBPOS'">
@@ -250,7 +251,8 @@
                                      {{(qtReqInfo.QTData.CarBrand === "*empty*") ?'': qtReqInfo.QTData.CarBrand}}  {{(qtReqInfo.QTData.CarSeries === "*empty*") ? '' : qtReqInfo.QTData.CarSeries }}
                                   </span>
                                 </b-row>
-                              </b-col>                    
+                              </b-col>  
+                            
                               <b-col class="request-qtInfo-detailBtn">
                                 <b-button block href="#"  v-b-toggle="'accordion-qtReq'+idx2"  variant="secondary" size="sm" v-on:click="showQtReqItem(qtReqInfo)">
                                 <!--<i v-if="!SOList2Toggle" class="fas fa-chevron-down"></i>
@@ -272,7 +274,11 @@
                             <ul>
                               <li v-for="(item, index) in qtReqItem" v-bind:key = "index">
                               <div>
-                              <div><span class="itemCode">{{item.ITM_NM}}</span> <span class="itemName">{{item.ITM_QTY}}개</span></div>
+                                <div> 
+                                    <span class="itemCode">{{item.ITM_NM}}</span> 
+                                    <span class="itemName" v-if="item.ITM_NM !=='사진입력'" >{{item.ITM_QTY}}개</span>
+                                    <span class="itemName" v-if="item.ITM_NM ==='사진입력'"  @click="showQTImage(item.IMG)"><i class="fas fa-image"></i></span>
+                                </div>
                               </div>
                               </li>
                             </ul>
@@ -2410,6 +2416,12 @@ export default {
   font-size: 1.1rem;
   font-weight: bold;
 }
+.history-qtInfo-dealer
+{
+   font-size: 0.9rem;
+   margin-left: 15px;
+   margin-top: 5px;
+}
 .history-qtInfo-vinNo {
   font-size: 0.7rem;
 }
@@ -2888,6 +2900,10 @@ export default {
   white-space: nowrap;
   font-size: 0.7rem;
   width: 145px;
+}
+.history-detailConts .itemName i{
+  font-size: 1.5em;
+  color:#848180;
 }
 
 .history-detailConts .itemCode {
