@@ -351,6 +351,9 @@
               <template v-slot:header.AMT="{ header }">
                 <span class="header-item2">{{ header.text }}</span>
               </template>
+              <template v-slot:header.delv="{ header }">
+                <span class="header-item2">{{ header.text }}</span>
+              </template>
               <template v-slot:header.memo="{ header }">
                 <span class="header-item2">{{ header.text }}</span>
               </template>
@@ -379,6 +382,9 @@
               <template v-slot:item.AMT="{ item }">
                <span class="item-numeric">{{ item.AMT|localeNum}}</span>
               </template>       
+              <template v-slot:item.delv="{ item }">
+               <span class="item-delv">{{ item.delv }}</span>
+              </template>
               <template v-slot:item.action="{ item }">
                 <v-icon small class="mr-2" @click="editItem(item)" >
                   edit
@@ -559,6 +565,7 @@ export default {
           { text: '수량',  value: 'itemQty', align:'end'},
           { text: '단가', value: 'itemPrice',align:'end' },
           { text: '금액', value: 'AMT',align:'end'},
+          { text: '배송구분', value: 'delv' },
           { text: '비고', value: 'memo', sortable: false,},
           { text: '', value: 'action', sortable: false, width:'80px', },
         ],
@@ -580,7 +587,7 @@ export default {
         itemQty:0,
         itemPrice:0,
         AMT:0,
-        delv:'택배',
+        delv:'퀵',
         memo:'',
       },
       itemsPerPage: -1,
@@ -921,12 +928,11 @@ export default {
         .then((result) => {
           console.log("======= QT Update result ========");
           console.log(result.data);
-          this.$EventBus.$emit('send-QTConfirm' , qtMsg)
+          this.$EventBus.$emit('send-QTConfirm' , qtMsg);
         })
         .catch((error) => {
           console.log(error);
         });
-
 
       })
       .catch((error) => {
@@ -961,8 +967,16 @@ export default {
 
         if(result.data.Items.length > 0){
           this.txtQTConfirm = "견적 재회신";
+
+          if(Array.isArray(result.data.Items))
+          {
+            result.data.Items.sort(function(a, b){
+              return (a.ReqTm > b.ReqTm) ? 1 : -1;
+            });
+          }
+
+          this.detailQTData = JSON.parse(convertDynamoToArrayString(result.data.Items[result.data.Items.length -1].LineItem));
           this.GetOrderHistory();
-          this.detailQTData = JSON.parse(convertDynamoToArrayString(result.data.Items[0].LineItem));
         }
         else{
           this.txtQTConfirm = "견적확정 회신";
@@ -1147,7 +1161,6 @@ export default {
       document.getElementById('clipboardBtn').value = clipText;
       document.getElementById('clipboardBtn').click();
 
-      
     });
   },
   mounted: function()
