@@ -6,16 +6,16 @@
         header-text-variant="white"
         header-tag="header"
         header-bg-variant="dark"
-        style="height:160px;"
+        style="height:113px;"
       >
         <b-card-text class="UserInfo-contents" v-if="showSiteInfo">
-          <div class="UserInfo-img">
-            <img src="@/assets/user-icon.png">
-          </div>
+
           <div class="UserInfo-info">
-            <div class="info-name">{{this.qtInfo.ReqName}}</div>
-            <div class="info-tel"><v-icon small class="qt-icon">fas fa-phone-square</v-icon>{{this.siteInfo.TEL}} / <v-icon small class="qt-icon">fas fa-mobile-alt</v-icon>{{this.siteInfo.HP}}</div>
-            <div class="info-addr"><v-icon small class="qt-icon">mdi-domain</v-icon>{{this.siteInfo.ADDR}}</div>
+            <v-row>
+              <div class="info-name">{{this.qtInfo.ReqName}}</div>
+              <div class="info-tel"><v-icon small class="qt-icon">fas fa-phone-square</v-icon>{{this.siteInfo.TEL}} / <v-icon small class="qt-icon">fas fa-mobile-alt</v-icon>{{this.siteInfo.HP}} / </div>
+              <div class="info-addr"><v-icon small class="qt-icon">mdi-domain</v-icon>{{this.siteInfo.ADDR}}</div>
+            </v-row>
           </div>
         </b-card-text>
       </b-card>
@@ -27,40 +27,66 @@
       >
         <b-card-text>
           <div class="Car-Info">
+            <v-container>
+              <v-row  class="mt-n10 mb-n12">
+                <v-col cols = "12" md="10">
+                  <v-row  class="mb-n10">
+                    <v-col cols="12" md="4">
+                      <v-text-field label="차량번호" outlined dense color="blue accent-1" :value="(this.qtInfo.CarNo==='*empty*')?'미상차량' : this.qtInfo.CarNo">
+                      </v-text-field>
+                    </v-col>
+                    <v-col cols="12" md="8">
+                      <v-text-field label="차대번호" outlined dense color="blue accent-1" :value="this.qtInfo.CarVin">
+                      </v-text-field>
+                    </v-col>
+                  </v-row>
+                  <v-row class="mb-n4">
+                    <v-col cols="12" md="4">
+                      <!--<v-select v-model="qtInfo.CarBrand" :items="carBrand" label="브랜드" :value="this.qtInfo.CarBrand" outlined dense color="success" :menu-props="{ top: true, offsetX: true}"></v-select>-->
+                      <b-form-select v-model="qtInfo.CarBrand" :options="carBrand"></b-form-select>
+                    </v-col>
+                    <v-col cols="12" md="8">
+                      <v-text-field label="차정상세" outlined dense clearable color="blue accent-1" v-model="qtInfo.CarSeries" :value="this.qtInfo.CarSeries">
+                      </v-text-field>
+                    </v-col>
+                  </v-row>                  
+                </v-col>
+                <v-col cols = "12" md="2">
+                   <v-btn class="mt-8" id="CarInfo-Button" x-large outlined color="blue accent-1" @click="showQTImage(qtInfo.IMG)">
+                    <v-icon left>fas fa-camera</v-icon> <span class="font-weight-medium ml-4">사진<br>확인</span>
+                  </v-btn>            
+                </v-col>
+              </v-row>
+                        
+            </v-container>            
+            <!--
               <div class="CarInfo-Left">
-                <div><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>차량번호</div>
-                <b-form-input  :value="(this.qtInfo.CarNo==='*empty*')?'미상차량' : this.qtInfo.CarNo"></b-form-input>
+                <v-row>
+                  <v-text-field label="차량번호" outlined dense width = "100px" :value="(this.qtInfo.CarNo==='*empty*')?'미상차량' : this.qtInfo.CarNo">
+                  </v-text-field>
+                </v-row>
+                <v-row>
+                  <div><v-icon x-small class="qt-icon">fas fa-angle-right</v-icon>브랜드 </div>     
+                  <div class="QT-Content">{{this.series}}</div>
+                </v-row>    
               </div>
               <div class="CarInfo-Right">
-                <div><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>차대번호</div>
-                <b-form-input v-model="this.qtInfo.CarVin"></b-form-input>
+                <v-row>
+                  <div><v-icon x-small class="qt-icon">fas fa-angle-right</v-icon>차대번호 </div>  
+                  <b-form-input v-model="this.qtInfo.CarVin"></b-form-input>
+                </v-row>
+                <v-row>
+                  <div><v-icon x-small class="qt-icon">fas fa-angle-right</v-icon>상세차정 </div>     
+                  <div class="QT-Content">{{this.series}}</div>
+                </v-row>                      
               </div>
               <div class="CarInfo-Button">
                 <v-btn class="ma-2" id="CarInfo-Button" outlined fab color="#acd3ce" elevation="5" @click="showQTImage(qtInfo.IMG)">
                   사진<br>확인
                 </v-btn>             
-              </div>              
-            </div>  
-            <div class="QT-Info"  v-if="UserInfo.UserType === 'DEALER'">
-              <!--
-              <div class="CarInfo-Left">
-                <div>브랜드</div>
-                <b-form-select v-model="selectedBrand" class="mb-3">
-                  <option :value="null">차량 브랜드 선택</option>
-                  <option value="AUDI">AUDI</option>
-                  <option value="VW">VW</option>
-                  <option value="BMW">BMW</option>
-                  <option value="Benz">Benz</option>
-                </b-form-select> 
-              </div>
-              -->
-              <div class="QT-Title">
-                <div><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>차정상세 :           
-                </div>
-                <!--<b-form-input v-model="headQTData[0].SERIES"></b-form-input>-->
-                </div>
-                <div class="QT-Content">{{this.series}}</div>
-            </div>   
+              </div>  
+            -->           
+          </div>   
         </b-card-text>
       </b-card>
       <b-card no-body class="QT-Detail">
@@ -98,8 +124,8 @@
               <v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>Memo
               <b-form-textarea
                 id="textarea"
-                rows="3"
-                max-rows="6"
+                rows="2"
+                max-rows="2"
                 v-model="this.qtInfo.Memo"
               ></b-form-textarea>   
             </div>      
@@ -291,7 +317,7 @@
               :items="detailQTData"
               class="elevation-1 mytable"
               fixed-header
-              height="calc(100vh - 620px)"
+              height="calc(100vh - 550px)"
               :items-per-page="itemsPerPage"
               hide-default-footer
               no-data-text=''
@@ -388,7 +414,7 @@
               :items="orderHistory"
               class="elevation-1 mytable"
               fixed-header
-              height="calc(100vh - 600px)"
+              height="calc(100vh - 520px)"
               :items-per-page="itemsPerPage"
               hide-default-footer
               no-data-text=''
@@ -558,12 +584,13 @@ export default {
         memo:'',
       },
       itemsPerPage: -1,
-      carBrand:['BENZ','BMW','AUDI','VW','FORD','VOLVO','JAGUAR','MASERATI','INFINITI','LEXUS','TOYOTA','HONDA'],
+      carBrand:['차종 선택', 'BMW', 'BENZ', 'AUDI', 'VW', 'FORD', 'LEXUS', '기타'],
       afterBrand:['MANN','FRAM','MEYLE','BOSCH','TRW'],
       delvType:['택배','퀵'],
       testData: {},      
       txtQTConfirm: '견적 확정 회신', 
       orderHistory:[],
+      brandSelected: '차종 선택',    
     }
   },
   methods: {
@@ -621,6 +648,8 @@ export default {
               this.series = headQTData[0].SERIES;
               this.angentNm = headQTData[0].AGENT_NM;
               this.estmStsNm = headQTData[0].ESTM_STS_NM;
+
+              this.qtInfo.CarSeries = headQTData[0].SERIES;
             }
           }
           
@@ -647,6 +676,8 @@ export default {
           this.qtInfo.Memo = "";
           this.qtItems = [];
         }
+
+        if(this.qtInfo.CarBrand === undefined) this.qtInfo.CarBrand = "차종 선택";
 
         var btnAdd =  document.querySelector('#btnItmAdd');
         btnAdd.removeAttribute("disabled", "true");
@@ -695,15 +726,14 @@ export default {
       var msg = '';
 
       for(var msg of this.msgDatas) {
-        console.log('checkMsg : ', msg.msgData.msg);
         if(msg.msgData.msg.indexOf('차량에 대한 견적이 완료') > 0) 
           checkMsg = true;
       }
 
       if(checkMsg === false)
-        msg = this.qtInfo.CarNo + " 차량에 대한 견적이 완료됐습니다.";
+        msg = ((this.qtInfo.CarNo==='*empty*')?'미상' : this.qtInfo.CarNo) + " 차량에 대한 견적이 완료됐습니다.";
       else
-        msg = this.qtInfo.CarNo + " 차량에 대한 견적이 수정 후 재전송 되었습니다.";      
+        msg = ((this.qtInfo.CarNo==='*empty*')?'미상' : this.qtInfo.CarNo) + " 차량에 대한 견적이 수정 후 재전송 되었습니다.";      
 
       var qtMsg = {};
       qtMsg.from = {'name' : this.UserInfo.BsnID};
@@ -716,6 +746,11 @@ export default {
       console.log("Image : ", img);
       this.showQTImageFlag = true;
       this.itemImage = Constant.IMG_URL + img;
+
+          var http = new XMLHttpRequest();
+          http.open('HEAD', Constant.IMG_URL + img, false);
+          http.send(); 
+          console.log("Image Check : ", http.status);
     },
     saveImage() {
       console.log("Info : ", this.qtInfo);
@@ -808,15 +843,14 @@ export default {
       var msg = '';
 
       for(var msg of this.msgDatas) {
-        console.log('checkMsg : ', msg);
         if(msg.msgData.msg.indexOf('차량에 대한 견적이 완료') > 0)
           checkMsg = true;
       }
 
       if(checkMsg === false)
-        msg = this.qtInfo.CarNo + " 차량에 대한 견적이 완료됐습니다.";
+        msg = ((this.qtInfo.CarNo==='*empty*')?'미상' : this.qtInfo.CarNo) + " 차량에 대한 견적이 완료됐습니다.";
       else
-        msg = this.qtInfo.CarNo + " 차량에 대한 견적이 수정 후 재전송 되었습니다.";
+        msg = ((this.qtInfo.CarNo==='*empty*')?'미상' : this.qtInfo.CarNo) + " 차량에 대한 견적이 수정 후 재전송 되었습니다.";
 
       var id =  this.UserInfo.BsnID + this.qtInfo.ReqSite + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2)
       + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);;
@@ -847,7 +881,7 @@ export default {
       param.payload.Item.ReqTm = ReqTm;
       param.payload.Item.ResDealerNm = this.UserInfo.Name;
               
-      console.log("======= QT Save Request ========");
+      console.log("======= QT Return Save Request ========");
       console.log(JSON.stringify(param));
 
       axios({
@@ -857,14 +891,45 @@ export default {
           data: param
       })
       .then((result) => {
-        console.log("======= QT Save result ========");
+        console.log("======= QT Return Save result ========");
         console.log(result.data);
         this.txtQTConfirm = "견적 재회신";
         })
       .catch((error) => {
         console.log(error);
       });
-   
+      
+      console.log("======= Check QT ========");
+      console.log(JSON.stringify(this.qtInfo));
+
+      param.operation = "update";
+      param.tableName = "BAY4U_QT_LIST";
+      param.payload = {};
+      param.payload.Key = {};
+      param.payload.Key.ID = this.qtInfo.ID;
+      param.payload.UpdateExpression = "Set CarBrand = :b, CarSeries = :s";
+      param.payload.ExpressionAttributeValues = {
+            ":b" : this.qtInfo.CarBrand,
+            ":s" :this.qtInfo.CarSeries
+      };
+              
+      console.log("======= QT Update Request ========");
+      console.log(JSON.stringify(param));
+
+      axios({
+          method: 'POST',
+          url: Constant.LAMBDA_URL,
+          headers: Constant.JSON_HEADER,
+          data: param
+      })
+      .then((result) => {
+        console.log("======= QT Update result ========");
+        console.log(result.data);
+        })
+      .catch((error) => {
+        console.log(error);
+      });
+      
     },
     getQTConfirm()
     {
@@ -1115,7 +1180,6 @@ export default {
   height: 100%;
 }
 .InfoPage {
- /*height: calc(100% - 10px);)*/
  height: 90%;
 }
 
@@ -1137,9 +1201,11 @@ export default {
 
 .UserInfo-info .info-name {
   font-weight: bold;
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   color: #455a63;
   text-align: center; 
+  padding-left: 10px;
+  padding-right: 30px;
 }
 .UserInfo-info .info-tel {
   margin-top: 5px;
@@ -1152,24 +1218,6 @@ export default {
   font-size: 0.9rem;
 }
 
-.Car-Info {
-  display: flex;
-}
-.Car-Info .CarInfo-Left {
-  flex: 30%;
-  font-weight: bold;
-  color: #5d4038;
-  margin-right: 5px;
-  margin-bottom: 5px;
-}
-.Car-Info .CarInfo-Right {
-  flex: 60%;
-  font-weight: bold;
-  color: #5d4038;
-}
-.Car-Info .CarInfo-Button {
-  flex: 10%;
-}
 .QT-Info {
   display:flex;
   flex-direction: row;
@@ -1194,14 +1242,14 @@ export default {
 .QTReq-List {
   font-weight: bold;
   color: #5d4038;
-  height: calc(100vh - 650px);
+  height: calc(100vh - 560px);
 }
 .QTReq-Table {
   width: 100%;
   display: block;
   overflow-y: scroll;
   height: 400px;
-  height: calc(100vh - 670px);
+  height: calc(100vh - 580px);
 }
 .QTReq-Memo {
   font-weight: bold;
@@ -1259,7 +1307,7 @@ export default {
 }
 
 .QT-Detail {
-  height: calc(100vh - 460px);
+  height: calc(100vh - 385px);
 }
 
 .QTRes-footer{
