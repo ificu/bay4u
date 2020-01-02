@@ -860,7 +860,7 @@ export default {
       qtMsg.reqTm = chatTime;
       qtMsg.ChatType = "R";
       qtMsg.RefID = id;
-      this.$EventBus.$emit('send-QTConfirm' , qtMsg)
+      //this.$EventBus.$emit('send-QTConfirm' , qtMsg);
 
       var param = {};
 
@@ -894,42 +894,46 @@ export default {
         console.log("======= QT Return Save result ========");
         console.log(result.data);
         this.txtQTConfirm = "견적 재회신";
+
+        console.log("======= Check QT ========");
+        console.log(JSON.stringify(this.qtInfo));
+
+        param.operation = "update";
+        param.tableName = "BAY4U_QT_LIST";
+        param.payload = {};
+        param.payload.Key = {};
+        param.payload.Key.ID = this.qtInfo.ID;
+        param.payload.UpdateExpression = "Set CarBrand = :b, CarSeries = :s";
+        param.payload.ExpressionAttributeValues = {
+              ":b" : this.qtInfo.CarBrand,
+              ":s" :this.qtInfo.CarSeries
+        };
+                
+        console.log("======= QT Update Request ========");
+        console.log(JSON.stringify(param));
+
+        axios({
+            method: 'POST',
+            url: Constant.LAMBDA_URL,
+            headers: Constant.JSON_HEADER,
+            data: param
         })
-      .catch((error) => {
-        console.log(error);
-      });
-      
-      console.log("======= Check QT ========");
-      console.log(JSON.stringify(this.qtInfo));
+        .then((result) => {
+          console.log("======= QT Update result ========");
+          console.log(result.data);
+          this.$EventBus.$emit('send-QTConfirm' , qtMsg)
+        })
+        .catch((error) => {
+          console.log(error);
+        });
 
-      param.operation = "update";
-      param.tableName = "BAY4U_QT_LIST";
-      param.payload = {};
-      param.payload.Key = {};
-      param.payload.Key.ID = this.qtInfo.ID;
-      param.payload.UpdateExpression = "Set CarBrand = :b, CarSeries = :s";
-      param.payload.ExpressionAttributeValues = {
-            ":b" : this.qtInfo.CarBrand,
-            ":s" :this.qtInfo.CarSeries
-      };
-              
-      console.log("======= QT Update Request ========");
-      console.log(JSON.stringify(param));
 
-      axios({
-          method: 'POST',
-          url: Constant.LAMBDA_URL,
-          headers: Constant.JSON_HEADER,
-          data: param
       })
-      .then((result) => {
-        console.log("======= QT Update result ========");
-        console.log(result.data);
-        })
       .catch((error) => {
         console.log(error);
       });
-      
+
+    
     },
     getQTConfirm()
     {

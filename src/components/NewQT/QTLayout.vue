@@ -908,6 +908,12 @@ name: 'QTStep',
 
         console.log('selectedDealer :' ,  this.selectedDealer);
 
+        var index = this.selectedDealer.findIndex(i => i.TYPE === 'A');
+        if(index === -1){
+          // 선택 된 대리점 중 대표대리점이 었으면 첫번째 대리점을 대표로 설정
+          this.selectedDealer[0].TYPE = 'A'
+        }
+
         this.selectedDealer.forEach( dealer => {
             
           if(dealer.DEALER === 'PARTS')
@@ -967,7 +973,6 @@ name: 'QTStep',
               });
           }
           else{
-
               console.log('대리점 저장 !!');
               now = new Date();
               docId = this.UserInfo.BsnID + now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2)  + this.CarInfo.VinNo + 
@@ -975,7 +980,6 @@ name: 'QTStep',
               // 견적저장
               this.saveQTData(docId , dealer.DEALER,  dealer.DEALER_NAME ,dealer.TYPE);
           }
-
         });
     },
     saveQTData(docId , dealer , dealerNm, dealerType)
@@ -1031,12 +1035,6 @@ name: 'QTStep',
         {
           this.saveChating(docId , dealer);
         }
-
-        if( this.dealerList.length === this.saveQtCount )
-        {
-            this.goChating();
-        }
-
       })
       .catch((error) => {
         console.log(error);
@@ -1075,6 +1073,11 @@ name: 'QTStep',
       .catch((error) => {
         console.log(error);
       }); 
+
+      if( this.selectedDealer.length === this.saveQtCount )
+      {
+          this.goChating();
+      }
     },
     goChating()
     {
