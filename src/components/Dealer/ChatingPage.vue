@@ -228,6 +228,74 @@ export default {
         this.saveChatMsg(qtMsg);
     });
 
+    this.$EventBus.$on('paste-Image', imgData => {  
+      console.log('Image Receive ......... ', imgData);   
+
+      var now = new Date();
+      var key = this.UserInfo.BsnID + now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
+      var bolbData = dataURItoBlob(imgData);
+
+      var param = {};
+      param.name = key + '.' + bolbData.type.replace('image/', '');
+      param.type = bolbData.type;
+
+      axios({
+          method: 'POST',
+          url: Constant.IMGUPLOAD_URL,
+          headers: Constant.IMGUPLOAD_HEADER,
+          data: param
+      })
+      .then((result) => {
+        console.log("======= IMG Save result ========");
+        console.log(result.data);
+
+        param = bolbData;
+
+        axios({
+            method: 'PUT',
+            url: result.data.uploadURL,
+            data: param
+        })
+        .then((result) => {
+          console.log("======= IMG Upload result ========");
+          console.log(result);
+        })
+        .catch((error) => {
+          console.log(error);
+        }); 
+
+      })
+      .catch((error) => {
+        console.log(error);
+      });       
+
+      var now = new Date();
+      var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
+      var msg = '사진첨부';
+      var chatMsg = {};
+      chatMsg.from = {'name' : this.UserInfo.BsnID};
+      chatMsg.to = {'name' : this.chatItem.ReqSite};
+      chatMsg.Chatid = this.chatItem.ID;
+      chatMsg.msg = msg;
+      chatMsg.img = imgData;
+      chatMsg.imgId = key + '.' + bolbData.type.replace('image/', '');
+      chatMsg.reqTm = chatTime;
+      this.msgDatas = chatMsg;
+      this.$sendMessage({
+        name: this.UserInfo.BsnID,
+        msg,
+        recv: this.chatItem.ReqSite,
+        chatId: this.chatItem.ID,
+        imgId: key + '.' + bolbData.type.replace('image/', '')
+      });
+      this.saveChatMsg(chatMsg);     
+
+    });
+
     Notification.requestPermission(function(result) {
       if(result === 'granted') {
         console.log('Notification OK');
