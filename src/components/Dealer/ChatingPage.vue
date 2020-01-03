@@ -139,7 +139,7 @@ export default {
       console.log('chatItem.ID : ' + this.chatItem.ID + ' / ' + 'data.chatId : ' + data.chatId);
 
       // 같은 대리점 채팅이 아니면 리턴
-      if(this.UserInfo.BsnID !==  data.qtInfo.ResDealer ) return;
+      if(data.imgId !== undefined && this.UserInfo.BsnID !==  data.qtInfo.ResDealer ) return;
       
       if(this.chatItem.ID === data.chatId) {
         
