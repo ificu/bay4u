@@ -2907,7 +2907,7 @@ export default {
   width: 145px;
 }
 .history-detailConts .itemName i{
-  font-size: 1.5em;
+  font-size: 1.8em;
   color:#848180;
 }
 
