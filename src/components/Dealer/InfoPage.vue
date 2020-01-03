@@ -56,8 +56,7 @@
                     <v-icon left>fas fa-camera</v-icon> <span class="font-weight-medium ml-4">사진<br>확인</span>
                   </v-btn>            
                 </v-col>
-              </v-row>
-                        
+              </v-row>            
             </v-container>            
             <!--
               <div class="CarInfo-Left">
@@ -142,7 +141,11 @@
             <div class="QTRes-List">
               <div class="QTRes-Title">
                 <v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>견적회신 상세
-              </div>  
+              </div> 
+              <div class="QTRes-select" v-if="UserInfo.UserType !== 'DEALER'" >
+                <b-form-select v-model="selectedConfirm" :options="confirmList" @change="getConfirmData">
+                </b-form-select>
+              </div>
               <div class="QTRes-Button">
                 <b-button-group size="sm">
                   <!--<b-button variant="outline-secondary">엑셀 카피 자동 입력</b-button>-->
@@ -179,7 +182,7 @@
                               <v-text-field v-model="editedItem.afterNo" label="After No" @focus="$event.target.select()"></v-text-field>
                           </v-col>-->
                           <v-col cols="12" sm="6" md="1">
-                              <v-text-field :value="editedItem.itemQty  | localeNum" label="수량" 
+                              <v-text-field :value="editedItem.itemQty" label="수량" 
                               @input="value =>editedItem.itemQty = value"  
                               @change="onCalculatorAMT"
                               @focus="$event.target.select()"
@@ -529,6 +532,7 @@ export default {
       selectedBrand: null,
       tabIndex: 0,
       detailQTData:[],
+      confirmList:[],
       series:'',
       angentNm:'',
       estmStsNm:'',
@@ -543,7 +547,7 @@ export default {
       singleSelect:false,
       dialog: false,
      // carinfoHeight:'height:130px;',
-      btnEditText:'추가',
+    //  btnEditText:'추가',
       headers: [
           {
             text: '브랜드',
@@ -562,7 +566,7 @@ export default {
           { text: '브랜드', value: 'itemBrand', align:'center',},
           { text: '부품명',  value: 'itemName', align:'center',},
          // { text: '애프터번호', value: 'afterNo', align:'center',},
-          { text: '수량',  value: 'itemQty', align:'end'},
+          { text: '수량', value: 'itemQty', align:'end'},
           { text: '단가', value: 'itemPrice',align:'end' },
           { text: '금액', value: 'AMT',align:'end'},
           { text: '배송구분', value: 'delv' },
@@ -577,7 +581,21 @@ export default {
           { text: '단가', value: 'itemPrice',align:'end' },
           { text: '금액', value: 'AMT',align:'end'},
         ],
+      editedIndex: -1,
       editedItem: {
+        seq:0,
+        itemCode: '',
+        itemBrand: '',
+        carBrand: '',
+        itemName: '',
+        afterNo: '',
+        itemQty: 0,
+        itemPrice:0,
+        AMT:0,
+        delv:'퀵',
+        memo:'',
+      },
+      defaultItem: {
         seq:0,
         itemCode: '',
         itemBrand: '',
@@ -597,7 +615,8 @@ export default {
       testData: {},      
       txtQTConfirm: '견적 확정 회신', 
       orderHistory:[],
-      brandSelected: '차종 선택',    
+      brandSelected: '차종 선택',
+      selectedConfirm:'' 
     }
   },
   methods: {
@@ -800,11 +819,10 @@ export default {
       })   
     },
     editItem (item) {
-        this.btnEditText = '수정';
-        this.editedIndex = this.detailQTData.indexOf(item);
-        this.editedItem = Object.assign({}, item);
-        this.dialog = true;        
-      },
+      this.editedIndex = this.detailQTData.indexOf(item);
+      this.editedItem = Object.assign({}, item);
+      this.dialog = true;    
+    },
     deleteItem (item) {
       const index = this.detailQTData.indexOf(item);
       confirm('삭제하시겠습니까?') && this.detailQTData.splice(index, 1);
@@ -827,18 +845,16 @@ export default {
       }, 300)
     },
     addItem () {
-      this.btnEditText = '추가';
       this.editedItem.seq = this.detailQTData.length + 1;
       if (this.editedIndex > -1) {
         Object.assign(this.detailQTData[this.editedIndex], this.editedItem)
-      } else {
+      } 
+      else {
         this.detailQTData.push(this.editedItem)
       }
-
       this.close()
     },
-    saveQTConfirm()
-    {
+    saveQTConfirm(){
       
       if(this.detailQTData.length === 0) return;
 
@@ -938,11 +954,8 @@ export default {
       .catch((error) => {
         console.log(error);
       });
-
-    
     },
-    getQTConfirm()
-    {
+    getQTConfirm(){
       this.detailQTData = [];
 
       var param = {};
@@ -975,7 +988,18 @@ export default {
             });
           }
 
-          this.detailQTData = JSON.parse(convertDynamoToArrayString(result.data.Items[result.data.Items.length -1].LineItem));
+          this.confirmList = result.data.Items.map( obj => { 
+            var rObj = {};
+            rObj.value = obj.ID;
+            rObj.text = obj.ReqTm;
+            rObj.data = obj;
+            return rObj;
+          });
+
+          this.selectedConfirm = this.confirmList[0].value;
+          //console.log('this.confirmList : ' , this.confirmList);
+          //this.detailQTData = JSON.parse(convertDynamoToArrayString(result.data.Items[result.data.Items.length -1].LineItem));
+          this.detailQTData = JSON.parse(convertDynamoToArrayString(this.confirmList[0].data.LineItem));
           this.GetOrderHistory();
         }
         else{
@@ -983,6 +1007,14 @@ export default {
         }
          
       });
+    },
+    getConfirmData()
+    {
+       //console.log(' selectedConfirm: ' , this.selectedConfirm);
+       //console.log(' confirmList: ' , this.confirmList);
+       let index = this.confirmList.findIndex(x => x.value === this.selectedConfirm);
+       //console.log('index : ' , index);
+       this.detailQTData = JSON.parse(convertDynamoToArrayString(this.confirmList[index].data.LineItem));
     },
     clipboardAdd() {
       console.log("======= clipboardAdd ========");
@@ -1111,22 +1143,24 @@ export default {
         get() { return this.$store.getters.msgDatas },
         set(value) { this.$store.dispatch('UpdateMsgData',value) }
     },        
-      total: function() {
-        let sum = 0;
-        this.detailQTData.forEach(function(item) {
-          sum += (parseFloat(item.AMT));
-        });
-        return sum;
-      },
-      total2: function()
-      {
-        let sum = 0;
-        this.orderHistory.forEach(function(item) {
-          sum += (parseFloat(item.AMT));
-        });
-        return sum;
-      }
-      
+    total: function() {
+      let sum = 0;
+      this.detailQTData.forEach(function(item) {
+        sum += (parseFloat(item.AMT));
+      });
+      return sum;
+    },
+    total2: function()
+    {
+      let sum = 0;
+      this.orderHistory.forEach(function(item) {
+        sum += (parseFloat(item.AMT));
+      });
+      return sum;
+    },
+    btnEditText () {
+      return this.editedIndex === -1 ? '추가' : '수정'
+    },
   },
 
   created: function(){
@@ -1170,7 +1204,12 @@ export default {
         var btnAdd =  document.querySelector('#btnItmAdd');
         btnAdd.setAttribute("disabled", "true");
     }
-  }
+  },
+   watch: {
+      dialog (val) {
+        val || this.close()
+      },
+    },
 }
 </script>
 
@@ -1281,6 +1320,10 @@ export default {
   color: #5d4038;
   text-align: left;
   flex: 20%;
+}
+.QTRes-select
+{
+  width: 220px;
 }
 .QTRes-List .QTRes-Button {
   text-align: right;
