@@ -137,6 +137,9 @@ export default {
       //$ths.datas.push(data);
       console.log("Chat Data Recv : ", data);
       console.log('chatItem.ID : ' + this.chatItem.ID + ' / ' + 'data.chatId : ' + data.chatId);
+
+      // 같은 대리점 채팅이 아니면 리턴
+      if(data.imgId !== undefined && this.UserInfo.BsnID !==  data.qtInfo.ResDealer ) return;
       
       if(this.chatItem.ID === data.chatId) {
         

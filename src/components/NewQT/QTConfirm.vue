@@ -48,7 +48,7 @@
 
 .body-qtList
 {
-  height: 300px;
+  height: 250px;
   overflow:auto;
   overflow-x:hidden;
 }

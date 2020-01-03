@@ -164,6 +164,9 @@ export default {
     }),*/
   },
   created : function() {
+
+    this.showQTReqList();
+
     if(this.$route.params.chatid !== undefined) {
 
       // msgDatas 초기화
@@ -192,7 +195,7 @@ export default {
           msg = this.$route.params.carNo + " 차량에 대한 견적이 요청됐습니다.";
         }
 
-         if(this.$route.params.chatDealerNm !== undefined)
+        if(this.$route.params.chatDealerNm !== undefined)
         {
           this.chatDealerName = this.$route.params.chatDealerNm;
         }
@@ -253,8 +256,6 @@ export default {
 
     if(this.UserInfo.BsnID === '')
       this.UserInfo.BsnID = this.$cookies.get('BsnID');
-
-    this.showQTReqList();
 
   },
   methods: {

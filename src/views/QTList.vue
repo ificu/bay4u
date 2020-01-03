@@ -236,7 +236,7 @@
                       <b-card-header header-tag="header" role="tab" header-class="card-header-qtInfo">
                         <b-container>
                            <b-row>
-                              <b-col class="pl-2 pr-2 pt-1 pb-0 request-qtInfo">견적요청</b-col>
+                              <b-col class="pl-2 pr-2 pt-1 pb-0 request-qtInfo">견적<br>요청</b-col>
                               <b-col class="request-qtInfo-detail">
                                 <b-row>
                                   <span class="history-qtInfo-carNo" v-if="qtReqInfo.CarNo === ''">차량번호 미입력</span>
@@ -302,7 +302,7 @@
                           <b-container>
                             <b-row>
                               <!--<b-col align-self="center" class="history-webpos-date">{{GetConfirmValue(qtReqInfo.ID,"MONTH")}}/{{GetConfirmValue(qtReqInfo.ID,"DAY")}}({{GetConfirmValue(qtReqInfo.ID,"DAYWEEK")}})</b-col>-->
-                              <b-col class="pl-2 pr-2 pt-1 response-qtInfo">견적회신</b-col>
+                              <b-col class="pl-2 pr-2 pt-1 response-qtInfo">견적<br>회신</b-col>
                               <b-col class="response-qtInfo-detail">
                                 <b-row>
                                   <b-col class="pl-1 pt-1 pb-0">
@@ -378,7 +378,7 @@
                         <b-card-header header-tag="header" role="tab" header-class="card-header-qtRes">
                         <b-container>
                           <b-row>
-                            <b-col class="pl-2 pr-2 pt-1 response-qtInfo">견적회신</b-col>
+                            <b-col class="pl-2 pr-2 pt-1 response-qtInfo">견적<br>회신</b-col>
                             <b-col class="response-qtInfo-detail">
                               <b-row>
                                   <b-col class="pl-1 pt-1 pb-0">
