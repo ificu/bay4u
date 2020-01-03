@@ -52,7 +52,7 @@
                   </v-row>                  
                 </v-col>
                 <v-col cols = "12" md="2">
-                   <v-btn class="mt-8" id="CarInfo-Button" x-large outlined color="blue accent-1" @click="showQTImage(qtInfo.IMG)">
+                  <v-btn v-if="qtInfo.IMG !== '*empty*'" class="mt-8" id="CarInfo-Button" x-large outlined color="blue accent-1" @click="showQTImage(qtInfo.IMG)" >
                     <v-icon left>fas fa-camera</v-icon> <span class="font-weight-medium ml-4">사진<br>확인</span>
                   </v-btn>            
                 </v-col>
@@ -151,7 +151,8 @@
                   <!--<b-button variant="outline-secondary">엑셀 카피 자동 입력</b-button>-->
                   <b-button variant="outline-secondary" v-on:click="GetQtList" v-if="UserInfo.UserType === 'DEALER'">견적서 자동 입력</b-button>
                   <b-button variant="outline-secondary" @click="selectedDeleteItem">선택 삭제</b-button>
-                  <b-button id="clipboardBtn" @click="clipboardAdd" style="display:none">test...</b-button>
+                  <b-button id="clipboardBtn" @click="clipboardAdd" style="display:none">Text 붙여넣기 Hidden 버튼</b-button>
+                  <b-button id="clipImageBtn" @click="clipImageAdd" style="display:none">Image 붙여넣기 Hidden 버튼</b-button>
                   <!-- <b-button class="QTRes-ButtonAdd" variant="outline-secondary">부품 추가</b-button>-->
                 <!--부품추가-->
                  <v-dialog v-model="dialog" width="90%" >
@@ -773,10 +774,10 @@ export default {
       this.showQTImageFlag = true;
       this.itemImage = Constant.IMG_URL + img;
 
-          var http = new XMLHttpRequest();
-          http.open('HEAD', Constant.IMG_URL + img, false);
-          http.send(); 
-          console.log("Image Check : ", http.status);
+      var http = new XMLHttpRequest();
+      http.open('HEAD', Constant.IMG_URL + img, false);
+      http.send(); 
+      console.log("Image Check : ", http.status);
     },
     saveImage() {
       console.log("Info : ", this.qtInfo);
@@ -926,11 +927,19 @@ export default {
         param.payload = {};
         param.payload.Key = {};
         param.payload.Key.ID = this.qtInfo.ID;
-        param.payload.UpdateExpression = "Set CarBrand = :b, CarSeries = :s";
-        param.payload.ExpressionAttributeValues = {
-              ":b" : this.qtInfo.CarBrand,
-              ":s" :this.qtInfo.CarSeries
-        };
+        if(this.qtInfo.CarSeries === undefined || this.qtInfo.CarSeries === '') {
+          param.payload.UpdateExpression = "Set CarBrand = :b";
+          param.payload.ExpressionAttributeValues = {
+                ":b" : this.qtInfo.CarBrand
+          };
+        }
+        else {
+          param.payload.UpdateExpression = "Set CarBrand = :b, CarSeries = :s";
+          param.payload.ExpressionAttributeValues = {
+                ":b" : this.qtInfo.CarBrand,
+                ":s" : this.qtInfo.CarSeries
+          };
+        }
                 
         console.log("======= QT Update Request ========");
         console.log(JSON.stringify(param));
@@ -1016,6 +1025,10 @@ export default {
        //console.log('index : ' , index);
        this.detailQTData = JSON.parse(convertDynamoToArrayString(this.confirmList[index].data.LineItem));
     },
+    clipImageAdd() { 
+      var clipImage = document.getElementById('clipImageBtn').value;
+      this.$EventBus.$emit('paste-Image' , clipImage);      
+    },
     clipboardAdd() {
       console.log("======= clipboardAdd ========");
       var clipText = document.getElementById('clipboardBtn').value;
@@ -1023,7 +1036,7 @@ export default {
       var copyData = clipText.split(/\r\n|\r|\n/);
       console.log('copyData : ', copyData);
 
-      if(copyData[0].indexOf('차종	부품명	애프터번호') > -1) { // 해당 문구가 있다면 화면에서 카피한 케이스
+      if(copyData[0].indexOf('차종	부품명	애프터번호') > -1) { // 해당 문구가 있다면 대신 화면에서 카피한 케이스
         var idx = -1;
         var itemIdx = 1;
         var newItem = {};
@@ -1051,7 +1064,7 @@ export default {
             }
             if(idx === 4) {
               if(isNaN(item) === false && item.length <= 2) {idx++;} // 애프터 품번 자리에 2자리 이하의 숫자가 들어갔다면 애프터는 비워지고 숫자가 들어온 케이스 임.
-              else newItem.memo = item;
+              else newItem.memo = "애프터품번 : " + item;
             }
             if(idx === 5) {
               newItem.itemQty = item.replace(',','');
@@ -1074,6 +1087,43 @@ export default {
           }
         }
       }
+      else if(copyData[0].indexOf('품목명[규격]	센터가(VAT별도)') > -1) { // 해당 문구가 있다면 대신 화면에서 카피한 케이스
+        var idx = 0;
+
+        for (var i = 1; i < copyData.length; i++) {
+          var val = copyData[i].split('	');
+
+          if(val.length > 1) {
+            var newItem = {};
+            newItem.seq = idx++;
+            newItem.itemCode = val[0];
+            var nameParse = [];
+            
+            for(var substr1 of val[1].split('[')){
+              for(var substr2 of substr1.split(']')){
+                if(substr2 !== '')
+                  nameParse.push(substr2);
+              }
+            }
+            if(nameParse.length > 1) {
+              newItem.itemName = val[1];
+              newItem.itemBrand = nameParse[nameParse.length-1];
+              //var checkStr = "[" + newItem.itemBrand + "]";
+              //newItem.itemName = val[1].replace("/" + checkStr + "/g", "");
+            }
+            else {
+              newItem.itemName = val[1];
+            }
+            newItem.itemQty = val[3].replace(',','');
+            newItem.itemPrice = val[4].replace(',','');
+            newItem.AMT = val[5].replace(',','');
+            newItem.memo = '센터가 : ' + val[2];
+    
+            this.detailQTData.push(newItem);       
+          }   
+        }      
+      }
+      /*
       else {  // 아니면 엑셀에서 카피한 케이스
         var idx = 0;
 
@@ -1093,7 +1143,7 @@ export default {
   
           this.detailQTData.push(newItem);
         }
-      }
+      }*/
     },
     GetOrderHistory()
     {
@@ -1191,10 +1241,31 @@ export default {
 
     document.addEventListener('paste', function (event) {
       var clipText = event.clipboardData.getData('Text');
-      console.log('clipText : ', clipText);
-      document.getElementById('clipboardBtn').value = clipText;
-      document.getElementById('clipboardBtn').click();
+      var clipItem = event.clipboardData.items;
 
+      if(clipText.length > 0) {
+        console.log('clipText : ', clipText);
+        document.getElementById('clipboardBtn').value = clipText;
+        document.getElementById('clipboardBtn').click();
+      }
+      else {
+        for (var i = 0; i < clipItem.length; i++) {
+          console.log('clipItem : ', clipItem[i]);
+
+          if (clipItem[i].type.indexOf("image") == -1) continue;
+
+          var blob = clipItem[i].getAsFile();
+          console.log('blob : ', blob);
+
+          var reader = new FileReader();
+          reader.onload = function(event){
+            document.getElementById('clipImageBtn').value = event.target.result;
+            document.getElementById('clipImageBtn').click();            
+          }; 
+          var source = reader.readAsDataURL(blob);
+        }
+      }
+      
     });
   },
   mounted: function()

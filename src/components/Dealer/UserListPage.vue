@@ -28,12 +28,13 @@
             align="center"
             justify="center"
             class = "ml-1 mr-1 mb-2"
-          >
+          > 
             <v-btn-toggle
               color="red"
               v-model="toggle_exclusive"
               rounded
               dense
+              style="display:contents"
             >
               <v-btn @click="showQTReqList(0)">당일</v-btn>
               <v-btn @click="showQTReqList(1)">어제</v-btn>

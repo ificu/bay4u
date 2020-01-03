@@ -1007,7 +1007,10 @@ name: 'QTStep',
       param.payload.Item.ResDealer = dealer;
       param.payload.Item.ResDealerNm = dealerNm;
       param.payload.Item.Memo = convertStringToDynamo(this.qtReqMemo);
-      param.payload.Item.IMG = imgKey + ".png";;
+      if(this.captureBlobImg !== '')
+        param.payload.Item.IMG = imgKey + ".png";
+      else
+        param.payload.Item.IMG = "*empty*";
       //param.payload.Item.LineItem = JSON.stringify(this.qtRequest);
       param.payload.Item.LineItem = convertArrayToDynamo(JSON.stringify(this.qtRequest));
 
@@ -1040,39 +1043,44 @@ name: 'QTStep',
         console.log(error);
       });
 
-      param = {};
-      param.name = imgKey + ".png";
-      param.type = "image/png";
+      console.log("this.captureBlobImg : ", this.captureBlobImg);
 
-      axios({
-          method: 'POST',
-          url: Constant.IMGUPLOAD_URL,
-          headers: Constant.IMGUPLOAD_HEADER,
-          data: param
-      })
-      .then((result) => {
-        console.log("======= IMG Save result ========");
-        console.log(result.data);
+      if(this.captureBlobImg !== '') {
 
-        param = this.captureBlobImg;
+        param = {};
+        param.name = imgKey + ".png";
+        param.type = "image/png";
 
         axios({
-            method: 'PUT',
-            url: result.data.uploadURL,
+            method: 'POST',
+            url: Constant.IMGUPLOAD_URL,
+            headers: Constant.IMGUPLOAD_HEADER,
             data: param
         })
         .then((result) => {
-          console.log("======= IMG Upload result ========");
-          console.log(result);
+          console.log("======= IMG Save result ========");
+          console.log(result.data);
+
+          param = this.captureBlobImg;
+
+          axios({
+              method: 'PUT',
+              url: result.data.uploadURL,
+              data: param
+          })
+          .then((result) => {
+            console.log("======= IMG Upload result ========");
+            console.log(result);
+          })
+          .catch((error) => {
+            console.log(error);
+          }); 
+
         })
         .catch((error) => {
           console.log(error);
         }); 
-
-      })
-      .catch((error) => {
-        console.log(error);
-      }); 
+      }
 
       if( this.selectedDealer.length === this.saveQtCount )
       {

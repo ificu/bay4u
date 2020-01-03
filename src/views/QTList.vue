@@ -199,12 +199,12 @@
                 <b-container>
                   <b-row>
                     <b-col align-self="center" class="history-brand">
-                      <img height='18' v-if="qtItem[0].CarBrand === 'AUDI'" style="align-self:center" src="@/assets/BRAND-AUDI.png">
-                      <img height='30' v-if="qtItem[0].CarBrand === 'BENZ'" style="align-self:center" src="@/assets/BRAND-BENZ.png">
-                      <img height='30' v-if="qtItem[0].CarBrand === 'BMW'" style="align-self:center" src="@/assets/BRAND-BMW.png">
-                      <img height='30' v-if="qtItem[0].CarBrand === 'FORD'" style="align-self:center" src="@/assets/BRAND-FORD.png">
-                      <img height='25' v-if="qtItem[0].CarBrand === 'LEXUS'" style="align-self:center" src="@/assets/BRAND-LEXUS.png">
-                      <img height='30' v-if="qtItem[0].CarBrand === 'VW'" style="align-self:center" src="@/assets/BRAND-VW.png">
+                      <img height='18' v-if="qtItem[0].CarBrand === 'AUDI'" style="align-self:center; margin-left:-3px;" src="@/assets/BRAND-AUDI.png">
+                      <img height='30' v-if="qtItem[0].CarBrand === 'BENZ'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-BENZ.png">
+                      <img height='30' v-if="qtItem[0].CarBrand === 'BMW'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-BMW.png">
+                      <img height='30' v-if="qtItem[0].CarBrand === 'FORD'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-FORD.png">
+                      <img height='25' v-if="qtItem[0].CarBrand === 'LEXUS'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-LEXUS.png">
+                      <img height='30' v-if="qtItem[0].CarBrand === 'VW'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-VW.png">
                     </b-col>                    
                     <b-col align-self="center" class="history-date">{{setQtDate(qtItem[0].ReqDt)}}</b-col>
                     <b-col class="history-car">
@@ -283,8 +283,8 @@
                               </li>
                             </ul>
                             <div class="qtReq-image" v-if="qtReqInfo.DealerFlag !=='WEBPOS'">
-                              <span class="qtReq-reqTitle">차량번호/차대번호 사진촬영</span>
-                              <span class="qtReq-reqIcon" @click="showQTImage(qtReqInfo.QTData.IMG)"><i class="fas fa-image"></i></span>
+                              <span class="qtReq-reqTitle" v-if="qtReqInfo.QTData.IMG !=='*empty*'">차량번호/차대번호 사진촬영</span>
+                              <span class="qtReq-reqIcon" v-if="qtReqInfo.QTData.IMG !=='*empty*'" @click="showQTImage(qtReqInfo.QTData.IMG)"><i class="fas fa-image"></i></span>
                               <span class="qtReq-reqTitle" v-if="qtReqInfo.QTData.Memo !=='*empty*'" >메모</span>
                               <span class="qtReq-reqIcon" v-if="qtReqInfo.QTData.Memo !=='*empty*'" @click="showResmemoPopup(qtReqInfo.QTData)" ><i class="far fa-sticky-note"></i></span>
                             </div>
@@ -1416,7 +1416,8 @@ export default {
 
         result.data.Items.forEach(element => {
 					let qtItem = {};
-					qtItem.ID = element.ID;
+          qtItem.ID = element.ID;
+          qtItem.CarBrand = element.CarBrand;
 					qtItem.CarNo = element.CarNo;
 					qtItem.CarVin = element.CarVin;
 					qtItem.ReqDt = element.ReqDt;
@@ -2844,10 +2845,14 @@ export default {
   flex: 35%;
 }
 .dealer-Price span{
-  float: right;
+  float: left;
 }
 .dealer-Price span:last-child{
   float: left;
+  padding-left: 5px;
+}
+.dealer-Price span:first-child{
+  float: right;
 }
 .dealer-delv{
   float: right;
@@ -2983,6 +2988,7 @@ export default {
   margin-right: 5px;
   margin-left: 5px;
   border:gray 1px solid;
+  text-align: center;
 }
 .order-itemPrice{
   margin-right: 5px;
