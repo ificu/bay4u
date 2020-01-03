@@ -293,6 +293,10 @@ export default {
 
     this.$EventBus.$on('update-chatMsg', docId => {  
       
+      //console.log('docId : ' , docId);
+      // 같은 대리점 채팅이 아니면 리턴
+      if(this.UserInfo.BsnID !==  docId.qtInfo.ResDealer ) return;
+
       var checkExist = false;
 
       for (var chat of this.qtReqList) {
@@ -326,7 +330,7 @@ export default {
           newQtData.isRead  = false;
           this.qtReqList.push(newQtData);
           
-          console.log('qtReqList : ' ,this.qtReqList);
+          //console.log('qtReqList : ' ,this.qtReqList);
 
           if(Array.isArray(this.qtReqList)) {
             this.qtReqList.sort(function(a, b){
