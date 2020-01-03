@@ -261,7 +261,7 @@
               :items="detailQTData"
               class="elevation-1"
               fixed-header
-              height="350px"
+              height="calc(100vh - 550px)"
               :items-per-page="itemsPerPage"
               hide-default-footer
               no-data-text=''
@@ -492,7 +492,7 @@
         </b-tabs>
       </b-card>   
 
-      <v-dialog v-model="showQTImageFlag" width="500px">
+      <v-dialog v-model="showQTImageFlag" width="500px" max-height="100%">
         <v-card>
           <v-card-title class="headline" >이미지 확인</v-card-title>
           <v-img class="grey lighten-3 mr-4 ml-4"  v-bind:src="itemImage" max-width="800px"></v-img>
@@ -705,7 +705,8 @@ export default {
         }
 
         var btnAdd =  document.querySelector('#btnItmAdd');
-        btnAdd.removeAttribute("disabled", "true");
+        if(btnAdd !== undefined && btnAdd !== null)
+          btnAdd.removeAttribute("disabled", "true");
        
       }
 
@@ -1400,7 +1401,7 @@ export default {
 }
 .QTRes-List .QTRes-Button {
   text-align: right;
-  flex: 60%;
+  flex: 30%;
   margin-bottom: 10px;
 }
 .QTRes-ButtonAdd {

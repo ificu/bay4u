@@ -24,25 +24,24 @@
             v-on:keypress.enter="showQTReqList"
           ></v-text-field>
      </div>
-          <v-row
-            align="center"
-            justify="center"
-            class = "ml-1 mr-1 mb-2"
-          > 
-            <v-btn-toggle
-              color="red"
-              v-model="toggle_exclusive"
-              rounded
-              dense
-              style="display:contents"
-            >
-              <v-btn @click="showQTReqList(0)">당일</v-btn>
-              <v-btn @click="showQTReqList(1)">어제</v-btn>
-              <v-btn @click="showQTReqList(2)">일주일</v-btn>
-              <v-btn @click="showQTReqList(3)">한달</v-btn>
+    <v-row
+      align="center"
+      justify="center"
+      class = "ml-1 mr-1 mb-0"
+    > 
+      <v-chip-group
+        column
+        mandatory
+        align="center"
+        style="color:#FF8F00"
+      >
+        <v-chip class="mr-1 pr-2 pl-2" @click="showQTReqList(0)">당일</v-chip>
+        <v-chip class="mr-1 pr-2 pl-2" @click="showQTReqList(1)">어제</v-chip>
+        <v-chip class="mr-1 pr-2 pl-2" @click="showQTReqList(2)">일주일</v-chip>
+        <v-chip class="mr-1 pr-2 pl-2" @click="showQTReqList(3)">한달</v-chip>
 
-            </v-btn-toggle>
-          </v-row>
+      </v-chip-group>          
+    </v-row>
       <div class="Chat-list">
         <ul>
           <li v-for="(qtReq, index) in qtReqList" v-bind:key = "index" v-on:click="SetQTInfo(qtReq,index)" :class="{selectItem : selectedList(index)}">
@@ -54,43 +53,8 @@
             </span>            
           </li>
         </ul>        
-        <!--
-        <ul>
-          <li>
-            <i class="Carcenter-type fas fa-wrench" style="color:#fbc02e;"></i>
-            <p class="Carcenter-name">No1. 카센터</p>
-            <span type="button" class="Chat-detail">
-              <i class="fas fa-angle-double-right"></i>
-            </span>
-          </li>
-          <li>
-            <i class="Carcenter-type fas fa-wrench" style="color:#967d5f;"></i>
-            <p class="Carcenter-name">동진 카센타</p>
-            <span type="button" class="Chat-detail">
-              <i class="fas fa-angle-double-right"></i>
-            </span>
-          </li>
-          <li>
-            <i class="Carcenter-type fas fa-wrench" style="color:#967d5f;"></i>
-            <p class="Carcenter-name">하나 정비</p>
-            <span type="button" class="Chat-detail">
-              <i class="fas fa-angle-double-right"></i>
-            </span>
-          </li>
-          <li>
-            <i class="Carcenter-type fas fa-wrench" style="color:#ccc;"></i>
-            <p class="Carcenter-name">스피드 오토</p>
-            <span type="button" class="Chat-detail">
-              <i class="fas fa-angle-double-right"></i>
-            </span>
-          </li>
-        </ul>-->
       </div>
     </b-tab>
-    <!--
-    <b-tab title="대리점 대화목록" :title-link-class="linkClass(1)">
-
-    </b-tab>-->
   </b-tabs>
   </div>   
 </template>
@@ -130,10 +94,7 @@ export default {
       } else {
         return false
       }
-    },/*      <v-btn @click="showQTReqList(0)">당일</v-btn>
-              <v-btn @click="showQTReqList(1)">어제</v-btn>
-              <v-btn @click="showQTReqList(2)">일주일</v-btn>
-              <v-btn @click="showQTReqList(3)">한달</v-btn> */
+    },
     showQTReqList(idx) {
       console.log("showQTReqList??????????????????????? : ", idx);
 
@@ -335,47 +296,6 @@ export default {
           }
         }
 
-        /*
-        var param = {};
-        param.operation = "list";
-        param.tableName = "BAY4U_QT_LIST";
-        param.payload = {};
-        param.payload.FilterExpression = "ResDealer = :id";
-        param.payload.ExpressionAttributeValues = {};
-        var key = ":id";
-        param.payload.ExpressionAttributeValues[key] = docId;
-
-        console.log("QT param : ", param);
-
-        axios({
-          method: 'POST',
-          url: Constant.LAMBDA_URL,
-          headers: Constant.JSON_HEADER,
-          data: param
-        })
-        .then((result) => {
-        console.log("======= QT List result ========");
-        console.log(result.data);
-
-        if(Array.isArray(result.data.Items)) {
-          result.data.Items.sort(function(a, b){
-          return (a.ReqDt < b.ReqDt) ? 1 : -1;
-          });
-        }
-      
-        for (var chat of result.data.Items) {
-          if(chat.ID === docId) {
-            chat.isRead = false;
-          }            
-          else {
-            chat.isRead = true;
-          }
-        }
-
-        this.qtReqList = result.data.Items;    
-
-        });
-         */
       }
 
     });      
@@ -441,7 +361,7 @@ export default {
 .Chat-list ul {
   list-style-type: none;
   padding: 0px;
-  height: calc(100vh - 225px); 
+  height: calc(100vh - 270px); 
   overflow: auto;
 }
 
