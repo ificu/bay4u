@@ -132,12 +132,6 @@
         </b-tab>
         <b-tab title="견적 회신" :title-link-class="linkClass(1)">
           <b-card-text>
-            <div class="QT-Info"  v-if="UserInfo.UserType === 'DEALER'">
-              <div class="QT-Title"><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>담당자 : </div>
-              <div class="QT-Content">{{this.angentNm }}</div>
-              <div class="QT-Title"><v-icon x-small  class="qt-icon">fas fa-angle-down</v-icon>견적상태 : </div>
-              <div class="QT-ContentSts">{{this.estmStsNm}}</div>
-            </div>
             <div class="QTRes-List">
               <div class="QTRes-Title">
                 <v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>견적회신 상세
@@ -146,18 +140,24 @@
                 <b-form-select v-model="selectedConfirm" :options="confirmList" @change="getConfirmData">
                 </b-form-select>
               </div>
+              <div class="QT-Info" v-if="UserInfo.UserType === 'DEALER'" >
+                <div class="QT-Title"><v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>담당자 : </div>
+                <div class="QT-Content">{{this.angentNm }}</div>
+                <div class="QT-Title"><v-icon x-small  class="qt-icon">fas fa-angle-down</v-icon>견적상태 : </div>
+                <div class="QT-ContentSts">{{this.estmStsNm}}</div>  
+              </div>            
               <div class="QTRes-Button">
                 <b-button-group size="sm">
                   <!--<b-button variant="outline-secondary">엑셀 카피 자동 입력</b-button>-->
                   <b-button variant="outline-secondary" v-on:click="GetQtList" v-if="UserInfo.UserType === 'DEALER'">견적서 자동 입력</b-button>
-                  <b-button variant="outline-secondary" @click="selectedDeleteItem">선택 삭제</b-button>
+                  <b-button variant="outline-secondary" @click="selectedDeleteItem" v-if="UserInfo.UserType !== 'DEALER'">선택 삭제</b-button>
                   <b-button id="clipboardBtn" @click="clipboardAdd" style="display:none">Text 붙여넣기 Hidden 버튼</b-button>
                   <b-button id="clipImageBtn" @click="clipImageAdd" style="display:none">Image 붙여넣기 Hidden 버튼</b-button>
                   <!-- <b-button class="QTRes-ButtonAdd" variant="outline-secondary">부품 추가</b-button>-->
                 <!--부품추가-->
                  <v-dialog v-model="dialog" width="90%" >
                   <template v-slot:activator="{ on }">
-                    <b-button id="btnItmAdd" class="QTRes-ButtonAdd" variant="outline-secondary" v-on="on">부품 추가</b-button>
+                    <b-button id="btnItmAdd" class="QTRes-ButtonAdd" variant="outline-secondary" v-on="on" v-if="UserInfo.UserType !== 'DEALER'">부품 추가</b-button>
                   </template>
                   <v-card>
                     <v-card-title>
@@ -1347,17 +1347,19 @@ export default {
 .QT-Info {
   display:flex;
   flex-direction: row;
+  margin-left: 50px;
 }
 .QT-Title {
   font-weight: bold;
   color: #5d4038;
-  margin-right: 5px;
+  margin-right: 10px;
   margin-bottom: 5px;
   width: 72px;
 }
 .QT-Content {
   flex: auto;
   font-size: 0.8rem;
+  margin-right: 50px;
 }
 .QT-ContentSts{
   flex: auto;
@@ -1398,7 +1400,7 @@ export default {
 }
 .QTRes-List .QTRes-Button {
   text-align: right;
-  flex: 80%;
+  flex: 60%;
   margin-bottom: 10px;
 }
 .QTRes-ButtonAdd {
