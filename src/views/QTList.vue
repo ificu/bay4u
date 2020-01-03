@@ -321,7 +321,7 @@
                                   <span v-if="qtReqInfo.WebposOnly ==='N'" @click="goQTChating(qtReqInfo)"><i class ="fas fa-comment-dots"></i></span>
                               </b-col>                   
                               <b-col class="response-detailBtn">
-                                <b-button block href="#"  v-b-toggle="'accordion-webpos-' + idx2"  variant="secondary" size="sm" v-on:click="showResItem(confrimInfo)">
+                                <b-button block href="#"  v-b-toggle="'accordion-webpos-' + idx3"  variant="secondary" size="sm" v-on:click="showResItem(confrimInfo)">
                                   <!--<i v-if="!SOList1Toggle" class="fas fa-chevron-down"></i>
                                   <i v-if="SOList1Toggle"  class="fas fa-chevron-up"></i>-->
                                   <span class="when-opened">
@@ -335,7 +335,7 @@
                             </b-row>
                           </b-container>
                         </b-card-header>
-                      <b-collapse :id="'accordion-webpos-'+idx2" accordion="my-accordion4" role="tabpanel" :visible="linkToggleQtConfirm(idx2)">
+                      <b-collapse :id="'accordion-webpos-'+idx3" accordion="my-accordion4" role="tabpanel" :visible="linkToggleQtConfirm(idx2)">
                         <b-card-body class ="pt-1 pl-1 pr-1">
                           <div class="history-detailConts-webpos">
                             <ul>
@@ -397,7 +397,7 @@
                               <span v-if="qtReqInfo.WebposOnly ==='N'" @click="goQTChating(qtReqInfo)"><i class ="fas fa-comment-dots"></i></span>
                             </b-col>                
                             <b-col class="response-detailBtn">
-                              <b-button block href="#"  v-b-toggle="'accordion-qtDealer-' + idx2"  variant="secondary" size="sm" v-on:click="showResItem2(confrimInfo)">
+                              <b-button block href="#"  v-b-toggle="'accordion-qtDealer-' + confrimInfo.ID"  variant="secondary" size="sm" v-on:click="showResItem2(confrimInfo)">
                                 <!--<i class="fas fa-chevron-down" :id="'btnIcon'+idx"></i>-->
                                 <!--<i v-if="!SOList3Toggle" class="fas fa-chevron-down"></i>
                                 <i v-if="SOList3Toggle"  class="fas fa-chevron-up"></i>-->
@@ -412,7 +412,7 @@
                           </b-row>
                         </b-container>
                         </b-card-header>
-                      <b-collapse :id="'accordion-qtDealer-'+idx2" accordion="my-accordion3" role="tabpanel" :visible="linkToggleQtConfirm2(idx2)">
+                      <b-collapse :id="'accordion-qtDealer-'+confrimInfo.ID" accordion="my-accordion3" role="tabpanel" :visible="linkToggleQtConfirm2(idx2)">
                         <b-card-body class ="pt-1 pl-1 pr-1">
                           <div class="dealer-qtInfo">
                             <ul>
