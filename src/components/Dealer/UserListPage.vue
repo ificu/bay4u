@@ -305,12 +305,13 @@ export default {
       // 값이 true가 아니면 현재 리스트에 없다는 의미으로 다시 조회해 와서 표시 하자.
       if(checkExist === false) {
 
-        console.log('docId.qtInfo : ' , docId.qtInfo);
+        //console.log('docId.qtInfo : ' , docId.qtInfo);
 
         if(docId.qtInfo  !== undefined)
         {
-          //console.log('Param qtInfo : ' , docId.qtInfo);
+          console.log('Param qtInfo : ' , docId.qtInfo);
           var newQtData = {};
+          newQtData.CarBrand   = docId.qtInfo.CarBrand;
           newQtData.CarNo   = docId.qtInfo.CarNo;
           newQtData.CarVin  = docId.qtInfo.CarVin;
           newQtData.ID  = docId.qtInfo.ID;
@@ -324,6 +325,8 @@ export default {
           newQtData.ResDealer  = docId.qtInfo.ResDealer;
           newQtData.isRead  = false;
           this.qtReqList.push(newQtData);
+          
+          console.log('qtReqList : ' ,this.qtReqList);
 
           if(Array.isArray(this.qtReqList)) {
             this.qtReqList.sort(function(a, b){
