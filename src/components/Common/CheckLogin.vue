@@ -143,7 +143,7 @@ export default {
 }
 .login-site{
   font-size: 0.54em;
-  color: darkblue;
+  color: #999;
   float: right;
   margin-bottom: 0px;
   top: -15px;

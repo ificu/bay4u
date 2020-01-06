@@ -211,6 +211,9 @@
                       <b-row class="history-carNo">
                         {{(qtItem[0].CarNo === "*empty*")?"미상차량" : qtItem[0].CarNo }}
                       </b-row>
+                     <b-row class="history-carSeries">
+                        {{ qtItem[0].CarSeries }}
+                      </b-row>                      
                     </b-col>                    
                     <b-col align-self="center" class="history-detailHeaderBtn">
                       <b-button block href="#"  v-b-toggle="'accordion-' + idx"  variant="secondary"  size="sm" v-on:click="showQtList(qtItem,idx)">
@@ -1502,7 +1505,8 @@ export default {
 						let qtItem = {};
 						qtItem.ID = element.ESTM_ID;
 						qtItem.CarNo = element.CAR_NO;
-						qtItem.CarVin = element.VIN_NO;
+            qtItem.CarVin = element.VIN_NO;
+            qtItem.CarSeries = element.SERIES;
 						qtItem.ReqDt = element.YEAR + "-" + element.MONTH + "-" + element.DAY;
 						qtItem.DealerFlag = 'WEBPOS';
 						qtItem.QTData = element;
@@ -2585,6 +2589,13 @@ export default {
 .history-carNo {
   font-size: 1rem;
   font-weight: bold;
+}
+.history-carSeries {
+  font-size: 0.7rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;  
+  width: 80px;
 }
 .history-carType {
   font-size: 0.7rem;
