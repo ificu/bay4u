@@ -1,5 +1,6 @@
 <template>
   <div class="LoginCheck">
+    <div><span class="login-site">{{this.UserInfo.Name}}점</span></div>
     <div class="logout-btn">
         <v-btn color="#90A4AE" dark depressed small @click="logOut">
             로그아웃
@@ -134,7 +135,19 @@ export default {
 
 <style>
 .LoginCheck{
-    text-align:end;
+  width:350px;
+  position:relative;
 }
-
+.logout-btn{
+  text-align: end;
+}
+.login-site{
+  font-size: 0.54em;
+  color: darkblue;
+  float: right;
+  margin-bottom: 0px;
+  top: -15px;
+  right: 0;
+  position: absolute;
+}
 </style>

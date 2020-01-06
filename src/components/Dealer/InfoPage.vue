@@ -767,6 +767,7 @@ export default {
       qtMsg.from = {'name' : this.UserInfo.BsnID};
       qtMsg.msg  = msg;
       qtMsg.reqTm = chatTime;
+      qtMsg.ChatType = "R";
       this.$EventBus.$emit('send-QTConfirm' , qtMsg)
     },
     showQTImage(img) { 

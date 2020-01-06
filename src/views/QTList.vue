@@ -328,7 +328,7 @@
                                       <i class="fa fa-chevron-up" aria-hidden="true"></i>
                                   </span>
                                   <span class="when-closed">
-                                        <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                                    <i class="fas fa-chevron-down" aria-hidden="true"></i>
                                   </span>
                                 </b-button>
                               </b-col>              
@@ -366,7 +366,7 @@
                           <div class="QTRes-footer">
                             <div class="TotalInfo">
                               <span class="TotalInfo-Title">합계</span>
-                              <span class="TotalInfo-Text">{{total | localeNum}}원</span>
+                              <span class="TotalInfo-Text">{{total | localeNum}} 원<br></span><span class="TotalInfo-Text2">({{totalAmt | localeNum}}) 원</span>
                             </div>
                           </div>
                         </b-card-footer>
@@ -2163,7 +2163,12 @@ export default {
         docId = item.ID;
       }
       
-      console.log('go chat : ' , docId);
+      let dealerNm = '';
+      if(item.ResQTData != undefined && item.ResQTData.length > 0)
+      {
+        dealerNm = item.ResQTData[0].DealerName;
+      }
+      //console.log('go chat : ' , item);
 
       let now = new Date();
       // 견적요청 채팅창으로 이동
@@ -2176,6 +2181,7 @@ export default {
               chatDate: now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2),
               qtInfo : item,
               chatType:'qt',
+              chatDealerNm : dealerNm
           }});
     },
     showQTImage(img) { 
@@ -2217,6 +2223,14 @@ export default {
     },
 
     total: function() {
+        let sum = 0;
+        this.detailQTData.forEach(function(item) {
+          sum += (parseFloat(item.AMT_PRC));
+        });
+        return sum;
+    },
+
+    totalAmt: function() {
         let sum = 0;
         this.detailQTData.forEach(function(item) {
           sum += (parseFloat(item.AMT));
@@ -2948,16 +2962,22 @@ export default {
     border-radius: 0.25rem;
 }
 .QTRes-footer .TotalInfo-Text{
-     -webkit-box-align: center;
+    /* -webkit-box-align: center;
     align-items: center;
-    padding: 0.375rem 0.75rem;
+    padding: 0.375rem 0.75rem;*/
+    padding-left: 0.75rem;
     margin-bottom: 0;
     font-size: 1.1rem;
     font-weight: 400;
     color: #E50914;
-    text-align: center;
+    /*text-align: center;*/
     white-space: nowrap;
     border-radius: 0.25rem;
+}
+.QTRes-footer .TotalInfo-Text2{
+   float:right;
+   color: #E50914;
+   font-size: 1rem;
 }
 .order-itemList {
   width: 98%;
