@@ -179,6 +179,11 @@ export default {
       this.dealer =  this.$route.params.qtInfo.ResDealer;  
 
       // 초기 메시지 입력
+      //console.log ('route : ', this.$route.params);
+      if(this.$route.params.chatDealerNm !== undefined)
+      {
+        this.chatDealerName = this.$route.params.chatDealerNm;
+      }
   
       if(this.$route.params.chatType !== undefined && (this.$route.params.chatType === 'order' || this.$route.params.chatType === 'qt')){
         var item = {};
@@ -193,11 +198,6 @@ export default {
         }
         else{
           msg = this.$route.params.carNo + " 차량에 대한 견적이 요청됐습니다.";
-        }
-
-        if(this.$route.params.chatDealerNm !== undefined)
-        {
-          this.chatDealerName = this.$route.params.chatDealerNm;
         }
 
         var now = new Date();
