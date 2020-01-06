@@ -66,7 +66,6 @@
               v-model="brandSelected"
               :items="brandList"
               menu-props="auto"
-              label="Select"
               hide-details
               append-outer-icon="fas fa-car"
               single-line

@@ -46,14 +46,43 @@
                   <v-row class="mb-n4">
                     <v-col cols="12" md="4">
                       <!--<v-select v-model="qtInfo.CarBrand" :items="carBrand" label="브랜드" :value="this.qtInfo.CarBrand" outlined dense color="success" :menu-props="{ top: true, offsetX: true}"></v-select>-->
-                      <b-form-select v-model="qtInfo.CarBrand" :options="carBrand"></b-form-select>
+                      <!--<b-form-select v-model="qtInfo.CarBrand" :options="carBrand"></b-form-select>-->
+                      <b-button id="btnBrandSelect" v-b-toggle.collapse-1 variant="outline-secondary" block @click="brandClicked=!brandClicked">
+                          <img height='20' class="mr-2" v-if="this.qtInfo.CarBrand === 'AUDI'" src="@/assets/BRAND-AUDI.png">
+                          <img height='20' class="mr-2" v-if="this.qtInfo.CarBrand === 'BENZ'" src="@/assets/BRAND-BENZ.png">
+                          <img height='20' class="mr-2" v-if="this.qtInfo.CarBrand === 'BMW'" src="@/assets/BRAND-BMW.png">
+                          <img height='20' class="mr-2" v-if="this.qtInfo.CarBrand === 'FORD'" src="@/assets/BRAND-FORD.png">
+                          <img height='20' class="mr-2" v-if="this.qtInfo.CarBrand === 'LEXUS'" src="@/assets/BRAND-LEXUS.png">
+                          <img height='20' class="mr-2" v-if="this.qtInfo.CarBrand === 'VW'" src="@/assets/BRAND-VW.png">                        
+                        {{this.qtInfo.CarBrand}}
+                        </b-button>
+
                     </v-col>
                     <v-col cols="12" md="8">
                       <v-text-field label="차정상세" outlined dense clearable color="blue accent-1" v-model="qtInfo.CarSeries" :value="this.qtInfo.CarSeries">
                       </v-text-field>
                     </v-col>
-                  </v-row>                  
+                  </v-row>   
+                  <v-row>   
+                    <b-collapse id="collapse-1" class="mt-n6 mb-6 ml-4">
+                      <b-card>
+                        <v-chip v-for="(brand, index) in carBrand" v-bind:key = "index" class="ma-2" color="#3cadc0" outlined link @click="clickBrandSelect(brand)">
+
+                          <img height='18' class="mr-2" v-if="brand === 'AUDI'" src="@/assets/BRAND-AUDI.png">
+                          <img height='22' class="mr-2" v-if="brand === 'BENZ'" src="@/assets/BRAND-BENZ.png">
+                          <img height='25' class="mr-2" v-if="brand === 'BMW'" src="@/assets/BRAND-BMW.png">
+                          <img height='20' class="mr-2" v-if="brand === 'FORD'" src="@/assets/BRAND-FORD.png">
+                          <img height='25' class="mr-2" v-if="brand === 'LEXUS'" src="@/assets/BRAND-LEXUS.png">
+                          <img height='22' class="mr-2" v-if="brand === 'VW'" src="@/assets/BRAND-VW.png">
+
+                          {{brand}}
+
+                        </v-chip>
+                      </b-card>
+                    </b-collapse>     
+                  </v-row>                             
                 </v-col>
+
                 <v-col cols = "12" md="2">
                   <v-btn v-if="qtInfo.IMG !== '*empty*'" class="mt-8" id="CarInfo-Button" x-large outlined color="blue accent-1" @click="showQTImage(qtInfo.IMG)" >
                     <v-icon left>fas fa-camera</v-icon> <span class="font-weight-medium ml-4">사진<br>확인</span>
@@ -268,6 +297,7 @@
               :items-per-page="itemsPerPage"
               hide-default-footer
               no-data-text=''
+              disable-sort
             >   
               <!--header-->
               <template v-slot:header.NM_ITM="{ header }">
@@ -331,7 +361,7 @@
               show-select
               :single-select="singleSelect"
               item-key="itemCode"
-              disable-sort=""
+              disable-sort
             >      
               <!--header-->
               <template v-slot:header.itemCode="{ header }">
@@ -571,6 +601,32 @@
         </v-card>
       </v-dialog>        
 
+      <v-dialog v-model="showBrandInputFlag" width="300px" max-height="100%">
+        <v-card>
+          <v-card-title class="headline" >브랜드 수기 입력</v-card-title>
+          <v-card-text>
+            <v-text-field v-model="typedBrand" v-on:keypress.enter="brandInput"></v-text-field>  
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+              <v-btn
+                color="#A1887F"
+                @click="brandInput"
+              >
+                입력
+              </v-btn>      
+              <v-btn
+                color="#00BFA5"
+                outlined
+                @click="showBrandInputFlag = false;"
+              >
+                닫기
+              </v-btn>
+
+          </v-card-actions>
+        </v-card>
+      </v-dialog>          
+
     </div>   
   </v-app>
 </template>
@@ -673,10 +729,13 @@ export default {
       txtQTConfirm: '견적 확정 회신', 
       orderHistory:[],
       brandSelected: '차종 선택',
+      brandClicked: false,
       selectedConfirm:'',
       selectedSMS:'모바일 견적 회신 메시지를 확인해 주세요.',
       typedSMS:'',
+      typedBrand:'',
       showSMSSendFlag: false,
+      showBrandInputFlag: false,
     }
   },
   methods: {
@@ -1273,6 +1332,25 @@ export default {
       });  
       
     },
+    clickBrandSelect(brand) {
+      console.log("clickBrandSelect : ", brand);
+      if(brand !== '기타') {
+        this.qtInfo.CarBrand = brand;
+        document.getElementById('btnBrandSelect').click();
+        this.brandClicked = false;
+        console.log("clickBrandSelect : ", this.qtInfo.CarBrand);
+      }
+      else {
+        this.typedBrand = '';
+        this.showBrandInputFlag = true;
+      }
+    },
+    brandInput() {
+      this.showBrandInputFlag = false;
+      this.qtInfo.CarBrand = this.typedBrand.toUpperCase();
+      document.getElementById('btnBrandSelect').click();
+      this.brandClicked = false;      
+    },    
   },
   computed:{
       CarInfo: {
@@ -1316,6 +1394,10 @@ export default {
         if(this.UserInfo.UserType !== 'DEALER'){
           this.getQTConfirm();
         }
+        if(this.brandClicked === true){
+          document.getElementById('btnBrandSelect').click();
+          this.brandClicked = false;
+        }
     });
 
     this.$EventBus.$on('init-qtInfo', chatItem => {   
@@ -1323,6 +1405,10 @@ export default {
         this.SetQtInfo();
         this.siteInfo = [];
         this.showSiteInfo = false;
+        if(this.brandClicked === true){
+          document.getElementById('btnBrandSelect').click();
+          this.brandClicked = false;
+        }
     });
 
     this.$EventBus.$on('click-showImage', img => {   
