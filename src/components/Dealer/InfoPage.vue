@@ -17,6 +17,9 @@
               <div class="info-addr"><v-icon small class="qt-icon">mdi-domain</v-icon>{{this.siteInfo.ADDR}}</div>
             </v-row>
           </div>
+          <v-btn small outlined color="blue accent-1" class="mt-3" @click="showSMSSendFlag=true">
+            <v-icon left>far fa-comment-alt</v-icon> <span class="font-weight-medium ml-4">SMS</span>
+          </v-btn> 
         </b-card-text>
       </b-card>
       <b-card
@@ -516,6 +519,58 @@
         </v-card>
       </v-dialog>  
 
+      <v-dialog v-model="showSMSSendFlag" width="600px" max-height="100%">
+        <v-card>
+          <v-card-title class="headline" >SMS 전송</v-card-title>
+          <v-card-text>
+
+            <v-row>
+              <v-col cols="3">
+                <v-subheader>SMS 문구</v-subheader>
+              </v-col>
+
+              <v-col cols="9">
+                <v-select
+                  v-model="selectedSMS"
+                  :items="SMSList"
+                  item-text="state"
+                  item-value="abbr"
+                  label="Select"
+                  persistent-hint
+                  return-object
+                  single-line
+                ></v-select>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="3">
+              </v-col>        
+              <v-col cols="9">      
+                <v-text-field v-if="this.selectedSMS==='직접입력'" v-model="typedSMS"></v-text-field>    
+              </v-col>           
+            </v-row>
+
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+              <v-btn
+                color="#A1887F"
+                @click="sendQTSMS"
+              >
+                전송
+              </v-btn>      
+              <v-btn
+                color="#00BFA5"
+                outlined
+                @click="showSMSSendFlag = false;"
+              >
+                닫기
+              </v-btn>
+
+          </v-card-actions>
+        </v-card>
+      </v-dialog>        
+
     </div>   
   </v-app>
 </template>
@@ -612,12 +667,16 @@ export default {
       itemsPerPage: -1,
       carBrand:['차종 선택', 'BMW', 'BENZ', 'AUDI', 'VW', 'FORD', 'LEXUS', '기타'],
       afterBrand:['MANN','FRAM','MEYLE','BOSCH','TRW'],
+      SMSList:['모바일 견적 회신 메시지를 확인해 주세요.', '도면 회신했습니다. 모바일서 확인해 주세요.', '직접입력'],
       delvType:['택배','퀵'],
       testData: {},      
       txtQTConfirm: '견적 확정 회신', 
       orderHistory:[],
       brandSelected: '차종 선택',
-      selectedConfirm:'' 
+      selectedConfirm:'',
+      selectedSMS:'모바일 견적 회신 메시지를 확인해 주세요.',
+      typedSMS:'',
+      showSMSSendFlag: false,
     }
   },
   methods: {
@@ -796,7 +855,7 @@ export default {
       var param = {};
       param.TranPhone = "010-0000-0000";
       param.TranCallback = "1600-9691";
-      param.TranMsg =  "모바일 견적요청이 완료되었습니다.";
+      param.TranMsg =  "모바일 견적요청이 완료되었습니다.";  
 
       console.log("======= SendSMS Request result ========");
       console.log(param); 
@@ -813,6 +872,39 @@ export default {
       })
       .then((result) => {
           console.log("======= SendSMS Return result ========");     
+          console.log(result.data); 
+          console.log(result.data.ReturnMessage)
+      })
+      .catch((error) => {
+          console.log(error);
+      })   
+    },
+    sendQTSMS() {
+      var param = {};
+      param.system = "BAY4U";
+      param.telNo = this.siteInfo.HP;
+      param.callbackNo = "1600-9691";
+
+      if(this.selectedSMS === "직접입력")
+        param.msg = this.typedSMS;
+      else
+        param.msg = this.selectedSMS;   
+
+      console.log("======= sendQTSMS Request result ========");
+      console.log(param); 
+      console.log(this.siteInfo);
+
+      axios({
+          method: 'POST',
+          url: Constant.SCPIF_URL + 'SendSMS',
+          headers:{
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+          },
+          data: param
+      })
+      .then((result) => {
+          console.log("======= sendQTSMS Return result ========");     
           console.log(result.data); 
           console.log(result.data.ReturnMessage)
       })

@@ -4,7 +4,7 @@
       <b-card no-body>
         <!--<b-tabs v-model="tabIndex" card>
           <b-tab title="대화 목록" :title-link-class="linkClass(0)" active >-->
-            <div  class="Chating-Title">{{chatItem.ReqName}} {{ (chatItem.CarNo==='*empty*') ?'미상차량': chatItem.CarNo}} </div>
+            <div class="Chating-Title">{{chatItem.ReqName}}<span class="Chating-Title-Sub">({{chatItem.ReqSite}})</span> {{ (chatItem.CarNo==='*empty*') ?'미상차량': chatItem.CarNo}} </div>
               <b-card-text>
                  <div v-if="showChatArea" >
                    <div class="Chating-page">
@@ -156,37 +156,6 @@ export default {
           chatMsg.imgId = data.imgId;    
 
           this.msgDatas = chatMsg;
-          
-          /*
-          var param = {};
-          param.operation = "list";
-          param.tableName = "BAY4U_IMG";
-          param.payload = {};
-          param.payload.FilterExpression = "ID = :id";
-          param.payload.ExpressionAttributeValues = {};
-          var key = ":id";
-
-          param.payload.ExpressionAttributeValues[key] = data.imgId;
-
-          axios({
-            method: 'POST',
-            url: Constant.LAMBDA_URL,
-            headers: Constant.JSON_HEADER,
-            data: param
-          })
-          .then((result) => {
-            console.log("======= Image Data result ========");
-            console.log(result.data);
-
-            chatMsg.img = result.data.Items[0].IMG;
-            chatMsg.imgId = data.imgId;    
-
-            this.msgDatas = chatMsg;
-          })
-          .catch((error) => {
-            console.log(error);
-            this.msgDatas = chatMsg;
-          });  */
         }
         else {
           this.msgDatas = chatMsg;
@@ -812,6 +781,10 @@ export default {
   padding: 10px 15px;
   border-top-left-radius: 5px 3px;
   border-top-right-radius: 5px 3px;
+}
+.Chating-Title-Sub
+{
+  font-size: 0.9rem;
 }
 .msg-form {
   bottom: -5px;
