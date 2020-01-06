@@ -254,21 +254,21 @@
                               </b-col>  
                             
                               <b-col class="request-qtInfo-detailBtn">
-                                <b-button block href="#"  v-b-toggle="'accordion-qtReq'+idx2"  variant="secondary" size="sm" v-on:click="showQtReqItem(qtReqInfo)">
+                                <b-button block href="#"  v-b-toggle="'accordion-qtReq'+idx2"  variant="secondary" size="sm" v-on:click="showQtReqItem(qtReqInfo , idx2)">
                                 <!--<i v-if="!SOList2Toggle" class="fas fa-chevron-down"></i>
                                 <i v-if="SOList2Toggle"  class="fas fa-chevron-up"></i>-->
-                                <span class="when-opened">
+                                <span v-if="visibleIcon === true" >
                                   <i class="fa fa-chevron-up" aria-hidden="true"></i>
                                 </span>
-                                <span class="when-closed">
-                                  <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                                <span v-if="visibleIcon !== true" >
+                                  <i class="fas fa-chevron-down"  aria-hidden="true"></i>
                                 </span>
                                 </b-button>
                               </b-col>               
                           </b-row>
                         </b-container>
                       </b-card-header>
-                      <b-collapse :id="'accordion-qtReq'+idx2" accordion="my-accordion2" role="tabpanel" :visible="linkToggleQtReq(idx2)" >
+                      <b-collapse :id="'accordion-qtReq'+idx2" accordion="my-accordion2" role="tabpanel" v-if="linkToggleQtReq(idx2)">
                         <b-card-body>
                           <div class="history-detailConts" style="position: relative">
                             <ul>
@@ -1203,6 +1203,7 @@ export default {
       itemImage:'',
       showResMemo :false,
       resMemo:'',
+      visibleIcon:false,
      // visible:false,
      // visible2:false,
      // visible3:true,
@@ -1300,7 +1301,7 @@ export default {
       }
     },
     linkToggleQtReq(idx)
-    {
+    { 
       if(this.qtReqToggleIndex === idx){
         return true;
       }
@@ -1807,12 +1808,13 @@ export default {
       this.orderToggleIndex = -1;
       this.qtToggleIndex = -1;
       this.qtReqToggleIndex = -1;
+      this.visibleIcon = false;
       this.qtConfrnToggleIndex2 = -1;
       
   //  this.qtReqItem = [];
   //  this.GetConfirmQtList(item);
   //  this.GetConfirmQtList2(item);
-
+  //    console.log('QT Item : ' , item);
       this.GetDealerResData(item);
       this.GetWebposResData(item);
 
@@ -1948,9 +1950,11 @@ export default {
       });
 
     },
-    showQtReqItem(item)
+    showQtReqItem(item , index)
     {
       console.log('item : ', item);
+      this.qtReqToggleIndex = index;
+      this.visibleIcon = !this.visibleIcon;
       //this.SOList2Toggle = !this.SOList2Toggle;
       this.qtReqItem = [];
       if(item.DealerFlag === 'WEBPOS'){
