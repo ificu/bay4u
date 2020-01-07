@@ -8,61 +8,51 @@
       </div>
       <div class="Chat-list">
         <ul>
-          <li v-for="(qtReq, index) in qtReqList" v-bind:key = "index" v-on:click="chatingToggle(qtReq)">
-            <img height='15' v-if="qtReq.CarBrand === 'AUDI'" style="align-self:center" src="@/assets/BRAND-AUDI.png">
-            <img height='25' v-else-if="qtReq.CarBrand === 'BENZ'" style="align-self:center;" src="@/assets/BRAND-BENZ.png">
-            <img height='30' v-else-if="qtReq.CarBrand === 'BMW'" style="align-self:center;" src="@/assets/BRAND-BMW.png">
-            <img height='30' v-else-if="qtReq.CarBrand === 'CADILLAC'" style="align-self:center;" src="@/assets/BRAND-CADILLAC.png">
-            <img height='10' v-else-if="qtReq.CarBrand === 'CHRYSLER'" style="align-self:center;" src="@/assets/BRAND-CHRYSLER.png">
-            <img height='25' v-else-if="qtReq.CarBrand === 'CITROEN'" style="align-self:center;" src="@/assets/BRAND-CITROEN.png">
-            <img height='18' v-else-if="qtReq.CarBrand === 'DODGE'" style="align-self:center;" src="@/assets/BRAND-DODGE.png">
-            <img height='30' v-else-if="qtReq.CarBrand === 'FIAT'" style="align-self:center;" src="@/assets/BRAND-FIAT.png">
-            <img height='17' v-else-if="qtReq.CarBrand === 'FORD'" style="align-self:center;" src="@/assets/BRAND-FORD.png">
-            <img height='25' v-else-if="qtReq.CarBrand === 'HONDA'" style="align-self:center;" src="@/assets/BRAND-HONDA.png">
-            <img height='15' v-else-if="qtReq.CarBrand === 'JEEP'" style="align-self:center;" src="@/assets/BRAND-JEEP.png">
-            <img height='17' v-else-if="qtReq.CarBrand === 'LANDROVER'" style="align-self:center;" src="@/assets/BRAND-LANDROVER.png">
-            <img height='25' v-else-if="qtReq.CarBrand === 'LEXUS'" style="align-self:center;" src="@/assets/BRAND-LEXUS.png">
-            <img height='30' v-else-if="qtReq.CarBrand === 'LINCOLN'" style="align-self:center;" src="@/assets/BRAND-LINCOLN.png">
-            <img height='18' v-else-if="qtReq.CarBrand === 'MINI'" style="align-self:center;" src="@/assets/BRAND-MINI.png">
-            <img height='25' v-else-if="qtReq.CarBrand === 'PEUGEOT'" style="align-self:center;" src="@/assets/BRAND-PEUGEOT.png">
-            <img height='30' v-else-if="qtReq.CarBrand === 'PORSCHE'" style="align-self:center;" src="@/assets/BRAND-PORSCHE.png">
-            <img height='25' v-else-if="qtReq.CarBrand === 'TOYOTA'" style="align-self:center;" src="@/assets/BRAND-TOYOTA.png">
-            <img height='25' v-else-if="qtReq.CarBrand === 'VOLVO'" style="align-self:center;" src="@/assets/BRAND-VOLVO.png">
-            <img height='25' v-else-if="qtReq.CarBrand === 'VW'" style="align-self:center;" src="@/assets/BRAND-VW.png">
-
-            <i v-else class="Dealer-type fas fa-wrench" style="color:#fbc02e;"></i>
-            <div class="Chart-qtinfo">
-              <span class="Chart-carInfo">{{(qtReq.CarNo === "*empty*")?"미상차량" : qtReq.CarNo }}</span> / 
-              <span  class="Chart-date">{{setReqDt(qtReq.ReqDt)}}</span>
+          <li v-for="(qtReq, index) in qtReqList" v-bind:key = "index" v-on:click="chatingToggle(qtReq)" v-bind:class = "qtReq.Kbn">
+            <div class="Chat-DivNormal" v-if="qtReq.Kbn==='list-normal'">
+              <img height='15' v-if="qtReq.CarBrand === 'AUDI'" style="align-self:center" src="@/assets/BRAND-AUDI.png">
+              <img height='25' v-else-if="qtReq.CarBrand === 'BENZ'" style="align-self:center;" src="@/assets/BRAND-BENZ.png">
+              <img height='30' v-else-if="qtReq.CarBrand === 'BMW'" style="align-self:center;" src="@/assets/BRAND-BMW.png">
+              <img height='30' v-else-if="qtReq.CarBrand === 'CADILLAC'" style="align-self:center;" src="@/assets/BRAND-CADILLAC.png">
+              <img height='10' v-else-if="qtReq.CarBrand === 'CHRYSLER'" style="align-self:center;" src="@/assets/BRAND-CHRYSLER.png">
+              <img height='25' v-else-if="qtReq.CarBrand === 'CITROEN'" style="align-self:center;" src="@/assets/BRAND-CITROEN.png">
+              <img height='18' v-else-if="qtReq.CarBrand === 'DODGE'" style="align-self:center;" src="@/assets/BRAND-DODGE.png">
+              <img height='30' v-else-if="qtReq.CarBrand === 'FIAT'" style="align-self:center;" src="@/assets/BRAND-FIAT.png">
+              <img height='17' v-else-if="qtReq.CarBrand === 'FORD'" style="align-self:center;" src="@/assets/BRAND-FORD.png">
+              <img height='25' v-else-if="qtReq.CarBrand === 'HONDA'" style="align-self:center;" src="@/assets/BRAND-HONDA.png">
+              <img height='15' v-else-if="qtReq.CarBrand === 'JEEP'" style="align-self:center;" src="@/assets/BRAND-JEEP.png">
+              <img height='17' v-else-if="qtReq.CarBrand === 'LANDROVER'" style="align-self:center;" src="@/assets/BRAND-LANDROVER.png">
+              <img height='25' v-else-if="qtReq.CarBrand === 'LEXUS'" style="align-self:center;" src="@/assets/BRAND-LEXUS.png">
+              <img height='30' v-else-if="qtReq.CarBrand === 'LINCOLN'" style="align-self:center;" src="@/assets/BRAND-LINCOLN.png">
+              <img height='18' v-else-if="qtReq.CarBrand === 'MINI'" style="align-self:center;" src="@/assets/BRAND-MINI.png">
+              <img height='25' v-else-if="qtReq.CarBrand === 'PEUGEOT'" style="align-self:center;" src="@/assets/BRAND-PEUGEOT.png">
+              <img height='30' v-else-if="qtReq.CarBrand === 'PORSCHE'" style="align-self:center;" src="@/assets/BRAND-PORSCHE.png">
+              <img height='25' v-else-if="qtReq.CarBrand === 'TOYOTA'" style="align-self:center;" src="@/assets/BRAND-TOYOTA.png">
+              <img height='25' v-else-if="qtReq.CarBrand === 'VOLVO'" style="align-self:center;" src="@/assets/BRAND-VOLVO.png">
+              <img height='25' v-else-if="qtReq.CarBrand === 'VW'" style="align-self:center;" src="@/assets/BRAND-VW.png">
+              <i v-else class="Dealer-type fas fa-wrench" style="color:#fbc02e;"></i>
+              
+              <div class="Chart-qtinfo">
+                <span class="Chart-carInfo">{{(qtReq.CarNo === "*empty*")?"미상차량" : qtReq.CarNo }}</span> / 
+                <span  class="Chart-date">{{setReqDt(qtReq.ReqDt)}}</span>
+              </div>
+              <span class="Dealer-name">{{SetDealerNm(qtReq.ResDealer)}}</span>
+              <span type="button" class="Chat-detail">
+                <i class="fas fa-angle-double-right"></i>
+              </span>
             </div>
-            <span class="Dealer-name">{{SetDealerNm(qtReq.ResDealer)}}</span>
-            <span type="button" class="Chat-detail">
-              <i class="fas fa-angle-double-right"></i>
-            </span>
+
+            <div class="Chat-DivIndent" v-if="qtReq.Kbn==='list-indent'">
+              <div class="Chart-qtinfo">
+                <span class="Chart-carInfo2">┗</span>
+              </div>
+
+              <span class="Dealer-name">{{SetDealerNm(qtReq.ResDealer)}}</span>
+              <span type="button" class="Chat-detail">
+                <i class="fas fa-angle-double-right"></i>
+              </span>
+            </div>
           </li>
-          <!--
-          <li>
-            <i class="Dealer-type fas fa-wrench" style="color:#967d5f;"></i>
-            <p class="Dealer-name">제로무역</p>
-            <span type="button" class="Chat-detail" v-on:click="chatingToggle">
-              <i class="fas fa-angle-double-right"></i>
-            </span>
-          </li>
-          <li>
-            <i class="Dealer-type fas fa-wrench" style="color:#967d5f;"></i>
-            <p class="Dealer-name">파트파츠</p>
-            <span type="button" class="Chat-detail" v-on:click="chatingToggle">
-              <i class="fas fa-angle-double-right"></i>
-            </span>
-          </li>
-          <li>
-            <i class="Dealer-type fas fa-wrench" style="color:#ccc;"></i>
-            <p class="Dealer-name">오토비</p>
-            <span type="button" class="Chat-detail" v-on:click="chatingToggle">
-              <i class="fas fa-angle-double-right"></i>
-            </span>
-          </li>
-          -->
         </ul>
       </div>
       <BackToTop></BackToTop>
@@ -129,7 +119,7 @@
 import Constant from '@/Constant';
 import MessageList from '@/components/Chat/ChatMessageList.vue';
 import MessageForm from '@/components/Chat/ChatMessageForm.vue';
-import {datePadding, convertStringToDynamo, dataURItoBlob} from '@/utils/common.js'
+import {datePadding, convertStringToDynamo, dataURItoBlob, sleep} from '@/utils/common.js'
 import QTCamera from '@/components/NewQT/QTCamera.vue'
 import CheckLogin from '@/components/Common/CheckLogin.vue'
 import BackToTop from '@/components/Common/BackToTop.vue'
@@ -256,6 +246,8 @@ export default {
         chatMsg.Chatid = this.docId;
         chatMsg.reqTm = data.reqTm;
         if(data.imgId !== undefined) {       
+
+          sleep(5000);
 
           chatMsg.img = Constant.IMG_URL + data.imgId;
           chatMsg.imgId = data.imgId;    
@@ -447,8 +439,6 @@ export default {
         data: param
       })
       .then((result) => {
-        console.log("======= QT List result ========");
-        console.log(result.data.Items);
 
         if(Array.isArray(result.data.Items))
         {
@@ -457,6 +447,18 @@ export default {
             return (a.ReqSeq < b.ReqSeq) ? 1 : -1;
           });
         }
+
+        for(var i = 0; i<result.data.Items.length; i++) {      
+          if(i > 0 && (result.data.Items[i].ReqSeq === result.data.Items[i-1].ReqSeq)) {
+            result.data.Items[i].Kbn = "list-indent";
+          }
+          else {
+            result.data.Items[i].Kbn = "list-normal";
+          }
+        }
+
+        console.log("======= QT List result ========");
+        console.log(result.data.Items);        
 
         this.qtReqList = result.data.Items;
 
@@ -579,6 +581,7 @@ export default {
   mounted() {
     datePadding();
     convertStringToDynamo();
+    sleep();
   }
 }
 </script>
@@ -624,6 +627,19 @@ export default {
   background-color: #fcf4df;
 }
 
+.Chat-list .list-indent {
+  margin-left: 80px;
+  margin-top: -7px;
+  border-style: dashed;
+}
+
+.Chat-DivNormal {
+  display:contents;
+}
+.Chat-DivIndent {
+  display:contents;
+}
+
 .Dealer-type {
   align-self: center;
   font-size: 1.5rem;
@@ -638,6 +654,11 @@ export default {
 .Chart-qtinfo .Chart-carInfo {
   font-weight: bold;
   font-size: 1.4em;
+}
+.Chart-qtinfo .Chart-carInfo2 {
+  font-weight: bold;
+  font-size: 1.7em;
+  margin-left: -60px;
 }
 
 .Chart-qtinfo .Chart-date {
