@@ -78,3 +78,7 @@ export function arrayGroupBy(array, f) {
         return groups[group];
     })
 }
+
+export function sleep(ms) {
+    return new Promise(resolve=>setTimeout(resolve, ms));
+  }

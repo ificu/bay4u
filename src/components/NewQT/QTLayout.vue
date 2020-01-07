@@ -98,7 +98,7 @@
             <v-card-actions>
               <v-spacer></v-spacer>
               <v-btn color="green darken-1" text @click="checkIntraVanVin">조회</v-btn>
-              <v-btn color="green darken-1" text @click="showVINSearchAgreePopup = false">취소</v-btn>
+              <v-btn color="green darken-1" text @click="showVINSearchAgreePopup = false; CarInfo.VinNo = '';">취소</v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>        
@@ -718,56 +718,62 @@ name: 'QTStep',
             (this.CarInfo.VinNo === '' || this.CarInfo.VinNo === null || this.CarInfo.VinNo === undefined)) 
         return;
 
-        var param = {};
-        param.BsnId = this.UserInfo.BsnID;
-        param.CarNo = this.CarInfo.CarNo;
-        param.VinNo = this.CarInfo.VinNo;
+        if(this.UserInfo.UserType === 'SITE') { // WebPOS일 경우 정비 이력 조회 이후 차대번호 세팅
 
-        this.$cookies.set('CarNo', this.CarInfo.CarNo, '600s');
+          var param = {};
+          param.BsnId = this.UserInfo.BsnID;
+          param.CarNo = this.CarInfo.CarNo;
+          param.VinNo = this.CarInfo.VinNo;
 
-        console.log("======= ROHistory Request result ========");
-        console.log(param); 
+          this.$cookies.set('CarNo', this.CarInfo.CarNo, '600s');
 
-        var rtnCode = "";
-        var rtnCount = 0;
-      
-        axios({
-            method: 'POST',
-            url: Constant.SCPIF_URL + 'GetROList',
-            headers: Constant.JSON_HEADER,
-            data: param
-        })
-        .then((result) => {
-            console.log("======= ROHistory Return result ========");
-            console.log(result.data); 
-            if(result.data.ReturnDataCount > 0) {
-              this.showROHistBtn = true;
+          console.log("======= ROHistory Request result ========");
+          console.log(param); 
 
-              if(Array.isArray(result.data.ReturnDataJSON))
-              {
-                 result.data.ReturnDataJSON.sort(function(a, b){
-                  return (a.DC_DY_BSN > b.DC_DY_BSN) ? 1 : -1;
-                });
+          var rtnCode = "";
+          var rtnCount = 0;
+        
+          axios({
+              method: 'POST',
+              url: Constant.SCPIF_URL + 'GetROList',
+              headers: Constant.JSON_HEADER,
+              data: param
+          })
+          .then((result) => {
+              console.log("======= ROHistory Return result ========");
+              console.log(result.data); 
+              if(result.data.ReturnDataCount > 0) {
+                this.showROHistBtn = true;
+
+                if(Array.isArray(result.data.ReturnDataJSON))
+                {
+                  result.data.ReturnDataJSON.sort(function(a, b){
+                    return (a.DC_DY_BSN > b.DC_DY_BSN) ? 1 : -1;
+                  });
+                }
+
+                this.roList = JSON.parse(result.data.ReturnDataJSON);
+                
+                this.CarInfo.VinNo = result.data.ReturnObject;
               }
-
-              this.roList = JSON.parse(result.data.ReturnDataJSON);
+              else if (result.data.ReturnObject !== "" && result.data.ReturnObject !== null) {
+                this.CarInfo.VinNo = result.data.ReturnObject;
+              }
+              else {
+                // 정비이력 조회는 차량번호 입력 or 인식 후 자동 처리 되므로 차대번호 조회도 자동 처리하자...
+                this.checkCarVin();
+              }
               
-              this.CarInfo.VinNo = result.data.ReturnObject;
-            }
-            else if (result.data.ReturnObject !== "" && result.data.ReturnObject !== null) {
-              this.CarInfo.VinNo = result.data.ReturnObject;
-            }
-            else {
-              // 정비이력 조회는 차량번호 입력 or 인식 후 자동 처리 되므로 차대번호 조회도 자동 처리하자...
-              this.checkCarVin();
-            }
-            
-            this.showVINSearchBtn = true;
-        })
-        .catch((error) => {
-            console.log(error);
-        })
-        this.CarInfo.VinNo = "WebPOS 이력 조회 중...";
+              this.showVINSearchBtn = true;
+          })
+          .catch((error) => {
+              console.log(error);
+          })
+          this.CarInfo.VinNo = "WebPOS 이력 조회 중...";
+        }
+        else { // 일반 카세터면 WebPOS 조회 없이 자체 저장 내역 체크
+          this.checkCarVin();
+        }
         
       },
       showQTConfirmModal() {
@@ -924,6 +930,9 @@ name: 'QTStep',
           // 선택 된 대리점 중 대표대리점이 었으면 첫번째 대리점을 대표로 설정
           this.selectedDealer[0].TYPE = 'A'
         }
+        
+        var reqSeq = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                  + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
 
         this.processMsg = "견적 요청 중입니다. \n잠시만 기다려주세요.";
         this.showProcessing = true;
@@ -961,7 +970,7 @@ name: 'QTStep',
               {
                   param.RequestDataJSON = JSON.stringify(this.qtRequest);
               }
-              
+
               console.log("======= webpos Request result ========");
               console.log(JSON.stringify(param));
 
@@ -980,7 +989,7 @@ name: 'QTStep',
                 {
                   docId = result.data.ReturnObject;  // 견적ID 
                   // 견적저장
-                  this.saveQTData(docId , dealer.DEALER, dealer.DEALER_NAME , dealer.TYPE);
+                  this.saveQTData(docId , dealer.DEALER, dealer.DEALER_NAME , dealer.TYPE, reqSeq);
                 }
                 else
                 {
@@ -1006,16 +1015,14 @@ name: 'QTStep',
               docId = this.UserInfo.BsnID + now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2)  + this.CarInfo.VinNo + 
                       datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2) ;
               // 견적저장
-              this.saveQTData(docId , dealer.DEALER,  dealer.DEALER_NAME ,dealer.TYPE);
+              this.saveQTData(docId , dealer.DEALER,  dealer.DEALER_NAME ,dealer.TYPE, reqSeq);
           }
         });
     },
-    saveQTData(docId , dealer , dealerNm, dealerType)
+    saveQTData(docId , dealer , dealerNm, dealerType, reqSeq)
     {
       this.saveQtCount++;
       var now = new Date();
-      var key = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
-                  + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
       var imgKey = this.UserInfo.BsnID + now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                   + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
 
@@ -1031,7 +1038,7 @@ name: 'QTStep',
       param.payload.Item.ReqDt = now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);
       param.payload.Item.ReqSite = convertStringToDynamo(this.UserInfo.BsnID);
       param.payload.Item.ReqName = convertStringToDynamo(this.UserInfo.Name);
-      param.payload.Item.ReqSeq = key;
+      param.payload.Item.ReqSeq = reqSeq;
       param.payload.Item.ResDealer = dealer;
       param.payload.Item.ResDealerNm = dealerNm;
       param.payload.Item.Memo = convertStringToDynamo(this.qtReqMemo);
@@ -1339,6 +1346,7 @@ name: 'QTStep',
         this.showVINSearchBtn = false;
         this.showROHistBtn = false;
         this.captureImg = "";
+        this.brandSelected = '차종 선택';
         this.$cookies.set('CarNo', this.CarInfo.CarNo, '600s');
         this.$cookies.set('VinNo', this.CarInfo.VinNo, '600s');
       },

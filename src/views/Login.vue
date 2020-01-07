@@ -113,7 +113,7 @@ export default {
             this.loginAlertMessage = "비밀번호 불일치";
             this.loginAlert = true;   
           }
-          else if(type === "SITE") {
+          else if(type === "SITE" || type === "SITE2") {
             this.$cookies.set('BsnID', siteCode, '86400s');
             this.$cookies.set('UserNM', name, '86400s');
             this.$cookies.set('UserType', type, '86400s');
@@ -161,10 +161,10 @@ export default {
     if(this.$cookies.get('BsnID') !== "" && this.$cookies.get('BsnID') !== null) {
       var type = this.$cookies.get('UserType');
 
-      if(type === "SITE") {
+      if(type === "SITE" || type === "SITE2") {
         this.$router.push('/NewQT');
       }
-      else if(type === "DEALER") {
+      else if(type === "DEALER" || type === "DEALER2") {
         this.$router.push('/MainPage');
       }
     }
