@@ -342,6 +342,15 @@
       </div>
     </MessageBox>
 
+    <!-- 프로세싱 메시지 -->
+    <MessageBox v-if="showProcessing">
+      <div slot="header"><h5 >처리 중...</h5></div>
+      <span slot="body" class="showProcessing">
+        <pre>{{processMsg}}</pre>
+        <v-icon large color="orange darken-2">fas fa-sync-alt fa-spin</v-icon>
+      </span>
+    </MessageBox>
+
   </v-app>  
 </template>
 
@@ -421,6 +430,8 @@ name: 'QTStep',
         '차종 선택', 'BMW', 'BENZ', 'AUDI', 'VW', 'FORD', 'LEXUS', '기타'
       ],     
       selectedDealer: [],
+      showProcessing: false,
+      processMsg: '',
     }
   },
   methods: {
@@ -541,6 +552,7 @@ name: 'QTStep',
                   this.alertMsg = "차대번호가 인식되었으나\n한자리 정도 오차가 있습니다.\n정확한 차대번호를 확인해 주세요.";
                   this.showAlertMsg = !this.showAlertMsg;
                   this.alertMsgPath = "";
+                  this.showAlerMsgBtn = true;
 
                   console.log("VIN-16/18 : ", JSON.stringify(text));
                   this.CarInfo.VinNo = text.description.replace(/\I/g, "1").replace(/\O/g, "0").replace(/\g/g, "9").toUpperCase();
@@ -913,6 +925,10 @@ name: 'QTStep',
           this.selectedDealer[0].TYPE = 'A'
         }
 
+        this.processMsg = "견적 요청 중입니다. \n잠시만 기다려주세요.";
+        this.showProcessing = true;
+        this.saveQtCount = 0;
+
         this.selectedDealer.forEach( dealer => {
             
           if(dealer.DEALER === 'PARTS')
@@ -945,7 +961,7 @@ name: 'QTStep',
               {
                   param.RequestDataJSON = JSON.stringify(this.qtRequest);
               }
-
+              
               console.log("======= webpos Request result ========");
               console.log(JSON.stringify(param));
 
@@ -966,8 +982,21 @@ name: 'QTStep',
                   // 견적저장
                   this.saveQTData(docId , dealer.DEALER, dealer.DEALER_NAME , dealer.TYPE);
                 }
+                else
+                {
+                  this.showProcessing = false;
+                  this.saveQtCount = 0;
+                  this.alertMsg = "WebPOS 견적 요청 중 에러가 발생했습니다.\n다시 요청해 주세요. (Code:"+rtnCode+")";
+                  this.showAlertMsg = !this.showAlertMsg;
+                  this.showAlerMsgBtn = true;
+                }
               })
               .catch((error) => {
+                this.showProcessing = false;
+                this.saveQtCount = 0;
+                this.alertMsg = "WebPOS 견적 요청 중 에러가 발생했습니다.\n다시 요청해 주세요. (Code:99)";
+                this.showAlertMsg = !this.showAlertMsg;
+                this.showAlerMsgBtn = true;
                 console.log(error);
               });
           }
@@ -1040,6 +1069,11 @@ name: 'QTStep',
       })
       .catch((error) => {
         console.log(error);
+        this.showProcessing = false;
+        this.saveQtCount = 0;
+        this.alertMsg = "견적 저장 중 에러가 발생했습니다.\n다시 요청해 주세요. (Code:"+rtnCode+")";
+        this.showAlertMsg = !this.showAlertMsg;
+        this.showAlerMsgBtn = true;
       });
 
       console.log("this.captureBlobImg : ", this.captureBlobImg);
@@ -1083,7 +1117,8 @@ name: 'QTStep',
 
       if( this.selectedDealer.length === this.saveQtCount )
       {
-          this.goChating();
+        this.showProcessing = false;
+        this.goChating();
       }
     },
     goChating()
@@ -1197,6 +1232,7 @@ name: 'QTStep',
          {
             this.alertMsg = "선택한 견적요청 대리점이 없습니다.\n대리점을 선택 해 주세요."
             this.showAlertMsg = !this.showAlertMsg;
+            this.showAlerMsgBtn = true;
             return false;
          }
 
@@ -1205,6 +1241,7 @@ name: 'QTStep',
           this.alertMsg = "로그인 정보가 없습니다.\n다시 로그인 해주세요."
           this.showAlertMsg = !this.showAlertMsg;
           this.alertMsgPath = "Login";
+          this.showAlerMsgBtn = true;
           return false;
         }
 
@@ -1213,6 +1250,7 @@ name: 'QTStep',
           this.alertMsg = "사이트 정보가 없습니다.\n다시 로그인 해주세요."
           this.showAlertMsg = !this.showAlertMsg;
           this.alertMsgPath = "Login";
+          this.showAlerMsgBtn = true;
           return false;
         }
 
@@ -1221,6 +1259,7 @@ name: 'QTStep',
           this.alertMsg = "로그인 정보가 없습니다.\n다시 로그인 해주세요."
           this.showAlertMsg = !this.showAlertMsg;
           this.alertMsgPath = "Login";
+          this.showAlerMsgBtn = true;
           return false;
         }
 
@@ -1229,6 +1268,7 @@ name: 'QTStep',
           this.alertMsg = "사이트 정보가 없습니다.\n다시 로그인 해주세요."
           this.showAlertMsg = !this.showAlertMsg;
           this.alertMsgPath = "Login";
+          this.showAlerMsgBtn = true;
           return false;
         }
         
@@ -1237,6 +1277,7 @@ name: 'QTStep',
           this.alertMsg = "사이트 정보가 없습니다.\n다시 로그인 해주세요."
           this.showAlertMsg = !this.showAlertMsg;
           this.alertMsgPath = "Login";
+          this.showAlerMsgBtn = true;
           return false;
         }
         /*
@@ -1698,4 +1739,11 @@ name: 'QTStep',
   color: yellow;
   padding-left: 8px;
 }
+.showProcessing
+{
+  display: block; 
+  text-align:center; 
+  font-size: 1.2rem;
+}
+
 </style>

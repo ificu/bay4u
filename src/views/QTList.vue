@@ -200,10 +200,24 @@
                   <b-row>
                     <b-col align-self="center" class="history-brand">
                       <img height='18' v-if="qtItem[0].CarBrand === 'AUDI'" style="align-self:center; margin-left:-3px;" src="@/assets/BRAND-AUDI.png">
-                      <img height='30' v-if="qtItem[0].CarBrand === 'BENZ'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-BENZ.png">
+                      <img height='25' v-if="qtItem[0].CarBrand === 'BENZ'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-BENZ.png">
                       <img height='30' v-if="qtItem[0].CarBrand === 'BMW'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-BMW.png">
-                      <img height='30' v-if="qtItem[0].CarBrand === 'FORD'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-FORD.png">
+                      <img height='30' v-if="qtItem[0].CarBrand === 'CADILLAC'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-CADILLAC.png">
+                      <img height='10' v-if="qtItem[0].CarBrand === 'CHRYSLER'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-CHRYSLER.png">
+                      <img height='25' v-if="qtItem[0].CarBrand === 'CITROEN'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-CITROEN.png">
+                      <img height='18' v-if="qtItem[0].CarBrand === 'DODGE'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-DODGE.png">
+                      <img height='30' v-if="qtItem[0].CarBrand === 'FIAT'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-FIAT.png">
+                      <img height='25' v-if="qtItem[0].CarBrand === 'FORD'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-FORD.png">
+                      <img height='25' v-if="qtItem[0].CarBrand === 'HONDA'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-HONDA.png">
+                      <img height='15' v-if="qtItem[0].CarBrand === 'JEEP'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-JEEP.png">
+                      <img height='17' v-if="qtItem[0].CarBrand === 'LANDROVER'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-LANDROVER.png">
                       <img height='25' v-if="qtItem[0].CarBrand === 'LEXUS'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-LEXUS.png">
+                      <img height='30' v-if="qtItem[0].CarBrand === 'LINCOLN'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-LINCOLN.png">
+                      <img height='18' v-if="qtItem[0].CarBrand === 'MINI'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-MINI.png">
+                      <img height='25' v-if="qtItem[0].CarBrand === 'PEUGEOT'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-PEUGEOT.png">
+                      <img height='30' v-if="qtItem[0].CarBrand === 'PORSCHE'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-PORSCHE.png">
+                      <img height='25' v-if="qtItem[0].CarBrand === 'TOYOTA'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-TOYOTA.png">
+                      <img height='25' v-if="qtItem[0].CarBrand === 'VOLVO'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-VOLVO.png">
                       <img height='30' v-if="qtItem[0].CarBrand === 'VW'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-VW.png">
                     </b-col>                    
                     <b-col align-self="center" class="history-date">{{setQtDate(qtItem[0].ReqDt)}}</b-col>

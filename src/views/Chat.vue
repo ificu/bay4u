@@ -9,12 +9,27 @@
       <div class="Chat-list">
         <ul>
           <li v-for="(qtReq, index) in qtReqList" v-bind:key = "index" v-on:click="chatingToggle(qtReq)">
-            <img height='18' v-if="qtReq.CarBrand === 'AUDI'" style="align-self:center" src="@/assets/BRAND-AUDI.png">
-            <img height='25' v-else-if="qtReq.CarBrand === 'BENZ'" style="align-self:center" src="@/assets/BRAND-BENZ.png">
-            <img height='25' v-else-if="qtReq.CarBrand === 'BMW'" style="align-self:center" src="@/assets/BRAND-BMW.png">
-            <img height='18' v-else-if="qtReq.CarBrand === 'FORD'" style="align-self:center" src="@/assets/BRAND-FORD.png">
-            <img height='25' v-else-if="qtReq.CarBrand === 'LEXUS'" style="align-self:center" src="@/assets/BRAND-LEXUS.png">
-            <img height='25' v-else-if="qtReq.CarBrand === 'VW'" style="align-self:center" src="@/assets/BRAND-VW.png">
+            <img height='15' v-if="qtReq.CarBrand === 'AUDI'" style="align-self:center" src="@/assets/BRAND-AUDI.png">
+            <img height='25' v-else-if="qtReq.CarBrand === 'BENZ'" style="align-self:center;" src="@/assets/BRAND-BENZ.png">
+            <img height='30' v-else-if="qtReq.CarBrand === 'BMW'" style="align-self:center;" src="@/assets/BRAND-BMW.png">
+            <img height='30' v-else-if="qtReq.CarBrand === 'CADILLAC'" style="align-self:center;" src="@/assets/BRAND-CADILLAC.png">
+            <img height='10' v-else-if="qtReq.CarBrand === 'CHRYSLER'" style="align-self:center;" src="@/assets/BRAND-CHRYSLER.png">
+            <img height='25' v-else-if="qtReq.CarBrand === 'CITROEN'" style="align-self:center;" src="@/assets/BRAND-CITROEN.png">
+            <img height='18' v-else-if="qtReq.CarBrand === 'DODGE'" style="align-self:center;" src="@/assets/BRAND-DODGE.png">
+            <img height='30' v-else-if="qtReq.CarBrand === 'FIAT'" style="align-self:center;" src="@/assets/BRAND-FIAT.png">
+            <img height='17' v-else-if="qtReq.CarBrand === 'FORD'" style="align-self:center;" src="@/assets/BRAND-FORD.png">
+            <img height='25' v-else-if="qtReq.CarBrand === 'HONDA'" style="align-self:center;" src="@/assets/BRAND-HONDA.png">
+            <img height='15' v-else-if="qtReq.CarBrand === 'JEEP'" style="align-self:center;" src="@/assets/BRAND-JEEP.png">
+            <img height='17' v-else-if="qtReq.CarBrand === 'LANDROVER'" style="align-self:center;" src="@/assets/BRAND-LANDROVER.png">
+            <img height='25' v-else-if="qtReq.CarBrand === 'LEXUS'" style="align-self:center;" src="@/assets/BRAND-LEXUS.png">
+            <img height='30' v-else-if="qtReq.CarBrand === 'LINCOLN'" style="align-self:center;" src="@/assets/BRAND-LINCOLN.png">
+            <img height='18' v-else-if="qtReq.CarBrand === 'MINI'" style="align-self:center;" src="@/assets/BRAND-MINI.png">
+            <img height='25' v-else-if="qtReq.CarBrand === 'PEUGEOT'" style="align-self:center;" src="@/assets/BRAND-PEUGEOT.png">
+            <img height='30' v-else-if="qtReq.CarBrand === 'PORSCHE'" style="align-self:center;" src="@/assets/BRAND-PORSCHE.png">
+            <img height='25' v-else-if="qtReq.CarBrand === 'TOYOTA'" style="align-self:center;" src="@/assets/BRAND-TOYOTA.png">
+            <img height='25' v-else-if="qtReq.CarBrand === 'VOLVO'" style="align-self:center;" src="@/assets/BRAND-VOLVO.png">
+            <img height='25' v-else-if="qtReq.CarBrand === 'VW'" style="align-self:center;" src="@/assets/BRAND-VW.png">
+
             <i v-else class="Dealer-type fas fa-wrench" style="color:#fbc02e;"></i>
             <div class="Chart-qtinfo">
               <span class="Chart-carInfo">{{(qtReq.CarNo === "*empty*")?"미상차량" : qtReq.CarNo }}</span> / 
