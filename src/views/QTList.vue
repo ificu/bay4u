@@ -299,13 +299,16 @@
                               </div>
                               </li>
                             </ul>
-                            <div class="qtReq-image" v-if="qtReqInfo.DealerFlag !=='WEBPOS'">
+                            <div class="qtReq-image" v-if="qtReqInfo.WebposOnly !=='Y'">
                               <span class="qtReq-reqTitle" v-if="qtReqInfo.QTData.IMG !=='*empty*'">차량번호/차대번호 사진촬영</span>
                               <span class="qtReq-reqIcon" v-if="qtReqInfo.QTData.IMG !=='*empty*'" @click="showQTImage(qtReqInfo.QTData.IMG)"><i class="fas fa-image"></i></span>
                               <span class="qtReq-reqTitle" v-if="qtReqInfo.QTData.Memo !=='*empty*'" >메모</span>
                               <span class="qtReq-reqIcon" v-if="qtReqInfo.QTData.Memo !=='*empty*'" @click="showResmemoPopup(qtReqInfo.QTData)" ><i class="far fa-sticky-note"></i></span>
                             </div>
-                            <div class="history-detailConts-carvin"><span>{{(qtReqInfo.CarVin === '99999999999999999')? "미상차량" : qtReqInfo.CarVin}}</span></div>
+                            <div class="history-detailConts-carvin">
+                              <span v-if="qtReqInfo.WebposOnly === 'Y'" style="color:lightgray;">*</span>
+                              <span>{{(qtReqInfo.CarVin === '99999999999999999')? "미상차량" : qtReqInfo.CarVin}}</span>
+                            </div>
                           </div>
                         </b-card-body>
                       </b-collapse>
@@ -1518,6 +1521,7 @@ export default {
 				{
 					this.confirmQTdata = JSON.parse(result.data.ReturnDataJSON);
 					this.confirmQTdata.forEach(element => {
+
 						let qtItem = {};
 						qtItem.ID = element.ESTM_ID;
 						qtItem.CarNo = element.CAR_NO;
@@ -1535,7 +1539,7 @@ export default {
             }
             else{
               this.qtList[index].DealerFlag  = 'WEBPOS';
-              this.qtList[index].QTData = element;
+              //this.qtList[index].QTData = element;
               this.qtList[index].ResQTData = [];
             }
 					});
@@ -1835,7 +1839,7 @@ export default {
   //  this.qtReqItem = [];
   //  this.GetConfirmQtList(item);
   //  this.GetConfirmQtList2(item);
-  //    console.log('QT Item : ' , item);
+  //  console.log('QT Item : ' , item);
       this.GetDealerResData(item);
       this.GetWebposResData(item);
 
@@ -1875,9 +1879,12 @@ export default {
               
               if(headQTData.length > 0)
               {
-                if(headQTData[0].ESTM_STS !== '0' && headQTData[0].ESTM_STS !== '1' && headQTData[0].ESTM_STS !== '6' && rtnQTData['ESTM_DTL'].Length !== 0)
+                var dtlQtData = rtnQTData['ESTM_DTL'];
+               // console.log('ESTM_STS :', headQTData[0].ESTM_STS);
+               // console.log('ESTM_DTL :', dtlQtData.length);
+                if(headQTData[0].ESTM_STS !== '0' && headQTData[0].ESTM_STS !== '1' && headQTData[0].ESTM_STS !== '6' && rtnQTData['ESTM_DTL'].length !== 0)
                 {
-                  var dtlQtData = rtnQTData['ESTM_DTL'];
+                  //var dtlQtData = rtnQTData['ESTM_DTL'];
                   console.log("ESTM_DTL : " , dtlQtData);
 
                   headQTData.forEach(element => {
@@ -1978,7 +1985,7 @@ export default {
       this.visibleIcon = !this.visibleIcon;
       //this.SOList2Toggle = !this.SOList2Toggle;
       this.qtReqItem = [];
-      if(item.DealerFlag === 'WEBPOS'){
+      if(item.WebposOnly === 'Y'){
         
         item.ResQTData[0].ResDetail.forEach(element => {
            let detailItem = {};
@@ -1988,7 +1995,8 @@ export default {
         });
       }
       else{
-         this.qtReqItem = JSON.parse(convertDynamoToArrayString(item.QTData.LineItem)); 
+
+        this.qtReqItem = JSON.parse(convertDynamoToArrayString(item.QTData.LineItem)); 
       }
     },
     showResItem(item , index)
@@ -2302,6 +2310,7 @@ export default {
     this.UserInfo.BsnID = this.$cookies.get('BsnID');
 
     if(this.$route !== undefined && this.$route.name === "QTList" ) {
+
       var docID = '';
       if(this.$route.params.DocID !== undefined)
       {
