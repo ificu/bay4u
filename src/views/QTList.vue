@@ -327,7 +327,7 @@
                                   <span v-if="qtReqInfo.WebposOnly ==='N'" @click="goQTChating(qtReqInfo)"><i class ="fas fa-comment-dots"></i></span>
                               </b-col>                   
                               <b-col class="response-detailBtn">
-                                <b-button block href="#"  v-b-toggle="'accordion-webpos-' + getIndex(confrimInfo.ID)"  variant="secondary" size="sm" v-on:click="showResItem(confrimInfo , getIndex(confrimInfo.ID))">
+                                <b-button block href="#" :id="'btnAccordion-'+getIndex(confrimInfo.ID)" v-b-toggle="'accordion-webpos-' + getIndex(confrimInfo.ID)"  variant="secondary" size="sm" v-on:click="showResItem(confrimInfo , getIndex(confrimInfo.ID))">
                                   <!--<i v-if="!SOList1Toggle" class="fas fa-chevron-down"></i>
                                   <i v-if="SOList1Toggle"  class="fas fa-chevron-up"></i>-->
                                   <span  v-if="visibleIcon2 === true" >
@@ -1892,9 +1892,13 @@ export default {
                   if(index >= 0)
                   {
                     // 채팅에서 넘어왔을 경우 상세 조회
-                    //this.qtConfrnToggleIndex = index;
-                    console.log('채팅차에서 넘어옴 : ' ,item);
-                    this.showResItem(item[index].ResQTData[0] , index)
+                    //this.showResItem(item[index].ResQTData[0] , index);
+                    this.$nextTick(function() {
+                      
+                      var target = 'btnAccordion-'+index;
+                      document.getElementById(target).click();
+
+                    }); 
                   } 
                 }
               }
