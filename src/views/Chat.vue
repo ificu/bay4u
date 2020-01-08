@@ -421,6 +421,8 @@ export default {
         });
     },
     showQTReqList() {
+      if(this.UserInfo.BsnID === '')
+      this.UserInfo.BsnID = this.$cookies.get('BsnID');
       var param = {};
       param.operation = "list";
       param.tableName = "BAY4U_QT_LIST";
@@ -588,7 +590,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
 .Chat-title {
   margin:auto;
   width: 90%;
@@ -611,6 +612,7 @@ export default {
 .Chat-list ul {
   list-style-type: none;
   padding: 0px;
+  padding-bottom: 80px;
 }
 
 .Chat-list li {
