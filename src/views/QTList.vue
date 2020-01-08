@@ -2083,7 +2083,7 @@ export default {
     },
     goOrderChating(val)
     {
-      var msg =  this.orderData.CarNo + " 차량 부품 주문 요청 완료!!";
+      var msg =  ((this.orderData.CarNo === "*empty*") ? "미상차량" : this.orderData.CarNo) + " 차량 부품 주문 요청 완료!!";
       var now = new Date();
       var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
           + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
