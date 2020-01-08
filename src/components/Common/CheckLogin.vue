@@ -135,7 +135,7 @@ export default {
 
 <style>
 .LoginCheck{
-  width:350px;
+  width:300px;
   position:relative;
 }
 .logout-btn{

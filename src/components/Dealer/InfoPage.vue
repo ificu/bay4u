@@ -186,6 +186,7 @@
                 rows="2"
                 max-rows="2"
                 v-model="this.qtInfo.Memo"
+                :class="{ memoArea :(qtInfo.Memo.length > 0) ? true :false}"
               ></b-form-textarea>   
             </div>      
           </b-card-text>
@@ -1751,5 +1752,10 @@ export default {
 td.text-center{
   font-size: 1.2em;
   padding:0;
+}
+.memoArea{
+  background-color: lightyellow;
+  font-weight: bold;
+  color: #E50914;
 }
 </style>
