@@ -1413,14 +1413,6 @@ export default {
     btnEditText () {
       return this.editedIndex === -1 ? '추가' : '수정'
     },
-    memoHighlighting(value)
-    {
-      if (value.length) {
-        return true
-      } else {
-        return false
-      }
-    },
   },
 
   created: function(){
