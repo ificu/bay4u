@@ -1,6 +1,7 @@
 <template>
   <div class="QTList">
-    <b-tabs class="QTList-tab" justified v-model="tabIndex" v-if="showMainPage">
+     <v-app>
+    <b-tabs class="QTList-tab" fill v-model="tabIndex" v-if="showMainPage">
       <!--<b-tab title="부품요청 내역" :title-link-class="linkClass(0)" >
         <div class="QTList-contents">
           <div class="QTList-title">
@@ -810,7 +811,7 @@
       <b-tab title="정비 명세서" :title-link-class="linkClass(2)" >
         <div class="QTList-contents">
           <div class="QTList-title">
-            <span>고객 정비 히스토리</span>
+            <span>고객 정비히스토리</span>
             <CheckLogin></CheckLogin>
           </div>
           <div class="QTList-search">
@@ -1034,30 +1035,65 @@
       <CustomerDoc>
       </CustomerDoc>
     </div>
+   <!-- <v-app>  -->
+      <div v-if="showCustomerDocOptionPage">
+        <CustomerDocOption  v-if="showCustomerDocOptionPage" @close="showCustomerDocPageToggle">
+                  
+          <h4 slot="header">고객 명세서 출력 옵션</h4>
+          <span slot="body">
+            <v-container fluid>
+              <v-switch class="mb-n4" v-model="customerDocOption" label="카센터 정보" value input-value="true" disabled></v-switch>
+              <v-switch class="mb-n4" v-model="customerDocOption" label="차량 정보" value input-value="true" disabled></v-switch>
+              <v-switch class="mb-n4" v-model="customerDocOption" label="공임 내역" value="공임 내역"></v-switch>
+              <v-switch class="mb-n4" v-model="customerDocOption" label="부품상세 내역" value="부품상세 내역"></v-switch>
+              <v-switch class="mb-n4" v-model="customerDocOption" label="할인 내역" value="할인 내역"></v-switch>
+              <v-switch class="mb-n4" v-model="customerDocOption" label="총 가격" value input-value="true" disabled></v-switch>
+            </v-container>
+          </span>
+          <span slot="footer" @click="showCustomerDocPageToggle">
+            확인 <i class="fas fa-check"></i>
+          </span>    
+        </CustomerDocOption>
+      </div>
+        <!--견적요청 이미지-->
+       <v-dialog v-model="showQTImageFlag" width="500px">
+        <v-card>
+          <v-card-title class="headline" >이미지 확인</v-card-title>
+          <v-img class="grey lighten-3 mr-4 ml-4"  v-bind:src="itemImage" max-width="800px"></v-img>
 
-    <div v-if="showCustomerDocOptionPage">
-      <v-app>  
-      <CustomerDocOption  v-if="showCustomerDocOptionPage" @close="showCustomerDocPageToggle">
-                
-        <h4 slot="header">고객 명세서 출력 옵션</h4>
-        <span slot="body">
-          <v-container fluid>
-            <v-switch class="mb-n4" v-model="customerDocOption" label="카센터 정보" value input-value="true" disabled></v-switch>
-            <v-switch class="mb-n4" v-model="customerDocOption" label="차량 정보" value input-value="true" disabled></v-switch>
-            <v-switch class="mb-n4" v-model="customerDocOption" label="공임 내역" value="공임 내역"></v-switch>
-            <v-switch class="mb-n4" v-model="customerDocOption" label="부품상세 내역" value="부품상세 내역"></v-switch>
-            <v-switch class="mb-n4" v-model="customerDocOption" label="할인 내역" value="할인 내역"></v-switch>
-            <v-switch class="mb-n4" v-model="customerDocOption" label="총 가격" value input-value="true" disabled></v-switch>
-          </v-container>
-        </span>
-        <span slot="footer" @click="showCustomerDocPageToggle">
-          확인 <i class="fas fa-check"></i>
-        </span>
-                
-      </CustomerDocOption>
-      </v-app>  
-    </div>
-
+          <v-card-actions>
+            <v-spacer></v-spacer>  
+            <v-btn
+              color="#00BFA5"
+              outlined
+              @click="showQTImageFlag = false; itemImage = '';"
+            >
+              닫기
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>  
+      <!--견적요청 메모-->
+      <v-dialog v-model="showResMemo" width="400px">
+          <v-card>
+            <v-card-title class="headline"><i class="far fa-lightbulb"></i>메모</v-card-title>
+            <v-card-text>
+            {{resMemo}}
+          </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>  
+              <v-btn
+                color="#00BFA5"
+                outlined
+                @click="showResMemo = false;resMemo=''"
+              >
+                닫기
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+      </v-dialog>
+   <!-- </v-app>  -->
+    
     <div class="QTList-footer" v-if="!showCustomerDocPage">
       <router-link to="/NewQT">
         <span>
@@ -1106,43 +1142,7 @@
         <b-button class="submit-NO" @click="showQTOrder=false">NO</b-button>
       </span>
     </QTOrder>
-  <v-app>
-    <v-dialog v-model="showQTImageFlag" width="500px">
-        <v-card>
-          <v-card-title class="headline" >이미지 확인</v-card-title>
-          <v-img class="grey lighten-3 mr-4 ml-4"  v-bind:src="itemImage" max-width="800px"></v-img>
-
-          <v-card-actions>
-            <v-spacer></v-spacer>  
-            <v-btn
-              color="#00BFA5"
-              outlined
-              @click="showQTImageFlag = false; itemImage = '';"
-            >
-              닫기
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-    </v-dialog>  
-    <v-dialog v-model="showResMemo" width="400px">
-        <v-card>
-          <v-card-title class="headline"><i class="far fa-lightbulb"></i>메모</v-card-title>
-          <v-card-text>
-          {{resMemo}}
-         </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>  
-            <v-btn
-              color="#00BFA5"
-              outlined
-              @click="showResMemo = false;resMemo=''"
-            >
-              닫기
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-    </v-dialog>  
-  </v-app>
+    </v-app>
   </div>
 </template>
 
@@ -1908,7 +1908,7 @@ export default {
                     // 채팅에서 넘어왔을 경우 상세 조회
                     //this.showResItem(item[index].ResQTData[0] , index);
                     this.$nextTick(function() {
-                      
+
                       var target = 'btnAccordion-'+index;
                       document.getElementById(target).click();
 
@@ -2382,10 +2382,9 @@ export default {
 */
 
 .QTList-tab {
-  padding: 5px;
+  padding: 5px 0px ;
   font-size: 0.9rem;
 }
-
 .QTList-title {
   margin:auto;
   width: 96%;
@@ -2594,6 +2593,7 @@ export default {
 }
 .qtReq-image{
   margin-left:-10px;
+  margin-top: 10px;
 }
 .qtReq-image span{
   margin-right: 10px;

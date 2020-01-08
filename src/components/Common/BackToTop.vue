@@ -53,7 +53,7 @@ export default {
   /*  padding: 10px 10px;*/
     width: 64px;
     bottom:0;
-    right: 0;
+    right: -8px;
     height:18%;
    
   /*  background-color: rgb(1,14,27);
