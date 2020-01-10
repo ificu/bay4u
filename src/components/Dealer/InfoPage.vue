@@ -916,7 +916,53 @@ export default {
       qtMsg.msg  = msg;
       qtMsg.reqTm = chatTime;
       qtMsg.ChatType = "R";
-      this.$EventBus.$emit('send-QTConfirm' , qtMsg)
+      //this.$EventBus.$emit('send-QTConfirm' , qtMsg);
+
+      // 견적상태 Update
+      var param = {};
+      param.operation = "update";
+        param.tableName = "BAY4U_QT_LIST";
+        param.payload = {};
+        param.payload.Key = {};
+        param.payload.Key.ID = this.qtInfo.ID;
+        if(this.qtInfo.CarSeries === undefined || this.qtInfo.CarSeries === '') {
+          param.payload.UpdateExpression = "Set CarBrand = :b, QTSts = :c" ;
+          param.payload.ExpressionAttributeValues = {
+                ":b" : this.qtInfo.CarBrand,
+                ":c" : "견적회신"
+          };
+        }
+        else {
+          param.payload.UpdateExpression = "Set CarBrand = :b, CarSeries = :s, QTSts = :c" ;
+          param.payload.ExpressionAttributeValues = {
+                ":b" : this.qtInfo.CarBrand,
+                ":s" : this.qtInfo.CarSeries,
+                ":c" : "견적회신"
+          };
+        }
+                
+        console.log("======= QT Update Request ========");
+        console.log(JSON.stringify(param));
+
+        axios({
+            method: 'POST',
+            url: Constant.LAMBDA_URL,
+            headers: Constant.JSON_HEADER,
+            data: param
+        })
+        .then((result) => {
+          console.log("======= QT Update result ========");
+          console.log(result.data);
+          this.$EventBus.$emit('send-QTConfirm' , qtMsg);
+
+          let updateData = {};
+          updateData.ID = this.qtInfo.ID;
+          updateData.Msg = '견적회신';
+          this.$EventBus.$emit('update-Sts' , updateData);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     },
     showQTImage(img) { 
       console.log("QTInfo : ", this.qtInfo);
