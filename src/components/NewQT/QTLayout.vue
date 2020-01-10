@@ -942,8 +942,7 @@ name: 'QTStep',
             
           if(dealer.DEALER === 'PARTS')
           {
-              console.log('부품지원센터 저장 !!');
-
+              //console.log('부품지원센터 저장 !!');
               // 부품지원센터
               var param = {};
               param.BsnId = this.UserInfo.BsnID;
@@ -1010,7 +1009,7 @@ name: 'QTStep',
               });
           }
           else{
-              console.log('대리점 저장 !!');
+              //console.log('대리점 저장 !!');
               now = new Date();
               docId = this.UserInfo.BsnID + now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2)  + this.CarInfo.VinNo + 
                       datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2) ;
@@ -1042,6 +1041,7 @@ name: 'QTStep',
       param.payload.Item.ResDealer = dealer;
       param.payload.Item.ResDealerNm = dealerNm;
       param.payload.Item.Memo = convertStringToDynamo(this.qtReqMemo);
+      param.payload.Item.QTSts = "견적요청";
       if(this.captureBlobImg !== '')
         param.payload.Item.IMG = imgKey + ".png";
       else

@@ -140,7 +140,7 @@ export default {
 
       // 같은 대리점 채팅이 아니면 리턴
       if(data.qtInfo !== undefined && this.UserInfo.BsnID !==  data.qtInfo.ResDealer ) return;
-      
+     
       if(this.chatItem.ID === data.chatId) {
         
         var chatMsg = {};
@@ -159,6 +159,21 @@ export default {
         }
         else {
           this.msgDatas = chatMsg;
+        }
+        
+        if(data.qtInfo !== undefined && data.qtInfo.QTSts !== undefined ){
+          // 견적상태 변경 처리
+          // console.log(' 견적상태 변경 : ' , data.qtInfo.QTSts);
+          let updateData = {};
+          updateData.ID = data.chatId;
+          updateData.Msg = data.qtInfo.QTSts;
+          this.$EventBus.$emit('update-Sts' , updateData);
+
+          if(data.qtInfo.QTSts === "주문요청")
+          { 
+            // 주문요청이면 주문내역 조회
+            this.$EventBus.$emit('get-orderList' , data.qtInfo);
+          }
         }
       }
       else {
@@ -186,9 +201,10 @@ export default {
         }
     });
 
-    this.$EventBus.$on('send-QTConfirm', qtMsg => {   
+    this.$EventBus.$on('send-QTConfirm', qtMsg => {
+      
+      //console.log('ChatingPage/채팅전달 : ', qtMsg);
         this.msgDatas = qtMsg;
-
         this.$sendMessage({
           name: this.UserInfo.BsnID,
           msg: qtMsg.msg,
