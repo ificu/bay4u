@@ -1892,13 +1892,13 @@ export default {
               el.ResQTData.splice(0, 0, resQtItem);
           };
 
-          if(refID !== undefined && refID !== '' ) 
+          if(refID !== undefined && refID.length > 1 ) 
           {
             let index =-1; 
             // 채팅에서 넘어왔을 경우 상세 조회
 
             this.$nextTick(function() {
-              console.log('refID : ', refID.length);
+              console.log('refID : ', refID);
               var target = 'btnDealerAccordion-'+refID;
               if(document.getElementById(target) !== null)
               {
@@ -2143,7 +2143,7 @@ export default {
         }
 
         // 부품지원센터와 일반대리점 견적 확정 내역 조회 
-        this.GetDealerResData(this.qtReqList[i], refID.trimEnd());
+        this.GetDealerResData(this.qtReqList[i], refID);
         this.GetWebposResData(this.qtReqList[i], index);
       } 
     },
