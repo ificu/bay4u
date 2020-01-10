@@ -146,13 +146,13 @@
             </v-card>
             <v-btn class="mx-2 " fab color="success" x-small @click="addNewItem(tempItem)">입력</v-btn>
         </div>   
-        <div class="ml-6 mt-2 mb-2">
-          <small color = "success"># 부품명 입력 후 "입력"버튼을 누르면 추가 됩니다.</small>
+        <div class="ml-6 mt-n6 mb-10">
+          <small color = "success"># 부품명 입력 후 "입력" 버튼을 누르면 추가 됩니다.</small> 
           <!--<v-btn small  color="indigo" outlined @click="addNewItem(tempItem)">기타부품추가</v-btn>-->
         </div>
 
       <div>
-        <v-textarea outlined class="ml-4 mr-4" color="success" label="사진 및 추가 요청사항" auto-grow rows="3" value="" v-model="qtReqMemo"></v-textarea>
+        <v-textarea outlined class="ml-4 mr-4" color="success" label="견적 메모 / 사진 및 추가 요청사항" auto-grow rows="3" value="" v-model="qtReqMemo"></v-textarea>
       </div>
       <div>
         <v-btn outlined small color="teal accent-4" class="mt-n6 mb-4 mr-4 float-right"  @click="showQTCameraModal(true, 'ITEMIMG')">부품 사진 입력</v-btn>
@@ -717,6 +717,8 @@ name: 'QTStep',
         if((this.CarInfo.CarNo === '' || this.CarInfo.CarNo === null || this.CarInfo.CarNo === undefined) &&
             (this.CarInfo.VinNo === '' || this.CarInfo.VinNo === null || this.CarInfo.VinNo === undefined)) 
         return;
+
+        console.log("테스트 User : ", this.UserInfo);
 
         if(this.UserInfo.UserType === 'SITE') { // WebPOS일 경우 정비 이력 조회 이후 차대번호 세팅
 
