@@ -433,7 +433,7 @@
                           </b-row>
                         </b-container>
                         </b-card-header>
-                      <b-collapse :id="'accd-'+confrimInfo.ID" accordion="my-accordion3" role="tabpanel" v-if="true">
+                      <b-collapse :id="'accd-'+confrimInfo.ID" accordion="my-accordion3" role="tabpanel" v-show="linkToggleQtConfirm2(confrimInfo.ID)">
                         <b-card-body class ="pt-1 pl-1 pr-1">
                           <div class="dealer-qtInfo">
                             <ul>
