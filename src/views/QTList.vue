@@ -356,7 +356,7 @@
                             </b-row>
                           </b-container>
                         </b-card-header>
-                      <b-collapse :id="'accdWebpos-'+confrimInfo.ID" accordion="my-accordion4" role="tabpanel" v-if="linkToggleQtConfirm(getIndex(confrimInfo.ID))">
+                      <b-collapse :id="'accdWebpos-'+confrimInfo.ID" accordion="my-accordion4" role="tabpanel" v-show="linkToggleQtConfirm(getIndex(confrimInfo.ID))">
                         <b-card-body class ="pt-1 pl-1 pr-1">
                           <div class="history-detailConts-webpos">
                             <ul>
@@ -1182,7 +1182,7 @@ export default {
       orderToggleIndex:-1,
       qtToggleIndex:-1,
       qtReqToggleIndex:-1,
-      qtConfrnToggleIndex:0,
+      qtConfrnToggleIndex:-1,
       qtConfrnToggleIndex2:'',
       dropdownQT: '차량번호',
       dropdownSO: '차량번호',
@@ -1822,18 +1822,20 @@ export default {
                     el.ResQTData.splice(0, 0, resQtItem);
                   });
 
-                  if(index >= 0)
+                  if(index !== undefined & index >= 0)
                   {
-                    // 채팅에서 넘어왔을 경우 상세 조회
+                     // 채팅에서 넘어왔을 경우 상세 조회
                     this.$nextTick(function() {
+                                       
                       var target = 'btnAccordion-'+index;
+                      console.log('target : ', document.getElementById(target));
                       if(document.getElementById(target) !== null)
                       {
-                        //console.log('target : ', target);
                         document.getElementById(target).click();
                       }
                     }); 
-                  } 
+                  }
+                
                 }
               }
             }
@@ -1896,13 +1898,13 @@ export default {
           {
             let index =-1; 
             // 채팅에서 넘어왔을 경우 상세 조회
-
             this.$nextTick(function() {
               console.log('refID : ', refID);
               var target = 'btnDealerAccordion-'+refID;
+              
               if(document.getElementById(target) !== null)
-              {
-                //console.log( document.getElementById(target));
+              { 
+                console.log('refID : ', document.getElementById(target));
                 document.getElementById(target).click();
               }
             });     
@@ -1913,7 +1915,7 @@ export default {
     },
     showQtReqItem(item , index)
     {
-      console.log('item : ', item);
+      //console.log('item : ', item);
       this.qtReqToggleIndex = index;
       this.visibleIcon = !this.visibleIcon;
       //this.SOList2Toggle = !this.SOList2Toggle;
@@ -1934,14 +1936,15 @@ export default {
     },
     showResItem(item , index)
     {
-      console.log('index' , index);
+      //console.log('inde111' , index);
       this.detailQTData = [];
       this.detailQTData = item.ResDetail;
       this.qtConfrnToggleIndex = index;
       this.visibleIcon2 = !this.visibleIcon2;
     },
-    showResItem2(item , id){
-      //this.SOList3Toggle = !this.SOList3Toggle;
+    showResItem2(item , id)
+    {  
+      console.log('item : ', item);
       this.detailQTData2 = [];
       if(item.ResDetail !== undefined)
       {
@@ -2113,10 +2116,10 @@ export default {
     },
     showOrderItem(docId , orderID)
     {
-      console.log('docId : ' , docId);
+      //console.log('docId : ' , docId);
       if(Array.isArray(this.orderHistory)){
         let index =  this.orderHistory.findIndex(i => i.DocID === docId);
-        console.log('index:' , index);
+        //console.log('index:' , index);
         this.orderToggleIndex = index;
         let item = this.orderHistory[index];
         this.GetOrderDetail(item);
@@ -2136,15 +2139,21 @@ export default {
           // 견적 그룹에서 채팅에서 넘어온 견적ID로 Index 찾기 
           index = this.qtReqList[i].findIndex(element => element.ID === docId);
           if(index >= 0){
-             console.log('index:' , i);
-             this.qtToggleIndex = i;
+            this.qtToggleIndex = i;
             break;
           }
         }
 
         // 부품지원센터와 일반대리점 견적 확정 내역 조회 
-        this.GetDealerResData(this.qtReqList[i], refID);
-        this.GetWebposResData(this.qtReqList[i], index);
+        if( this.qtReqList[i][index].DealerFlag === "WEBPOS")
+        {
+          this.GetWebposResData(this.qtReqList[i], index);
+          this.GetDealerResData(this.qtReqList[i]);
+        }
+        else{
+          this.GetDealerResData(this.qtReqList[i], refID);
+          this.GetWebposResData(this.qtReqList[i]);
+        }
       } 
     },
     goQTChating(item)
@@ -2205,8 +2214,15 @@ export default {
     },
     getIndex(value)
     {
-        let str = value;
-        return Number(str.substring(str.length , str.length -4)) -1;
+      let index = -1;
+      if(this.qtToggleIndex > -1)
+      {
+        index = this.qtReqList[this.qtToggleIndex].findIndex(el => el.ID === value);
+      }
+      return index;
+      //let str = value;
+      //return Number(str.substring(str.length , str.length -4)) -1;
+      
     },
     getDealerIndex(value)
     {
