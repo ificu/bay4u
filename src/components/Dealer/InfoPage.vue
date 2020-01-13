@@ -1611,7 +1611,10 @@ export default {
     if(this.qtInfo.length === 0)
     {
       var btnAdd =  document.querySelector('#btnItmAdd');
-      btnAdd.setAttribute("disabled", "true");
+      if(btnAdd !== null)
+      {
+        btnAdd.setAttribute("disabled", "true");
+      }
     }
 },
    watch: {

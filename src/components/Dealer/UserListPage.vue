@@ -136,7 +136,7 @@ export default {
           filter = "ResDealer = :id and ReqDt between :startDt and :endDt";
       }
       else{
-        filter = "ResDealer = :id and ( CarNo = :searchText or ReqName = :searchText or ReqDt = :searchText  )";
+        filter = "ResDealer = :id and ( contains(CarNo, :searchText) or contains(ReqName, :searchText) or contains(ReqDt, :searchText) )";
       }
 
       var param = {};
