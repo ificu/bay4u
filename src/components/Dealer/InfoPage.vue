@@ -186,7 +186,7 @@
                 rows="2"
                 max-rows="2"
                 v-model="this.qtInfo.Memo"
-                :class="{ memoArea :(qtInfo.Memo.length > 0) ? true :false}"
+                :class="{ memoArea :(qtInfo.Memo !== undefined && qtInfo.Memo.length > 0) ? true :false}"
               ></b-form-textarea>   
             </div>      
           </b-card-text>
@@ -377,99 +377,98 @@
             </div>
             </div>
             <div  v-else>
-            <v-data-table
-              v-model="selected"
-              :headers="headers2"
-              :items="detailQTData"
-              class="elevation-1 mytable"
-              fixed-header
-              height="calc(100vh - 550px)"
-              :items-per-page="itemsPerPage"
-              hide-default-footer
-              no-data-text=''
-              show-select
-              :single-select="singleSelect"
-              item-key="itemCode"
-              disable-sort
-            >      
-              <!--header-->
-              <template v-slot:header.itemCode="{ header }">
-                <span class="header-item2">{{ header.text }}</span>
-              </template>
-              <template v-slot:header.itemBrand="{ header }">
-                <span class="header-item2">{{ header.text }}</span>
-              </template>
-             <!-- <template v-slot:header.carBrand="{ header }">
-                <span class="header-item2">{{ header.text }}</span>
-              </template>-->
-              <template v-slot:header.itemName="{ header }">
-                <span class="header-item2">{{ header.text }}</span>
-              </template>
-             <!-- <template v-slot:header.afterNo="{ header }">
-                <span class="header-item2">{{ header.text }}</span>
-              </template>-->
-              <template v-slot:header.itemQty="{ header }">
-                <span class="header-item2">{{ header.text }}</span>
-              </template>
-              <template v-slot:header.itemPrice="{ header }">
-                <span class="header-item2">{{ header.text }}</span>
-              </template>
-              <template v-slot:header.AMT="{ header }">
-                <span class="header-item2">{{ header.text }}</span>
-              </template>
-              <template v-slot:header.delv="{ header }">
-                <span class="header-item2">{{ header.text }}</span>
-              </template>
-              <template v-slot:header.memo="{ header }">
-                <span class="header-item2">{{ header.text }}</span>
-              </template>
-              <!-- contents -->
-              <template v-slot:item.itemCode="{ item }">
-               <span class="item-delv">{{ item.itemCode }}</span>
-              </template>
-              <template v-slot:item.itemBrand="{ item }">
-               <span class="item-delv">{{ item.itemBrand }}</span>
-              </template>   
-             <!-- <template v-slot:item.carBrand="{ item }">
-               <span class="item-delv">{{ item.carBrand }}</span>
-              </template> -->
-              <template v-slot:item.itemName="{ item }">
-               <span class="item-delv">{{ item.itemName }}</span>
-              </template> 
-              <!--<template v-slot:item.afterNo="{ item }">
-               <span class="item-delv">{{ item.afterNo }}</span>
-              </template> -->
-              <template v-slot:item.itemQty="{ item }">
-               <span class="item-numeric-qty">{{ item.itemQty|localeNum}}</span>
-              </template>
-              <template v-slot:item.itemPrice="{ item }">
-               <span class="item-numeric">{{ item.itemPrice|localeNum}}</span>
-              </template>
-              <template v-slot:item.AMT="{ item }">
-               <span class="item-numeric">{{ item.AMT|localeNum}}</span>
-              </template>       
-              <template v-slot:item.delv="{ item }">
-               <span class="item-delv">{{ item.delv }}</span>
-              </template>
-              <template v-slot:item.action="{ item }">
-                <v-icon small class="mr-2" @click="editItem(item)" >
-                  edit
-                </v-icon>
-                <v-icon small @click="deleteItem(item)">
-                  delete
-                </v-icon>
-              </template>
-           
-            </v-data-table>
-            <div class="QTRes-footer">
-                <div class="TotalInfo">
-                  <span class="TotalInfo-Title">합계금액</span>
-                  <span class="TotalInfo-Text">{{total | localeNum}}</span>
-                  <span><b-button v-on:click="saveQTConfirm()">{{txtQTConfirm}}</b-button></span>
-                  <!--<v-btn @click="SendSMS" >SMS전송</v-btn>-->
-                </div>
-
-            </div>
+              <v-data-table
+                v-model="selected"
+                :headers="headers2"
+                :items="detailQTData"
+                class="elevation-1 mytable"
+                fixed-header
+                height="calc(100vh - 550px)"
+                :items-per-page="itemsPerPage"
+                hide-default-footer
+                no-data-text=''
+                show-select
+                :single-select="singleSelect"
+                item-key="itemCode"
+                disable-sort
+              >      
+                <!--header-->
+                <template v-slot:header.itemCode="{ header }">
+                  <span class="header-item2">{{ header.text }}</span>
+                </template>
+                <template v-slot:header.itemBrand="{ header }">
+                  <span class="header-item2">{{ header.text }}</span>
+                </template>
+              <!-- <template v-slot:header.carBrand="{ header }">
+                  <span class="header-item2">{{ header.text }}</span>
+                </template>-->
+                <template v-slot:header.itemName="{ header }">
+                  <span class="header-item2">{{ header.text }}</span>
+                </template>
+              <!-- <template v-slot:header.afterNo="{ header }">
+                  <span class="header-item2">{{ header.text }}</span>
+                </template>-->
+                <template v-slot:header.itemQty="{ header }">
+                  <span class="header-item2">{{ header.text }}</span>
+                </template>
+                <template v-slot:header.itemPrice="{ header }">
+                  <span class="header-item2">{{ header.text }}</span>
+                </template>
+                <template v-slot:header.AMT="{ header }">
+                  <span class="header-item2">{{ header.text }}</span>
+                </template>
+                <template v-slot:header.delv="{ header }">
+                  <span class="header-item2">{{ header.text }}</span>
+                </template>
+                <template v-slot:header.memo="{ header }">
+                  <span class="header-item2">{{ header.text }}</span>
+                </template>
+                <!-- contents -->
+                <template v-slot:item.itemCode="{ item }">
+                <span class="item-delv">{{ item.itemCode }}</span>
+                </template>
+                <template v-slot:item.itemBrand="{ item }">
+                <span class="item-delv">{{ item.itemBrand }}</span>
+                </template>   
+              <!-- <template v-slot:item.carBrand="{ item }">
+                <span class="item-delv">{{ item.carBrand }}</span>
+                </template> -->
+                <template v-slot:item.itemName="{ item }">
+                <span class="item-delv">{{ item.itemName }}</span>
+                </template> 
+                <!--<template v-slot:item.afterNo="{ item }">
+                <span class="item-delv">{{ item.afterNo }}</span>
+                </template> -->
+                <template v-slot:item.itemQty="{ item }">
+                <span class="item-numeric-qty">{{ item.itemQty|localeNum}}</span>
+                </template>
+                <template v-slot:item.itemPrice="{ item }">
+                <span class="item-numeric">{{ item.itemPrice|localeNum}}</span>
+                </template>
+                <template v-slot:item.AMT="{ item }">
+                <span class="item-numeric">{{ item.AMT|localeNum}}</span>
+                </template>       
+                <template v-slot:item.delv="{ item }">
+                <span class="item-delv">{{ item.delv }}</span>
+                </template>
+                <template v-slot:item.action="{ item }">
+                  <v-icon small class="mr-2" @click="editItem(item)" >
+                    edit
+                  </v-icon>
+                  <v-icon small @click="deleteItem(item)">
+                    delete
+                  </v-icon>
+                </template>
+            
+              </v-data-table>
+              <div class="QTRes-footer">
+                  <div class="TotalInfo">
+                    <span class="TotalInfo-Title">합계금액</span>
+                    <span class="TotalInfo-Text">{{total | localeNum}}</span>
+                    <span><b-button v-on:click="saveQTConfirm()">{{txtQTConfirm}}</b-button></span>
+                    <!--<v-btn @click="SendSMS" >SMS전송</v-btn>-->
+                  </div>
+              </div>
             </div>
           </b-card-text>
         </b-tab>
@@ -546,6 +545,7 @@
                 <div class="TotalInfo">
                   <span class="TotalInfo-Title">합계금액</span>
                   <span class="TotalInfo-Text">{{total2 | localeNum}}</span>
+                  <span><b-button id = "btnOrdConfirm" class="TotalInfo-Button" v-on:click="saveOrderConfirm()">주문확정</b-button></span>
                 </div>
             </div>
             </div>
@@ -758,6 +758,7 @@ export default {
       testData: {},      
       txtQTConfirm: '견적 확정 회신', 
       orderHistory:[],
+      orderID:'',
       brandSelected: '차종 선택',
       brandClicked: false,
       selectedConfirm:'',
@@ -827,7 +828,6 @@ export default {
               this.qtInfo.CarSeries = headQTData[0].SERIES;
             }
           }
-          
       })
       .catch((error) => {
           console.log(error);
@@ -916,7 +916,53 @@ export default {
       qtMsg.msg  = msg;
       qtMsg.reqTm = chatTime;
       qtMsg.ChatType = "R";
-      this.$EventBus.$emit('send-QTConfirm' , qtMsg)
+      //this.$EventBus.$emit('send-QTConfirm' , qtMsg);
+
+      // 견적상태 Update
+      var param = {};
+      param.operation = "update";
+        param.tableName = "BAY4U_QT_LIST";
+        param.payload = {};
+        param.payload.Key = {};
+        param.payload.Key.ID = this.qtInfo.ID;
+        if(this.qtInfo.CarSeries === undefined || this.qtInfo.CarSeries === '') {
+          param.payload.UpdateExpression = "Set CarBrand = :b, QTSts = :c" ;
+          param.payload.ExpressionAttributeValues = {
+                ":b" : this.qtInfo.CarBrand,
+                ":c" : "견적회신"
+          };
+        }
+        else {
+          param.payload.UpdateExpression = "Set CarBrand = :b, CarSeries = :s, QTSts = :c" ;
+          param.payload.ExpressionAttributeValues = {
+                ":b" : this.qtInfo.CarBrand,
+                ":s" : this.qtInfo.CarSeries,
+                ":c" : "견적회신"
+          };
+        }
+                
+        console.log("======= QT Update Request ========");
+        console.log(JSON.stringify(param));
+
+        axios({
+            method: 'POST',
+            url: Constant.LAMBDA_URL,
+            headers: Constant.JSON_HEADER,
+            data: param
+        })
+        .then((result) => {
+          console.log("======= QT Update result ========");
+          console.log(result.data);
+          this.$EventBus.$emit('send-QTConfirm' , qtMsg);
+
+          let updateData = {};
+          updateData.ID = this.qtInfo.ID;
+          updateData.Msg = '견적회신';
+          this.$EventBus.$emit('update-Sts' , updateData);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     },
     showQTImage(img) { 
       console.log("QTInfo : ", this.qtInfo);
@@ -1111,16 +1157,18 @@ export default {
         param.payload.Key = {};
         param.payload.Key.ID = this.qtInfo.ID;
         if(this.qtInfo.CarSeries === undefined || this.qtInfo.CarSeries === '') {
-          param.payload.UpdateExpression = "Set CarBrand = :b";
+          param.payload.UpdateExpression = "Set CarBrand = :b, QTSts = :c" ;
           param.payload.ExpressionAttributeValues = {
-                ":b" : this.qtInfo.CarBrand
+                ":b" : this.qtInfo.CarBrand,
+                ":c" : "견적회신"
           };
         }
         else {
-          param.payload.UpdateExpression = "Set CarBrand = :b, CarSeries = :s";
+          param.payload.UpdateExpression = "Set CarBrand = :b, CarSeries = :s, QTSts = :c" ;
           param.payload.ExpressionAttributeValues = {
                 ":b" : this.qtInfo.CarBrand,
-                ":s" : this.qtInfo.CarSeries
+                ":s" : this.qtInfo.CarSeries,
+                ":c" : "견적회신"
           };
         }
                 
@@ -1137,11 +1185,69 @@ export default {
           console.log("======= QT Update result ========");
           console.log(result.data);
           this.$EventBus.$emit('send-QTConfirm' , qtMsg);
+
+          let updateData = {};
+          updateData.ID = this.qtInfo.ID;
+          updateData.Msg = '견적회신';
+          this.$EventBus.$emit('update-Sts' , updateData);
         })
         .catch((error) => {
           console.log(error);
         });
 
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    },
+    saveOrderConfirm()
+    {
+      var now = new Date();
+      var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
+      var msg = ((this.qtInfo.CarNo==='*empty*')?'미상' : this.qtInfo.CarNo) + " 차량 부품 주문 확정 완료!!";
+
+      var qtMsg = {};
+      qtMsg.from = {'name' : this.UserInfo.BsnID};
+      qtMsg.msg  = msg;
+      qtMsg.reqTm = chatTime;
+      qtMsg.ChatType = "E";
+      qtMsg.RefID = this.orderID;
+      
+      var param = {};
+      param.operation = "update";
+      param.tableName = "BAY4U_QT_LIST";
+      param.payload = {};
+      param.payload.Key = {};
+      param.payload.Key.ID =  this.qtInfo.ID;
+      param.payload.UpdateExpression = "Set QTSts = :c" ;
+      param.payload.ExpressionAttributeValues = {
+            ":c" : "주문확정",
+      };
+
+      console.log("======= QT Update Request ========");
+      console.log(JSON.stringify(param));
+
+      axios({
+          method: 'POST',
+          url: Constant.LAMBDA_URL,
+          headers: Constant.JSON_HEADER,
+          data: param
+      })
+      .then((result) => {
+        console.log("======= QT Update result ========");
+        console.log(result.data);
+
+        var btnOrder =  document.querySelector('#btnOrdConfirm');
+        btnOrder.setAttribute("disabled", "true");
+
+        this.$EventBus.$emit('send-QTConfirm' , qtMsg);
+
+        let updateData = {};
+        updateData.ID = this.qtInfo.ID;
+        updateData.Msg = '주문확정';
+        this.$EventBus.$emit('update-Sts' , updateData);
       })
       .catch((error) => {
         console.log(error);
@@ -1331,6 +1437,7 @@ export default {
     GetOrderHistory()
     {
       this.orderHistory = [];
+      this.orderID = '';
       var param = {};
       param.operation = "list";
       param.tableName = "BAY4U_ORDER_LIST";
@@ -1354,6 +1461,7 @@ export default {
           console.log("=======주문내역 조회 result ========");
           console.log( result.data.Items[0].LineItem);
           this.tabIndex = 2;
+          this.orderID = result.data.Items[0].ID;
           this.orderHistory  = JSON.parse(convertDynamoToArrayString(result.data.Items[0].LineItem));
         }
         else{
@@ -1422,11 +1530,26 @@ export default {
         this.SetQtInfo();
         this.GetSiteInfo();
         if(this.UserInfo.UserType !== 'DEALER'){
+          // 일반대리점 일떼
           this.getQTConfirm();
         }
         if(this.brandClicked === true){
           document.getElementById('btnBrandSelect').click();
           this.brandClicked = false;
+        }
+
+        var btnOrder =  document.querySelector('#btnOrdConfirm');
+        if(btnOrder !== undefined && btnOrder !== null)
+        {
+          if(this.qtInfo !== undefined && this.qtInfo.QTSts === '주문확정')
+          {
+            btnOrder.setAttribute("disabled", "true");
+          }
+          else{
+
+          
+            btnOrder.removeAttribute("disabled");
+          }
         }
     });
 
@@ -1439,6 +1562,11 @@ export default {
           document.getElementById('btnBrandSelect').click();
           this.brandClicked = false;
         }
+    });
+
+    this.$EventBus.$on('get-orderList', paramItem => {   
+      // 상태가 주문요청으로 변경되었을때 주문내역 조회 
+      this.GetOrderHistory();
     });
 
     this.$EventBus.$on('click-showImage', img => {   
@@ -1482,10 +1610,10 @@ export default {
   {
     if(this.qtInfo.length === 0)
     {
-        var btnAdd =  document.querySelector('#btnItmAdd');
-        btnAdd.setAttribute("disabled", "true");
+      var btnAdd =  document.querySelector('#btnItmAdd');
+      btnAdd.setAttribute("disabled", "true");
     }
-  },
+},
    watch: {
       dialog (val) {
         val || this.close()
@@ -1685,6 +1813,9 @@ export default {
     text-align: center;
     white-space: nowrap;
     border-radius: 0.25rem;
+}
+.QTRes-footer .TotalInfo-Button{
+  width: 100px;
 }
 .qt-icon{
   color:#5d4038;  

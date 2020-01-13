@@ -231,7 +231,7 @@
                       </b-row>                      
                     </b-col>                    
                     <b-col align-self="center" class="history-detailHeaderBtn">
-                      <b-button block href="#"  v-b-toggle="'accordion-' + idx"  variant="secondary"  size="sm" v-on:click="showQtList(qtItem,idx)">
+                      <b-button block href="#"  v-b-toggle="'accordion-' + idx"  variant="secondary"  size="sm" v-on:click="showQtList(qtItem)">
                         <!--<i class="fas fa-chevron-down" :id="'btnDetail'+idx"></i>-->
                         <!--<i v-if="!SOList1Toggle" class="fas fa-chevron-down"></i>
                         <i v-if="SOList1Toggle"  class="fas fa-chevron-up"></i>-->
@@ -342,7 +342,7 @@
                                   <span v-if="qtReqInfo.WebposOnly ==='N'" @click="goQTChating(qtReqInfo)"><i class ="fas fa-comment-dots"></i></span>
                               </b-col>                   
                               <b-col class="response-detailBtn">
-                                <b-button block href="#" :id="'btnAccordion-'+getIndex(confrimInfo.ID)" v-b-toggle="'accordion-webpos-' + getIndex(confrimInfo.ID)"  variant="secondary" size="sm" v-on:click="showResItem(confrimInfo , getIndex(confrimInfo.ID))">
+                                <b-button block href="#" :id="'btnAccordion-'+getIndex(confrimInfo.ID)" v-b-toggle="'accdWebpos-' +confrimInfo.ID"  variant="secondary" size="sm" v-on:click="showResItem(confrimInfo , getIndex(confrimInfo.ID))">
                                   <!--<i v-if="!SOList1Toggle" class="fas fa-chevron-down"></i>
                                   <i v-if="SOList1Toggle"  class="fas fa-chevron-up"></i>-->
                                   <span  v-if="visibleIcon2 === true" >
@@ -356,7 +356,7 @@
                             </b-row>
                           </b-container>
                         </b-card-header>
-                      <b-collapse :id="'accordion-webpos-'+getIndex(confrimInfo.ID)" accordion="my-accordion4" role="tabpanel" v-if="linkToggleQtConfirm(getIndex(confrimInfo.ID))">
+                      <b-collapse :id="'accdWebpos-'+confrimInfo.ID" accordion="my-accordion4" role="tabpanel" v-show="linkToggleQtConfirm(getIndex(confrimInfo.ID))">
                         <b-card-body class ="pt-1 pl-1 pr-1">
                           <div class="history-detailConts-webpos">
                             <ul>
@@ -418,22 +418,22 @@
                               <span v-if="qtReqInfo.WebposOnly ==='N'" @click="goQTChating(qtReqInfo)"><i class ="fas fa-comment-dots"></i></span>
                             </b-col>                
                             <b-col class="response-detailBtn">
-                              <b-button block href="#"  v-b-toggle="'accordion-qtDealer-' + confrimInfo.ID"  variant="secondary" size="sm" v-on:click="showResItem2(confrimInfo)">
+                              <b-button block href="#" :id="'btnDealerAccordion-'+confrimInfo.ID"  v-b-toggle="'accd-' + confrimInfo.ID"  variant="secondary" size="sm" v-on:click="showResItem2(confrimInfo, confrimInfo.ID)">
                                 <!--<i class="fas fa-chevron-down" :id="'btnIcon'+idx"></i>-->
                                 <!--<i v-if="!SOList3Toggle" class="fas fa-chevron-down"></i>
                                 <i v-if="SOList3Toggle"  class="fas fa-chevron-up"></i>-->
-                                <span class="when-opened">
-                                  <i class="fa fa-chevron-up" aria-hidden="true"></i>
-                                </span>
-                                <span class="when-closed">
+                                 <span  v-if="visibleIcon3 === true" >
+                                      <i class="fa fa-chevron-up" aria-hidden="true"></i>
+                                  </span>
+                                  <span  v-if="visibleIcon3 !== true" >
                                     <i class="fas fa-chevron-down" aria-hidden="true"></i>
-                                </span>
+                                  </span>
                               </b-button>
                             </b-col>             
                           </b-row>
                         </b-container>
                         </b-card-header>
-                      <b-collapse :id="'accordion-qtDealer-'+confrimInfo.ID" accordion="my-accordion3" role="tabpanel" :visible="linkToggleQtConfirm2(idx2)">
+                      <b-collapse :id="'accd-'+confrimInfo.ID" accordion="my-accordion3" role="tabpanel" v-show="linkToggleQtConfirm2(confrimInfo.ID)">
                         <b-card-body class ="pt-1 pl-1 pr-1">
                           <div class="dealer-qtInfo">
                             <ul>
@@ -1143,6 +1143,14 @@
       </span>
     </QTOrder>
     </v-app>
+    <!-- 프로세싱 메시지 -->
+    <MessageBox v-if="showProcessing">
+      <div slot="header"><h5 >처리 중...</h5></div>
+      <span slot="body" class="showProcessing">
+        <pre>{{processMsg}}</pre>
+        <v-icon large color="orange darken-2">fas fa-sync-alt fa-spin</v-icon>
+      </span>
+    </MessageBox>
   </div>
 </template>
 
@@ -1158,6 +1166,7 @@ import CheckLogin from '@/components/Common/CheckLogin.vue'
 import QTOrder from '@/components/QTList/QTOrder.vue'
 import BackToTop from '@/components/Common/BackToTop.vue'
 import Constant from '@/Constant';
+import MessageBox from '@/components/Common/MessageBox.vue'
 import {getInputDayWeek , convertDynamoToArrayString, arrayGroupBy, datePadding ,convertArrayToDynamo} from '@/utils/common.js'
 import { isArray } from 'util'
 import { join } from 'path'
@@ -1173,8 +1182,8 @@ export default {
       orderToggleIndex:-1,
       qtToggleIndex:-1,
       qtReqToggleIndex:-1,
-      qtConfrnToggleIndex:0,
-      qtConfrnToggleIndex2:-1,
+      qtConfrnToggleIndex:-1,
+      qtConfrnToggleIndex2:'',
       dropdownQT: '차량번호',
       dropdownSO: '차량번호',
       dropdownRO: '차량번호',
@@ -1225,6 +1234,9 @@ export default {
       resMemo:'',
       visibleIcon:false,
       visibleIcon2:false,
+      visibleIcon3:false,
+      showProcessing: false,
+      processMsg: '',
      // visible:false,
      // visible2:false,
      // visible3:true,
@@ -1451,28 +1463,6 @@ export default {
 				});
 
 				this.GetWebPosQtList(docId ,refID);
-
-      /*
-        if(Array.isArray(result.data.Items))
-        {
-          result.data.Items.sort(function(a, b){
-            return (a.ReqSeq < b.ReqSeq) ? 1 : -1;
-          });
-        }
-
-        var qtGroupList = arrayGroupBy(result.data.Items, function(item)
-        {
-          return [item.CarNo, item.ReqDt];
-        });
-
-        this.qtReqList =  qtGroupList;
-
-        // 채팅에서 넘어왔을 경우
-        if(docId !== ''  && refID !== '')
-        {
-          this.showQtItem(docId , refID);
-        } 
-      */
       });
     },
     GetWebPosQtList(docId ,refID)
@@ -1634,79 +1624,6 @@ export default {
         }  
       } 
     },
-    GetConfirmQtList(item)
-    {
-      this.confirmQTdata  = [];
-      
-      var param = {};
-      param.BsnId = this.UserInfo.BsnID;
-      param.CarNo = item[0].CarNo;
-      param.RequestDataJSON = item[0].ReqDt;
-
-      console.log("======= 견적확정 조회 Request result ========");
-      console.log(param); 
-
-      var rtnCode = "";
-
-      axios({
-          method: 'POST',
-          url: Constant.SCPIF_URL + 'GetConfirmQTData',
-          headers: Constant.JSON_HEADER,          
-          data: param
-      })
-      .then((result) => {
-          console.log("======= 견적확정 조회 Return result ========");     
-          console.log(result.data); 
-         
-          this.rtnCode = result.data.ReturnCode;
-
-          if(this.rtnCode === 0)
-          {
-            this.confirmQTdata = JSON.parse(result.data.ReturnDataJSON);
-            console.log(this.confirmQTdata);
-          }
-      })
-      .catch((error) => {
-          console.log(error);
-      })   
-    },
-    GetConfirmQtList2(item , index)
-    {
-      
-      var param = {};
-      param.operation = "list";
-      param.tableName = "BAY4U_QT_RETURN_LIST";
-      param.payload = {};
-      param.payload.FilterExpression = "CarNo = :id and ReqDt = :reqDt";
-      //param.payload.FilterExpression = "DocID = :id";
-      param.payload.ExpressionAttributeValues = {};
-      var key = ":id";
-      var key2 = ":reqDt";
-      param.payload.ExpressionAttributeValues[key] = item[0].CarNo;
-      param.payload.ExpressionAttributeValues[key2] = item[0].ReqDt;
-
-      console.log("======= 견적확정 조회 Request result ========");
-      console.log(param); 
-
-      axios({
-        method: 'POST',
-        url: Constant.LAMBDA_URL,
-        headers: Constant.JSON_HEADER,
-        data: param
-      })
-      .then((result) => {
-        console.log("======= 견적확정 조회 Response result ========");
-        console.log( result.data.Items);
-        this.confirmQTdata2  = result.data.Items;
-
-        if(index >= 0)
-        {
-          // 채팅에서 넘어왔을 경우 상세 조회
-          this.qtConfrnToggleIndex2 = index;
-          //this.GetQtList2(this.GetConfirmValue2(item[0].ID));
-        }
-      });  
-    },
     GetOrderHistory(docId ,orderID, seachText)
     {
       
@@ -1822,9 +1739,9 @@ export default {
       var str = value + '';
       return str.substring(5,7) + '/'+str.substring(8,10) + '(' + getInputDayWeek(value) +')';
     },
-    showQtList(item, index)
+    showQtList(item)
     {
-      this.SOList1Toggle = !this.SOList1Toggle;
+      //this.SOList1Toggle = !this.SOList1Toggle;
       //this.visible = false;
       //this.visible2 = false;
       //this.visible3 = false;
@@ -1833,20 +1750,18 @@ export default {
       this.qtReqToggleIndex = -1;
       this.visibleIcon = false;
       this.visibleIcon2 = false;
+      this.visibleIcon3 = false;
       this.qtConfrnToggleIndex = -1;
-      this.qtConfrnToggleIndex2 = -1;
+      this.qtConfrnToggleIndex2 = '';
       
   //  this.qtReqItem = [];
-  //  this.GetConfirmQtList(item);
-  //  this.GetConfirmQtList2(item);
-  //  console.log('QT Item : ' , item);
+   //  console.log('QT Item : ' , item);
       this.GetDealerResData(item);
       this.GetWebposResData(item);
-
-      console.log('item : ' , item);
     },
     GetWebposResData(item, index){
-     
+      console.log('webpos item :' , item);
+      console.log('webpos index : ', index);
       item.forEach(el =>{
 
         var param = {};
@@ -1857,6 +1772,9 @@ export default {
 
         console.log("======= QT Detail Request result ========");
         console.log(param); 
+
+        this.processMsg = "견적회신 조회 중입니다. \n잠시만 기다려주세요.";
+        this.showProcessing = true;
 
         var rtnCode = "";
 
@@ -1900,33 +1818,40 @@ export default {
                     resQtItem.ResFlag = 'WEBPOS';
                     resQtItem.CarType = element.SERIES;
                     resQtItem.ResDetail = dtlQtData;
-                    el.ResQTData.push(resQtItem);              
+                    //el.ResQTData.push(resQtItem); 
+                    el.ResQTData.splice(0, 0, resQtItem);
                   });
 
-                  if(index >= 0)
+                  if(index !== undefined & index >= 0)
                   {
-                    // 채팅에서 넘어왔을 경우 상세 조회
-                    //this.showResItem(item[index].ResQTData[0] , index);
+                     // 채팅에서 넘어왔을 경우 상세 조회
                     this.$nextTick(function() {
-
+                                       
                       var target = 'btnAccordion-'+index;
-                      document.getElementById(target).click();
-
+                      console.log('target : ', document.getElementById(target));
+                      if(document.getElementById(target) !== null)
+                      {
+                        document.getElementById(target).click();
+                      }
                     }); 
-                  } 
+                  }
+                
                 }
               }
             }
+
+            this.showProcessing = false;
+            this.processMsg = "";
         })
         .catch((error) => {
             console.log(error);
+            this.showProcessing = false;
+            this.processMsg = "";
         }) 
 
       });  
     },
-    GetDealerResData(item, index) { 
-
-      console.log('dealer item :', item);
+    GetDealerResData(item, refID) { 
 
       item.forEach(el =>{
         var param = {};
@@ -1952,31 +1877,37 @@ export default {
           console.log( result.data.Items);
           //this.confirmQTdata2  = result.data.Items;
 
-          result.data.Items.forEach(element => {
+          for(var element  of  result.data.Items){
 
-            let resQtItem = {};
-            resQtItem.ID = element.ID;
-            resQtItem.DocID = element.DocID;
-            resQtItem.CarNo = element.CarNo;
-            resQtItem.DealerName = element.ResDealerNm;
-            resQtItem.DealerCode = element.ResDealer;
-            resQtItem.DealerAgent = '';
-            resQtItem.ResFlag = 'BAY4U'
-            resQtItem.CarType ='';
-            resQtItem.ResDetail = JSON.parse(element.LineItem);
-            el.ResQTData.push(resQtItem);
+              console.log('element : ' ,element);
+              let resQtItem = {};
+              resQtItem.ID = element.ID;
+              resQtItem.DocID = element.DocID;
+              resQtItem.CarNo = element.CarNo;
+              resQtItem.DealerName = element.ResDealerNm;
+              resQtItem.DealerCode = element.ResDealer;
+              resQtItem.DealerAgent = '';
+              resQtItem.ResFlag = 'BAY4U'
+              resQtItem.CarType ='';
+              resQtItem.ResDetail = JSON.parse(element.LineItem);
+              //el.ResQTData.push(resQtItem);
+              el.ResQTData.splice(0, 0, resQtItem);
+          };
 
-          });
-
-          if(index >= 0)
+          if(refID !== undefined && refID.length > 1 ) 
           {
+            let index =-1; 
             // 채팅에서 넘어왔을 경우 상세 조회
-            this.qtConfrnToggleIndex2 = index;
-            
-            if(item[index].ResQTData.length > 0)
-            {
-              this.showResItem2(item[index].ResQTData[0])
-            }
+            this.$nextTick(function() {
+              console.log('refID : ', refID);
+              var target = 'btnDealerAccordion-'+refID;
+              
+              if(document.getElementById(target) !== null)
+              { 
+                console.log('refID : ', document.getElementById(target));
+                document.getElementById(target).click();
+              }
+            });     
           }
         });  
       });
@@ -1984,7 +1915,7 @@ export default {
     },
     showQtReqItem(item , index)
     {
-      console.log('item : ', item);
+      //console.log('item : ', item);
       this.qtReqToggleIndex = index;
       this.visibleIcon = !this.visibleIcon;
       //this.SOList2Toggle = !this.SOList2Toggle;
@@ -2005,22 +1936,22 @@ export default {
     },
     showResItem(item , index)
     {
-      console.log('index' , index);
+      //console.log('inde111' , index);
       this.detailQTData = [];
       this.detailQTData = item.ResDetail;
       this.qtConfrnToggleIndex = index;
       this.visibleIcon2 = !this.visibleIcon2;
     },
-    showResItem2(item){
-      this.SOList3Toggle = !this.SOList3Toggle;
-      
-      console.log('resItem :', item);
+    showResItem2(item , id)
+    {  
+      console.log('item : ', item);
       this.detailQTData2 = [];
       if(item.ResDetail !== undefined)
       {
         this.detailQTData2 = JSON.parse(convertDynamoToArrayString(JSON.stringify(item.ResDetail)));
       }
-      //this.detailQTData2 = JSON.parse(convertDynamoToArrayString(item.LineItem));
+      this.qtConfrnToggleIndex2 = id;
+      this.visibleIcon3 = !this.visibleIcon3;
     },
     showQTOrderPopup(item)
     {
@@ -2075,7 +2006,35 @@ export default {
       .then((result) => {
         console.log("======= Order result ========");
         console.log(result.data);
-        this.goOrderChating(id);
+
+        param.operation = "update";
+        param.tableName = "BAY4U_QT_LIST";
+        param.payload = {};
+        param.payload.Key = {};
+        param.payload.Key.ID = this.orderData.DocID;  //docId
+        param.payload.UpdateExpression = "Set QTSts = :c" ;
+        param.payload.ExpressionAttributeValues = {
+             ":c" : "주문요청",
+        };
+               
+        console.log("======= QT Update Request ========");
+        console.log(JSON.stringify(param));
+
+        axios({
+            method: 'POST',
+            url: Constant.LAMBDA_URL,
+            headers: Constant.JSON_HEADER,
+            data: param
+        })
+        .then((result) => {
+          console.log("======= QT Update result ========");
+          console.log(result.data);
+
+          this.goOrderChating(id);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
       })
       .catch((error) => {
         console.log(error);
@@ -2125,6 +2084,10 @@ export default {
       .then((result) => {
         console.log("======= Chat Save result ========");
         console.log(result.data);
+        
+        let qtInfoPram = {};
+        qtInfoPram.ResDealer = this.orderData.DealerCode;
+        qtInfoPram.QTSts = '주문요청';
 
         this.$sendMessage({
           name: this.UserInfo.BsnID,
@@ -2132,6 +2095,7 @@ export default {
           recv:  this.orderData.DealerCode,
           chatId: this.orderData.DocID,
           reqTm : chatMsg.reqTm,
+          qtInfo : qtInfoPram,
         });
 
         this.$router.push({name:'Chat', 
@@ -2152,10 +2116,10 @@ export default {
     },
     showOrderItem(docId , orderID)
     {
-      console.log('docId : ' , docId);
+      //console.log('docId : ' , docId);
       if(Array.isArray(this.orderHistory)){
         let index =  this.orderHistory.findIndex(i => i.DocID === docId);
-        console.log('index:' , index);
+        //console.log('index:' , index);
         this.orderToggleIndex = index;
         let item = this.orderHistory[index];
         this.GetOrderDetail(item);
@@ -2166,23 +2130,29 @@ export default {
       // 채팅에서 넘어왔을 경우 처리
       if(Array.isArray(this.qtReqList)){
         
-        console.log('채팅에서 넘어옴 ! ' , docId , refID) ; 
+        console.log('채팅에서 넘어옴 !  docId ' , docId ) ; 
+        console.log('채팅에서 넘어옴 !  refID ' , refID ) ; 
           
         let index = -1;
         for(var i=0; i <= this.qtReqList.length; i++)
-        {
+        { 
+          // 견적 그룹에서 채팅에서 넘어온 견적ID로 Index 찾기 
           index = this.qtReqList[i].findIndex(element => element.ID === docId);
           if(index >= 0){
-             console.log('index:' , index);
-             this.qtToggleIndex = i;
-            // this.GetConfirmQtList(this.qtReqList[i]);
-            // this.GetConfirmQtList2(this.qtReqList[i] , index);
-
-            this.GetDealerResData(this.qtReqList[i], index);
-            this.GetWebposResData(this.qtReqList[i], index);
-           
-             break;
+            this.qtToggleIndex = i;
+            break;
           }
+        }
+
+        // 부품지원센터와 일반대리점 견적 확정 내역 조회 
+        if( this.qtReqList[i][index].DealerFlag === "WEBPOS")
+        {
+          this.GetWebposResData(this.qtReqList[i], index);
+          this.GetDealerResData(this.qtReqList[i]);
+        }
+        else{
+          this.GetDealerResData(this.qtReqList[i], refID);
+          this.GetWebposResData(this.qtReqList[i]);
         }
       } 
     },
@@ -2244,9 +2214,34 @@ export default {
     },
     getIndex(value)
     {
-        let str = value;
-        return Number(str.substring(str.length , str.length -4)) -1;
-    }
+      let index = -1;
+      if(this.qtToggleIndex > -1)
+      {
+        index = this.qtReqList[this.qtToggleIndex].findIndex(el => el.ID === value);
+      }
+      return index;
+      //let str = value;
+      //return Number(str.substring(str.length , str.length -4)) -1;
+      
+    },
+    getDealerIndex(value)
+    {
+        let index = -1;
+        console.log('qtReqList : ', this.qtReqList);
+        console.log('value.DocID : ' , value.DocID);
+
+        for(var element of this.qtReqList){
+          let hedIndex = element.findIndex(hedEl => hedEl.ID === value.DocID);
+          console.log('hedIndex :'  , hedIndex);
+          if(hedIndex > -1)
+          {  
+            index = element[hedIndex].ResQTData.findIndex(el => el.ID === value.ID);
+            console.log( 'dtl : ' , element[hedIndex].ResQTData);
+            break;
+          }
+        }
+        return index;
+    },
   },
 
   components: {
@@ -2257,7 +2252,8 @@ export default {
     CustomerDocOption,
     CheckLogin:CheckLogin,
     QTOrder:QTOrder,
-    BackToTop:BackToTop
+    BackToTop:BackToTop,
+    MessageBox: MessageBox
   },
   computed: {
     
@@ -2322,7 +2318,7 @@ export default {
       }
       var RefID = '';
       if(this.$route.params.RefID !== undefined)
-      {
+      { 
         RefID = this.$route.params.RefID;
       }
       var CarNo = '';
@@ -3032,14 +3028,14 @@ export default {
    font-size: 1rem;
 }
 .order-itemList {
-  width: 98%;
+  width: 99%;
   margin: auto;
   border-style: solid;
   border-width: thin;
   border-radius: 5px;
   border-color: #ddd;
   margin-bottom: 5px;
-  padding: 3px 2px;
+  padding: 3px 0px;
   display: flex;
 }
 .order-itemCode {
@@ -3091,5 +3087,11 @@ export default {
 .collapsed > .when-opened,
 :not(.collapsed) > .when-closed {
   display: none;
+}
+.showProcessing
+{
+  display: block; 
+  text-align:center; 
+  font-size: 1.2rem;
 }
 </style>

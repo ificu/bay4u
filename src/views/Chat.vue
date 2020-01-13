@@ -252,11 +252,28 @@ export default {
           chatMsg.img = Constant.IMG_URL + data.imgId;
           chatMsg.imgId = data.imgId;    
 
-          this.msgDatas = chatMsg;
-          
+          console.log('chatMsg1 : ', chatMsg);
+          console.log('msgDatas1 : ', this.msgDatas);
+
+          let index = this.msgDatas.findIndex(element => element.msgData.reqTm === chatMsg.reqTm);
+          if(index === -1)
+          {
+            //console.log('msg index : ' , index);
+            //console.log('chatMsg.reqTm' , chatMsg.reqTm);
+            this.msgDatas = chatMsg;
+          }          
         }
         else {
-          this.msgDatas = chatMsg;
+          //console.log('chatMsg2 : ', chatMsg);
+          //console.log('msgDatas2 : ', this.msgDatas);
+
+          let index = this.msgDatas.findIndex(element => element.msgData.reqTm === chatMsg.reqTm);
+          if(index === -1)
+          {
+            //console.log('msg index : ' , index);
+            //console.log('chatMsg.reqTm', chatMsg.reqTm);
+            this.msgDatas = chatMsg;
+          }
         }
       }
     });
