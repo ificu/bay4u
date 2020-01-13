@@ -47,7 +47,8 @@
           <li v-for="(qtReq, index) in qtReqList" v-bind:key = "index" v-on:click="SetQTInfo(qtReq,index)" :class="{selectItem : selectedList(index)}">
             <i class="Carcenter-type fas fa-wrench" style="color:#fbc02e;" v-if="qtReq.isRead === true"></i>     
             <i class="Carcenter-type fas fa-wrench" style="color:red;" v-else-if="qtReq.isRead === false"></i>          
-            <p class="Carcenter-name">{{qtReq.ReqName}} ({{(qtReq.CarNo === "*empty*")?"미상차량" : qtReq.CarNo}})<br>{{qtReq.ReqDt}}</p>
+            <p class="Carcenter-name">{{qtReq.ReqName}} ({{(qtReq.CarNo === "*empty*")?"미상차량" : qtReq.CarNo}})<br><span class="Carcenter-reqdt">{{qtReq.ReqDt}}</span></p>
+            <span :class="linkQtSts(qtReq.QTSts)">{{qtReq.QTSts}}</span>
             <span type="button" class="Chat-detail">
               <i class="fas fa-angle-double-right"></i>
             </span>            
@@ -236,6 +237,25 @@ export default {
             return arrSearch;
           }
       }
+    },
+    linkQtSts(value){
+      
+      if(value === '견적요청')
+      {
+        return 'qtSts-1';
+      }
+      else if(value === '견적회신')
+      {
+        return 'qtSts-2';
+      }
+      else if(value === '주문요청')
+      {
+        return 'qtSts-3';
+      }
+      else if(value === '주문확정')
+      {
+        return 'qtSts-4';
+      }
     }
   },
   mounted(){
@@ -254,16 +274,18 @@ export default {
 
     this.$EventBus.$on('update-chatMsg', docId => {  
       
-      //console.log('docId : ' , docId);
+      console.log('docId : ' , docId);
       // 같은 대리점 채팅이 아니면 리턴
       if(this.UserInfo.BsnID !==  docId.qtInfo.ResDealer ) return;
 
       var checkExist = false;
-
+      
       for (var chat of this.qtReqList) {
-        if(chat.ID === docId) {
+
+        if(chat.ID === docId.chatId) {
           chat.isRead = false;
           checkExist = true;
+          chat.QTSts = docId.qtInfo.QTSts; 
         }
       }
 
@@ -288,6 +310,7 @@ export default {
           newQtData.ReqSeq  = docId.qtInfo.ReqSeq;
           newQtData.ReqSite  = docId.qtInfo.ReqSite;
           newQtData.ResDealer  = docId.qtInfo.ResDealer;
+          newQtData.QTSts  = docId.qtInfo.QTSts;
           newQtData.isRead  = false;
           this.qtReqList.push(newQtData);
           
@@ -299,10 +322,20 @@ export default {
             });
           }
         }
+      }
+    }); 
+    
+    this.$EventBus.$on('update-Sts', updateData => {
 
+      let index = this.qtReqList.findIndex(element => element.ID === updateData.ID);
+      if(index >= 0)
+      {
+        this.qtReqList[index].QTSts = updateData.Msg;
+        console.log('update : ', this.qtReqList[index].QTSts);
       }
 
-    });      
+    });
+
   },    
   computed:{
     UserInfo: {
@@ -382,6 +415,7 @@ export default {
   border-radius: 5px;
   border-color: #bebebe;
   background-color: #fcf4df;
+  position: relative;
 }
 
 .Chat-list .selectItem {
@@ -402,10 +436,14 @@ export default {
   align-self: center;
   font-size: 1.5rem;
 }
+
 .Carcenter-name {
   padding-left: 10px;
   font-weight: bold;
   cursor:pointer;
+}
+.Carcenter-reqdt{
+  font-size: 0.88em;
 }
 .Chat-detail {
   align-self: center;
@@ -413,5 +451,41 @@ export default {
   color: #5d4038;
   -webkit-appearance:none;
   -moz-appearance:none;
+}
+/*견적요청 */
+.qtSts-1{
+  font-size: 0.8em;
+  font-weight: bold;
+  position: absolute;
+  right:40px;
+  top: 10px;
+  color:#3F51B5;
+}
+/*견적회신 */
+.qtSts-2{
+  font-size: 0.8em;
+  font-weight: bold;
+  position: absolute;
+  right:40px;
+  top: 10px;
+  color:#1B5E20;
+}
+/*주문요청 */
+.qtSts-3{
+  font-size: 0.8em;
+  font-weight: bold;
+  position: absolute;
+  right:40px;
+  top: 10px;
+  color:#E53935;
+}
+/*주문완료 */
+.qtSts-4{
+  font-size: 0.8em;
+  font-weight: bold;
+  position: absolute;
+  right:40px;
+  top: 10px;
+  color:#FF6D00;
 }
 </style>
