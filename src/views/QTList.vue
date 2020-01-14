@@ -647,7 +647,7 @@
                     <b-col align-self="center" class="history-order-date">{{setQtDate(item.ReqDt)}}</b-col>
                     <b-col class="history-order-car">
                       <b-row class="history-carNo">
-                       {{item.CarNo}}
+                      {{(item.CarNo === "*empty*")?"미상차량" : item.CarNo }}
                       </b-row>
                       <b-row  class="history-carType">
                         {{item.ResDealerNm}}
@@ -1382,15 +1382,15 @@ export default {
         switch (searchCase) {
           case '차량번호' :
             console.log('차량번호 검색!!');
-            filter = "ReqSite = :id and CarNo = :carNo";
+            filter = "ReqSite = :id and (contains(CarNo, :carNo))";
             break;
           case '대리점' :
             console.log('대리점 검색!!');
-            filter = "ReqSite = :id and ResDealer = :resDealer";
+            filter = "ReqSite = :id and (contains(ResDealer, :resDealer))";
             break;
           case '날짜' :
             console.log('날짜 검색!!');
-            filter = "ReqSite = :id and ReqDt = :reqDt";
+            filter = "ReqSite = :id and (contains(ReqDt, :reqDt))";
             break;
           default :
             break;
@@ -1420,7 +1420,7 @@ export default {
         switch (searchCase) {
           case '차량번호' :
             var key2 = ":carNo";
-            param.payload.ExpressionAttributeValues[key2] = this.qtSearchText;
+            param.payload.ExpressionAttributeValues[key2] = (this.qtSearchText === "미상차량")? "*empty*" : this.qtSearchText;
             break;
           case '대리점' :
             var key2 = ":resDealer";
@@ -1650,13 +1650,13 @@ export default {
         var searchCase = this.dropdownSO;
         switch (searchCase) {
           case '차량번호' :
-            filter = "ReqSite = :id and CarNo = :carNo";
+            filter = "ReqSite = :id and (contains(CarNo, :carNo))";
             break;
           case '대리점' :
-            filter = "ReqSite = :id and ResDealerNm = :resDealer";
+            filter = "ReqSite = :id and (contains(ResDealerNm, :resDealer))";
             break;
           case '날짜' :
-            filter = "ReqSite = :id and ReqDt = :reqDt";
+            filter = "ReqSite = :id and (contains(ReqDt, :reqDt))";
             break;
           default :
             break;
@@ -1685,7 +1685,7 @@ export default {
         switch (searchCase) {
           case '차량번호' :
             var key2 = ":carNo";
-            param.payload.ExpressionAttributeValues[key2] = this.ordSearchText;
+            param.payload.ExpressionAttributeValues[key2] = (this.ordSearchText==="미상차량")?"*empty*":this.ordSearchText;
             break;
           case '대리점' :
             var key2 = ":resDealer";
