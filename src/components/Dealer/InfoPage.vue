@@ -1202,6 +1202,8 @@ export default {
     },
     saveOrderConfirm()
     {
+      if(this.orderHistory.length === 0 ) return;
+
       var now = new Date();
       var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                 + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);

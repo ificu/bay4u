@@ -10,7 +10,7 @@
         >
         <v-expansion-panel-header class="roHistory-header" @click="GetRoItem(roItem)">
             <v-row no-gutters>
-                <div class="roHistory-title"><v-icon small class="roHistory-icon">mdi-wrench</v-icon>{{roItem.RO_NM}}</div>
+                <div class="roHistory-title"><v-icon x-small class="roHistory-icon">mdi-wrench</v-icon>{{roItem.RO_NM}}</div>
                 <div class="roHistory-detail">
                     <div><!--<v-icon x-small class="roHistory-icon">fas fa-tachometer-alt</v-icon>-->{{roItem.DST_CR | localeNum}} Km</div>
                     <div class="roHistory-date"><!--<v-icon x-small class="roHistory-icon">fas fa-calendar-alt</v-icon>-->{{roItem.DC_DY_BSN}}</div>
@@ -183,7 +183,7 @@ export default {
 }
 .roHistory-title {
     flex: 60%;
-    font-size: 1rem;
+    font-size: 0.92rem;
     font-weight: bold;
     margin-bottom:5px;
     font-family: 'Noto Sans KR', sans-serif;

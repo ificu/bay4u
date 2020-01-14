@@ -44,14 +44,49 @@
     </v-row>
       <div class="Chat-list">
         <ul>
-          <li v-for="(qtReq, index) in qtReqList" v-bind:key = "index" v-on:click="SetQTInfo(qtReq,index)" :class="{selectItem : selectedList(index)}">
-            <i class="Carcenter-type fas fa-wrench" style="color:#fbc02e;" v-if="qtReq.isRead === true"></i>     
-            <i class="Carcenter-type fas fa-wrench" style="color:red;" v-else-if="qtReq.isRead === false"></i>          
-            <p class="Carcenter-name">{{qtReq.ReqName}} ({{(qtReq.CarNo === "*empty*")?"미상차량" : qtReq.CarNo}})<br><span class="Carcenter-reqdt">{{qtReq.ReqDt}}</span></p>
-            <span :class="linkQtSts(qtReq.QTSts)">{{qtReq.QTSts}}</span>
-            <span type="button" class="Chat-detail">
-              <i class="fas fa-angle-double-right"></i>
-            </span>            
+         <li v-for="(qtReq, index) in qtReqList" v-bind:key = "index" v-on:click="SetQTInfo(qtReq,index)" >
+           <div class="chat-item flex-direction_row" :class="{selectItem : selectedList(index), noReadItem : qtReq.isRead === false}">
+             <div class="carBrand">
+                <!--<i class="Carcenter-type fas fa-wrench" style="color:#fbc02e;" v-if="qtReq.isRead === true"></i>     
+                <i class="Carcenter-type fas fa-wrench" style="color:red;" v-else-if="qtReq.isRead === false"></i>-->    
+                <img height='18' v-if="qtReq.CarBrand === 'AUDI'" style="align-self:center;" src="@/assets/BRAND-AUDI.png">
+                <img height='25' v-if="qtReq.CarBrand === 'BENZ'" style="align-self:center;" src="@/assets/BRAND-BENZ.png">
+                <img height='30' v-if="qtReq.CarBrand === 'BMW'" style="align-self:center;width:32px;" src="@/assets/BRAND-BMW.png">
+                <img height='30' v-if="qtReq.CarBrand === 'CADILLAC'" style="align-self:center; " src="@/assets/BRAND-CADILLAC.png">
+                <img height='10' v-if="qtReq.CarBrand === 'CHRYSLER'" style="align-self:center; " src="@/assets/BRAND-CHRYSLER.png">
+                <img height='25' v-if="qtReq.CarBrand === 'CITROEN'" style="align-self:center; " src="@/assets/BRAND-CITROEN.png">
+                <img height='18' v-if="qtReq.CarBrand === 'DODGE'" style="align-self:center;width:48px;" src="@/assets/BRAND-DODGE.png">
+                <img height='30' v-if="qtReq.CarBrand === 'FIAT'" style="align-self:center; " src="@/assets/BRAND-FIAT.png">
+                <img height='25' v-if="qtReq.CarBrand === 'FORD'" style="align-self:center;width:46px;" src="@/assets/BRAND-FORD.png">
+                <img height='25' v-if="qtReq.CarBrand === 'HONDA'" style="align-self:center;" src="@/assets/BRAND-HONDA.png">
+                <img height='15' v-if="qtReq.CarBrand === 'JEEP'" style="align-self:center;width:46px;" src="@/assets/BRAND-JEEP.png">
+                <img height='17' v-if="qtReq.CarBrand === 'LANDROVER'" style="align-self:center; " src="@/assets/BRAND-LANDROVER.png">
+                <img height='25' v-if="qtReq.CarBrand === 'LEXUS'" style="align-self:center;" src="@/assets/BRAND-LEXUS.png">
+                <img height='30' v-if="qtReq.CarBrand === 'LINCOLN'" style="align-self:center;margin-left:6px;" src="@/assets/BRAND-LINCOLN.png">
+                <img height='18' v-if="qtReq.CarBrand === 'MINI'" style="align-self:center;width:46px;" src="@/assets/BRAND-MINI.png">
+                <img height='25' v-if="qtReq.CarBrand === 'PEUGEOT'" style="align-self:center;" src="@/assets/BRAND-PEUGEOT.png">
+                <img height='30' v-if="qtReq.CarBrand === 'PORSCHE'" style="align-self:center;" src="@/assets/BRAND-PORSCHE.png">
+                <img height='25' v-if="qtReq.CarBrand === 'TOYOTA'" style="align-self:center;width:34px;" src="@/assets/BRAND-TOYOTA.png">
+                <img height='25' v-if="qtReq.CarBrand === 'VOLVO'" style="align-self:center;width:30px;" src="@/assets/BRAND-VOLVO.png">
+                <img height='30' v-if="qtReq.CarBrand === 'VW'" style="align-self:center;" src="@/assets/BRAND-VW.png">
+                <i class="Carcenter-type fas fa-wrench" style="color:#fbc02e;" v-if="qtReq.CarBrand === '차종 선택'"></i>  
+             </div>
+             <div class="chatInfo" :class="{chatInfo2 : checkBrand(qtReq.CarBrand)}">
+                <div class="carInfo">
+                  <span class="Carcenter-name">{{qtReq.ReqName}} ({{(qtReq.CarNo === "*empty*")?"미상차량" : qtReq.CarNo}})</span>
+                  <span class="Carcenter-reqdt">{{qtReq.ReqDt}}</span>
+                  <span class="carSeries">{{qtReq.CarSeries}}</span>
+                </div>
+                <div>
+                  <span :class="linkQtSts(qtReq.QTSts)">{{qtReq.QTSts}}</span>
+                </div>
+             </div>
+             <div>
+              <span type="button" class="Chat-detail">
+                <i class="fas fa-angle-double-right"></i>
+              </span>  
+             </div>
+           </div>
           </li>
         </ul>        
       </div>
@@ -256,6 +291,17 @@ export default {
       {
         return 'qtSts-4';
       }
+    },
+    checkBrand(value)
+    {
+      const brands = ['AUDI', 'CHRYSLER','DODGE','FORD','JEEP','MINI'];
+      let index = brands.indexOf(value);
+      if(index > -1){
+        return true;
+      }
+      else{
+        return false;
+      }
     }
   },
   mounted(){
@@ -401,13 +447,52 @@ export default {
   height: calc(100vh - 270px); 
   overflow: auto;
 }
+.Chat-list .chat-item{
+  display: flex;
+  min-height: 50px;
+  height: 50px;
+  line-height: 50px;
+  margin:4px 1px;
+  padding: 0 0.9rem;
+  border-width: thin;
+  border-style: solid;
+  border-radius: 5px;
+  border-color: #bebebe;
+  background-color: #fcf4df;
+  position: relative;
+  align-content: center;
+}
+.Chat-list .carBrand
+{
+  position:absolute;
+  left:8px;
+  padding:0;
+}
+.Chat-list .chatInfo
+{
+  padding-left: 20px;
+  flex:50%;
+}
+.Chat-list .chatInfo2
+{
+  padding-left: 35px;
+  flex:50%;
+}
+.Chat-list .carInfo{
+  width:80%;
+  font-weight: bold;
+  cursor:pointer;
+  padding-left: 10px;
+}
 
+.flex-direction_row {flex-direction: row; /*default*/}
+
+/*
 .Chat-list li {
   display: flex;
   min-height: 50px;
   height: 50px;
   line-height: 50px;
-  /*margin: 0.5rem 0;*/
   margin:4px 1px;
   padding: 0 0.9rem;
   border-width: thin;
@@ -417,7 +502,7 @@ export default {
   background-color: #fcf4df;
   position: relative;
 }
-
+*/
 .Chat-list .selectItem {
   display: flex;
   min-height: 50px;
@@ -431,6 +516,19 @@ export default {
   border-color: #bebebe;
   background-color: #878f99;
 }
+.Chat-list .noReadItem {
+  display: flex;
+  min-height: 50px;
+  height: 50px;
+  line-height: 50px;
+  margin: 0.5rem 0;
+  padding: 0 0.9rem;
+  border-width: thin;
+  border-style: solid;
+  border-radius: 5px;
+  border-color: #bebebe;
+  background-color: #FFAB91;
+}
 
 .Carcenter-type {
   align-self: center;
@@ -438,12 +536,23 @@ export default {
 }
 
 .Carcenter-name {
-  padding-left: 10px;
-  font-weight: bold;
-  cursor:pointer;
+  position: absolute;;
+  line-height: 20px;
 }
 .Carcenter-reqdt{
-  font-size: 0.88em;
+  font-size: 0.85em;
+  line-height: 15px;
+}
+.carSeries{
+  position: absolute;;
+  line-height: 10px;
+  left: 45px;
+  bottom: 2px;
+  font-size: 0.5em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 180px;
 }
 .Chat-detail {
   align-self: center;
@@ -458,7 +567,7 @@ export default {
   font-weight: bold;
   position: absolute;
   right:40px;
-  top: 10px;
+  top: 0px;
   color:#3F51B5;
 }
 /*견적회신 */

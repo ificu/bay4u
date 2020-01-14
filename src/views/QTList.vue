@@ -224,14 +224,16 @@
                     <b-col align-self="center" class="history-date">{{setQtDate(qtItem[0].ReqDt)}}</b-col>
                     <b-col class="history-car">
                       <b-row class="history-carNo">
+                        <v-icon color="#FFF59D" style="margin-right:4px;margin-top:4px;font-size:0.85em;" v-if="showQtState(qtItem)">fas fa-hourglass-end</v-icon>
+                        <v-icon color="#FFF59D" style="margin-right:4px;margin-top:3px;font-size:0.85em;" v-if="showOrderState(qtItem)">fas fa-check</v-icon>
                         {{(qtItem[0].CarNo === "*empty*")?"미상차량" : qtItem[0].CarNo }}
                       </b-row>
                      <b-row class="history-carSeries">
-                        {{ qtItem[0].CarSeries }}
+                       {{qtItem[0].CarSeries}}
                       </b-row>                      
-                    </b-col>                    
+                    </b-col>          
                     <b-col align-self="center" class="history-detailHeaderBtn">
-                      <b-button block href="#"  v-b-toggle="'accordion-' + idx"  variant="secondary"  size="sm" v-on:click="showQtList(qtItem)">
+                      <b-button :id ="'btnGrp-'+qtItem[0].ID" block href="#"  v-b-toggle="'accordion-' + idx"  variant="secondary"  size="sm" v-on:click="showQtList(qtItem)">
                         <!--<i class="fas fa-chevron-down" :id="'btnDetail'+idx"></i>-->
                         <!--<i v-if="!SOList1Toggle" class="fas fa-chevron-down"></i>
                         <i v-if="SOList1Toggle"  class="fas fa-chevron-up"></i>-->
@@ -323,7 +325,7 @@
                           <b-container>
                             <b-row>
                               <!--<b-col align-self="center" class="history-webpos-date">{{GetConfirmValue(qtReqInfo.ID,"MONTH")}}/{{GetConfirmValue(qtReqInfo.ID,"DAY")}}({{GetConfirmValue(qtReqInfo.ID,"DAYWEEK")}})</b-col>-->
-                              <b-col class="pl-2 pr-2 pt-1 response-qtInfo">견적<br>회신</b-col>
+                              <b-col class="pl-2 pr-2 pt-1 response-qtInfo">{{showQtStateText(confrimInfo.QTSts,0,2)}}<br>{{showQtStateText(confrimInfo.QTSts,2,4)}}</b-col>
                               <b-col class="response-qtInfo-detail">
                                 <b-row>
                                   <b-col class="pl-1 pt-1 pb-0">
@@ -399,10 +401,10 @@
                         <b-card-header header-tag="header" role="tab" header-class="card-header-qtRes">
                         <b-container>
                           <b-row>
-                            <b-col class="pl-2 pr-2 pt-1 response-qtInfo">견적<br>회신</b-col>
+                            <b-col class="pl-2 pr-2 pt-1 response-qtInfo">{{showQtStateText(confrimInfo.QTSts,0,2)}}<br>{{showQtStateText(confrimInfo.QTSts,2,4)}}</b-col>
                             <b-col class="response-qtInfo-detail">
                               <b-row>
-                                  <b-col class="pl-1 pt-1 pb-0">
+                                  <b-col class="pl-0 pt-1 pb-0">
                                     <span class="qtInfo-detail-carNo">{{(confrimInfo.CarNo) === "*empty*" ? "미상차량" :confrimInfo.CarNo }}</span>
                                     <span class="qtInfo-detail-dealer">{{confrimInfo.DealerName}}</span>
                                   </b-col>
@@ -483,7 +485,7 @@
                       <b-card-footer>
                         <div class="QTRes-footer">
                           <div class="TotalInfo">
-                              <v-btn color="#4E342E" dark depressed class="mr-3" @click="showQTOrderPopup(confrimInfo)" >주문하기</v-btn>
+                              <v-btn color="#4E342E" dark depressed class="mr-3" @click="showQTOrderPopup(confrimInfo)" v-if="confrimInfo.QTSts !== '주문확정'">주문하기</v-btn>
                               <span class="TotalInfo-Title">합계</span>
                               <span class="TotalInfo-Text">{{total2 | localeNum}}원</span>
                           </div>
@@ -1452,11 +1454,13 @@ export default {
 					let qtItem = {};
           qtItem.ID = element.ID;
           qtItem.CarBrand = element.CarBrand;
+          qtItem.CarSeries = element.CarSeries;
 					qtItem.CarNo = element.CarNo;
 					qtItem.CarVin = element.CarVin;
 					qtItem.ReqDt = element.ReqDt;
           qtItem.DealerFlag = 'BAY4YU';
           qtItem.WebposOnly = 'N';
+          qtItem.QTSts = element.QTSts;
           qtItem.QTData = element;
           qtItem.ResQTData = [];
 					this.qtList.push(qtItem);
@@ -1519,7 +1523,8 @@ export default {
             qtItem.CarSeries = element.SERIES;
 						qtItem.ReqDt = element.YEAR + "-" + element.MONTH + "-" + element.DAY;
 						qtItem.DealerFlag = 'WEBPOS';
-						qtItem.QTData = element;
+            qtItem.QTData = element;
+            qtItem.QTSts = "견적회신";
             qtItem.ResQTData = [];
 
 						var index = this.qtList.findIndex(i => i.ID === element.ESTM_ID);
@@ -1752,10 +1757,8 @@ export default {
       this.visibleIcon2 = false;
       this.visibleIcon3 = false;
       this.qtConfrnToggleIndex = -1;
-      this.qtConfrnToggleIndex2 = '';
-      
-  //  this.qtReqItem = [];
-   //  console.log('QT Item : ' , item);
+      this.qtConfrnToggleIndex2 = '';  
+
       this.GetDealerResData(item);
       this.GetWebposResData(item);
     },
@@ -1773,8 +1776,12 @@ export default {
         console.log("======= QT Detail Request result ========");
         console.log(param); 
 
-        this.processMsg = "견적회신 조회 중입니다. \n잠시만 기다려주세요.";
-        this.showProcessing = true;
+        var btnGrp = 'btnGrp-'+item[0].ID;
+        if(document.getElementById(btnGrp).getAttribute("aria-expanded") === "false")
+        { 
+          this.processMsg = "견적회신 조회 중입니다. \n잠시만 기다려주세요.";
+          this.showProcessing = true;
+        }
 
         var rtnCode = "";
 
@@ -1818,6 +1825,7 @@ export default {
                     resQtItem.ResFlag = 'WEBPOS';
                     resQtItem.CarType = element.SERIES;
                     resQtItem.ResDetail = dtlQtData;
+                    resQtItem.QTSts = el.QTSts;
                     //el.ResQTData.push(resQtItem); 
                     el.ResQTData.splice(0, 0, resQtItem);
                   });
@@ -1889,6 +1897,7 @@ export default {
               resQtItem.DealerAgent = '';
               resQtItem.ResFlag = 'BAY4U'
               resQtItem.CarType ='';
+              resQtItem.QTSts = el.QTSts;
               resQtItem.ResDetail = JSON.parse(element.LineItem);
               //el.ResQTData.push(resQtItem);
               el.ResQTData.splice(0, 0, resQtItem);
@@ -1974,71 +1983,137 @@ export default {
     SaveOrder()
     {
       var now = new Date();
-      var id =  this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
-                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
       var ReqTm = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
-                        + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+                            + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
       var param = {};
-      param.operation = "create";
+      param.operation = "list";
       param.tableName = "BAY4U_ORDER_LIST";
       param.payload = {};
-      param.payload.Item = {};
-      param.payload.Item.ID = id;
-      param.payload.Item.DocID = this.orderData.DocID;  //docId
-      param.payload.Item.CarNo = this.orderData.CarNo;
-      param.payload.Item.ReqSite =  this.UserInfo.BsnID
-      param.payload.Item.ReqSiteNm = this.UserInfo.Name;
-      param.payload.Item.ResDealer = this.orderData.DealerCode;
-      param.payload.Item.ResDealerNm = this.orderData.DealerName;
-      param.payload.Item.LineItem = convertArrayToDynamo(JSON.stringify(this.orderList));
-      param.payload.Item.ReqDt = now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);
-      param.payload.Item.ReqTm = ReqTm;
-         
-      console.log("======= Order Request ========");
-      console.log(JSON.stringify(param));
+      param.payload.FilterExpression ="ReqSite = :site and DocID = :id";
+      param.payload.ExpressionAttributeValues = {};
+      var key = ":site";
+      var key2 = ":id";
+      param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
+      param.payload.ExpressionAttributeValues[key2] = this.orderData.DocID;
+     
+      console.log("======= 주문내역 조회 Request result ========");
+      console.log(param); 
 
       axios({
-          method: 'POST',
-          url: Constant.LAMBDA_URL,
-          headers: Constant.JSON_HEADER,
-          data: param
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
       })
       .then((result) => {
-        console.log("======= Order result ========");
-        console.log(result.data);
 
-        param.operation = "update";
-        param.tableName = "BAY4U_QT_LIST";
-        param.payload = {};
-        param.payload.Key = {};
-        param.payload.Key.ID = this.orderData.DocID;  //docId
-        param.payload.UpdateExpression = "Set QTSts = :c" ;
-        param.payload.ExpressionAttributeValues = {
-             ":c" : "주문요청",
-        };
-               
-        console.log("======= QT Update Request ========");
-        console.log(JSON.stringify(param));
+        console.log("=======주문내역 조회  result ========");
+        console.log( result.data.Items);
 
-        axios({
-            method: 'POST',
-            url: Constant.LAMBDA_URL,
-            headers: Constant.JSON_HEADER,
-            data: param
-        })
-        .then((result) => {
-          console.log("======= QT Update result ========");
-          console.log(result.data);
+        if(result.data.Items.length > 0){
+          let ordId = result.data.Items[0].ID;
+          // 주문내역 Update
+          param.operation = "update";
+          param.tableName = "BAY4U_ORDER_LIST";
+          param.payload = {};
+          param.payload.Key = {};
+          param.payload.Key.ID = ordId;  
+          param.payload.UpdateExpression = "Set LineItem=:x, ReqDt=:y, ReqTm=:z ";
+          param.payload.ExpressionAttributeValues = {
+              ":x" :convertArrayToDynamo(JSON.stringify(this.orderList)),
+              ":y" : now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2),
+              ":z" : ReqTm,
+          };
+                
+          console.log("======= 주문내역 Update Request ========");
+          console.log(JSON.stringify(param));
 
-          this.goOrderChating(id);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+          axios({
+              method: 'POST',
+              url: Constant.LAMBDA_URL,
+              headers: Constant.JSON_HEADER,
+              data: param
+          })
+          .then((result) => {
+            console.log("======= 주문내역 Update result ========");
+            console.log(result.data);
+
+            this.goOrderChating(ordId);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+        }
+        else{
+          // 신규주문 
+          var id =  this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+         /* var ReqTm = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                            + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);*/
+          
+          param.operation = "create";
+          param.tableName = "BAY4U_ORDER_LIST";
+          param.payload = {};
+          param.payload.Item = {};
+          param.payload.Item.ID = id;
+          param.payload.Item.DocID = this.orderData.DocID;  //docId
+          param.payload.Item.CarNo = this.orderData.CarNo;
+          param.payload.Item.ReqSite =  this.UserInfo.BsnID;
+          param.payload.Item.ReqSiteNm = this.UserInfo.Name;
+          param.payload.Item.ResDealer = this.orderData.DealerCode;
+          param.payload.Item.ResDealerNm = this.orderData.DealerName;
+          param.payload.Item.LineItem = convertArrayToDynamo(JSON.stringify(this.orderList));
+          param.payload.Item.ReqDt = now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);
+          param.payload.Item.ReqTm = ReqTm;
+            
+          console.log("======= Order Request ========");
+          console.log(JSON.stringify(param));
+
+          axios({
+              method: 'POST',
+              url: Constant.LAMBDA_URL,
+              headers: Constant.JSON_HEADER,
+              data: param
+          })
+          .then((result) => {
+            console.log("======= Order result ========");
+            console.log(result.data);
+
+            param.operation = "update";
+            param.tableName = "BAY4U_QT_LIST";
+            param.payload = {};
+            param.payload.Key = {};
+            param.payload.Key.ID = this.orderData.DocID;  //docId
+            param.payload.UpdateExpression = "Set QTSts = :c" ;
+            param.payload.ExpressionAttributeValues = {
+                ":c" : "주문요청",
+            };
+                  
+            console.log("======= QT Update Request ========");
+            console.log(JSON.stringify(param));
+
+            axios({
+                method: 'POST',
+                url: Constant.LAMBDA_URL,
+                headers: Constant.JSON_HEADER,
+                data: param
+            })
+            .then((result) => {
+              console.log("======= QT Update result ========");
+              console.log(result.data);
+
+              this.goOrderChating(id);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+        }
+      });  
+
     },
     goOrderChating(val)
     {
@@ -2242,6 +2317,75 @@ export default {
         }
         return index;
     },
+    showQtState(item)
+    {
+      if(Array.isArray(item))
+      {
+        if(item.length === 1) {
+          if(item[0].QTData.QTSts === "견적요청"){
+            return false;
+          }
+          else if(item[0].QTData.QTSts === "주문확정")
+          {
+            return false;
+          }
+          else{
+            return true;
+          }
+        }
+        else{           
+          let index = item.findIndex(el => el.QTData.QTSts === "견적요청");
+          if(index > -1 ){
+            return false;
+          }
+          else{
+            let cnt = item.length;
+            let result = item.filter(el => el.QTData.QTSts === "주문확정");
+            let webposResult = item.filter(el => el.QTData.QTSts === "견적회신" && el.DealerFlag === "WEBPOS"); 
+            if(cnt === ( result.length + webposResult.length)){
+              return false
+            }
+            else{
+              return true;
+            }
+          }
+        }
+      }      
+    },
+    showOrderState(item){
+      if(Array.isArray(item))
+      {
+        if(item.length === 1) {
+          if(item[0].QTData.QTSts === "주문확정")
+          {
+            return true;
+          }
+          else{
+            return false;
+          }
+        }
+        else{
+          let cnt = item.length;
+          let result = item.filter(el => el.QTData.QTSts === "주문확정");
+          let webposResult = item.filter(el => el.QTData.QTSts === "견적회신" && el.DealerFlag === "WEBPOS"); 
+          if(cnt === ( result.length + webposResult.length)){
+            return true
+          }
+          else{
+            return false;
+          }
+        }
+      }
+    },
+    showQtStateText(value , index1 , index2)
+    {   
+      if(value !== '' && value !== undefined){
+        return value.substring(index1 , index2);
+      }
+      else{
+        return '';
+      }
+    }
   },
 
   components: {
