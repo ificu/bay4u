@@ -221,16 +221,16 @@
                       <img height='25' v-if="qtItem[0].CarBrand === 'VOLVO'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-VOLVO.png">
                       <img height='30' v-if="qtItem[0].CarBrand === 'VW'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-VW.png">
                     </b-col>                    
-                    <b-col align-self="center" class="history-date">{{setQtDate(qtItem[0].ReqDt)}}</b-col>
-                    <b-col class="history-car">
+                    <b-col class="history-date" :class="{ 'history-date2' :(qtItem[0].CarSeries !== undefined && qtItem[0].CarSeries.length > 0) ? true :false}">{{setQtDate(qtItem[0].ReqDt)}}</b-col>
+                    <b-col class="history-car" :class="{ 'history-car2' :(qtItem[0].CarSeries !== undefined && qtItem[0].CarSeries.length > 0) ? true :false}">
                       <b-row class="history-carNo">
                         <v-icon color="#FFF59D" style="margin-right:4px;margin-top:4px;font-size:0.85em;" v-if="showQtState(qtItem)">fas fa-hourglass-end</v-icon>
                         <v-icon color="#FFF59D" style="margin-right:4px;margin-top:3px;font-size:0.85em;" v-if="showOrderState(qtItem)">fas fa-check</v-icon>
                         {{(qtItem[0].CarNo === "*empty*")?"미상차량" : qtItem[0].CarNo }}
                       </b-row>
-                     <b-row class="history-carSeries">
+                      <!--<b-row class="history-carSeries">
                        {{qtItem[0].CarSeries}}
-                      </b-row>                      
+                      </b-row>-->                
                     </b-col>          
                     <b-col align-self="center" class="history-detailHeaderBtn">
                       <b-button :id ="'btnGrp-'+qtItem[0].ID" block href="#"  v-b-toggle="'accordion-' + idx"  variant="secondary"  size="sm" v-on:click="showQtList(qtItem)">
@@ -245,6 +245,9 @@
                       </span>
                       </b-button>
                     </b-col>               
+                  </b-row>
+                  <b-row class="history-carSeries">
+                    <b-col><span>{{qtItem[0].CarSeries}}</span></b-col>
                   </b-row>
                 </b-container>
               </b-card-header>
@@ -1908,12 +1911,12 @@ export default {
             let index =-1; 
             // 채팅에서 넘어왔을 경우 상세 조회
             this.$nextTick(function() {
-              console.log('refID : ', refID);
+              //console.log('refID : ', refID);
               var target = 'btnDealerAccordion-'+refID;
               
               if(document.getElementById(target) !== null)
               { 
-                console.log('refID : ', document.getElementById(target));
+                //console.log('refID : ', document.getElementById(target));
                 document.getElementById(target).click();
               }
             });     
@@ -2171,6 +2174,8 @@ export default {
           chatId: this.orderData.DocID,
           reqTm : chatMsg.reqTm,
           qtInfo : qtInfoPram,
+          chatType : "O",
+          refId: val,
         });
 
         this.$router.push({name:'Chat', 
@@ -2706,7 +2711,7 @@ export default {
   margin:auto;
   width: 96%;
   padding-top: 20px;
-  margin-bottom: 60px;
+  margin-bottom: 80px;
 }
 
 .QTList-history .list-group .list-group-item {
@@ -2752,6 +2757,21 @@ export default {
   font-weight: bold;
   flex:15%;
 }
+.history-date2 {
+  font-size: 1.2rem;
+  font-weight: bold;
+  flex:15%;
+  padding: 5px 6px;;
+}
+.history-car {
+  flex:40%;
+  margin-right: -15px;
+}
+.history-car2 {
+  flex:40%;
+  padding: 8px 16px;;
+  margin-right: -15px;
+}
 .history-webpos-date {
   font-size: 1.2rem;
   font-weight: bold;
@@ -2763,10 +2783,6 @@ export default {
   padding-top: 0px;
 }*/
 
-.history-car {
-  flex:40%;
-  margin-right: -15px;
-}
 .history-carNo {
   font-size: 1rem;
   font-weight: bold;
@@ -2776,7 +2792,11 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;  
-  width: 80px;
+  width: 225px;
+  padding:0px;
+  margin: 0px;
+  position: absolute;
+  top:24px;
 }
 .history-carType {
   font-size: 0.7rem;
