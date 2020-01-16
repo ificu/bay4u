@@ -205,7 +205,7 @@ export default {
 
     this.$EventBus.$on('send-QTConfirm', qtMsg => {
       
-      //console.log('ChatingPage/채팅전달 : ', qtMsg);
+        console.log('ChatingPage/채팅전달 : ', qtMsg);
         this.msgDatas = qtMsg;
         this.$sendMessage({
           name: this.UserInfo.BsnID,
@@ -215,6 +215,7 @@ export default {
           reqTm : qtMsg.reqTm,
           chatType : qtMsg.ChatType,
           refId: qtMsg.RefID,
+          qtInfo: qtMsg.qtInfo,
         });
         
         this.saveChatMsg(qtMsg);

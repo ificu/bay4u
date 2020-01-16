@@ -322,7 +322,7 @@ export default {
       
       console.log('docId : ' , docId);
       // 같은 대리점 채팅이 아니면 리턴
-      if(this.UserInfo.BsnID !==  docId.qtInfo.ResDealer ) return;
+      //if(this.UserInfo.BsnID !==  docId.qtInfo.ResDealer ) return;
 
       var checkExist = false;
       
@@ -552,7 +552,7 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  width: 180px;
+  width: 160px;
 }
 .Chat-detail {
   align-self: center;

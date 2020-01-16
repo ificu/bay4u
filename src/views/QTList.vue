@@ -196,11 +196,11 @@
           <div class="QTList-history">
             <!--견적내역-->
             <b-card no-body class="mb-1" v-for="(qtItem , idx) in qtReqList" v-bind:key="idx" >
-              <b-card-header header-tag="header" role="tab" header-class="card-header-qtlist">
+              <b-card-header header-tag="header" role="tab" header-class="card-header-qtlist" style="height:54px;">
                 <b-container>
                   <b-row>
                     <b-col align-self="center" class="history-brand">
-                      <img height='18' v-if="qtItem[0].CarBrand === 'AUDI'" style="align-self:center; margin-left:-3px;" src="@/assets/BRAND-AUDI.png">
+                      <img height='18' v-if="qtItem[0].CarBrand === 'AUDI'" style="align-self:center; margin-left:-3px;width:40px;" src="@/assets/BRAND-AUDI.png">
                       <img height='25' v-if="qtItem[0].CarBrand === 'BENZ'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-BENZ.png">
                       <img height='30' v-if="qtItem[0].CarBrand === 'BMW'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-BMW.png">
                       <img height='30' v-if="qtItem[0].CarBrand === 'CADILLAC'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-CADILLAC.png">
@@ -221,8 +221,8 @@
                       <img height='25' v-if="qtItem[0].CarBrand === 'VOLVO'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-VOLVO.png">
                       <img height='30' v-if="qtItem[0].CarBrand === 'VW'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-VW.png">
                     </b-col>                    
-                    <b-col class="history-date" :class="{ 'history-date2' :(qtItem[0].CarSeries !== undefined && qtItem[0].CarSeries.length > 0) ? true :false}">{{setQtDate(qtItem[0].ReqDt)}}</b-col>
-                    <b-col class="history-car" :class="{ 'history-car2' :(qtItem[0].CarSeries !== undefined && qtItem[0].CarSeries.length > 0) ? true :false}">
+                    <b-col class="history-date" :class="{ 'history-date2' :(qtItem[0].CarSeries !== undefined && qtItem[0].CarSeries !== '') ? true :false}">{{setQtDate(qtItem[0].ReqDt)}}</b-col>
+                    <b-col class="history-car" :class="{ 'history-car2' :(qtItem[0].CarSeries !== undefined && qtItem[0].CarSeries !== '') ? true :false}">
                       <b-row class="history-carNo">
                         <v-icon color="#FFF59D" style="margin-right:4px;margin-top:4px;font-size:0.85em;" v-if="showQtState(qtItem)">fas fa-hourglass-end</v-icon>
                         <v-icon color="#FFF59D" style="margin-right:4px;margin-top:3px;font-size:0.85em;" v-if="showOrderState(qtItem)">fas fa-check</v-icon>
@@ -231,7 +231,7 @@
                       <!--<b-row class="history-carSeries">
                        {{qtItem[0].CarSeries}}
                       </b-row>-->                
-                    </b-col>          
+                    </b-col>       
                     <b-col align-self="center" class="history-detailHeaderBtn">
                       <b-button :id ="'btnGrp-'+qtItem[0].ID" block href="#"  v-b-toggle="'accordion-' + idx"  variant="secondary"  size="sm" v-on:click="showQtList(qtItem)">
                         <!--<i class="fas fa-chevron-down" :id="'btnDetail'+idx"></i>-->
@@ -2756,12 +2756,13 @@ export default {
   font-size: 1.2rem;
   font-weight: bold;
   flex:15%;
+  padding-left: 5px;
 }
 .history-date2 {
   font-size: 1.2rem;
   font-weight: bold;
   flex:15%;
-  padding: 5px 6px;;
+  padding: 5px 6px;
 }
 .history-car {
   flex:40%;
@@ -2770,7 +2771,8 @@ export default {
 .history-car2 {
   flex:40%;
   padding: 8px 16px;;
-  margin-right: -15px;
+  margin-right: -8px;
+  height: 54px;
 }
 .history-webpos-date {
   font-size: 1.2rem;

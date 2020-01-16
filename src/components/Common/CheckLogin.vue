@@ -53,6 +53,9 @@ export default {
     if(this.UserInfo.Name === '')
       this.UserInfo.Name = this.$cookies.get('UserNM');
 
+    if(this.UserInfo.UserType === '')
+      this.UserInfo.UserType = this.$cookies.get('UserType');
+
     if(this.$cookies.get('CarNo') !== undefined || this.$cookies.get('CarNo') !== '' || this.$cookies.get('CarNo') !== 'null') {
       this.CarInfo.CarNo = this.$cookies.get('CarNo');
     }

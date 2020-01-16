@@ -953,12 +953,15 @@ export default {
         .then((result) => {
           console.log("======= QT Update result ========");
           console.log(result.data);
-          this.$EventBus.$emit('send-QTConfirm' , qtMsg);
 
           let updateData = {};
           updateData.ID = this.qtInfo.ID;
           updateData.Msg = '견적회신';
           this.$EventBus.$emit('update-Sts' , updateData);
+
+          qtMsg.qtInfo = this.qtInfo;
+          this.$EventBus.$emit('send-QTConfirm' , qtMsg);
+
         })
         .catch((error) => {
           console.log(error);
@@ -1113,6 +1116,7 @@ export default {
       qtMsg.reqTm = chatTime;
       qtMsg.ChatType = "R";
       qtMsg.RefID = id;
+      
       //this.$EventBus.$emit('send-QTConfirm' , qtMsg);
 
       var param = {};
@@ -1184,12 +1188,14 @@ export default {
         .then((result) => {
           console.log("======= QT Update result ========");
           console.log(result.data);
-          this.$EventBus.$emit('send-QTConfirm' , qtMsg);
-
+          
           let updateData = {};
           updateData.ID = this.qtInfo.ID;
           updateData.Msg = '견적회신';
           this.$EventBus.$emit('update-Sts' , updateData);
+
+          qtMsg.qtInfo = this.qtInfo;
+          this.$EventBus.$emit('send-QTConfirm' , qtMsg);
         })
         .catch((error) => {
           console.log(error);
@@ -1244,12 +1250,14 @@ export default {
         var btnOrder =  document.querySelector('#btnOrdConfirm');
         btnOrder.setAttribute("disabled", "true");
 
-        this.$EventBus.$emit('send-QTConfirm' , qtMsg);
-
         let updateData = {};
         updateData.ID = this.qtInfo.ID;
         updateData.Msg = '주문확정';
         this.$EventBus.$emit('update-Sts' , updateData);
+
+        qtMsg.qtInfo = this.qtInfo;
+        this.$EventBus.$emit('send-QTConfirm' , qtMsg);
+
       })
       .catch((error) => {
         console.log(error);

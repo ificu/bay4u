@@ -12,6 +12,7 @@
           </div>
 
           <div class="modal-body">
+            <v-container  id="scroll-target" style="max-height:500px" class="overflow-y-auto pa-0">
             <div class="body-subTitle">
               <h6>견적 요청 대리점</h6>
             </div>
@@ -30,7 +31,7 @@
               <slot name="list2">
               </slot>
             </div>
-
+            </v-container>
           </div>
 
           <div class="modal-footer">
@@ -46,12 +47,12 @@
 
 <style lang="css" scoped>
 
-.body-qtList
+/*.body-qtList
 {
   height: 250px;
   overflow:auto;
   overflow-x:hidden;
-}
+}*/
 
 .body-subTitle {
   margin-top: 15px;
