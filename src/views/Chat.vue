@@ -245,6 +245,9 @@ export default {
         chatMsg.msg  = data.msg;
         chatMsg.Chatid = this.docId;
         chatMsg.reqTm = data.reqTm;
+        chatMsg.ChatType = data.chatType;
+        chatMsg.RefID = data.refID;
+
         if(data.imgId !== undefined) {       
 
           sleep(5000);

@@ -122,6 +122,7 @@ export default {
             this.UserInfo.BsnID = siteCode;
             this.UserInfo.Name = name;
             this.UserInfo.EntNo = entNo;
+            this.UserInfo.UserType = type;
           }
           else {
 

@@ -303,7 +303,7 @@
         <div class="qtConfirm-itemList" v-for="(item, index) in qtRequest" v-bind:key="index">
           <span class="qtConfirm-itemDel">{{item.ITM_NM}}</span>
           <span class="qtConfirm-itemDel">{{item.ITM_QTY }}개</span>
-            <i class="qtConfirm-itemDel fas fa-times-circle"  @click="removeItem(item)"></i>
+          <i class="qtConfirm-itemDel fas fa-times-circle"  @click="removeItem(item)"></i>
         </div>
       </span>
       <span slot="footer">
@@ -422,6 +422,7 @@ name: 'QTStep',
       sendDocId : '',
       sendDealer : '',
       senddealerNm : '',
+      sendqtInfoData :{},
       qtInfoData : {},
       saveQtCount : 0,
      // isScroll:false,
@@ -800,12 +801,12 @@ name: 'QTStep',
           if(Array.isArray(result.data.Items))
           {
             result.data.Items.sort(function(a, b){
-            return (a.TYPE < b.TYPE) ? 1 : -1;
+            return (a.TYPE > b.TYPE) ? 1 : -1;
             });
           }
 
           this.dealerList = result.data.Items;
-
+  
           let mainDealer = this.dealerList.find(element => element.TYPE === 'A')
           this.selectedDealer = [mainDealer];
         });
@@ -1049,12 +1050,13 @@ name: 'QTStep',
       //param.payload.Item.LineItem = JSON.stringify(this.qtRequest);
       param.payload.Item.LineItem = convertArrayToDynamo(JSON.stringify(this.qtRequest));
 
+      this.qtInfoData = param.payload.Item;
       if(dealerType === 'A')
       {
-        this.qtInfoData = param.payload.Item;
         this.sendDocId =  docId;
         this.sendDealer = dealer;
         this.sendDealerNm = dealerNm;
+        this.sendqtInfoData = this.qtInfoData;
       }
       console.log("======= QT Save result ========");
       console.log(JSON.stringify(param));
@@ -1133,7 +1135,7 @@ name: 'QTStep',
       
       console.log('SendDocId :', this.sendDocId);
       console.log('SEndDealer :',this.sendDealer);      
-      console.log('SendQtInfo :',this.qtInfoData);    
+      console.log('SendQtInfo :',this.sendqtInfoData);    
       // 대표 대리점 채팅 전송
       var now = new Date();
       this.$router.push({name:'Chat', 
@@ -1143,7 +1145,7 @@ name: 'QTStep',
                               chatFrom: this.UserInfo.BsnID,
                               chatTo: this.sendDealer,
                               chatDate: now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2),
-                              qtInfo : this.qtInfoData,
+                              qtInfo : this.sendqtInfoData,
                               chatDealerNm : this.sendDealerNm
                           }});
 
@@ -1199,6 +1201,17 @@ name: 'QTStep',
       .then((result) => {
         console.log("======= Chat Save result ========");
         console.log(result.data);
+
+        this.$sendMessage({
+          name: this.UserInfo.BsnID,
+          msg,
+          recv:  dealer,
+          chatId: docId,
+          reqTm : chatTime,
+          qtInfo : this.qtInfoData,
+          chatType : "Q",
+        });
+
         })
       .catch((error) => {
         console.log(error);

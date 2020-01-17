@@ -8,25 +8,26 @@ import Constant from '@/Constant';
 const socket = io(Constant.CHAT_URL);
 
 const SocketPlugin = {
-  install(vue) {
-    vue.mixin({
-    });
+    install(vue) {
+        vue.mixin({});
 
-    vue.prototype.$sendMessage = ($payload) => {
-      socket.emit('chat', {
-        msg: $payload.msg,
-        name: $payload.name,
-        recv: $payload.recv,
-        chatId: $payload.chatId,
-        imgId: $payload.imgId,
-        reqTm: $payload.reqTm,
-        qtInfo: $payload.qtInfo,
-      });
-    };
+        vue.prototype.$sendMessage = ($payload) => {
+            socket.emit('chat', {
+                msg: $payload.msg,
+                name: $payload.name,
+                recv: $payload.recv,
+                chatId: $payload.chatId,
+                imgId: $payload.imgId,
+                reqTm: $payload.reqTm,
+                qtInfo: $payload.qtInfo,
+                chatType: $payload.chatType,
+                refID: $payload.refId,
+            });
+        };
 
-    // 인스턴스 메소드 추가
-    vue.prototype.$socket = socket;
-  },
+        // 인스턴스 메소드 추가
+        vue.prototype.$socket = socket;
+    },
 };
 
 Vue.use(SocketPlugin);
