@@ -149,6 +149,8 @@ export default {
         chatMsg.msg  = data.msg;
         chatMsg.Chatid = this.chatItem.ID;
         chatMsg.reqTm = data.reqTm;
+        chatMsg.ChatType = data.chatType;
+        chatMsg.RefID = data.refID;
 
         if(data.imgId !== undefined) {   
 
@@ -203,7 +205,7 @@ export default {
 
     this.$EventBus.$on('send-QTConfirm', qtMsg => {
       
-      //console.log('ChatingPage/채팅전달 : ', qtMsg);
+        console.log('ChatingPage/채팅전달 : ', qtMsg);
         this.msgDatas = qtMsg;
         this.$sendMessage({
           name: this.UserInfo.BsnID,
@@ -211,6 +213,9 @@ export default {
           recv: this.chatItem.ReqSite,
           chatId: this.chatItem.ID,
           reqTm : qtMsg.reqTm,
+          chatType : qtMsg.ChatType,
+          refId: qtMsg.RefID,
+          qtInfo: qtMsg.qtInfo,
         });
         
         this.saveChatMsg(qtMsg);
