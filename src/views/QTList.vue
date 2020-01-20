@@ -392,7 +392,10 @@
                           <div class="QTRes-footer">
                             <div class="TotalInfo">
                               <span class="TotalInfo-Title">합계</span>
-                              <span class="TotalInfo-Text">{{total | localeNum}} 원<br></span><span class="TotalInfo-Text2">({{totalAmt | localeNum}}) 원</span>
+                              <span v-if="total === 0" class="TotalInfo-Text" style="margin-left:30px;">{{ total}} 원</span>
+                              <span v-if="total !== 0" class="TotalInfo-Text">{{ total | localeNum}} 원</span><br>
+                              <span v-if="totalAmt === 0" class="TotalInfo-Text2" style="margin-left:30px;">({{totalAmt | localeNum}}) 원</span>
+                              <span v-if="totalAmt !== 0" class="TotalInfo-Text2">({{totalAmt | localeNum}}) 원</span>
                             </div>
                           </div>
                         </b-card-footer>
@@ -490,7 +493,8 @@
                           <div class="TotalInfo">
                               <v-btn color="#4E342E" dark depressed class="mr-3" @click="showQTOrderPopup(confrimInfo)" v-if="confrimInfo.QTSts !== '주문확정'">주문하기</v-btn>
                               <span class="TotalInfo-Title">합계</span>
-                              <span class="TotalInfo-Text">{{total2 | localeNum}}원</span>
+                              <span v-if="total2 === 0" class="TotalInfo-Text">{{total2 | localeNum}}원</span>
+                              <span v-if="total2 !== 0" class="TotalInfo-Text">{{total2 | localeNum}}원</span>
                           </div>
                         </div>
                       </b-card-footer>
