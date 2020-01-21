@@ -1265,7 +1265,8 @@ export default {
     },
     getQTConfirm(){
       this.detailQTData = [];
-
+      this.confirmList =[];
+      
       var param = {};
       param.operation = "list";
       param.tableName = "BAY4U_QT_RETURN_LIST";
@@ -1299,7 +1300,7 @@ export default {
           this.confirmList = result.data.Items.map( obj => { 
             var rObj = {};
             rObj.value = obj.ID;
-            rObj.text = obj.ReqTm;
+            rObj.text = this.setRequestTime(obj.ReqTm);
             rObj.data = obj;
             return rObj;
           });
@@ -1498,7 +1499,21 @@ export default {
       this.qtInfo.CarBrand = this.typedBrand.toUpperCase();
       document.getElementById('btnBrandSelect').click();
       this.brandClicked = false;      
-    },    
+    }, 
+    setRequestTime(value)
+    { 
+      if(value !== undefined){
+        var year = value.substring(0, 4);
+        var month = value.substring(4, 6);
+        var date = value.substring(6, 8);
+        var hour = value.substring(8, 10);
+        var minute = value.substring(10, 12);
+        return year +'-'+ month + '-' + date + ' '+ hour + ':' + minute;
+      }
+      else{
+        return value;
+      }
+    },   
   },
   computed:{
       CarInfo: {

@@ -127,7 +127,7 @@ export default {
         GetRoItem(item)
         {
             var param = {};
-            param.RequestDataJSON = item.ID_TRN
+            param.RequestDataJSON = "ID_TRN:" + item.ID_TRN + ","+"RO_CD:" + item.RO_CD;
             
             console.log("======= GetRoItem Request result ========");
             console.log(param); 
