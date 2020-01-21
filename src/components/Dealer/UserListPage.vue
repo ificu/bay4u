@@ -74,12 +74,12 @@
              <div class="chatInfo" :class="{chatInfo2 : checkBrand(qtReq.CarBrand)}">
                 <div class="carInfo">
                   <span class="Carcenter-name">{{qtReq.ReqName}} ({{(qtReq.CarNo === "*empty*")?"미상차량" : qtReq.CarNo}})</span>
-                  <span class="Carcenter-reqdt">{{qtReq.ReqDt}}</span>
+                  <span class="Carcenter-reqdt">{{qtReq.ReqDt}}</span><span :class="linkQtSts(qtReq.QTSts)">{{qtReq.QTSts}}</span>
                   <span class="carSeries">{{qtReq.CarSeries}}</span>
                 </div>
-                <div>
+                <!--<div>
                   <span :class="linkQtSts(qtReq.QTSts)">{{qtReq.QTSts}}</span>
-                </div>
+                </div>-->
              </div>
              <div>
               <span type="button" class="Chat-detail">
@@ -479,7 +479,7 @@ export default {
   flex:50%;
 }
 .Chat-list .carInfo{
-  width:80%;
+  width:95%;
   font-weight: bold;
   cursor:pointer;
   padding-left: 10px;
@@ -529,14 +529,12 @@ export default {
   border-color: #bebebe;
   background-color: #FFAB91;
 }
-
 .Carcenter-type {
   align-self: center;
   font-size: 1.5rem;
 }
-
 .Carcenter-name {
-  position: absolute;;
+  position: absolute;
   line-height: 20px;
 }
 .Carcenter-reqdt{
@@ -552,7 +550,8 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  width: 160px;
+  /*width: 160px;*/
+  width:70%;
 }
 .Chat-detail {
   align-self: center;
@@ -565,36 +564,32 @@ export default {
 .qtSts-1{
   font-size: 0.8em;
   font-weight: bold;
-  position: absolute;
+  margin-left:10px;
+  /*position: absolute;
   right:40px;
-  top: 0px;
+  top: 0px;*/
   color:#3F51B5;
 }
 /*견적회신 */
 .qtSts-2{
   font-size: 0.8em;
   font-weight: bold;
-  position: absolute;
-  right:40px;
-  top: 10px;
+  margin-left:10px;
+  text-align: right;
   color:#1B5E20;
 }
 /*주문요청 */
 .qtSts-3{
   font-size: 0.8em;
   font-weight: bold;
-  position: absolute;
-  right:40px;
-  top: 10px;
+  margin-left:10px;
   color:#E53935;
 }
 /*주문완료 */
 .qtSts-4{
   font-size: 0.8em;
   font-weight: bold;
-  position: absolute;
-  right:40px;
-  top: 10px;
+  margin-left:10px;
   color:#FF6D00;
 }
 </style>
