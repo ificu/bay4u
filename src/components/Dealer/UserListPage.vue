@@ -114,7 +114,7 @@ export default {
       toggle_exclusive: undefined
     }
   },
-  props:['chatInfo'],
+  props:['chatInfo', 'showQTId'],
   methods: {
     linkClass(idx) {
       if (this.tabIndex === idx) {
@@ -229,10 +229,10 @@ export default {
     },
     SetQTInfo(item , idx)
     {
-       this.$emit('setQtInfo' ,item);
-       this.$EventBus.$emit('click-qtInfo' , item)
-       this.qtItemIndex = idx;
-       this.qtReqList[idx].isRead = true;
+      this.$emit('setQtInfo' ,item);
+      this.$EventBus.$emit('click-qtInfo' , item)
+      this.qtItemIndex = idx;
+      this.qtReqList[idx].isRead = true;
     },
     initQTData()
     {
@@ -243,8 +243,24 @@ export default {
 
       if(this.qtReqList.length > 0)
       {
-          var arrSearch = this.qtReqList.filter(item => {
-            if(item.ReqName === this.searchText)
+        var arrSearch = this.qtReqList.filter(item => {
+          if(item.ReqName === this.searchText)
+          {
+            return true;
+          }
+          else{
+            return false;
+          }
+        });
+        
+        if(arrSearch.length > 0)
+        {
+            return arrSearch;
+        }
+        else{
+
+          arrSearch = this.qtReqList.filter(item => {
+            if(item.CarNo === this.searchText)
             {
               return true;
             }
@@ -252,44 +268,30 @@ export default {
               return false;
             }
           });
-          
-          if(arrSearch.length > 0)
-          {
-              return arrSearch;
-          }
-          else{
 
-            arrSearch = this.qtReqList.filter(item => {
-              if(item.CarNo === this.searchText)
-              {
-                return true;
-              }
-              else{
-                return false;
-              }
-            });
-
-            return arrSearch;
-          }
+          return arrSearch;
+        }
       }
     },
     linkQtSts(value){
       
-      if(value === '견적요청')
-      {
+      if(value === '견적요청'){
         return 'qtSts-1';
       }
-      else if(value === '견적회신')
-      {
+      else if(value === '견적회신'){
         return 'qtSts-2';
       }
-      else if(value === '주문요청')
-      {
+      else if(value === '주문요청'){
         return 'qtSts-3';
       }
-      else if(value === '주문확정')
-      {
+      else if(value === '주문확정'){
         return 'qtSts-4';
+      }
+      else if(value === '바로주문'){
+        return 'qtSts-3';
+      }
+      else{
+        return 'qtSts-0';
       }
     },
     checkBrand(value)
@@ -302,11 +304,24 @@ export default {
       else{
         return false;
       }
+    },
+    showQtInfo(ID)
+    {
+      let index = this.qtReqList.findIndex(i => i.ID === ID);
+      console.log('index : ', index);
+      this.SetQTInfo(this.qtReqList[index], index);
+    }
+  },
+  updated()
+  {
+ 
+    if(this.showQTId !== '')
+    {
+      this.showQtInfo(this.showQTId);
     }
   },
   mounted(){
     this.showQTReqList();
-
   },
   created : function() {
     if(this.UserInfo.BsnID === '')
@@ -340,13 +355,13 @@ export default {
 
         //console.log('docId.qtInfo : ' , docId.qtInfo);
 
-        if(docId.qtInfo  !== undefined)
+        if(docId.qtInfo !== undefined)
         {
           console.log('Param qtInfo : ' , docId.qtInfo);
           var newQtData = {};
-          newQtData.CarBrand   = docId.qtInfo.CarBrand;
-          newQtData.CarNo   = docId.qtInfo.CarNo;
-          newQtData.CarVin  = docId.qtInfo.CarVin;
+          newQtData.CarBrand = docId.qtInfo.CarBrand;
+          newQtData.CarNo = docId.qtInfo.CarNo;
+          newQtData.CarVin = docId.qtInfo.CarVin;
           newQtData.ID  = docId.qtInfo.ID;
           newQtData.IMG  = docId.qtInfo.IMG;
           newQtData.LineItem  = docId.qtInfo.LineItem;
@@ -379,9 +394,7 @@ export default {
         this.qtReqList[index].QTSts = updateData.Msg;
         console.log('update : ', this.qtReqList[index].QTSts);
       }
-
     });
-
   },    
   computed:{
     UserInfo: {
@@ -559,6 +572,12 @@ export default {
   color: #5d4038;
   -webkit-appearance:none;
   -moz-appearance:none;
+}
+.qtSts-0{
+  font-size: 0.8em;
+  font-weight: bold;
+  margin-left:10px;
+  text-align: right;
 }
 /*견적요청 */
 .qtSts-1{
