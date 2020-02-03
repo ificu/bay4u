@@ -392,6 +392,9 @@ export default {
      
       param.payload.ExpressionAttributeValues[key] = item.ID;
 
+      console.log("======= Chat Msg List request ========");
+      console.log(param);
+
       axios({
         method: 'POST',
         url: Constant.LAMBDA_URL,

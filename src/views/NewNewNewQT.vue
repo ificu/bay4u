@@ -5,7 +5,7 @@
         <span>신규 견적 요청</span>
         <CheckLogin></CheckLogin>
       </div>
-      <QTLayout></QTLayout>
+      <QTLayout :NewQTData = "newQtData"></QTLayout>
     </div>
 
     <div class="NewQT-footer">
@@ -45,10 +45,20 @@ const axios = require('axios').default;
 
 export default {
   name: 'NewQT',
+  data() {
+        return {
+          newQtData: {},
+        }
+  },
   components: {
     QTLayout: QTLayout,
     CheckLogin:CheckLogin
-  }
+  },
+  created: function(){
+     if(this.$route.params.NewQTData !== undefined) {
+       this.newQtData = this.$route.params.NewQTData;
+     }
+  },
 }
 
 </script>

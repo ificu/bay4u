@@ -25,10 +25,13 @@
         <div class="text-left pl-6 mb-n9"><v-btn  color="#FFECB3" depressed @click="CarInfoClear()">CLEAR</v-btn></div>
         <div class="text-right mb-2 pr-6"><v-btn  color="#FFECB3" depressed @click="SetDummyCar()">미상차량</v-btn></div>
         <!-- 과거 정비이력 Popup / 차량번호 입력 -->
+        <template  @click.stop="showROHistDialog = true" >
+          <v-text-field class="pr-6 pl-4 mb-n4" label="차량번호" v-model="CarInfo.CarNo" outlined dense color="success" append-outer-icon="search" @click:append-outer="checkWebPOSHist" v-on:keypress.enter="checkWebPOSHist"></v-text-field>
+        </template>
         <v-dialog v-model="showROHistDialog" transition="dialog-bottom-transition" >
-          <template v-slot:activator="{ on: { click } }">
+          <!--<template v-slot:activator="{ on: { click } }">
             <v-text-field class="pr-6 pl-4 mb-n4" label="차량번호" v-model="CarInfo.CarNo" outlined dense color="success" append-outer-icon="search" @click:append-outer="checkWebPOSHist" v-on:keypress.enter="checkWebPOSHist"></v-text-field>
-          </template>
+          </template>-->
           <v-card>
             <v-toolbar dark color="primary"> 
               <v-toolbar-title>
@@ -50,7 +53,7 @@
             </v-card-text>    
             <v-card-actions>
               <v-row  align="center" justify="end" class="mt-n6 mb-4 mr-4" >
-                <v-btn color="#4E342E" dark depressed @click="goOrderList(CarInfo.CarNo)"> 
+                <v-btn color="#4E342E" dark depressed @click="goOrderList()"> 
                   과거주문내역조회
                 </v-btn>
               </v-row>
@@ -137,7 +140,7 @@
                 <v-icon dark>mdi-minus</v-icon>
               </v-btn>-->
               <div class="qtyInput">
-               <input type="number" v-on:keypress.enter="addNewItem(tempItem)" v-model.number="tempItem.ITM_QTY" >
+               <input type="number" pattern="\d*" placeholder="number" v-on:keypress.enter="addNewItem(tempItem)" v-model.number="tempItem.ITM_QTY" >
               </div>
              <!-- <v-btn fab x-small dark color="#757575" @click="addCounter()">
                 <v-icon dark>mdi-plus</v-icon>
@@ -202,7 +205,7 @@
                 <v-btn tile outlined depressed  @click="addCounter(index)">+</v-btn>
                 <div class="qtyInput">
                   <!--<v-text-field  v-model.number="qtItem.ITM_QTY" type="number" ></v-text-field>-->
-                  <input type="number"  v-model.number="qtItem.ITM_QTY" >                  
+                  <input type="number" pattern="\d*" placeholder="number" v-model.number="qtItem.ITM_QTY" >                  
                 </div>
                 <!--<v-btn text small min-width="10px" max-width="15px">
                   {{qtItem.ITM_QTY}}
@@ -299,6 +302,7 @@
           </li>
         </ul>-->
       </span>
+      <span slot="reorder"><v-btn color="#4E342E" dark depressed class="btnOrder" @click="saveQTOrder" >바로주문</v-btn></span>
       <span slot="list2">
         <div class="qtConfirm-itemList" v-for="(item, index) in qtRequest" v-bind:key="index">
           <span class="qtConfirm-itemDel">{{item.ITM_NM}}</span>
@@ -350,7 +354,6 @@
         <v-icon large color="orange darken-2">fas fa-sync-alt fa-spin</v-icon>
       </span>
     </MessageBox>
-
   </v-app>  
 </template>
 
@@ -368,7 +371,7 @@ import Constant from '@/Constant';
 const axios = require('axios').default;
 
 export default {
-name: 'QTStep',
+  name: 'QTStep',
   data () {
     return {
       e6: 1,
@@ -425,7 +428,7 @@ name: 'QTStep',
       sendqtInfoData :{},
       qtInfoData : {},
       saveQtCount : 0,
-     // isScroll:false,
+      isScroll:false,
       brandSelected: '차종 선택',
       brandList: [
         '차종 선택', 'BMW', 'BENZ', 'AUDI', 'VW', 'FORD', 'LEXUS', '기타'
@@ -433,591 +436,592 @@ name: 'QTStep',
       selectedDealer: [],
       showProcessing: false,
       processMsg: '',
+      saveCount: 0,
     }
   },
+  props:['NewQTData'],
   methods: {
-      showQTCameraModal(showFlag, type){
-        this.showQTCamera = showFlag;
-        this.imgCaptureType = type;
-      },
-      updatePic(pic){
-        
-        if(pic.length < 100) {
-          alert("촬영된 이미지에 이상이 있습니다.\n다시 촬영해 주세요.");
-          return;
-        }
-        
-        if(this.imgCaptureType === "CARNO") {
-          this.captureImg = pic;
-          this.captureBlobImg = dataURItoBlob(pic);
-          pic = pic.replace("data:image/png;base64,", "");
-          this.CarInfo.CarNo = "이미지 인식 중...";
-          this.CarInfo.VinNo = "이미지 인식 중...";
-          this.checkImgVIN(pic);
-          this.checkImgCarNo(pic);
-        }
-        else if(this.imgCaptureType === "ITEMIMG") {
-          var seq = this.qtRequest.length + 1;
+    showQTCameraModal(showFlag, type){
+      this.showQTCamera = showFlag;
+      this.imgCaptureType = type;
+    },
+    updatePic(pic){
+      
+      if(pic.length < 100) {
+        alert("촬영된 이미지에 이상이 있습니다.\n다시 촬영해 주세요.");
+        return;
+      }
+      
+      if(this.imgCaptureType === "CARNO") {
+        this.captureImg = pic;
+        this.captureBlobImg = dataURItoBlob(pic);
+        pic = pic.replace("data:image/png;base64,", "");
+        this.CarInfo.CarNo = "이미지 인식 중...";
+        this.CarInfo.VinNo = "이미지 인식 중...";
+        this.checkImgVIN(pic);
+        this.checkImgCarNo(pic);
+      }
+      else if(this.imgCaptureType === "ITEMIMG") {
+        var seq = this.qtRequest.length + 1;
 
-          var now = new Date();
-          var key = this.UserInfo.BsnID + now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
-                    + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+        var now = new Date();
+        var key = this.UserInfo.BsnID + now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                  + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
 
-          var item = {
-            "ITM_ICON": "icon-pic.png",
-            "ITM_QTY": 1,
-            "GRP_ID":"0",
-            "ITM_NM":"사진입력",
-            "ITM_VAL": "사진Item-" + seq,
-            "SEQ": seq,
-            "IMG": key + ".png"
-          };
-          this.qtRequest.push(item);
+        var item = {
+          "ITM_ICON": "icon-pic.png",
+          "ITM_QTY": 1,
+          "GRP_ID":"0",
+          "ITM_NM":"사진입력",
+          "ITM_VAL": "사진Item-" + seq,
+          "SEQ": seq,
+          "IMG": key + ".png"
+        };
+        this.qtRequest.push(item);
 
-          var param = {};
+        var param = {};
 
-          param.name = key + ".png";
-          param.type = "image/png";
+        param.name = key + ".png";
+        param.type = "image/png";
+
+        axios({
+            method: 'POST',
+            url: Constant.IMGUPLOAD_URL,
+            headers: Constant.IMGUPLOAD_HEADER,
+            data: param
+        })
+        .then((result) => {
+          console.log("======= IMG Save result ========");
+          console.log(result.data);
+
+          param = dataURItoBlob(pic);
 
           axios({
-              method: 'POST',
-              url: Constant.IMGUPLOAD_URL,
-              headers: Constant.IMGUPLOAD_HEADER,
+              method: 'PUT',
+              url: result.data.uploadURL,
               data: param
           })
           .then((result) => {
-            console.log("======= IMG Save result ========");
-            console.log(result.data);
-
-            param = dataURItoBlob(pic);
-
-            axios({
-                method: 'PUT',
-                url: result.data.uploadURL,
-                data: param
-            })
-            .then((result) => {
-              console.log("======= IMG Upload result ========");
-              console.log(result);
-            })
-            .catch((error) => {
-              console.log(error);
-            }); 
-
+            console.log("======= IMG Upload result ========");
+            console.log(result);
           })
           .catch((error) => {
             console.log(error);
           }); 
 
-        }
-      },
-      // Google OCR API를 통해 이미지에서 차대번호 추출
-      checkImgVIN(pic){
-        var param = {};
-        param.requests = [];
-        var req = {};
-        req.image = {};
-        req.image.content = pic;
-        req.features = [];
-        var reqType = {};
-        reqType.type = "TEXT_DETECTION";
-        req.features.push(reqType);
-        param.requests.push(req);    
+        })
+        .catch((error) => {
+          console.log(error);
+        }); 
+      }
+    },
+    // Google OCR API를 통해 이미지에서 차대번호 추출
+    checkImgVIN(pic){
+      var param = {};
+      param.requests = [];
+      var req = {};
+      req.image = {};
+      req.image.content = pic;
+      req.features = [];
+      var reqType = {};
+      reqType.type = "TEXT_DETECTION";
+      req.features.push(reqType);
+      param.requests.push(req);    
 
-        axios({
-          method: 'POST',
-          url: Constant.GOOGLE_URL,
-          headers: Constant.JSON_HEADER,
-          data: param
-        }).then((result) => {
-          console.log("======= Google API result ========");
-          console.log(result.data);
+      axios({
+        method: 'POST',
+        url: Constant.GOOGLE_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      }).then((result) => {
+        console.log("======= Google API result ========");
+        console.log(result.data);
 
-          if(this.CarInfo.VinNo === "이미지 인식 중...") this.CarInfo.VinNo = "";
+        if(this.CarInfo.VinNo === "이미지 인식 중...") this.CarInfo.VinNo = "";
 
-          var textArea;
-          var vinNo;
-          for (var img of result.data.responses) {
-            textArea = img.fullTextAnnotation.pages[0].blocks[0];
-            //console.log("Area : ", JSON.stringfy(textArea));
-            var regType = /^[A-Za-z0-9+]*$/; // 영문 또는 숫자만 체크
+        var textArea;
+        var vinNo;
+        for (var img of result.data.responses) {
+          textArea = img.fullTextAnnotation.pages[0].blocks[0];
+          //console.log("Area : ", JSON.stringfy(textArea));
+          var regType = /^[A-Za-z0-9+]*$/; // 영문 또는 숫자만 체크
+          for (var text of img.textAnnotations) {
+            if(regType.test(text.description)) {
+              if(text.description.length == 17) {
+                // 이 것을 차대번호로 인지
+                console.log("VIN-17 : ", JSON.stringify(text));
+                this.CarInfo.VinNo = text.description.replace(/\I/g, "1").replace(/\O/g, "0").replace(/\g/g, "9").toUpperCase();
+              }
+              if(text.description.length == 16 || text.description.length == 18) {
+                // 이 것을 차대번호로 인지
+                this.alertMsg = "차대번호가 인식되었으나\n한자리 정도 오차가 있습니다.\n정확한 차대번호를 확인해 주세요.";
+                this.showAlertMsg = !this.showAlertMsg;
+                this.alertMsgPath = "";
+                this.showAlerMsgBtn = true;
+
+                console.log("VIN-16/18 : ", JSON.stringify(text));
+                this.CarInfo.VinNo = text.description.replace(/\I/g, "1").replace(/\O/g, "0").replace(/\g/g, "9").toUpperCase();
+              }
+            }
+          }
+
+          // 여전히 인식 안된 경우 두개의 문자열을 연결하여 한번 더 체크해 보자. 
+          if(this.CarInfo.VinNo === "" || this.CarInfo.VinNo === null) {
+            var preCheckedString = "";
             for (var text of img.textAnnotations) {
               if(regType.test(text.description)) {
-                if(text.description.length == 17) {
-                  // 이 것을 차대번호로 인지
-                  console.log("VIN-17 : ", JSON.stringify(text));
-                  this.CarInfo.VinNo = text.description.replace(/\I/g, "1").replace(/\O/g, "0").replace(/\g/g, "9").toUpperCase();
-                }
-                if(text.description.length == 16 || text.description.length == 18) {
-                  // 이 것을 차대번호로 인지
-                  this.alertMsg = "차대번호가 인식되었으나\n한자리 정도 오차가 있습니다.\n정확한 차대번호를 확인해 주세요.";
-                  this.showAlertMsg = !this.showAlertMsg;
-                  this.alertMsgPath = "";
-                  this.showAlerMsgBtn = true;
-
-                  console.log("VIN-16/18 : ", JSON.stringify(text));
-                  this.CarInfo.VinNo = text.description.replace(/\I/g, "1").replace(/\O/g, "0").replace(/\g/g, "9").toUpperCase();
-                }
-              }
-            }
-
-            // 여전히 인식 안된 경우 두개의 문자열을 연결하여 한번 더 체크해 보자. 
-            if(this.CarInfo.VinNo === "" || this.CarInfo.VinNo === null) {
-              var preCheckedString = "";
-              for (var text of img.textAnnotations) {
-                if(regType.test(text.description)) {
-                  if(preCheckedString !== ""){
-                    var checkString = preCheckedString + text.description.replace(/\I/g, "1").replace(/\O/g, "0").replace(/\g/g, "9").toUpperCase();
-                    if(checkString.length == 17) {
-                      console.log("VIN-pre : ", JSON.stringify(text));
-                      this.CarInfo.VinNo = checkString;
-                    }
+                if(preCheckedString !== ""){
+                  var checkString = preCheckedString + text.description.replace(/\I/g, "1").replace(/\O/g, "0").replace(/\g/g, "9").toUpperCase();
+                  if(checkString.length == 17) {
+                    console.log("VIN-pre : ", JSON.stringify(text));
+                    this.CarInfo.VinNo = checkString;
                   }
-                  preCheckedString = text.description.replace(/\I/g, "1").replace(/\O/g, "0").replace(/\g/g, "9").toUpperCase();
                 }
+                preCheckedString = text.description.replace(/\I/g, "1").replace(/\O/g, "0").replace(/\g/g, "9").toUpperCase();
               }
             }
           }
-        }).catch((error) => {
-          console.log(error);
-        });
-      },
-      // DB에서 차대번호를 조회 이력이 있는지 체크
-      checkCarVin(){
-        var param = {};
-        param.operation = "list";
-        param.tableName = "BAY4U_CAR_VIN";
-        param.payload = {};
-        param.payload.FilterExpression = "CAR = :carno";
-        param.payload.ExpressionAttributeValues = {};
-        var key = ":carno";
-        param.payload.ExpressionAttributeValues[key] = this.CarInfo.CarNo;
+        }
+      }).catch((error) => {
+        console.log(error);
+      });
+    },
+    // DB에서 차대번호를 조회 이력이 있는지 체크
+    checkCarVin(){
+      var param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_CAR_VIN";
+      param.payload = {};
+      param.payload.FilterExpression = "CAR = :carno";
+      param.payload.ExpressionAttributeValues = {};
+      var key = ":carno";
+      param.payload.ExpressionAttributeValues[key] = this.CarInfo.CarNo;
 
-        this.$cookies.set('CarNo', this.CarInfo.CarNo, '600s');
-        this.CarInfo.VinNo = "";
+      this.$cookies.set('CarNo', this.CarInfo.CarNo, '600s');
+      this.CarInfo.VinNo = "";
 
-        axios({
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+        // 차대번호가 있는데 괜히 덮어 씌어지지 않게 처리
+        if(this.CarInfo.VinNo === "" || this.CarInfo.VinNo === null) {
+          console.log("======= checkCarVin result ========");
+          console.log(result.data);
+          if(result.data.Count > 0) {
+            this.CarInfo.VinNo = result.data.Items[0].VIN;
+            this.$cookies.set('VinNo', this.CarInfo.VinNo, '600s');
+          }
+          else {
+            this.CarInfo.VinNo = "";
+
+            // DB에 차량이 없다면 Intravan 통해서 국토부 조회 체크 
+
+            param = {};
+            param.carNo = this.CarInfo.CarNo;
+            param.entNo = this.UserInfo.EntNo;
+
+            axios({
+                method: 'POST',
+                url: Constant.INTRA_PKGIF_URL,
+                headers: Constant.JSON_HEADER,
+                data: param
+            })
+            .then((result) => {
+                console.log("======= checkIntraVanPkg result ========");
+                console.log(result.data); 
+                if(result.data.success === true) {
+                  this.CarInfo.VinNo = result.data.data;
+                  this.$cookies.set('VinNo', this.CarInfo.VinNo, '600s');
+                }
+                else {
+                  // 조회 에러가 났다면 고객명을 입력받아 차대 원부 조회
+                  this.showVINSearchAgreePopup = true;
+                }
+            })
+            .catch((error) => {
+                console.log(error);
+            })
+
+            this.CarInfo.VinNo = "국토부 차대번호 조회 중...";
+          }
+        }
+      });
+    },
+    // 인트라밴을 통해 차대번호를 체크
+    checkIntraVanVin(){
+      if(this.chkCustAgree === false || this.custName === "") return;
+
+      var param = {};
+      param.carNo = this.CarInfo.CarNo;
+      param.custName = this.custName;
+
+      axios({
           method: 'POST',
-          url: Constant.LAMBDA_URL,
+          url: Constant.INTRAIF_URL,
           headers: Constant.JSON_HEADER,
           data: param
-        })
-        .then((result) => {
-          // 차대번호가 있는데 괜히 덮어 씌어지지 않게 처리
-          if(this.CarInfo.VinNo === "" || this.CarInfo.VinNo === null) {
-            console.log("======= checkCarVin result ========");
-            console.log(result.data);
-            if(result.data.Count > 0) {
-              this.CarInfo.VinNo = result.data.Items[0].VIN;
-              this.$cookies.set('VinNo', this.CarInfo.VinNo, '600s');
-            }
-            else {
-              this.CarInfo.VinNo = "";
-
-              // DB에 차량이 없다면 Intravan 통해서 국토부 조회 체크 
-
-              param = {};
-              param.carNo = this.CarInfo.CarNo;
-              param.entNo = this.UserInfo.EntNo;
-
-              axios({
-                  method: 'POST',
-                  url: Constant.INTRA_PKGIF_URL,
-                  headers: Constant.JSON_HEADER,
-                  data: param
-              })
-              .then((result) => {
-                  console.log("======= checkIntraVanPkg result ========");
-                  console.log(result.data); 
-                  if(result.data.success === true) {
-                    this.CarInfo.VinNo = result.data.data;
-                    this.$cookies.set('VinNo', this.CarInfo.VinNo, '600s');
-                  }
-                  else {
-                    // 조회 에러가 났다면 고객명을 입력받아 차대 원부 조회
-                    this.showVINSearchAgreePopup = true;
-                  }
-              })
-              .catch((error) => {
-                  console.log(error);
-              })
-
-              this.CarInfo.VinNo = "국토부 차대번호 조회 중...";
-            }
+      })
+      .then((result) => {
+          console.log("======= checkIntraVanVin result ========");
+          console.log(result.data); 
+          if(result.data.success === true) {
+            this.CarInfo.VinNo = result.data.data;
+            this.$cookies.set('VinNo', this.CarInfo.VinNo, '600s');
           }
-        });
-      },
-      // 인트라밴을 통해 차대번호를 체크
-      checkIntraVanVin(){
-        if(this.chkCustAgree === false || this.custName === "") return;
+          else {
+            if(result.data.data.indexOf("소유자 성명") >= 0)
+              this.CarInfo.VinNo = "소유자 성명 불일치";
+            else if(result.data.data.indexOf("일치하는 차량이 없습니다.") >= 0)
+              this.CarInfo.VinNo = "차량번호 미 존재";
+            else
+              this.CarInfo.VinNo = "국토부 조회 중 오류";
+          }
+      })
+      .catch((error) => {
+          console.log(error);
+      })
+
+      this.CarInfo.VinNo = "차대 원부 조회 중...";
+      this.showVINSearchAgreePopup = false;
+    },
+    // Aibril Vision API를 통해 이미지에서 차량번호 추출
+    checkImgCarNo(pic){
+      var param = {};
+      param.name = "최범진";
+      param.returnResultImage = false;
+      param.image = pic;
+
+      axios({
+        method: 'POST',
+        url: Constant.AIBRIL_URL,
+        headers: Constant.AIBRIL_HEADER,
+        data: param
+      }).then((result) => {
+        console.log("======= Aibril API result ========");
+        console.log(result.data);
+
+        if(this.CarInfo.CarNo === "이미지 인식 중...") this.CarInfo.CarNo = "";
+
+        for (var img of result.data.results) {
+          if(img.carNo.length > 4) {
+            console.log("CarNo : ", img.carNo);
+            this.CarInfo.CarNo = img.carNo;
+            this.checkWebPOSHist();
+          }
+        }
+      }).catch((error) => {
+        console.log(error);
+      });
+    },
+    // WebPOS에 과거 정비내역이 있는지 체크
+    checkWebPOSHist(){
+      if((this.CarInfo.CarNo === '' || this.CarInfo.CarNo === null || this.CarInfo.CarNo === undefined) &&
+          (this.CarInfo.VinNo === '' || this.CarInfo.VinNo === null || this.CarInfo.VinNo === undefined)) 
+      return;
+
+      if(this.UserInfo.UserType === 'SITE') { // WebPOS일 경우 정비 이력 조회 이후 차대번호 세팅
 
         var param = {};
-        param.carNo = this.CarInfo.CarNo;
-        param.custName = this.custName;
+        param.BsnId = this.UserInfo.BsnID;
+        param.CarNo = this.CarInfo.CarNo;
+        param.VinNo = this.CarInfo.VinNo;
 
+        this.$cookies.set('CarNo', this.CarInfo.CarNo, '600s');
+
+        console.log("======= ROHistory Request result ========");
+        console.log(param); 
+
+        var rtnCode = "";
+        var rtnCount = 0;
+      
         axios({
             method: 'POST',
-            url: Constant.INTRAIF_URL,
+            url: Constant.SCPIF_URL + 'GetROList',
             headers: Constant.JSON_HEADER,
             data: param
         })
         .then((result) => {
-            console.log("======= checkIntraVanVin result ========");
+            console.log("======= ROHistory Return result ========");
             console.log(result.data); 
-            if(result.data.success === true) {
-              this.CarInfo.VinNo = result.data.data;
-              this.$cookies.set('VinNo', this.CarInfo.VinNo, '600s');
+            if(result.data.ReturnDataCount > 0) {
+              this.showROHistBtn = true;
+
+              if(Array.isArray(result.data.ReturnDataJSON))
+              {
+                result.data.ReturnDataJSON.sort(function(a, b){
+                  return (a.DC_DY_BSN > b.DC_DY_BSN) ? 1 : -1;
+                });
+              }
+
+              this.roList = JSON.parse(result.data.ReturnDataJSON);
+              
+              this.CarInfo.VinNo = result.data.ReturnObject;
+            }
+            else if (result.data.ReturnObject !== "" && result.data.ReturnObject !== null) {
+              this.CarInfo.VinNo = result.data.ReturnObject;
             }
             else {
-              if(result.data.data.indexOf("소유자 성명") >= 0)
-                this.CarInfo.VinNo = "소유자 성명 불일치";
-              else if(result.data.data.indexOf("일치하는 차량이 없습니다.") >= 0)
-                this.CarInfo.VinNo = "차량번호 미 존재";
-              else
-                this.CarInfo.VinNo = "국토부 조회 중 오류";
+              // 정비이력 조회는 차량번호 입력 or 인식 후 자동 처리 되므로 차대번호 조회도 자동 처리하자...
+              this.checkCarVin();
             }
+            
+            this.showVINSearchBtn = true;
         })
         .catch((error) => {
             console.log(error);
         })
+        this.CarInfo.VinNo = "WebPOS 이력 조회 중...";
+      }
+      else { // 일반 카세터면 WebPOS 조회 없이 자체 저장 내역 체크
+        this.checkCarVin();
+      }
+    },
+    showQTConfirmModal() {
+      this.dealerList = [];
 
-        this.CarInfo.VinNo = "차대 원부 조회 중...";
-        this.showVINSearchAgreePopup = false;
-      },
-      // Aibril Vision API를 통해 이미지에서 차량번호 추출
-      checkImgCarNo(pic){
-        var param = {};
-        param.name = "최범진";
-        param.returnResultImage = false;
-        param.image = pic;
+      var param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_CARCENTER_DEALER";
+      param.payload = {};
+      param.payload.FilterExpression = "CARCENTER = :id";
+      param.payload.ExpressionAttributeValues = {};
+      var key = ":id";
+      param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
 
-        axios({
-          method: 'POST',
-          url: Constant.AIBRIL_URL,
-          headers: Constant.AIBRIL_HEADER,
-          data: param
-        }).then((result) => {
-          console.log("======= Aibril API result ========");
-          console.log(result.data);
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+        console.log("======= dealerList result ========");
+        console.log(result.data);
+        if(Array.isArray(result.data.Items))
+        {
+          result.data.Items.sort(function(a, b){
+          return (a.TYPE > b.TYPE) ? 1 : -1;
+          });
+        }
 
-          if(this.CarInfo.CarNo === "이미지 인식 중...") this.CarInfo.CarNo = "";
+        this.dealerList = result.data.Items;
 
-          for (var img of result.data.results) {
-            if(img.carNo.length > 4) {
-              console.log("CarNo : ", img.carNo);
-              this.CarInfo.CarNo = img.carNo;
-              this.checkWebPOSHist();
-            }
-          }
-        }).catch((error) => {
-          console.log(error);
+        let mainDealer = this.dealerList.find(element => element.TYPE === 'A')
+        this.selectedDealer = [mainDealer];
+      });
+
+      // 기타부품 체크
+      if(this.tempItem.ITM_NM.replace(/\s/gi, "") !== "")
+      { 
+        console.log("기타부품추가추");
+        var tmpItemNm = this.tempItem.ITM_NM.replace(/\s{1}/i, "");
+        var newItem = {};
+        newItem.ITM_ICON = " ";
+        newItem.ITM_QTY = this.tempItem.ITM_QTY;
+        newItem.GRP_ID = " ";
+        newItem.ITM_NM = tmpItemNm;
+
+        newItem.ITM_VAL = tmpItemNm + this.qtRequest.length + 1 ;
+        newItem.GRP_NM = " ";
+        newItem.SEQ =  this.qtRequest.length + 1;
+        this.qtRequest.push(newItem);
+
+        // 기타부품 초기화
+        this.tempItem.ITM_QTY = 1;
+        this.tempItem.ITM_NM = " ";
+        this.tempItem.ITM_VAL = " ";
+        this.tempItem.SEQ = 0;
+      }
+      
+      this.showQTConfirm = !this.showQTConfirm;
+      // this.isScroll = true;
+        
+    },
+    showItemCategoryModal(id) {
+      var param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_ITM_CTGRY";
+      param.payload = {};
+      param.payload.FilterExpression = "GRP_ID = :id";
+      param.payload.ExpressionAttributeValues = {};
+      var key = ":id";
+      param.payload.ExpressionAttributeValues[key] = id;
+
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+        console.log("======= categoryList result ========");
+        console.log(result.data);
+
+      if(Array.isArray(result.data.Items))
+      {
+        result.data.Items.sort(function(a, b){
+          return (a.SORT > b.SORT) ? 1 : -1;
         });
-      },
-      // WebPOS에 과거 정비내역이 있는지 체크
-      checkWebPOSHist(){
-        if((this.CarInfo.CarNo === '' || this.CarInfo.CarNo === null || this.CarInfo.CarNo === undefined) &&
-            (this.CarInfo.VinNo === '' || this.CarInfo.VinNo === null || this.CarInfo.VinNo === undefined)) 
-        return;
+      }
 
-        if(this.UserInfo.UserType === 'SITE') { // WebPOS일 경우 정비 이력 조회 이후 차대번호 세팅
+        this.categoryTitle = result.data.Items[0].GRP_NM;
+        this.categoryList = result.data.Items;
+      });
 
+      this.showItemCategory = !this.showItemCategory;
+    },
+    addNewItem(item) {
+      if(item.ITM_VAL === " ")
+      {
+          var tmpItmNm = item.ITM_NM.replace(/\s{1}/i, "");
+          var tempItem = {};
+          tempItem.ITM_ICON = " ";
+          tempItem.ITM_QTY = item.ITM_QTY;
+          tempItem.GRP_ID = " ";
+          if(item.ITM_NM.replace(/\s/gi, "") === ""){
+            return;
+          }
+          else{
+            tempItem.ITM_NM = tmpItmNm;
+          }
+          
+          tempItem.ITM_VAL = tmpItmNm + this.qtRequest.length + 1 ;
+          tempItem.GRP_NM = " ";
+          tempItem.SEQ =  this.qtRequest.length + 1;
+          this.qtRequest.push(tempItem);
+          
+          // 기타부품 초기화
+          item.ITM_QTY = 1;
+          item.ITM_NM = " ";
+          item.ITM_VAL = " ";
+          item.SEQ = 0;
+      }
+      else{
+
+        if(this.selectedCategory.indexOf(item.ITM_VAL) === -1) { // 새로 추가된 경우
+          item.SEQ = this.qtRequest.length + 1;
+          this.qtRequest.push(item);
+        }
+        else { // 체크 해제 한 경우
+          this.qtRequest = this.qtRequest.filter(it => it.ITM_VAL != item.ITM_VAL);
+        }
+      }
+        /*console.log(Array.isArray(this.requests));*/
+      console.log('qtRequest : ' + JSON.stringify(this.qtRequest));
+    },
+    removeItem(item) {
+      /*console.log('Index : ' + this.selectedCategory.indexOf(item.ITM_NM));*/
+      this.qtRequest = this.qtRequest.filter(it => it.ITM_VAL != item.ITM_VAL);
+      if(this.selectedCategory.indexOf(item.ITM_NM) >= 0){
+        this.$delete(this.selectedCategory , this.selectedCategory.indexOf(item.ITM_NM));
+      }
+      /*console.log(Array.isArray(this.selectedCategory));
+      console.log('selectedCategory : ' + this.selectedCategory);*/
+    },
+    addNewQTRequest() {
+      
+      var docId = '';
+      var now = new Date();
+
+      console.log('selectedDealer :' ,  this.selectedDealer);
+
+      var index = this.selectedDealer.findIndex(i => i.TYPE === 'A');
+      if(index === -1){
+        // 선택 된 대리점 중 대표대리점이 없으면 첫번째 대리점을 대표로 설정
+        this.selectedDealer[0].TYPE = 'A'
+      }
+      
+      var reqSeq = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
+      this.processMsg = "견적 요청 중입니다. \n잠시만 기다려주세요.";
+      this.showProcessing = true;
+      this.saveQtCount = 0;
+
+      this.selectedDealer.forEach( dealer => {
+          
+        if(dealer.DEALER === 'PARTS')
+        {
+          //console.log('부품지원센터 저장 !!');
+          // 부품지원센터
           var param = {};
           param.BsnId = this.UserInfo.BsnID;
+          param.UserID = this.UserInfo.UserID;
           param.CarNo = this.CarInfo.CarNo;
           param.VinNo = this.CarInfo.VinNo;
+          
+          if(Array.isArray(this.roList) && this.roList.length > 0  ){
+            
+            param.KTYPNR  = this.roList[0].KTYPNR ;
+            param.CD_CR_DTL = this.roList[0].CD_CR_DTL ;
+            param.MCODE = this.roList[0].MCODE ;
+            
+          }
+          else{
+            
+            param.KTYPNR  = '0' ;
+            param.CD_CR_DTL = '' ;
+            param.MCODE = '' ;
+          
+          }
+            
+          param.Memo = this.qtReqMemo;
+          if(this.qtRequest !== undefined || this.qtRequest !== null || this.qtRequest.length !== 0 )
+          {
+              param.RequestDataJSON = JSON.stringify(this.qtRequest);
+          }
 
-          this.$cookies.set('CarNo', this.CarInfo.CarNo, '600s');
+          console.log("======= webpos Request result ========");
+          console.log(JSON.stringify(param));
 
-          console.log("======= ROHistory Request result ========");
-          console.log(param); 
-
-          var rtnCode = "";
-          var rtnCount = 0;
-        
           axios({
               method: 'POST',
-              url: Constant.SCPIF_URL + 'GetROList',
+              url: Constant.SCPIF_URL + 'SaveQTData',
               headers: Constant.JSON_HEADER,
               data: param
           })
           .then((result) => {
-              console.log("======= ROHistory Return result ========");
-              console.log(result.data); 
-              if(result.data.ReturnDataCount > 0) {
-                this.showROHistBtn = true;
+            console.log("======= webpos result ========");
+            console.log(result.data);
 
-                if(Array.isArray(result.data.ReturnDataJSON))
-                {
-                  result.data.ReturnDataJSON.sort(function(a, b){
-                    return (a.DC_DY_BSN > b.DC_DY_BSN) ? 1 : -1;
-                  });
-                }
-
-                this.roList = JSON.parse(result.data.ReturnDataJSON);
-                
-                this.CarInfo.VinNo = result.data.ReturnObject;
-              }
-              else if (result.data.ReturnObject !== "" && result.data.ReturnObject !== null) {
-                this.CarInfo.VinNo = result.data.ReturnObject;
-              }
-              else {
-                // 정비이력 조회는 차량번호 입력 or 인식 후 자동 처리 되므로 차대번호 조회도 자동 처리하자...
-                this.checkCarVin();
-              }
-              
-              this.showVINSearchBtn = true;
+            var rtnCode = result.data.ReturnCode;
+            if(rtnCode === 0)
+            {
+              docId = result.data.ReturnObject;  // 견적ID 
+              // 견적저장
+              this.saveQTData(docId , dealer.DEALER, dealer.DEALER_NAME , dealer.TYPE, reqSeq);
+            }
+            else
+            {
+              this.showProcessing = false;
+              this.saveQtCount = 0;
+              this.alertMsg = "WebPOS 견적 요청 중 에러가 발생했습니다.\n다시 요청해 주세요. (Code:"+rtnCode+")";
+              this.showAlertMsg = !this.showAlertMsg;
+              this.showAlerMsgBtn = true;
+            }
           })
           .catch((error) => {
-              console.log(error);
-          })
-          this.CarInfo.VinNo = "WebPOS 이력 조회 중...";
-        }
-        else { // 일반 카세터면 WebPOS 조회 없이 자체 저장 내역 체크
-          this.checkCarVin();
-        }
-        
-      },
-      showQTConfirmModal() {
-        this.dealerList = [];
-
-        var param = {};
-        param.operation = "list";
-        param.tableName = "BAY4U_CARCENTER_DEALER";
-        param.payload = {};
-        param.payload.FilterExpression = "CARCENTER = :id";
-        param.payload.ExpressionAttributeValues = {};
-        var key = ":id";
-        param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
-
-        axios({
-          method: 'POST',
-          url: Constant.LAMBDA_URL,
-          headers: Constant.JSON_HEADER,
-          data: param
-        })
-        .then((result) => {
-          console.log("======= dealerList result ========");
-          console.log(result.data);
-          if(Array.isArray(result.data.Items))
-          {
-            result.data.Items.sort(function(a, b){
-            return (a.TYPE > b.TYPE) ? 1 : -1;
-            });
-          }
-
-          this.dealerList = result.data.Items;
-  
-          let mainDealer = this.dealerList.find(element => element.TYPE === 'A')
-          this.selectedDealer = [mainDealer];
-        });
-
-        // 기타부품 체크
-        if(this.tempItem.ITM_NM.replace(/\s/gi, "") !== "")
-        { 
-          console.log("기타부품추가추");
-          var tmpItemNm = this.tempItem.ITM_NM.replace(/\s{1}/i, "");
-          var newItem = {};
-          newItem.ITM_ICON = " ";
-          newItem.ITM_QTY = this.tempItem.ITM_QTY;
-          newItem.GRP_ID = " ";
-          newItem.ITM_NM = tmpItemNm;
-
-          newItem.ITM_VAL = tmpItemNm + this.qtRequest.length + 1 ;
-          newItem.GRP_NM = " ";
-          newItem.SEQ =  this.qtRequest.length + 1;
-          this.qtRequest.push(newItem);
-
-          // 기타부품 초기화
-          this.tempItem.ITM_QTY = 1;
-          this.tempItem.ITM_NM = " ";
-          this.tempItem.ITM_VAL = " ";
-          this.tempItem.SEQ = 0;
-        }
-        
-        this.showQTConfirm = !this.showQTConfirm;
-       // this.isScroll = true;
-         
-      },
-      showItemCategoryModal(id) {
-        var param = {};
-        param.operation = "list";
-        param.tableName = "BAY4U_ITM_CTGRY";
-        param.payload = {};
-        param.payload.FilterExpression = "GRP_ID = :id";
-        param.payload.ExpressionAttributeValues = {};
-        var key = ":id";
-        param.payload.ExpressionAttributeValues[key] = id;
-
-        axios({
-          method: 'POST',
-          url: Constant.LAMBDA_URL,
-          headers: Constant.JSON_HEADER,
-          data: param
-        })
-        .then((result) => {
-          console.log("======= categoryList result ========");
-          console.log(result.data);
-
-        if(Array.isArray(result.data.Items))
-        {
-          result.data.Items.sort(function(a, b){
-            return (a.SORT > b.SORT) ? 1 : -1;
+            this.showProcessing = false;
+            this.saveQtCount = 0;
+            this.alertMsg = "WebPOS 견적 요청 중 에러가 발생했습니다.\n다시 요청해 주세요. (Code:99)";
+            this.showAlertMsg = !this.showAlertMsg;
+            this.showAlerMsgBtn = true;
+            console.log(error);
           });
         }
-
-          this.categoryTitle = result.data.Items[0].GRP_NM;
-          this.categoryList = result.data.Items;
-        });
-
-        this.showItemCategory = !this.showItemCategory;
-      },
-      addNewItem(item) {
-        if(item.ITM_VAL === " ")
-        {
-            var tmpItmNm = item.ITM_NM.replace(/\s{1}/i, "");
-            var tempItem = {};
-            tempItem.ITM_ICON = " ";
-            tempItem.ITM_QTY = item.ITM_QTY;
-            tempItem.GRP_ID = " ";
-            if(item.ITM_NM.replace(/\s/gi, "") === ""){
-              return;
-            }
-            else{
-              tempItem.ITM_NM = tmpItmNm;
-            }
-            
-            tempItem.ITM_VAL = tmpItmNm + this.qtRequest.length + 1 ;
-            tempItem.GRP_NM = " ";
-            tempItem.SEQ =  this.qtRequest.length + 1;
-            this.qtRequest.push(tempItem);
-            
-            // 기타부품 초기화
-            item.ITM_QTY = 1;
-            item.ITM_NM = " ";
-            item.ITM_VAL = " ";
-            item.SEQ = 0;
-        }
         else{
-
-          if(this.selectedCategory.indexOf(item.ITM_VAL) === -1) { // 새로 추가된 경우
-            item.SEQ = this.qtRequest.length + 1;
-            this.qtRequest.push(item);
-          }
-          else { // 체크 해제 한 경우
-            this.qtRequest = this.qtRequest.filter(it => it.ITM_VAL != item.ITM_VAL);
-          }
+            //console.log('대리점 저장 !!');
+            now = new Date();
+            docId = this.UserInfo.BsnID + now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2)  + this.CarInfo.VinNo + 
+                    datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2) ;
+            // 견적저장
+            this.saveQTData(docId , dealer.DEALER,  dealer.DEALER_NAME ,dealer.TYPE, reqSeq);
         }
-         /*console.log(Array.isArray(this.requests));*/
-        console.log('qtRequest : ' + JSON.stringify(this.qtRequest));
-      },
-      removeItem(item) {
-        /*console.log('Index : ' + this.selectedCategory.indexOf(item.ITM_NM));*/
-        this.qtRequest = this.qtRequest.filter(it => it.ITM_VAL != item.ITM_VAL);
-        if(this.selectedCategory.indexOf(item.ITM_NM) >= 0){
-          this.$delete(this.selectedCategory , this.selectedCategory.indexOf(item.ITM_NM));
-        }
-        /*console.log(Array.isArray(this.selectedCategory));
-        console.log('selectedCategory : ' + this.selectedCategory);*/
-      },
-      addNewQTRequest() {
-        
-        var docId = '';
-        var now = new Date();
-
-        console.log('selectedDealer :' ,  this.selectedDealer);
-
-        var index = this.selectedDealer.findIndex(i => i.TYPE === 'A');
-        if(index === -1){
-          // 선택 된 대리점 중 대표대리점이 었으면 첫번째 대리점을 대표로 설정
-          this.selectedDealer[0].TYPE = 'A'
-        }
-        
-        var reqSeq = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
-                  + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
-
-        this.processMsg = "견적 요청 중입니다. \n잠시만 기다려주세요.";
-        this.showProcessing = true;
-        this.saveQtCount = 0;
-
-        this.selectedDealer.forEach( dealer => {
-            
-          if(dealer.DEALER === 'PARTS')
-          {
-              //console.log('부품지원센터 저장 !!');
-              // 부품지원센터
-              var param = {};
-              param.BsnId = this.UserInfo.BsnID;
-              param.UserID = this.UserInfo.UserID;
-              param.CarNo = this.CarInfo.CarNo;
-              param.VinNo = this.CarInfo.VinNo;
-              if(Array.isArray(this.roList) && this.roList.length > 0  ){
-                
-                param.KTYPNR  = this.roList[0].KTYPNR ;
-                param.CD_CR_DTL = this.roList[0].CD_CR_DTL ;
-                param.MCODE = this.roList[0].MCODE ;
-                
-              }
-              else{
-                
-                param.KTYPNR  = '0' ;
-                param.CD_CR_DTL = '' ;
-                param.MCODE = '' ;
-              
-              }
-              
-              param.Memo = this.qtReqMemo;
-              if(this.qtRequest !== undefined || this.qtRequest !== null || this.qtRequest.length !== 0 )
-              {
-                  param.RequestDataJSON = JSON.stringify(this.qtRequest);
-              }
-
-              console.log("======= webpos Request result ========");
-              console.log(JSON.stringify(param));
-
-              axios({
-                  method: 'POST',
-                  url: Constant.SCPIF_URL + 'SaveQTData',
-                  headers: Constant.JSON_HEADER,
-                  data: param
-              })
-              .then((result) => {
-                console.log("======= webpos result ========");
-                console.log(result.data);
-
-                var rtnCode = result.data.ReturnCode;
-                if(rtnCode === 0)
-                {
-                  docId = result.data.ReturnObject;  // 견적ID 
-                  // 견적저장
-                  this.saveQTData(docId , dealer.DEALER, dealer.DEALER_NAME , dealer.TYPE, reqSeq);
-                }
-                else
-                {
-                  this.showProcessing = false;
-                  this.saveQtCount = 0;
-                  this.alertMsg = "WebPOS 견적 요청 중 에러가 발생했습니다.\n다시 요청해 주세요. (Code:"+rtnCode+")";
-                  this.showAlertMsg = !this.showAlertMsg;
-                  this.showAlerMsgBtn = true;
-                }
-              })
-              .catch((error) => {
-                this.showProcessing = false;
-                this.saveQtCount = 0;
-                this.alertMsg = "WebPOS 견적 요청 중 에러가 발생했습니다.\n다시 요청해 주세요. (Code:99)";
-                this.showAlertMsg = !this.showAlertMsg;
-                this.showAlerMsgBtn = true;
-                console.log(error);
-              });
-          }
-          else{
-              //console.log('대리점 저장 !!');
-              now = new Date();
-              docId = this.UserInfo.BsnID + now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2)  + this.CarInfo.VinNo + 
-                      datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2) ;
-              // 견적저장
-              this.saveQTData(docId , dealer.DEALER,  dealer.DEALER_NAME ,dealer.TYPE, reqSeq);
-          }
-        });
+      });
     },
     saveQTData(docId , dealer , dealerNm, dealerType, reqSeq)
     {
@@ -1124,18 +1128,16 @@ name: 'QTStep',
         }); 
       }
 
-      if( this.selectedDealer.length === this.saveQtCount )
-      {
+      if( this.selectedDealer.length === this.saveQtCount ){
         this.showProcessing = false;
         this.goChating();
       }
     },
     goChating()
     {
-      
-      console.log('SendDocId :', this.sendDocId);
-      console.log('SEndDealer :',this.sendDealer);      
-      console.log('SendQtInfo :',this.sendqtInfoData);    
+      //console.log('SendDocId :', this.sendDocId);
+      //console.log('SEndDealer :',this.sendDealer);      
+      //console.log('SendQtInfo :',this.sendqtInfoData);    
       // 대표 대리점 채팅 전송
       var now = new Date();
       this.$router.push({name:'Chat', 
@@ -1217,7 +1219,6 @@ name: 'QTStep',
         console.log(error);
       });
     },
-     
     addCounter: function(idx) {
       if(idx === undefined)
       {
@@ -1227,79 +1228,74 @@ name: 'QTStep',
         this.qtRequest[idx].ITM_QTY++;
       }
     },
-      subCounter: function(idx) {
+    subCounter: function(idx) {
 
-        if(idx === undefined)
+      if(idx === undefined)
+      {
+        this.tempItem.ITM_QTY--;
+        if( this.tempItem.ITM_QTY < 0)
         {
-          this.tempItem.ITM_QTY--;
-          if( this.tempItem.ITM_QTY < 0)
-          {
-            this.tempItem.ITM_QTY = 0;
-          }
+          this.tempItem.ITM_QTY = 0;
         }
-        else
+      }
+      else
+      {
+        this.qtRequest[idx].ITM_QTY--;
+        if( this.qtRequest[idx].ITM_QTY < 0)
         {
-          this.qtRequest[idx].ITM_QTY--;
-          if( this.qtRequest[idx].ITM_QTY < 0)
-          {
-              this.qtRequest[idx].ITM_QTY = 0;
-          }
+            this.qtRequest[idx].ITM_QTY = 0;
         }
-      },
-      checkQtData() {
+      }
+    },
+    checkQtData() {
          
-         if(this.selectedDealer.length === 0)
-         {
-            this.alertMsg = "선택한 견적요청 대리점이 없습니다.\n대리점을 선택 해 주세요."
-            this.showAlertMsg = !this.showAlertMsg;
-            this.showAlerMsgBtn = true;
-            return false;
-         }
+      if(this.selectedDealer.length === 0){
+        this.alertMsg = "선택한 견적요청 대리점이 없습니다.\n대리점을 선택 해 주세요."
+        this.showAlertMsg = !this.showAlertMsg;
+        this.showAlerMsgBtn = true;
+        return false;
+      }
 
-        if(this.UserInfo === null){
-          //alert("로그인 정보가 없습니다. \r 다시 로그인 해주세요.");
-          this.alertMsg = "로그인 정보가 없습니다.\n다시 로그인 해주세요."
-          this.showAlertMsg = !this.showAlertMsg;
-          this.alertMsgPath = "Login";
-          this.showAlerMsgBtn = true;
-          return false;
-        }
+      if(this.UserInfo === null){
+        //alert("로그인 정보가 없습니다. \r 다시 로그인 해주세요.");
+        this.alertMsg = "로그인 정보가 없습니다.\n다시 로그인 해주세요."
+        this.showAlertMsg = !this.showAlertMsg;
+        this.alertMsgPath = "Login";
+        this.showAlerMsgBtn = true;
+        return false;
+      }
 
-        if(this.UserInfo.BsnID === undefined || this.UserInfo.BsnID === null || this.UserInfo.BsnID.length === 0 )
-        {
-          this.alertMsg = "사이트 정보가 없습니다.\n다시 로그인 해주세요."
-          this.showAlertMsg = !this.showAlertMsg;
-          this.alertMsgPath = "Login";
-          this.showAlerMsgBtn = true;
-          return false;
-        }
+      if(this.UserInfo.BsnID === undefined || this.UserInfo.BsnID === null || this.UserInfo.BsnID.length === 0 ){
+        this.alertMsg = "사이트 정보가 없습니다.\n다시 로그인 해주세요."
+        this.showAlertMsg = !this.showAlertMsg;
+        this.alertMsgPath = "Login";
+        this.showAlerMsgBtn = true;
+        return false;
+      }
 
-        if(this.UserInfo.UserID === undefined || this.UserInfo.UserID === null || this.UserInfo.UserID === 0 )
-        {
-          this.alertMsg = "로그인 정보가 없습니다.\n다시 로그인 해주세요."
-          this.showAlertMsg = !this.showAlertMsg;
-          this.alertMsgPath = "Login";
-          this.showAlerMsgBtn = true;
-          return false;
-        }
+      if(this.UserInfo.UserID === undefined || this.UserInfo.UserID === null || this.UserInfo.UserID === 0 ){
+        this.alertMsg = "로그인 정보가 없습니다.\n다시 로그인 해주세요."
+        this.showAlertMsg = !this.showAlertMsg;
+        this.alertMsgPath = "Login";
+        this.showAlerMsgBtn = true;
+        return false;
+      }
 
-        if(this.UserInfo.BsnID === undefined || this.UserInfo.BsnID === null || this.UserInfo.BsnID.length === 0 )
-        {
-          this.alertMsg = "사이트 정보가 없습니다.\n다시 로그인 해주세요."
-          this.showAlertMsg = !this.showAlertMsg;
-          this.alertMsgPath = "Login";
-          this.showAlerMsgBtn = true;
-          return false;
-        }
-        
-        if(this.UserInfo.Name === undefined || this.UserInfo.Name === null || this.UserInfo.Name.length === 0 )
-        {
-          this.alertMsg = "사이트 정보가 없습니다.\n다시 로그인 해주세요."
-          this.showAlertMsg = !this.showAlertMsg;
-          this.alertMsgPath = "Login";
-          this.showAlerMsgBtn = true;
-          return false;
-        }
+      if(this.UserInfo.BsnID === undefined || this.UserInfo.BsnID === null || this.UserInfo.BsnID.length === 0 ){
+        this.alertMsg = "사이트 정보가 없습니다.\n다시 로그인 해주세요."
+        this.showAlertMsg = !this.showAlertMsg;
+        this.alertMsgPath = "Login";
+        this.showAlerMsgBtn = true;
+        return false;
+      }
+      
+      if(this.UserInfo.Name === undefined || this.UserInfo.Name === null || this.UserInfo.Name.length === 0 ){
+        this.alertMsg = "사이트 정보가 없습니다.\n다시 로그인 해주세요."
+        this.showAlertMsg = !this.showAlertMsg;
+        this.alertMsgPath = "Login";
+        this.showAlerMsgBtn = true;
+        return false;
+      }
         /*
         if(this.CarInfo.CarNo === undefined || this.CarInfo.CarNo === null || this.CarInfo.CarNo.length === 0 )
         {
@@ -1308,14 +1304,14 @@ name: 'QTStep',
           return false;
         }
         */
-        if(this.CarInfo.VinNo === undefined || this.CarInfo.VinNo === null || this.CarInfo.VinNo.length === 0 || this.CarInfo.VinNo === "국토부 차대번호 조회 중...")
-        {
-          this.alertMsg = "차대번호가 없습니다.\n차대번호 없이 요청하시겠습니까?"
-          this.showAlertMsg = !this.showAlertMsg;
-          this.showAlerMsgBtn = false;
-          this.showAlerMsgConfirmBtn = !this.showAlerMsgConfirmBtn;  
-          return false;
-        }
+      if(this.CarInfo.VinNo === undefined || this.CarInfo.VinNo === null || this.CarInfo.VinNo.length === 0 || this.CarInfo.VinNo === "국토부 차대번호 조회 중...")
+      {
+        this.alertMsg = "차대번호가 없습니다.\n차대번호 없이 요청하시겠습니까?"
+        this.showAlertMsg = !this.showAlertMsg;
+        this.showAlerMsgBtn = false;
+        this.showAlerMsgConfirmBtn = !this.showAlerMsgConfirmBtn;  
+        return false;
+      }
       /*
         if(this.qtRequest === undefined || this.qtRequest === null || this.qtRequest.length === 0 )
         {
@@ -1325,68 +1321,301 @@ name: 'QTStep',
         }
      */
         this.addNewQTRequest();
-      },
-      closeMsg(path) {     
-          this.showAlertMsg = false;
-          if(path.length > 0 && path == 'Login')
-          {
-              this.$router.push('/');
-          }
-      },
-      CheckReqVinNoQT(value) {
-        if(value === true)
-        {
-           this.CarInfo.VinNo = "99999999999999999";
-           this.addNewQTRequest();
-           
-           console.log("this.alertYesNo : ", this.alertYesNo);
-           console.log("VinNo : ", this.CarInfo.VinNo);
-           
-        }
-        
-        this.showAlertMsg = false;
-        this.showAlerMsgConfirmBtn = false;
-        this.alertYesNo = value;
-
-      },
-      SetDummyCar() {
-        this.CarInfo.VinNo = "99999999999999999";
-        this.e6 = 2;
-      },
-      CarInfoClear() {
-        this.CarInfo.CarNo = "";
-        this.CarInfo.VinNo = "";
-        this.showVINSearchBtn = false;
-        this.showROHistBtn = false;
-        this.captureImg = "";
-        this.brandSelected = '차종 선택';
-        this.$cookies.set('CarNo', this.CarInfo.CarNo, '600s');
-        this.$cookies.set('VinNo', this.CarInfo.VinNo, '600s');
-      },
-      changeImageSize() {
-        if(this.imgSize === "100%")
-          this.imgSize = "115";
-        else
-        this.imgSize = "100%";
-      },
-      goOrderList(value)
+    },
+    closeMsg(path) {     
+      this.showAlertMsg = false;
+      if(path.length > 0 && path == 'Login')
       {
-        this.$router.push({name:'QTList', 
-                  params:{
-                        DocID: '', 
-                        RefID: '',
-                        CarNo: value,
-                        Type: 'orderHistory'
-                  }});
+          this.$router.push('/');
       }
     },
-    components: {
-      ItemCategory: ItemCategory,
-      QTConfirm: QTConfirm,
-      QTCamera: QTCamera,
-      ROHistory:ROHistory,
-      MessageBox: MessageBox
-    },    
+    CheckReqVinNoQT(value) {
+      if(value === true){
+        this.CarInfo.VinNo = "99999999999999999";
+        this.addNewQTRequest();
+        console.log("this.alertYesNo : ", this.alertYesNo);
+        console.log("VinNo : ", this.CarInfo.VinNo);
+      }
+      
+      this.showAlertMsg = false;
+      this.showAlerMsgConfirmBtn = false;
+      this.alertYesNo = value;
+    },
+    SetDummyCar() {
+      this.CarInfo.VinNo = "99999999999999999";
+      this.e6 = 2;
+    },
+    CarInfoClear() {
+      this.CarInfo.CarNo = "";
+      this.CarInfo.VinNo = "";
+      this.showVINSearchBtn = false;
+      this.showROHistBtn = false;
+      this.captureImg = "";
+      this.brandSelected = '차종 선택';
+      this.$cookies.set('CarNo', this.CarInfo.CarNo, '600s');
+      this.$cookies.set('VinNo', this.CarInfo.VinNo, '600s');
+    },
+    changeImageSize() {
+      if(this.imgSize === "100%")
+        this.imgSize = "115";
+      else
+      this.imgSize = "100%";
+    },
+    goOrderList()
+    {
+      let CarInfoData = {};
+      CarInfoData.CarNo = this.CarInfo.CarNo;
+      CarInfoData.VinNo = this.CarInfo.VinNo;
+      CarInfoData.CarBrand = this.brandSelected;
+      CarInfoData.Memo = this.qtReqMemo;
+      CarInfoData.captureBlobImg = this.captureBlobImg;
+      
+      this.$router.push({name:'QTList', 
+                params:{
+                      DocID: '', 
+                      RefID: '',
+                      CarInfoData: CarInfoData,
+                      Type: 'orderHistory'
+                }});
+    },
+    saveQTOrder(){
+
+      if(this.qtRequest.length === 0){
+        this.showAlertMsg = true;
+        this.alertMsg = "요청 부품 리스트가 없습니다.\n요청 부품을 선택 해 주세요.";
+        return;
+      }
+
+      // 부품지원센터 빼고 선택 대리점 리스트 셋팅
+      let reqDealerList = [];
+      reqDealerList = this.selectedDealer.filter( x => x.DEALER !== 'PARTS');
+
+      if(reqDealerList.length === 0){
+        this.showAlertMsg = true;
+        this.alertMsg = "요청 할 대리점을 선택 해 주세요.";
+        return;
+      }
+      
+      let index = reqDealerList.findIndex(i => i.TYPE === 'A');
+      if(index === -1){
+        // 선택 된 대리점 중 대표대리점이 없으면 첫번째 대리점을 대표로 설정
+        reqDealerList[0].TYPE = 'A'
+      }
+
+      let reOrderCarNo = this.CarInfo.CarNo;
+      if(reOrderCarNo === '' || reOrderCarNo === undefined || reOrderCarNo === null){
+        reOrderCarNo = "*empty*";
+      }
+
+      let reOrderVinNo = this.CarInfo.VinNo;
+      if(reOrderVinNo === '' || reOrderVinNo === undefined || reOrderVinNo === null){
+        reOrderVinNo = "99999999999999999";
+      }
+
+      let now = new Date();
+      let reqSeq = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                  + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+      let docId = '';
+      let imgKey = '';
+
+      if(this.showProcessing === false){ 
+        this.processMsg = "바로주문 중입니다. \n잠시만 기다려주세요.";
+        this.showProcessing = true;
+      }
+        
+      reqDealerList.forEach(dealer => {
+
+        this.saveCount++;
+        
+        now = new Date();
+        docId = this.UserInfo.BsnID + now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2)  + reOrderVinNo + 
+                      datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2) ;
+        imgKey = this.UserInfo.BsnID + now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                  + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
+        // 신규견적 생성
+        let param = {};
+        param.operation = "create";
+        param.tableName = "BAY4U_QT_LIST";
+        param.payload = {};
+        param.payload.Item = {};
+        param.payload.Item.ID = docId;
+        param.payload.Item.CarNo = reOrderCarNo;
+        param.payload.Item.CarVin = reOrderVinNo;
+        param.payload.Item.CarBrand = this.brandSelected;
+        param.payload.Item.ReqDt = now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);
+        param.payload.Item.ReqSite = this.UserInfo.BsnID;
+        param.payload.Item.ReqName = this.UserInfo.Name;
+        param.payload.Item.ReqSeq = reqSeq;
+        param.payload.Item.ResDealer = dealer.DEALER;
+        param.payload.Item.ResDealerNm = dealer.DEALER_NAME;
+        param.payload.Item.Memo = convertStringToDynamo(this.qtReqMemo);
+        param.payload.Item.QTSts = "바로주문";
+        if(this.captureBlobImg !== '')
+          param.payload.Item.IMG = imgKey + ".png";
+        else
+          param.payload.Item.IMG = "*empty*";
+        
+        param.payload.Item.LineItem = convertArrayToDynamo(JSON.stringify(this.qtRequest));
+
+        this.qtInfoData = param.payload.Item;
+        if(dealer.TYPE === 'A')
+        {
+          this.sendDocId =  docId;
+          this.sendDealer = dealer.DEALER;
+          this.sendDealerNm = dealer.DEALER_NAME;
+          this.sendqtInfoData = this.qtInfoData;
+        }
+        console.log("======= QT Save Request ========");
+        console.log(JSON.stringify(param));
+
+        axios({
+          method: 'POST',
+          url: Constant.LAMBDA_URL,
+          headers: Constant.JSON_HEADER,
+          data: param
+        })
+        .then((result) => {
+          console.log("======= QT Save result ========");
+          console.log(result.data);
+
+          // 채팅저장
+          this.saveChatOrder(docId , dealer , reOrderCarNo, reqDealerList);
+
+          if(this.captureBlobImg !== '') {
+            param = {};
+            param.name = imgKey + ".png";
+            param.type = "image/png";
+
+            axios({
+                method: 'POST',
+                url: Constant.IMGUPLOAD_URL,
+                headers: Constant.IMGUPLOAD_HEADER,
+                data: param
+            })
+            .then((result) => {
+              console.log("======= IMG Save result ========");
+              console.log(result.data);
+
+              param = this.captureBlobImg;
+
+              axios({
+                  method: 'PUT',
+                  url: result.data.uploadURL,
+                  data: param
+              })
+              .then((result) => {
+                console.log("======= IMG Upload result ========");
+                console.log(result);
+              })
+              .catch((error) => {
+                console.log(error);
+                this.saveCount = 0;
+              }); 
+
+            })
+            .catch((error) => {
+              console.log(error);
+              this.saveCount = 0;
+            }); 
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+          this.showProcessing = false;
+          this.alertMsg = "견적 저장 중 에러가 발생했습니다.\n다시 요청해 주세요.";
+          this.showAlertMsg = !this.showAlertMsg;
+          this.showAlerMsgBtn = true;
+        });
+      });
+    },
+    saveChatOrder(docId , dealer , carNo , dealerList)
+    {
+      let msg =  ((carNo === "*empty*") ? "미상차량" : carNo) + " 차량 부품 바로주문 요청 완료!!";
+      let now = new Date();
+      let chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+          + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+      let chatMsg = {};
+      chatMsg.from = {'name' : this.UserInfo.BsnID};
+      chatMsg.to = {'name' : dealer.DEALER};
+      chatMsg.msg  = msg;
+      chatMsg.reqTm = chatTime;
+        
+      let param = {};
+      let id = this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+      let key = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
+      param.operation = "create";
+      param.tableName = "BAY4U_CHAT";
+      param.payload = {};
+      param.payload.Item = {};
+      param.payload.Item.ID = id;
+      param.payload.Item.DocID = docId;
+      param.payload.Item.ChatFrom = this.UserInfo.BsnID;
+      param.payload.Item.ChatTo =  dealer.DEALER;
+      param.payload.Item.Message = chatMsg.msg;
+      param.payload.Item.Status = "0";
+      param.payload.Item.ReqTm = chatMsg.reqTm;
+      param.payload.Item.ChatType = "O";
+      param.payload.Item.RefID = ' ';
+
+      console.log("Send Msg : ", JSON.stringify(param));
+
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+        console.log("======= Chat Save result ========");
+        console.log(result.data);
+        
+        this.$sendMessage({
+          name: this.UserInfo.BsnID,
+          msg,
+          recv:   dealer.DEALER,
+          chatId: docId,
+          reqTm : chatMsg.reqTm,
+          qtInfo : this.qtInfoData,
+          chatType : "O",
+          refId: ' ',
+				});
+				
+				if( dealerList.length === this.saveCount )
+				{
+					this.showProcessing = false;
+
+					this.$router.push({name:'Chat', 
+							params:{
+										chatid: docId, 
+										carNo:  carNo,
+										chatFrom: this.UserInfo.BsnID,
+										chatTo: this.sendDealer,
+										chatDate: now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2),
+										qtInfo : this.qtRequest,
+										chatDealerNm : this.sendDealerNm,
+										chatType:'order',
+								}});
+				}
+
+      })
+      .catch((error) => {
+				console.log(error);
+				this.showProcessing = false;
+				this.saveCount = 0;
+      });
+		},
+  },
+  components: {
+    ItemCategory: ItemCategory,
+    QTConfirm: QTConfirm,
+    QTCamera: QTCamera,
+    ROHistory:ROHistory,
+    MessageBox: MessageBox,
+  },    
     computed:{
       CarInfo: {
           get() { return this.$store.getters.CarInfo },
@@ -1410,6 +1639,26 @@ name: 'QTStep',
     mounted() {
       datePadding();
       convertStringToDynamo();
+      console.log('NewQTData : ', this.NewQTData);
+
+      if(this.NewQTData !== undefined){
+        if(this.NewQTData.CarNo !== undefined)
+        this.CarInfo.CarNo = this.NewQTData.CarNo;
+
+        if(this.NewQTData.VinNo !== undefined)
+        this.CarInfo.VinNo = this.NewQTData.VinNo;
+
+        if(this.NewQTData.CarBrand !== undefined)
+        this.brandSelected = this.NewQTData.CarBrand;
+
+        if(this.NewQTData.LineItem !== undefined)
+        {
+          this.NewQTData.LineItem.forEach(item =>{
+               this.addNewItem(item);
+          });
+        }
+      }
+      
 /*
       var self = this;
        window.addEventListener("scroll", function (e) {
@@ -1766,5 +2015,10 @@ name: 'QTStep',
   text-align:center; 
   font-size: 1.2rem;
 }
-
+.btnOrder
+{
+  position: absolute;
+  right:0;
+  top:-10px;
+}
 </style>
