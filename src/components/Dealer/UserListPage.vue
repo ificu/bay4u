@@ -233,6 +233,7 @@ export default {
       this.$EventBus.$emit('click-qtInfo' , item)
       this.qtItemIndex = idx;
       this.qtReqList[idx].isRead = true;
+
     },
     initQTData()
     {
@@ -314,7 +315,6 @@ export default {
   },
   updated()
   {
- 
     if(this.showQTId !== '')
     {
       this.showQtInfo(this.showQTId);
