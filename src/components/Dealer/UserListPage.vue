@@ -111,7 +111,8 @@ export default {
       qtReqList: [],
       qtItemIndex: -1,
       searchText:'',
-      toggle_exclusive: undefined
+      toggle_exclusive: undefined,
+      targetQtId:'',
     }
   },
   props:['chatInfo', 'showQTId'],
@@ -132,7 +133,7 @@ export default {
       }
     },
     showQTReqList(idx) {
-      console.log("showQTReqList??????????????????????? : ", idx);
+      //console.log("showQTReqList??????????????????????? : ", idx);
 
       this.initQTData();
 
@@ -309,21 +310,21 @@ export default {
     showQtInfo(ID)
     {
       let index = this.qtReqList.findIndex(i => i.ID === ID);
-      console.log('index : ', index);
       this.SetQTInfo(this.qtReqList[index], index);
+      this.targetQtId = '';
     }
   },
-  updated()
-  {
-    if(this.showQTId !== '')
+  updated(){
+    if(this.targetQtId !== '')
     {
-      this.showQtInfo(this.showQTId);
+      this.showQtInfo(this.targetQtId);
     }
   },
   mounted(){
     this.showQTReqList();
   },
   created : function() {
+    this.targetQtId = this.showQTId;
     if(this.UserInfo.BsnID === '')
       this.UserInfo.BsnID = this.$cookies.get('BsnID');
     if(this.UserInfo.Name === '')
