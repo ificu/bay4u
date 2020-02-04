@@ -280,7 +280,10 @@ export default {
 				this.dealerList = result.data.Items;
 
 				let mainDealer = this.dealerList.find(element => element.TYPE === 'A')
-				this.selectedDealer = [mainDealer];
+				if(mainDealer !== undefined){
+					this.selectedDealer = [mainDealer];
+				}
+				
 			});
 		},
 		calculatorAMT(item){
@@ -290,7 +293,7 @@ export default {
       this.showAlertMsg = false;
     },
 		saveReQT(){
-
+			
 			if(this.selectedDealer.length === 0){
 				this.showAlertMsg = true;
 				this.alertMsg = "주문 할 대리점을 선택 해 주세요.";
@@ -321,7 +324,7 @@ export default {
 				this.reOrderBrand = "차종 선택";
 			}
 
-			if(this.reOrderMemo === '' || this.this.reOrderMemo === undefined){
+			if(this.reOrderMemo === '' || this.reOrderMemo === undefined){
 				this.reOrderMemo = "*empty*";
 			}
 

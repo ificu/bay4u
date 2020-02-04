@@ -55,11 +55,11 @@
                         <!--견적요청-->
                         <v-icon color="#FFF59D" style="margin-right:4px;margin-top:4px;font-size:1.1em;" v-if="showQtState(qtItem)">far fa-clock</v-icon>
                         <!--견적회신-->
-                        <v-icon color="#FFF59D" style="margin-right:4px;margin-top:4px;font-size:0.85em;" v-if="showQtConfirmState(qtItem)">fas fa-tag</v-icon>
+                        <v-icon color="#FFF59D" style="margin-right:4px;margin-top:4px;font-size:1.45em;" v-if="showQtConfirmState(qtItem)">receipt</v-icon>
                         <!--주문요청-->
-                        <v-icon color="#FFF59D" style="margin-right:4px;margin-top:3px;font-size:0.95em;" v-if="showOrderState(qtItem)">fas fa-cart-arrow-down</v-icon>
+                        <v-icon color="#FFF59D" style="margin-right:4px;margin-top:3px;font-size:1.35em;" v-if="showOrderState(qtItem)">local_grocery_store</v-icon>
                         <!--주문확정-->
-                        <v-icon color="#FFF59D" style="margin-right:4px;margin-top:3px;font-size:0.95em;" v-if="showOrdConfirmState(qtItem)">fas fa-truck</v-icon>
+                        <v-icon color="#FFF59D" style="margin-right:4px;margin-top:3px;font-size:1.08em;" v-if="showOrdConfirmState(qtItem)">fas fa-truck</v-icon>
                         {{(qtItem[0].CarNo === "*empty*")?"미상차량" : qtItem[0].CarNo }}
                       </b-row>
                       <!--<b-row class="history-carSeries">
@@ -2007,14 +2007,12 @@ export default {
       return index;
       //let str = value;
       //return Number(str.substring(str.length , str.length -4)) -1;
-      
     },
     getDealerIndex(value)
     {
         let index = -1;
-        console.log('qtReqList : ', this.qtReqList);
-        console.log('value.DocID : ' , value.DocID);
-
+        //console.log('qtReqList : ', this.qtReqList);
+        //console.log('value.DocID : ' , value.DocID);
         for(var element of this.qtReqList){
           let hedIndex = element.findIndex(hedEl => hedEl.ID === value.DocID);
           console.log('hedIndex :'  , hedIndex);
@@ -2041,12 +2039,12 @@ export default {
         }
         else{
           let cnt = item.length;
-          let result = item.filter(el => el.QTData.QTSts === "견적요청");
-          if(cnt === result){
+          let result = item.filter(el => (el.QTData.QTSts === "견적요청" || el.QTData.QTSts === "바로주문"));
+          if(cnt === result.length){
             return true;
           }
           else{
-             return false;
+            return false;
           }
         }
       }
@@ -2055,32 +2053,31 @@ export default {
     {
       if(Array.isArray(item))
       {
-        if(item.length === 1) {
-          if(item[0].QTData.QTSts === "견적요청"){
-            return false;
-          }
-          else if(item[0].QTData.QTSts === "주문확정")
-          {
-            return false;
-          }
-          else{
+        if(item.length === 1){
+          if(item[0].QTData.QTSts === "견적회신"){
             return true;
           }
-        }
-        else{           
-          let index = item.findIndex(el => el.QTData.QTSts === "견적요청");
-          if(index > -1 ){
+          else{
             return false;
           }
+        }
+        else{
+          let cnt = item.length;
+          let result = item.filter(el => el.QTData.QTSts === "견적회신");
+          if(cnt === result.length){
+            return true;
+          }
           else{
-            let cnt = item.length;
-            let result = item.filter(el => el.QTData.QTSts === "주문확정");
-            let webposResult = item.filter(el => el.QTData.QTSts === "견적회신" && el.DealerFlag === "WEBPOS"); 
-            if(cnt === ( result.length + webposResult.length)){
-              return false
+            let index = item.findIndex(el => (el.QTData.QTSts === "주문요청" || el.QTData.QTSts === "주문확정" ) );
+            if(index > -1 ){
+              return false;
             }
             else{
-              return true;
+              index = item.findIndex(el => el.QTData.QTSts === "견적회신");
+              if(index > -1 ){
+                return true;
+              }
+              return false;
             }
           }
         }
@@ -2107,7 +2104,17 @@ export default {
             return true
           }
           else{
-            return false;
+            let index = item.findIndex(el => el.QTData.QTSts === "주문확정");
+            if(index > -1 ){
+              return false;
+            }
+            else{
+              index = item.findIndex(el => el.QTData.QTSts === "주문요청");
+              if(index > -1 ){
+                return true;
+              }
+              return false;
+            }
           }
         }
       }
@@ -2132,7 +2139,13 @@ export default {
             return true
           }
           else{
-            return false;
+            let index = item.findIndex(el => el.QTData.QTSts === "주문확정");
+            if(index > -1 ){
+              return true;
+            }
+            else{
+              return false;
+            }
           }
         }
       }
