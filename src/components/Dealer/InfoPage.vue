@@ -1392,7 +1392,7 @@ export default {
           }
         }
       }
-      else if(copyData[0].indexOf('품목명[규격]	센터가(VAT별도)') > -1) { // 해당 문구가 있다면 대신 화면에서 카피한 케이스
+      else if(copyData[0].indexOf('품목명[규격]	센터가(VAT별도)') > -1) { // 해당 문구가 있다면 JAX 화면에서 카피한 케이스
         var idx = 0;
 
         for (var i = 1; i < copyData.length; i++) {
@@ -1420,8 +1420,8 @@ export default {
               newItem.itemName = val[1];
             }
             newItem.itemQty = val[3].replace(',','');
-            newItem.itemPrice = val[4].replace(',','');
-            newItem.AMT = val[5].replace(',','');
+            newItem.itemPrice = parseInt(parseInt(val[4].replace(',','')) *  1.1);
+            newItem.AMT = val[7].replace(',','');
             newItem.memo = '센터가 : ' + val[2];
     
             this.detailQTData.push(newItem);       

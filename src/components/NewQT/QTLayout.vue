@@ -29,6 +29,7 @@
           <v-text-field class="pr-6 pl-4 mb-n4" label="차량번호" v-model="CarInfo.CarNo" outlined dense color="success" append-outer-icon="search" @click:append-outer="checkWebPOSHist" v-on:keypress.enter="checkWebPOSHist"></v-text-field>
         </template>
         <v-dialog v-model="showROHistDialog" transition="dialog-bottom-transition" >
+
           <!--<template v-slot:activator="{ on: { click } }">
             <v-text-field class="pr-6 pl-4 mb-n4" label="차량번호" v-model="CarInfo.CarNo" outlined dense color="success" append-outer-icon="search" @click:append-outer="checkWebPOSHist" v-on:keypress.enter="checkWebPOSHist"></v-text-field>
           </template>-->
@@ -149,13 +150,13 @@
             </v-card>
             <v-btn class="mx-2 " fab color="success" x-small @click="addNewItem(tempItem)">입력</v-btn>
         </div>   
-        <div class="ml-6 mt-2 mb-2">
-          <small color = "success"># 부품명 입력 후 "입력"버튼을 누르면 추가 됩니다.</small>
+        <div class="ml-6 mt-n6 mb-10">
+          <small color = "success"># 부품명 입력 후 "입력" 버튼을 누르면 추가 됩니다.</small> 
           <!--<v-btn small  color="indigo" outlined @click="addNewItem(tempItem)">기타부품추가</v-btn>-->
         </div>
 
       <div>
-        <v-textarea outlined class="ml-4 mr-4" color="success" label="사진 및 추가 요청사항" auto-grow rows="3" value="" v-model="qtReqMemo"></v-textarea>
+        <v-textarea outlined class="ml-4 mr-4" color="success" label="견적 메모 / 사진 및 추가 요청사항" auto-grow rows="3" value="" v-model="qtReqMemo"></v-textarea>
       </div>
       <div>
         <v-btn outlined small color="teal accent-4" class="mt-n6 mb-4 mr-4 float-right"  @click="showQTCameraModal(true, 'ITEMIMG')">부품 사진 입력</v-btn>
@@ -786,11 +787,81 @@ export default {
         })
         .catch((error) => {
             console.log(error);
+            this.CarInfo.VinNo = "";
         })
         this.CarInfo.VinNo = "WebPOS 이력 조회 중...";
       }
       else { // 일반 카세터면 WebPOS 조회 없이 자체 저장 내역 체크
-        this.checkCarVin();
+
+          var now = new Date();
+          var startDate = (now.getFullYear() - 1) + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);        
+
+          var param = {};
+          param.carNo = this.CarInfo.CarNo;
+          param.idNo = this.UserInfo.BsnID;
+          param.sDate = startDate;
+
+          this.$cookies.set('CarNo', this.CarInfo.CarNo, '600s');
+
+          console.log("======= ROHistory Request result ========");
+          console.log(param); 
+
+          var rtnCode = "";
+          var rtnCount = 0;
+        
+          axios({
+              method: 'POST',
+              url: Constant.INTRA_HISTIF_URL,
+              headers: Constant.JSON_HEADER,
+              data: param
+          })
+          .then((result) => {
+              console.log("======= ROHistory Return result ========");
+              console.log(result.data); 
+              var rtnData = result.data;
+              this.CarInfo.VinNo = "";
+              if(rtnData.data.result === 'ok') {
+                this.showROHistBtn = true;
+
+                if(Array.isArray(rtnData.data.dataset))
+                {
+                  rtnData.data.dataset.sort(function(a, b){
+                    return (a.inDay > b.inDay) ? 1 : -1;
+                  });
+                }
+
+                var roHisList = [];
+                var keyList = [];
+
+                for(var his of rtnData.data.dataset) {
+                  if(keyList.indexOf(his.inDay) === -1) {
+                    var ro = {};
+                    ro.CAR_NO = this.CarInfo.CarNo;
+                    ro.DC_DY_BSN = his.inDay;
+                    ro.NM_CR_TEC = rtnData.data.carName;
+                    ro.RO_NM = '차량 정비';
+                    ro.DST_CR = his.lastkm;
+
+                    roHisList.push(ro);
+                    keyList.push(his.inDay);
+                  }
+                }
+                this.roList = roHisList;
+
+                this.checkCarVin();
+              }
+              else {
+                // 정비이력 조회는 차량번호 입력 or 인식 후 자동 처리 되므로 차대번호 조회도 자동 처리하자...
+                this.checkCarVin();
+              }
+              
+              this.showVINSearchBtn = true;
+          })
+          .catch((error) => {
+              console.log(error);
+              this.CarInfo.VinNo = "";
+          })
+          this.CarInfo.VinNo = "IntraVan 이력 조회 중...";
       }
     },
     showQTConfirmModal() {
