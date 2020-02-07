@@ -392,14 +392,14 @@
                     <b-col align-self="center" class="history-order-date">{{setQtDate(item.ReqDt)}}</b-col>
                     <b-col class="history-order-car">
                       <b-row class="history-carNo">
-                      {{(item.CarNo === "*empty*")?"미상차량" : item.CarNo }}
+                        {{(item.CarNo === "*empty*")?"미상차량" : item.CarNo }}
                       </b-row>
                       <b-row  class="history-carType">
                         {{item.ResDealerNm}}
                       </b-row>
                     </b-col>
                     <b-col align-self="center" class="history-detailBtn">
-                      <b-button block href="#"  v-b-toggle="'ROaccordion' + idx"  variant="secondary" size="sm" @click="GetOrderDetail(item)">
+                      <b-button block href="#" v-b-toggle="'ROaccordion' + idx"  variant="secondary" size="sm" @click="GetOrderDetail(item)">
                         <!--<i v-if="!ROList1Toggle" class="fas fa-chevron-down"></i>
                         <i v-if="ROList1Toggle"  class="fas fa-chevron-up"></i>-->
                         <span class="when-opened">
@@ -1457,7 +1457,7 @@ export default {
         console.log(param); 
 
         var btnGrp = 'btnGrp-'+item[0].ID;
-        if(document.getElementById(btnGrp).getAttribute("aria-expanded") === "false" && this.showProcessing === false)
+        if(document.getElementById(btnGrp) !== null && document.getElementById(btnGrp).getAttribute("aria-expanded") === "false" && this.showProcessing === false)
         { 
           this.processMsg = "견적회신 조회 중입니다. \n잠시만 기다려주세요.";
           this.showProcessing = true;
@@ -1555,7 +1555,7 @@ export default {
         console.log(param); 
 
         var btnGrp = 'btnGrp-'+item[0].ID;
-        if(document.getElementById(btnGrp).getAttribute("aria-expanded") === "false" && this.showProcessing === false)
+        if(document.getElementById(btnGrp)!== null && document.getElementById(btnGrp).getAttribute("aria-expanded") === "false" && this.showProcessing === false)
         { 
           this.processMsg = "견적회신 조회 중입니다. \n잠시만 기다려주세요.";
           this.showProcessing = true;
@@ -1801,7 +1801,6 @@ export default {
           });
         }
       });  
-
     },
     goOrderChating(val)
     {
@@ -1831,7 +1830,8 @@ export default {
       param.payload.Item.ChatFrom = this.UserInfo.BsnID;
       param.payload.Item.ChatTo =  this.orderData.DealerCode;
       param.payload.Item.Message = chatMsg.msg;
-      param.payload.Item.Status = "0";
+      //param.payload.Item.Status = "0";
+      param.payload.Item.ReadYn = "0";
       param.payload.Item.ReqTm = chatMsg.reqTm;
       param.payload.Item.ChatType = "O";
       param.payload.Item.RefID = val;
@@ -1856,7 +1856,8 @@ export default {
           name: this.UserInfo.BsnID,
           msg,
           recv:  this.orderData.DealerCode,
-          chatId: this.orderData.DocID,
+          chatId: id, 
+          docId: this.orderData.DocID,
           reqTm : chatMsg.reqTm,
           qtInfo : qtInfoPram,
           chatType : "O",

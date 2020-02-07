@@ -302,7 +302,7 @@
           </li>
         </ul>-->
       </span>
-      <span slot="reorder"><v-btn color="#4E342E" dark depressed class="btnOrder" @click="saveQTOrder" >바로주문</v-btn></span>
+      <span slot="reorder"><v-btn color="#4E342E" dark depressed class="btnOrder" @click="checkQtOrder">바로주문</v-btn></span>
       <span slot="list2">
         <div class="qtConfirm-itemList" v-for="(item, index) in qtRequest" v-bind:key="index">
           <span class="qtConfirm-itemDel">{{item.ITM_NM}}</span>
@@ -343,6 +343,16 @@
       <div slot="footer" v-if="showAlerMsgConfirmBtn">
         <v-btn depressed small color="#967d5f" dark @click="CheckReqVinNoQT(true)">확인</v-btn>
         <v-btn depressed small color="blue-grey lighten-2"  @click="CheckReqVinNoQT(false)">취소</v-btn>
+      </div>
+    </MessageBox>
+    <!--바로주문 확인 메시지 팝업-->
+    <MessageBox v-if="showAlertOrdMsg"  @close="closeMsg(alertMsgPath)">
+      <div slot="header"><h5 >알림</h5></div>
+      <span slot="body" @click="closeMsg(alertMsgPath)"><pre>{{alertMsg}}</pre>
+      </span>
+      <div slot="footer" v-if="showMsgOrdConfirmBtn">
+        <v-btn depressed small color="#967d5f" dark @click="returnOrdMsgYesNo(true)">확인</v-btn>
+        <v-btn depressed small color="blue-grey lighten-2"  @click="returnOrdMsgYesNo(false)">취소</v-btn>
       </div>
     </MessageBox>
 
@@ -406,6 +416,8 @@ export default {
       custName: "",
       showAlertMsg: false,
       showAlerMsgConfirmBtn :false,
+      showMsgOrdConfirmBtn: false,
+      showAlertOrdMsg:false,
       showAlerMsgBtn: true,
       alertMsg: "",
       alertMsgPath: "",
@@ -437,6 +449,7 @@ export default {
       showProcessing: false,
       processMsg: '',
       saveCount: 0,
+      reqDealerList: [],
     }
   },
   props:['NewQTData'],
@@ -1186,7 +1199,8 @@ export default {
       param.payload.Item.ChatFrom = this.UserInfo.BsnID;
       param.payload.Item.ChatTo =  dealer;
       param.payload.Item.Message = chatMsg.msg;
-      param.payload.Item.Status = "0";
+      //param.payload.Item.Status = "0";
+      param.payload.Item.ReadYn = "0";
       param.payload.Item.ReqTm = chatMsg.reqTm;
       param.payload.Item.IMG = chatMsg.imgId;
       param.payload.Item.ChatType = 'Q';
@@ -1208,7 +1222,8 @@ export default {
           name: this.UserInfo.BsnID,
           msg,
           recv:  dealer,
-          chatId: docId,
+          chatId: id,
+          docId: docId,
           reqTm : chatTime,
           qtInfo : this.qtInfoData,
           chatType : "Q",
@@ -1333,7 +1348,6 @@ export default {
       if(value === true){
         this.CarInfo.VinNo = "99999999999999999";
         this.addNewQTRequest();
-        console.log("this.alertYesNo : ", this.alertYesNo);
         console.log("VinNo : ", this.CarInfo.VinNo);
       }
       
@@ -1378,28 +1392,44 @@ export default {
                       Type: 'orderHistory'
                 }});
     },
-    saveQTOrder(){
-
+    checkQtOrder(){
       if(this.qtRequest.length === 0){
         this.showAlertMsg = true;
         this.alertMsg = "요청 부품 리스트가 없습니다.\n요청 부품을 선택 해 주세요.";
         return;
       }
 
-      // 부품지원센터 빼고 선택 대리점 리스트 셋팅
-      let reqDealerList = [];
-      reqDealerList = this.selectedDealer.filter( x => x.DEALER !== 'PARTS');
+      let partsDealer = [];
+      partsDealer = this.selectedDealer.filter( x => x.DEALER === 'PARTS');
+      console.log('partsDealer:' ,partsDealer.length );
+      if(partsDealer.length > 0){
+        this.showAlertMsg = true;
+        this.alertMsg = "부품지원센터는 바로주문 할 \n수 없습니다.";
+        return;
+      }
 
-      if(reqDealerList.length === 0){
+      // 부품지원센터 빼고 선택 대리점 리스트 셋팅
+      
+      this.reqDealerList = this.selectedDealer.filter( x => x.DEALER !== 'PARTS');
+
+      if(this.reqDealerList.length === 0){
         this.showAlertMsg = true;
         this.alertMsg = "요청 할 대리점을 선택 해 주세요.";
         return;
       }
       
-      let index = reqDealerList.findIndex(i => i.TYPE === 'A');
+      this.alertMsg = "바로주문 요청하시겠습니까?"
+      this.showAlertOrdMsg = !this.showAlertOrdMsg;
+      this.showAlerMsgBtn = false;
+      this.showMsgOrdConfirmBtn = !this.showMsgOrdConfirmBtn;  
+      return false;
+    },
+    saveQTOrder(){
+
+      let index = this.reqDealerList.findIndex(i => i.TYPE === 'A');
       if(index === -1){
         // 선택 된 대리점 중 대표대리점이 없으면 첫번째 대리점을 대표로 설정
-        reqDealerList[0].TYPE = 'A'
+        this.reqDealerList[0].TYPE = 'A'
       }
 
       let reOrderCarNo = this.CarInfo.CarNo;
@@ -1423,7 +1453,7 @@ export default {
         this.showProcessing = true;
       }
         
-      reqDealerList.forEach(dealer => {
+      this.reqDealerList.forEach(dealer => {
 
         this.saveCount++;
         
@@ -1480,7 +1510,7 @@ export default {
           console.log(result.data);
 
           // 채팅저장
-          this.saveChatOrder(docId , dealer , reOrderCarNo, reqDealerList);
+          this.saveChatOrder(docId , dealer , reOrderCarNo, this.reqDealerList);
 
           if(this.captureBlobImg !== '') {
             param = {};
@@ -1556,7 +1586,8 @@ export default {
       param.payload.Item.ChatFrom = this.UserInfo.BsnID;
       param.payload.Item.ChatTo =  dealer.DEALER;
       param.payload.Item.Message = chatMsg.msg;
-      param.payload.Item.Status = "0";
+      //param.payload.Item.Status = "0";
+      param.payload.Item.ReadYn = "0";
       param.payload.Item.ReqTm = chatMsg.reqTm;
       param.payload.Item.ChatType = "O";
       param.payload.Item.RefID = ' ';
@@ -1577,37 +1608,46 @@ export default {
           name: this.UserInfo.BsnID,
           msg,
           recv:   dealer.DEALER,
-          chatId: docId,
-          reqTm : chatMsg.reqTm,
-          qtInfo : this.qtInfoData,
-          chatType : "O",
+          chatId: id,
+          docId: docId,
+          reqTm: chatMsg.reqTm,
+          qtInfo: this.qtInfoData,
+          chatType: "O",
           refId: ' ',
 				});
 				
 				if( dealerList.length === this.saveCount )
 				{
 					this.showProcessing = false;
-
 					this.$router.push({name:'Chat', 
-							params:{
-										chatid: docId, 
-										carNo:  carNo,
-										chatFrom: this.UserInfo.BsnID,
-										chatTo: this.sendDealer,
-										chatDate: now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2),
-										qtInfo : this.qtRequest,
-										chatDealerNm : this.sendDealerNm,
-										chatType:'order',
-								}});
+            params:{
+                  chatid: docId, 
+                  carNo:  carNo,
+                  chatFrom: this.UserInfo.BsnID,
+                  chatTo: dealer.DEALER,
+                  chatDate: now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2),
+                  qtInfo : this.qtRequest,
+                  chatDealerNm : this.sendDealerNm,
+                  chatType:'order',
+              }});
 				}
-
       })
       .catch((error) => {
 				console.log(error);
 				this.showProcessing = false;
 				this.saveCount = 0;
       });
-		},
+    },
+    returnOrdMsgYesNo(value)
+    {
+      if(value === true)
+      {
+        this.saveQTOrder();
+      }
+      this.showAlertOrdMsg = false;
+      this.showMsgOrdConfirmBtn = false;
+      this.alertYesNo = value;
+    },
   },
   components: {
     ItemCategory: ItemCategory,

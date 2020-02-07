@@ -35,11 +35,13 @@
         </v-expansion-panel-header>
         <v-expansion-panel-content class="ml-n4 mr-n4">
             <div v-for="(item,idx) in roitemList" :key="idx">
-            <div class="roHistory-content">
-                <div class="roHistory-itemcode">{{item.ID_ITM}}</div>
-                <div class="roHistory-itemName">{{item.NM_ITM}}</div>
-               
-            </div>
+                <div>
+									<div class="roHistory-itemName">{{item.NM_ITM}}</div>	
+									<div class="roHistory-content">
+										<div class="roHistory-itemcode">{{item.ID_ITM}}</div>
+										<div class="roHistory-amount"><span class="amount-title">판매단가</span><span class="amount-info">{{item.MO_PRC_REG | localeNum}} 원</span></div>
+									</div>
+                </div>
                  <!--<div class="roHistory-amount">{{item.MO_PRC_REG | localeNum}} 원</div>-->
             </div>
             <!--<div class="roHistory-content"><v-icon small class="roHistory-icon">fas fa-car</v-icon> {{roItem.NM_CR_TEC}} </div>-->
@@ -204,27 +206,32 @@ export default {
 }
 .roHistory-content
 {
-    display:flex;
-}
-.roHistory-itemName
-{
-    font-size: 0.8rem;
-    margin-top: 5px;
-    text-align: right;
+	display:flex;
 }
 .roHistory-itemcode
 {
-    font-size: 0.9rem;
-    margin-top: 5px;
-    font-weight: bold;
-    flex:40%;
+	font-size: 0.8rem;
+	margin-top: 5px;
+	flex:40%;
 }
-
 .roHistory-amount{
-    color:#F65314;
-    font-size: 0.8rem;
-    font-weight: bold;
-    margin-top: 5px;
-    float:right;
+	font-size: 0.8rem;
+	font-weight: bold;
+	margin-top: 5px;
+	float:right;
+}
+.amount-title
+{
+	margin-right: 5px;
+}
+.amount-info
+{
+	color:#F65314;
+}
+.roHistory-itemName
+{
+	font-size: 0.9rem;
+	margin-top: 5px;
+	font-weight: bold;
 }
 </style>
