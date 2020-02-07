@@ -24,7 +24,9 @@
               </div>
             </div>
             <div class="body-subTitle">
-              <h6>견적 요청 리스트</h6>
+              <div class="subTitle-div">
+                <h6>견적 요청 리스트</h6><slot name="reorder"></slot>
+              </div>
             </div>
 
             <div class="body-qtList">
@@ -66,6 +68,11 @@
   font-weight: bold;
 }
 
+.body-subTitle .subTitle-div{
+  display: flex;
+  margin-bottom: 5px;
+  position: relative;
+}
 .modal-body .custom-control {
   margin-left: 15px;
   font-size: 0.9rem;

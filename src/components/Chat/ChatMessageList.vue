@@ -74,6 +74,8 @@ export default {
     },
     goChating(msg , chatType)
     { 
+      if(msg.RefID === ' ') return;
+
       this.$router.push({name:'QTList', 
                       params:{
                             DocID: msg.Chatid, 

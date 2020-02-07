@@ -38,8 +38,8 @@
         <v-chip class="mr-1 pr-2 pl-2" @click="showQTReqList(0)">당일</v-chip>
         <v-chip class="mr-1 pr-2 pl-2" @click="showQTReqList(1)">어제</v-chip>
         <v-chip class="mr-1 pr-2 pl-2" @click="showQTReqList(2)">일주일</v-chip>
-        <v-chip class="mr-1 pr-2 pl-2" @click="showQTReqList(3)">한달</v-chip>
-
+        <!--<v-chip class="mr-1 pr-2 pl-2" @click="showQTReqList(3)">한달</v-chip>-->
+        <v-chip class="mr-1 pr-2 pl-2" @click="showQTReqList(4)">미확인</v-chip>
       </v-chip-group>          
     </v-row>
       <div class="Chat-list">
@@ -74,17 +74,18 @@
              <div class="chatInfo" :class="{chatInfo2 : checkBrand(qtReq.CarBrand)}">
                 <div class="carInfo">
                   <span class="Carcenter-name">{{qtReq.ReqName}} ({{(qtReq.CarNo === "*empty*")?"미상차량" : qtReq.CarNo}})</span>
-                  <span class="Carcenter-reqdt">{{qtReq.ReqDt}}</span>
+                  <span class="Carcenter-reqdt">{{qtReq.ReqDt}}</span><span :class="linkQtSts(qtReq.QTSts)">{{qtReq.QTSts}}</span>
                   <span class="carSeries">{{qtReq.CarSeries}}</span>
                 </div>
-                <div>
+                <!--<div>
                   <span :class="linkQtSts(qtReq.QTSts)">{{qtReq.QTSts}}</span>
-                </div>
+                </div>-->
              </div>
              <div>
+              <b-badge v-show="qtReq.NotReadCnt !== 0" variant="warning" pill class="mr-1">{{qtReq.NotReadCnt}}</b-badge>
               <span type="button" class="Chat-detail">
                 <i class="fas fa-angle-double-right"></i>
-              </span>  
+              </span> 
              </div>
            </div>
           </li>
@@ -100,6 +101,7 @@
 <script>
 import {datePadding} from '@/utils/common.js'
 import Constant from '@/Constant';
+import {arrayGroupBy} from '@/utils/common.js'
 
 const axios = require('axios').default;
 
@@ -111,10 +113,11 @@ export default {
       qtReqList: [],
       qtItemIndex: -1,
       searchText:'',
-      toggle_exclusive: undefined
+      toggle_exclusive: undefined,
+      targetQtId:'',
     }
   },
-  props:['chatInfo'],
+  props:['chatInfo', 'showQTId'],
   methods: {
     linkClass(idx) {
       if (this.tabIndex === idx) {
@@ -132,7 +135,7 @@ export default {
       }
     },
     showQTReqList(idx) {
-      console.log("showQTReqList??????????????????????? : ", idx);
+      //console.log("showQTReqList??????????????????????? : ", idx);
 
       this.initQTData();
 
@@ -159,6 +162,12 @@ export default {
         startDate = beforeDate.getFullYear() + '-' + datePadding(beforeDate.getMonth()+1,2) +'-'+ datePadding(beforeDate.getDate(),2);
         endDate = now.getFullYear() + '-' + datePadding(now.getMonth()+1,2) +'-'+ datePadding(now.getDate(),2);
       }
+      else if(idx === 4)
+      {
+        beforeDate.setDate(beforeDate.getDate() - 7);
+        startDate = beforeDate.getFullYear() + '-' + datePadding(beforeDate.getMonth()+1,2) +'-'+ datePadding(beforeDate.getDate(),2);
+        endDate = now.getFullYear() + '-' + datePadding(now.getMonth()+1,2) +'-'+ datePadding(now.getDate(),2);
+      }
       else {
         beforeDate.setDate(beforeDate.getDate() - 7);
         startDate = beforeDate.getFullYear() + '-' + datePadding(beforeDate.getMonth()+1,2) +'-'+ datePadding(beforeDate.getDate(),2);
@@ -168,7 +177,7 @@ export default {
       var filter = "ResDealer = :id";
       if(this.searchText === '')
       {
-          filter = "ResDealer = :id and ReqDt between :startDt and :endDt";
+        filter = "ResDealer = :id and ReqDt between :startDt and :endDt";
       }
       else{
         filter = "ResDealer = :id and ( contains(CarNo, :searchText) or contains(ReqName, :searchText) or contains(ReqDt, :searchText) )";
@@ -216,23 +225,130 @@ export default {
 
         for (var chat of result.data.Items) {
           chat.isRead = true;
+          chat.NotReadCnt = 0;
         }
 
-        this.qtReqList = result.data.Items;
-/*
-        if(this.searchText !== '')
+        // 미확인 채팅 건수
+        if(idx === 4){
+          let itemList = result.data.Items;
+          this.getChatReadState('F' ,true , itemList);
+        }
+        else{
+          this.qtReqList = result.data.Items;
+          this.getChatReadState('');
+        }
+      });
+    },
+    getChatReadState(flag,filterRead ,data)
+    {
+      // flag : C : created 에서 호출 , 나머지 : 공백
+      let param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_CHAT";
+      param.payload = {};
+      param.payload.ExpressionAttributeValues = {};
+
+      let filter = "";
+      let idx = 1;
+      let docIdList = this.qtReqList;
+      if(filterRead !== undefined && filterRead === true){
+        docIdList = data;
+      }
+
+      for(let item of docIdList)
+      { 
+        if(idx === 1){
+          filter = filter + "DocID = :docID"+idx;
+        }
+        else{
+          filter = filter + " OR DocID = :docID"+idx;
+        }
+        param.payload.ExpressionAttributeValues[":docID"+idx] = item.ID;
+        idx++;
+      }
+      param.payload.FilterExpression = filter;
+      console.log("======= chat state request result ========");
+      console.log(JSON.stringify(param));
+
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+        console.log("=======  result ========");
+        console.log(result.data);
+
+        let chatList = result.data.Items;
+        for(let qt of this.qtReqList)
         {
-          this.qtReqList = this.searchQTList();
-        } 
-*/        
+          let newChatState = chatList.filter(x => x.DocID === qt.ID && x.ChatTo === this.UserInfo.BsnID && x.ReadYn === '0' );
+          console.log('newChatState:',newChatState);
+          qt.NotChatIDList = newChatState;
+          if(flag !== 'C'){
+            qt.NotReadCnt = newChatState.length;
+          }
+        }
+        
+        // 미확인 조회
+        if(filterRead !== undefined && filterRead === true){
+          let list = this.qtReqList.filter(y => y.NotReadCnt > 0);
+          //console.log('list : ',list);
+          this.qtReqList = list;
+        }
+        console.log('this.qtReqList:', this.qtReqList);
       });
     },
     SetQTInfo(item , idx)
     {
-       this.$emit('setQtInfo' ,item);
-       this.$EventBus.$emit('click-qtInfo' , item)
-       this.qtItemIndex = idx;
-       this.qtReqList[idx].isRead = true;
+      this.$emit('setQtInfo' ,item);
+      this.$EventBus.$emit('click-qtInfo' , item)
+      this.qtItemIndex = idx;
+      this.qtReqList[idx].isRead = true;
+      this.saveChatState(item);
+    },
+    saveChatState(item)
+    {
+      var readCount = item.NotReadCnt;
+
+      for(let chat of item.NotChatIDList)
+      {
+        let param = {};
+        param.operation = "update";
+        param.tableName = "BAY4U_CHAT";
+        param.payload = {};
+        param.payload.Key = {};
+        param.payload.Key.ID = chat.ID;
+        param.payload.Key.DocID = item.ID;
+        param.payload.UpdateExpression = "Set ReadYn = :a";
+        param.payload.ConditionExpression = "ChatTo = :p",
+        param.payload.ExpressionAttributeValues = {
+        ":a" : "1",
+        ":p" : this.UserInfo.BsnID,
+        };
+
+        console.log("======= chat read update Request ========");
+        console.log(JSON.stringify(param));
+
+        axios({
+          method: 'POST',
+          url: Constant.LAMBDA_URL,
+          headers: Constant.JSON_HEADER,
+          data: param
+        })
+        .then((result) => {
+          console.log("======= chat read update  result ========");
+          console.log(result.data);
+          if(readCount > 0 ){
+            readCount = readCount-1;
+            item.NotReadCnt = readCount;
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+      }
     },
     initQTData()
     {
@@ -243,8 +359,24 @@ export default {
 
       if(this.qtReqList.length > 0)
       {
-          var arrSearch = this.qtReqList.filter(item => {
-            if(item.ReqName === this.searchText)
+        var arrSearch = this.qtReqList.filter(item => {
+          if(item.ReqName === this.searchText)
+          {
+            return true;
+          }
+          else{
+            return false;
+          }
+        });
+        
+        if(arrSearch.length > 0)
+        {
+            return arrSearch;
+        }
+        else{
+
+          arrSearch = this.qtReqList.filter(item => {
+            if(item.CarNo === this.searchText)
             {
               return true;
             }
@@ -252,44 +384,30 @@ export default {
               return false;
             }
           });
-          
-          if(arrSearch.length > 0)
-          {
-              return arrSearch;
-          }
-          else{
 
-            arrSearch = this.qtReqList.filter(item => {
-              if(item.CarNo === this.searchText)
-              {
-                return true;
-              }
-              else{
-                return false;
-              }
-            });
-
-            return arrSearch;
-          }
+          return arrSearch;
+        }
       }
     },
     linkQtSts(value){
       
-      if(value === '견적요청')
-      {
+      if(value === '견적요청'){
         return 'qtSts-1';
       }
-      else if(value === '견적회신')
-      {
+      else if(value === '견적회신'){
         return 'qtSts-2';
       }
-      else if(value === '주문요청')
-      {
+      else if(value === '주문요청'){
         return 'qtSts-3';
       }
-      else if(value === '주문확정')
-      {
+      else if(value === '주문확정'){
         return 'qtSts-4';
+      }
+      else if(value === '바로주문'){
+        return 'qtSts-3';
+      }
+      else{
+        return 'qtSts-0';
       }
     },
     checkBrand(value)
@@ -302,13 +420,25 @@ export default {
       else{
         return false;
       }
+    },
+    showQtInfo(ID)
+    {
+      let index = this.qtReqList.findIndex(i => i.ID === ID);
+      this.SetQTInfo(this.qtReqList[index], index);
+      this.targetQtId = '';
+    }
+  },
+  updated(){
+    if(this.targetQtId !== '')
+    {
+      this.showQtInfo(this.targetQtId);
     }
   },
   mounted(){
     this.showQTReqList();
-
   },
   created : function() {
+    this.targetQtId = this.showQTId;
     if(this.UserInfo.BsnID === '')
       this.UserInfo.BsnID = this.$cookies.get('BsnID');
     if(this.UserInfo.Name === '')
@@ -318,48 +448,50 @@ export default {
     if(this.UserInfo.UserType === '')
       this.UserInfo.UserType = this.$cookies.get('UserType');
 
-    this.$EventBus.$on('update-chatMsg', docId => {  
+    this.$EventBus.$on('update-chatMsg', data => {  
       
-      console.log('docId : ' , docId);
+      console.log('docId : ' , data);
       // 같은 대리점 채팅이 아니면 리턴
       //if(this.UserInfo.BsnID !==  docId.qtInfo.ResDealer ) return;
-
+      var flag = '';
       var checkExist = false;
-      
+      console.log('aaa:',  this.qtReqList);
       for (var chat of this.qtReqList) {
-
-        if(chat.ID === docId.chatId) {
+        if(chat.ID === data.docId) {
+          console.log('chat:',chat );
           chat.isRead = false;
+          chat.NotReadCnt = chat.NotReadCnt + 1;
           checkExist = true;
-          chat.QTSts = docId.qtInfo.QTSts; 
+          if(data.qtInfo !== undefined){
+            chat.QTSts = data.qtInfo.QTSts; 
+          }
         }
       }
-
+      console.log('checkExist:',  checkExist);
       // 값이 true가 아니면 현재 리스트에 없다는 의미으로 다시 조회해 와서 표시 하자.
       if(checkExist === false) {
-
+        flag = 'C';
         //console.log('docId.qtInfo : ' , docId.qtInfo);
-
-        if(docId.qtInfo  !== undefined)
+        if(data.qtInfo !== undefined)
         {
-          console.log('Param qtInfo : ' , docId.qtInfo);
+          console.log('Param qtInfo : ' , data.qtInfo);
           var newQtData = {};
-          newQtData.CarBrand   = docId.qtInfo.CarBrand;
-          newQtData.CarNo   = docId.qtInfo.CarNo;
-          newQtData.CarVin  = docId.qtInfo.CarVin;
-          newQtData.ID  = docId.qtInfo.ID;
-          newQtData.IMG  = docId.qtInfo.IMG;
-          newQtData.LineItem  = docId.qtInfo.LineItem;
-          newQtData.Memo  = docId.qtInfo.Memo;
-          newQtData.ReqDt  = docId.qtInfo.ReqDt;
-          newQtData.ReqName  = docId.qtInfo.ReqName;
-          newQtData.ReqSeq  = docId.qtInfo.ReqSeq;
-          newQtData.ReqSite  = docId.qtInfo.ReqSite;
-          newQtData.ResDealer  = docId.qtInfo.ResDealer;
-          newQtData.QTSts  = docId.qtInfo.QTSts;
+          newQtData.CarBrand = data.qtInfo.CarBrand;
+          newQtData.CarNo = data.qtInfo.CarNo;
+          newQtData.CarVin = data.qtInfo.CarVin;
+          newQtData.ID  = data.qtInfo.ID;
+          newQtData.IMG  = data.qtInfo.IMG;
+          newQtData.LineItem  = data.qtInfo.LineItem;
+          newQtData.Memo  = data.qtInfo.Memo;
+          newQtData.ReqDt  = data.qtInfo.ReqDt;
+          newQtData.ReqName  = data.qtInfo.ReqName;
+          newQtData.ReqSeq  = data.qtInfo.ReqSeq;
+          newQtData.ReqSite  = data.qtInfo.ReqSite;
+          newQtData.ResDealer  = data.qtInfo.ResDealer;
+          newQtData.QTSts  = data.qtInfo.QTSts;
           newQtData.isRead  = false;
-          this.qtReqList.push(newQtData);
-          
+          newQtData.NotReadCnt  = 1;
+          this.qtReqList.push(newQtData);    
           //console.log('qtReqList : ' ,this.qtReqList);
 
           if(Array.isArray(this.qtReqList)) {
@@ -369,6 +501,10 @@ export default {
           }
         }
       }
+
+      //this.$nextTick(function(){
+        this.getChatReadState(flag);
+      //});
     }); 
     
     this.$EventBus.$on('update-Sts', updateData => {
@@ -377,11 +513,9 @@ export default {
       if(index >= 0)
       {
         this.qtReqList[index].QTSts = updateData.Msg;
-        console.log('update : ', this.qtReqList[index].QTSts);
+       // console.log('update : ', this.qtReqList[index].QTSts);
       }
-
     });
-
   },    
   computed:{
     UserInfo: {
@@ -479,7 +613,7 @@ export default {
   flex:50%;
 }
 .Chat-list .carInfo{
-  width:80%;
+  width:95%;
   font-weight: bold;
   cursor:pointer;
   padding-left: 10px;
@@ -529,14 +663,12 @@ export default {
   border-color: #bebebe;
   background-color: #FFAB91;
 }
-
 .Carcenter-type {
   align-self: center;
   font-size: 1.5rem;
 }
-
 .Carcenter-name {
-  position: absolute;;
+  position: absolute;
   line-height: 20px;
 }
 .Carcenter-reqdt{
@@ -552,7 +684,8 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  width: 160px;
+  /*width: 160px;*/
+  width:70%;
 }
 .Chat-detail {
   align-self: center;
@@ -561,40 +694,42 @@ export default {
   -webkit-appearance:none;
   -moz-appearance:none;
 }
+.qtSts-0{
+  font-size: 0.8em;
+  font-weight: bold;
+  margin-left:10px;
+  text-align: right;
+}
 /*견적요청 */
 .qtSts-1{
   font-size: 0.8em;
   font-weight: bold;
-  position: absolute;
+  margin-left:10px;
+  /*position: absolute;
   right:40px;
-  top: 0px;
+  top: 0px;*/
   color:#3F51B5;
 }
 /*견적회신 */
 .qtSts-2{
   font-size: 0.8em;
   font-weight: bold;
-  position: absolute;
-  right:40px;
-  top: 10px;
+  margin-left:10px;
+  text-align: right;
   color:#1B5E20;
 }
 /*주문요청 */
 .qtSts-3{
   font-size: 0.8em;
   font-weight: bold;
-  position: absolute;
-  right:40px;
-  top: 10px;
+  margin-left:10px;
   color:#E53935;
 }
 /*주문완료 */
 .qtSts-4{
   font-size: 0.8em;
   font-weight: bold;
-  position: absolute;
-  right:40px;
-  top: 10px;
+  margin-left:10px;
   color:#FF6D00;
 }
 </style>
