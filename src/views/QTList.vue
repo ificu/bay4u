@@ -2,175 +2,6 @@
   <div class="QTList">
      <v-app>
     <b-tabs class="QTList-tab" fill v-model="tabIndex" v-if="showMainPage">
-      <!--<b-tab title="부품요청 내역" :title-link-class="linkClass(0)" >
-        <div class="QTList-contents">
-          <div class="QTList-title">
-            <span>견적 요청 히스토리</span>
-            <CheckLogin></CheckLogin>
-          </div>
-          <div class="QTList-search">
-            <b-input-group>
-              <b-dropdown slot="prepend" v-bind:text="dropdownQT">
-                <b-dropdown-item @click="dropdownQT='대리점'">대리점</b-dropdown-item>
-                <b-dropdown-item @click="dropdownQT='차량번호'">차량번호</b-dropdown-item>
-                <b-dropdown-item @click="dropdownQT='날짜'">날짜</b-dropdown-item>
-              </b-dropdown>
-
-              <b-form-input></b-form-input>
-
-              <b-input-group-append>
-                <b-button><i class="fas fa-search"></i></b-button>
-              </b-input-group-append>
-            </b-input-group>
-          </div>
-
-          <div class="QTList-history">
-            <b-card no-body class="mb-1">
-              <b-card-header header-tag="header" role="tab">
-                <b-container>
-                  <b-row>
-                    <b-col align-self="center" class="history-date">8/7(수)</b-col>
-                    <b-col class="history-car">
-                      <b-row class="history-carNo">
-                        43마4297
-                      </b-row>
-                      <b-row  class="history-carType">
-                        BMW 7Series
-                      </b-row>
-                    </b-col>
-                    <b-col align-self="center" class="history-detailBtn">
-                        <b-button block href="#" v-b-toggle.QTaccordion-1 variant="secondary" size="sm" @click="QTList1Toggle = !QTList1Toggle">
-                        <i v-if="!QTList1Toggle" class="fas fa-chevron-down"></i>
-                        <i v-if="QTList1Toggle"  class="fas fa-chevron-up"></i>
-                      </b-button>
-                    </b-col>
-                  </b-row>
-                </b-container>
-              </b-card-header>
-              <b-collapse id="QTaccordion-1" accordion="my-accordion" role="tabpanel">
-                <b-card-body>
-                  <div class="history-detailConts">
-                    <ul>
-                      <li>
-                        <div class="detailConts-title">대영 모터스</div>
-                        <div class="detailConts-amount">290,000원</div>
-                      </li>
-                      <li>
-                        <div class="detailConts-title">벤츠 부품</div>
-                        <div class="detailConts-amount">305,000원</div>
-                      </li>
-                      <li>
-                        <div class="detailConts-title">코리아 No.1</div>
-                        <div class="detailConts-amount">295,000원</div>
-                      </li>
-                    </ul>
-                    <div class="detailConts-compare">
-                      <b-button @click="showQTComparePageToggle">상세 견적 확인</b-button>
-                      <b-button @click="showQTShoppingcartPageToggle">개별 부품 선택</b-button>
-                    </div>
-                  </div>
-                </b-card-body>
-              </b-collapse>
-            </b-card>
-
-            <b-card no-body class="mb-1">
-              <b-card-header header-tag="header" role="tab">
-                <b-container>
-                  <b-row>
-                    <b-col align-self="center" class="history-date">8/5(월)</b-col>
-                    <b-col class="history-car">
-                      <b-row class="history-carNo">
-                        61거6440
-                      </b-row>
-                      <b-row  class="history-carType">
-                        BMW i8
-                      </b-row>
-                    </b-col>
-                    <b-col align-self="center" class="history-detailBtn">
-                      <b-button block href="#" v-b-toggle.QTaccordion-2 variant="secondary" size="sm" @click="QTList2Toggle = !QTList2Toggle">
-                        <i v-if="!QTList2Toggle" class="fas fa-chevron-down"></i>
-                        <i v-if="QTList2Toggle"  class="fas fa-chevron-up"></i>
-                      </b-button>
-                    </b-col>
-                  </b-row>
-                </b-container>
-              </b-card-header>
-              <b-collapse id="QTaccordion-2" accordion="my-accordion" role="tabpanel">
-                <b-card-body>
-                  <div class="history-detailConts">
-                    <ul>
-                      <li>
-                        <div class="detailConts-title">대영 모터스</div>
-                        <div class="detailConts-amount">290,000원</div>
-                      </li>
-                      <li>
-                        <div class="detailConts-title">벤츠 부품</div>
-                        <div class="detailConts-amount">305,000원</div>
-                      </li>
-                      <li>
-                        <div class="detailConts-title">코리아 No.1</div>
-                        <div class="detailConts-amount">295,000원</div>
-                      </li>
-                    </ul>
-                    <div class="detailConts-compare">
-                      <b-button @click="showQTComparePageToggle">상세 견적 확인</b-button>
-                      <b-button @click="showQTShoppingcartPageToggle">개별 부품 선택</b-button>
-                    </div>
-                  </div>
-                </b-card-body>
-              </b-collapse>
-            </b-card>
-
-            <b-card no-body class="mb-1">
-              <b-card-header header-tag="header" role="tab">
-                <b-container>
-                  <b-row>
-                    <b-col align-self="center" class="history-date">8/5(월)</b-col>
-                    <b-col class="history-car">
-                      <b-row class="history-carNo">
-                        11서8137
-                      </b-row>
-                      <b-row  class="history-carType">
-                        BMW X3
-                      </b-row>
-                    </b-col>
-                    <b-col align-self="center" class="history-detailBtn">
-                      <b-button block href="#" v-b-toggle.QTaccordion-3 variant="secondary" size="sm" @click="QTList3Toggle = !QTList3Toggle">
-                        <i v-if="!QTList3Toggle" class="fas fa-chevron-down"></i>
-                        <i v-if="QTList3Toggle"  class="fas fa-chevron-up"></i>
-                      </b-button>
-                    </b-col>
-                  </b-row>
-                </b-container>
-              </b-card-header>
-              <b-collapse id="QTaccordion-3" accordion="my-accordion" role="tabpanel">
-                <b-card-body>
-                  <div class="history-detailConts">
-                    <ul>
-                      <li>
-                        <div class="detailConts-title">대영 모터스</div>
-                        <div class="detailConts-amount">290,000원</div>
-                      </li>
-                      <li>
-                        <div class="detailConts-title">벤츠 부품</div>
-                        <div class="detailConts-amount">305,000원</div>
-                      </li>
-                      <li>
-                        <div class="detailConts-title">코리아 No.1</div>
-                        <div class="detailConts-amount">295,000원</div>
-                      </li>
-                    </ul>
-                    <div class="detailConts-compare">
-                      <b-button @click="showQTComparePageToggle">상세 견적 확인</b-button>
-                      <b-button @click="showQTShoppingcartPageToggle">개별 부품 선택</b-button>
-                    </div>
-                  </div>
-                </b-card-body>
-              </b-collapse>
-            </b-card>
-          </div>
-        </div>
-      </b-tab>-->
       <b-tab title="견적확정 내역" :title-link-class="linkClass(0)" class="p-0 border bg-light">
         <div class="QTList-contents" >
           <div class="QTList-title">
@@ -184,15 +15,12 @@
                 <b-dropdown-item @click="dropdownQT='차량번호';sampletxtQT='';">차량번호</b-dropdown-item>
                 <b-dropdown-item @click="dropdownQT='날짜';sampletxtQT='2019-12-01';">날짜</b-dropdown-item>
               </b-dropdown>
-
               <b-form-input v-model="qtSearchText" v-on:keypress.enter="GetQTReqList('','')" :placeholder="sampletxtQT"></b-form-input>
-
               <b-input-group-append>
                 <b-button @click="GetQTReqList('','')"><i class="fas fa-search"></i></b-button>
               </b-input-group-append>
             </b-input-group>
           </div>
-
           <div class="QTList-history">
             <!--견적내역-->
             <b-card no-body class="mb-1" v-for="(qtItem , idx) in qtReqList" v-bind:key="idx" >
@@ -200,38 +28,44 @@
                 <b-container>
                   <b-row>
                     <b-col align-self="center" class="history-brand">
-                      <img height='18' v-if="qtItem[0].CarBrand === 'AUDI'" style="align-self:center; margin-left:-3px;width:40px;" src="@/assets/BRAND-AUDI.png">
-                      <img height='25' v-if="qtItem[0].CarBrand === 'BENZ'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-BENZ.png">
-                      <img height='30' v-if="qtItem[0].CarBrand === 'BMW'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-BMW.png">
-                      <img height='30' v-if="qtItem[0].CarBrand === 'CADILLAC'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-CADILLAC.png">
-                      <img height='10' v-if="qtItem[0].CarBrand === 'CHRYSLER'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-CHRYSLER.png">
-                      <img height='25' v-if="qtItem[0].CarBrand === 'CITROEN'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-CITROEN.png">
-                      <img height='18' v-if="qtItem[0].CarBrand === 'DODGE'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-DODGE.png">
-                      <img height='30' v-if="qtItem[0].CarBrand === 'FIAT'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-FIAT.png">
-                      <img height='25' v-if="qtItem[0].CarBrand === 'FORD'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-FORD.png">
-                      <img height='25' v-if="qtItem[0].CarBrand === 'HONDA'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-HONDA.png">
-                      <img height='15' v-if="qtItem[0].CarBrand === 'JEEP'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-JEEP.png">
-                      <img height='17' v-if="qtItem[0].CarBrand === 'LANDROVER'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-LANDROVER.png">
-                      <img height='25' v-if="qtItem[0].CarBrand === 'LEXUS'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-LEXUS.png">
-                      <img height='30' v-if="qtItem[0].CarBrand === 'LINCOLN'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-LINCOLN.png">
-                      <img height='18' v-if="qtItem[0].CarBrand === 'MINI'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-MINI.png">
-                      <img height='25' v-if="qtItem[0].CarBrand === 'PEUGEOT'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-PEUGEOT.png">
+                      <img height='18' v-if="qtItem[0].CarBrand === 'AUDI'" style="align-self:center;margin-left:-3px;width:40px;" src="@/assets/BRAND-AUDI.png">
+                      <img height='25' v-if="qtItem[0].CarBrand === 'BENZ'" style="align-self:center;margin-left:4px;" src="@/assets/BRAND-BENZ.png">
+                      <img height='30' v-if="qtItem[0].CarBrand === 'BMW'" style="align-self:center;margin-left:4px;" src="@/assets/BRAND-BMW.png">
+                      <img height='30' v-if="qtItem[0].CarBrand === 'CADILLAC'" style="align-self:center;margin-left:2px;" src="@/assets/BRAND-CADILLAC.png">
+                      <img height='10' v-if="qtItem[0].CarBrand === 'CHRYSLER'" style="align-self:center;margin-left:0px;width:36px;" src="@/assets/BRAND-CHRYSLER.png">
+                      <img height='25' v-if="qtItem[0].CarBrand === 'CITROEN'" style="align-self:center;margin-left:5px;" src="@/assets/BRAND-CITROEN.png">
+                      <img height='18' v-if="qtItem[0].CarBrand === 'DODGE'" style="align-self:center;margin-left:0px;width:36px;" src="@/assets/BRAND-DODGE.png">
+                      <img height='30' v-if="qtItem[0].CarBrand === 'FIAT'" style="align-self:center;margin-left:4px;" src="@/assets/BRAND-FIAT.png">
+                      <img height='25' v-if="qtItem[0].CarBrand === 'FORD'" style="align-self:center;margin-left:1px;width:38px;" src="@/assets/BRAND-FORD.png">
+                      <img height='25' v-if="qtItem[0].CarBrand === 'HONDA'" style="align-self:center;margin-left:2px;width:34px;" src="@/assets/BRAND-HONDA.png">
+                      <img height='15' v-if="qtItem[0].CarBrand === 'JEEP'" style="align-self:center;margin-left:2px;width:34px;" src="@/assets/BRAND-JEEP.png">
+                      <img height='17' v-if="qtItem[0].CarBrand === 'LANDROVER'" style="align-self:center;margin-left:2px;" src="@/assets/BRAND-LANDROVER.png">
+                      <img height='25' v-if="qtItem[0].CarBrand === 'LEXUS'" style="align-self:center;margin-left:4px;" src="@/assets/BRAND-LEXUS.png">
+                      <img height='30' v-if="qtItem[0].CarBrand === 'LINCOLN'" style="align-self:center; margin-left:6px;" src="@/assets/BRAND-LINCOLN.png">
+                      <img height='18' v-if="qtItem[0].CarBrand === 'MINI'" style="align-self:center;margin-left:-3px;width:40px;" src="@/assets/BRAND-MINI.png">
+                      <img height='25' v-if="qtItem[0].CarBrand === 'PEUGEOT'" style="align-self:center; margin-left:4px;" src="@/assets/BRAND-PEUGEOT.png">
                       <img height='30' v-if="qtItem[0].CarBrand === 'PORSCHE'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-PORSCHE.png">
-                      <img height='25' v-if="qtItem[0].CarBrand === 'TOYOTA'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-TOYOTA.png">
+                      <img height='25' v-if="qtItem[0].CarBrand === 'TOYOTA'" style="align-self:center; margin-left:0px;" src="@/assets/BRAND-TOYOTA.png">
                       <img height='25' v-if="qtItem[0].CarBrand === 'VOLVO'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-VOLVO.png">
                       <img height='30' v-if="qtItem[0].CarBrand === 'VW'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-VW.png">
                     </b-col>                    
                     <b-col class="history-date" :class="{ 'history-date2' :(qtItem[0].CarSeries !== undefined && qtItem[0].CarSeries !== '') ? true :false}">{{setQtDate(qtItem[0].ReqDt)}}</b-col>
                     <b-col class="history-car" :class="{ 'history-car2' :(qtItem[0].CarSeries !== undefined && qtItem[0].CarSeries !== '') ? true :false}">
                       <b-row class="history-carNo">
-                        <v-icon color="#FFF59D" style="margin-right:4px;margin-top:4px;font-size:0.85em;" v-if="showQtState(qtItem)">fas fa-hourglass-end</v-icon>
-                        <v-icon color="#FFF59D" style="margin-right:4px;margin-top:3px;font-size:0.85em;" v-if="showOrderState(qtItem)">fas fa-check</v-icon>
+                        <!--견적요청-->
+                        <v-icon color="#FFF59D" style="margin-right:4px;margin-top:4px;font-size:1.1em;" v-if="showQtState(qtItem)">far fa-clock</v-icon>
+                        <!--견적회신-->
+                        <v-icon color="#FFF59D" style="margin-right:4px;margin-top:4px;font-size:1.45em;" v-if="showQtConfirmState(qtItem)">receipt</v-icon>
+                        <!--주문요청-->
+                        <v-icon color="#FFF59D" style="margin-right:4px;margin-top:3px;font-size:1.35em;" v-if="showOrderState(qtItem)">local_grocery_store</v-icon>
+                        <!--주문확정-->
+                        <v-icon color="#FFF59D" style="margin-right:4px;margin-top:3px;font-size:1.08em;" v-if="showOrdConfirmState(qtItem)">fas fa-truck</v-icon>
                         {{(qtItem[0].CarNo === "*empty*")?"미상차량" : qtItem[0].CarNo }}
                       </b-row>
                       <!--<b-row class="history-carSeries">
                        {{qtItem[0].CarSeries}}
                       </b-row>-->                
-                    </b-col>       
+                    </b-col>    
                     <b-col align-self="center" class="history-detailHeaderBtn">
                       <b-button :id ="'btnGrp-'+qtItem[0].ID" block href="#"  v-b-toggle="'accordion-' + idx"  variant="secondary"  size="sm" v-on:click="showQtList(qtItem)">
                         <!--<i class="fas fa-chevron-down" :id="'btnDetail'+idx"></i>-->
@@ -442,7 +276,7 @@
                         </b-container>
                         </b-card-header>
                       <b-collapse :id="'accd-'+confrimInfo.ID" accordion="my-accordion3" role="tabpanel" v-show="linkToggleQtConfirm2(confrimInfo.ID)">
-                        <b-card-body class ="pt-1 pl-1 pr-1">
+                        <b-card-body class ="pt-1 pl-0 pr-0">
                           <div class="dealer-qtInfo">
                             <ul>
                               <li v-for="(item, index) in detailQTData2" v-bind:key = "index">
@@ -504,125 +338,7 @@
                   </div>
                 </b-card-body>
               </b-collapse>
-            </b-card>
-
-            <!--
-            <b-card no-body class="mb-1">
-              <b-card-header header-tag="header" role="tab">
-                <b-container>
-                  <b-row>
-                    <b-col align-self="center" class="history-date">8/5(월)</b-col>
-                    <b-col class="history-car">
-                      <b-row class="history-carNo">
-                        61거6440
-                      </b-row>
-                      <b-row  class="history-carType">
-                        BMW i8
-                      </b-row>
-                    </b-col>
-                    <b-col align-self="center" class="history-detailBtn">
-                      <b-button block href="#" v-b-toggle.SOaccordion-2 variant="secondary" size="sm" @click="SOList2Toggle = !SOList2Toggle">
-                        <i v-if="!SOList2Toggle" class="fas fa-chevron-down"></i>
-                        <i v-if="SOList2Toggle"  class="fas fa-chevron-up"></i>
-                      </b-button>
-                    </b-col>
-                  </b-row>
-                </b-container>
-              </b-card-header>
-              <b-collapse id="SOaccordion-2" accordion="my-accordion" role="tabpanel">
-                <b-card-body>
-                  <div class="history-detailConts">
-                    <ul>
-                      <li>
-                        <div class="detailConts-dealer">코리아 No.1</div>
-                      </li>
-                      <li>
-                        <div class="detailConts-icon"><img src="@/assets/icon-bosch.png"></div>
-                        <div class="detailConts-title">에어 필터</div>
-                        <div class="detailConts-amount">65,000원</div>
-                        <div class="detailConts-status"><i class="fas fa-shipping-fast"></i></div>
-                      </li>
-                      <li>
-                        <div class="detailConts-icon"><img src="@/assets/icon-fram.png"></div>
-                        <div class="detailConts-title">연료 필터</div>
-                        <div class="detailConts-amount">120,000원</div>
-                        <div class="detailConts-status"><i class="fas fa-phone"></i></div>
-                      </li>
-                      <li>
-                        <div class="detailConts-icon"><img src="@/assets/icon-trw.png"></div>
-                        <div class="detailConts-title">디스크 패드</div>
-                        <div class="detailConts-amount">89,000원</div>
-                        <div class="detailConts-status"><i class="fas fa-box-open"></i></div>
-                      </li>
-                    </ul>
-                    <div class="detailConts-compare">
-                      <b-button @click="showRODetailPageToggle">정비 명세서 작성</b-button>
-                    </div>
-                  </div>
-                </b-card-body>
-              </b-collapse>
-            </b-card>
-
-            <b-card no-body class="mb-1">
-              <b-card-header header-tag="header" role="tab">
-                <b-container>
-                  <b-row>
-                    <b-col align-self="center" class="history-date">8/5(월)</b-col>
-                    <b-col class="history-car">
-                      <b-row class="history-carNo">
-                        11서8137
-                      </b-row>
-                      <b-row  class="history-carType">
-                        BMW X3
-                      </b-row>
-                    </b-col>
-                    <b-col align-self="center" class="history-detailBtn">
-                      <b-button block href="#" v-b-toggle.SOaccordion-3 variant="secondary" size="sm" @click="SOList3Toggle = !SOList3Toggle">
-                        <i v-if="!SOList3Toggle" class="fas fa-chevron-down"></i>
-                        <i v-if="SOList3Toggle"  class="fas fa-chevron-up"></i>
-                      </b-button>
-                    </b-col>
-                  </b-row>
-                </b-container>
-              </b-card-header>
-              <b-collapse id="SOaccordion-3" accordion="my-accordion" role="tabpanel">
-                <b-card-body>
-                  <div class="history-detailConts">
-                    <ul>
-                      <li>
-                        <div class="detailConts-dealer">대영 모터스</div>
-                      </li>
-                      <li>
-                        <div class="detailConts-icon"><img src="@/assets/icon-bosch.png"></div>
-                        <div class="detailConts-title">에어 필터</div>
-                        <div class="detailConts-amount">65,000원</div>
-                        <div class="detailConts-status"><i class="fas fa-shipping-fast"></i></div>
-                      </li>
-                      <li>
-                        <div class="detailConts-icon"><img src="@/assets/icon-fram.png"></div>
-                        <div class="detailConts-title">연료 필터</div>
-                        <div class="detailConts-amount">120,000원</div>
-                        <div class="detailConts-status"><i class="fas fa-phone"></i></div>
-                      </li>
-                      <hr>
-                      <li>
-                        <div class="detailConts-dealer">코리아 No.1</div>
-                      </li>
-                      <li>
-                        <div class="detailConts-icon"><img src="@/assets/icon-trw.png"></div>
-                        <div class="detailConts-title">디스크 패드</div>
-                        <div class="detailConts-amount">89,000원</div>
-                        <div class="detailConts-status"><i class="fas fa-box-open"></i></div>
-                      </li>
-                    </ul>
-                    <div class="detailConts-compare">
-                      <b-button @click="showRODetailPageToggle">정비 명세서 작성</b-button>
-                    </div>
-                  </div>
-                </b-card-body>
-              </b-collapse>
-            </b-card>
--->            
+            </b-card>         
           </div>
         </div>
       </b-tab>
@@ -647,7 +363,27 @@
               </b-input-group-append>
             </b-input-group>
           </div>
-
+            <div class="orderbutton">
+              <!-- 재주문 요청-->
+              <QTReOrder :orderData="selectedOrder" :orderCarInfo="CarInfoData">
+                <div slot="trigger"  slot-scope="slotProps">
+                  <v-btn color="#4E342E" dark depressed @click="slotProps.open">재주문하기</v-btn>
+                </div>
+                <div class="reorder-header" slot="header" slot-scope="slotProps">
+                  <v-toolbar flat color="#696565"> 
+                    <v-toolbar-title>
+                      <h4>총 {{slotProps.dealerCount}}개 대리점에 <br> 주문요청을 보냅니다</h4>
+                    </v-toolbar-title>                 
+                    <v-spacer></v-spacer>
+                    <v-toolbar-items> 
+                    </v-toolbar-items>
+                    <v-btn icon dark @click="slotProps.close">
+                      <v-icon>mdi-close</v-icon>
+                    </v-btn>
+                  </v-toolbar>
+                </div>
+              </QTReOrder>
+            </div>
           <div class="QTList-history">
             <b-card no-body class="mb-1" v-for="(item , idx) in orderHistory" v-bind:key="idx">
               <b-card-header header-tag="header" role="tab" header-class="card-header-order">
@@ -656,14 +392,14 @@
                     <b-col align-self="center" class="history-order-date">{{setQtDate(item.ReqDt)}}</b-col>
                     <b-col class="history-order-car">
                       <b-row class="history-carNo">
-                      {{(item.CarNo === "*empty*")?"미상차량" : item.CarNo }}
+                        {{(item.CarNo === "*empty*")?"미상차량" : item.CarNo }}
                       </b-row>
                       <b-row  class="history-carType">
                         {{item.ResDealerNm}}
                       </b-row>
                     </b-col>
                     <b-col align-self="center" class="history-detailBtn">
-                      <b-button block href="#"  v-b-toggle="'ROaccordion' + idx"  variant="secondary" size="sm" @click="GetOrderDetail(item)">
+                      <b-button block href="#" v-b-toggle="'ROaccordion' + idx"  variant="secondary" size="sm" @click="GetOrderDetail(item)">
                         <!--<i v-if="!ROList1Toggle" class="fas fa-chevron-down"></i>
                         <i v-if="ROList1Toggle"  class="fas fa-chevron-up"></i>-->
                         <span class="when-opened">
@@ -677,28 +413,21 @@
                   </b-row>
                 </b-container>
               </b-card-header>
-              <b-collapse :id="'ROaccordion'+idx" accordion="my-accordion" role="tabpanel" :visible="linkToggle(idx)" >
-                <b-card-body>
-                  <div class="history-detailConts">
+              <b-collapse :id="'ROaccordion'+idx" accordion="my-accordion" role="tabpanel" :visible="linkToggle(idx)">
+                <b-card-body class ="pa-0">
+                  <div v-if="orderdetail.isHistory" class="history-detailConts-order">
                     <ul>
-                      <li v-for="(ordItem, idx) in orderdetail" v-bind:key="idx">
-                        <div class="detailConts-title detailConts-subtotal">{{ordItem.itemCode}}</div>
-                        <div class="detailConts-title detailConts-subtotal2">{{ordItem.itemName}}</div>
-                        <div class="detailConts-title detailConts-subtotal3">{{ordItem.itemQty}}개</div>
-                        <div class="detailConts-amount detailConts-subtotal">{{ordItem.AMT | localeNum}}원</div>
-                      </li>
-                    <!--  <li>
-                        <div class="detailConts-title detailConts-subtotal">브레이크 패드 교환</div>
-                        <div class="detailConts-amount detailConts-subtotal">160,000원</div>
-                      </li>
-                      <li>
-                        <div class="detailConts-title detailConts-subtotal">기타</div>
-                        <div class="detailConts-amount detailConts-subtotal">5,000원</div>
-                      </li>
-                      -->
-                      <li>
-                        <div class="detailConts-title detailConts-total">총 합계</div>
-                        <div class="detailConts-amount detailConts-total">{{total4 | localeNum}}원</div>
+                      <li v-for="(ordItem, idx) in orderdetail.ordLineItem[idx]" v-bind:key="idx">
+                        <b-form-checkbox-group class="pa-0" id="chkOrdGrp" v-model="selectedOrder">
+                          <b-form-checkbox :value="ordItem" class="pl-7">
+                            <div class="orderItem">
+                              <div class="detailConts-title detailConts-itemCode">{{ordItem.itemCode}}</div>
+                              <div class="detailConts-title detailConts-itemName">{{ordItem.itemName}}</div>
+                              <div class="detailConts-title detailConts-itemQty">{{ordItem.itemQty}}개</div>
+                              <div class="detailConts-amount detailConts-itemAmt">{{ordItem.AMT | localeNum}}원</div>
+                            </div>
+                          </b-form-checkbox>
+                        </b-form-checkbox-group>
                       </li>
                     </ul>
                     <!--<div class="detailConts-compare">
@@ -706,114 +435,35 @@
                       <b-button @click="showCustomerDocOptionPageToggle">고객 명세서 발송</b-button>
                     </div>-->
                   </div>
-                </b-card-body>
-              </b-collapse>
-            </b-card>
-            <!--
-            <b-card no-body class="mb-1">
-              <b-card-header header-tag="header" role="tab">
-                <b-container>
-                  <b-row>
-                    <b-col align-self="center" class="history-date">8/5(월)</b-col>
-                    <b-col class="history-car">
-                      <b-row class="history-carNo">
-                        61거6440
-                      </b-row>
-                      <b-row  class="history-carType">
-                        BMW i8
-                      </b-row>
-                    </b-col>
-                    <b-col align-self="center" class="history-detailBtn">
-                      <b-button block href="#" v-b-toggle.ROaccordion-2 variant="secondary" size="sm" @click="ROList2Toggle = !ROList2Toggle">
-                        <i v-if="!ROList2Toggle" class="fas fa-chevron-down"></i>
-                        <i v-if="ROList2Toggle"  class="fas fa-chevron-up"></i>
-                      </b-button>
-                    </b-col>
-                  </b-row>
-                </b-container>
-              </b-card-header>
-              <b-collapse id="ROaccordion-2" accordion="my-accordion" role="tabpanel">
-                <b-card-body>
-                  <div class="history-detailConts">
+                  <div v-else class="history-detailConts-order">
                     <ul>
-                      <li>
-                        <div class="detailConts-title detailConts-subtotal">오일 교환</div>
-                        <div class="detailConts-amount detailConts-subtotal">120,000원</div>
-                      </li>
-                      <li>
-                        <div class="detailConts-title detailConts-subtotal">브레이크 패드 교환</div>
-                        <div class="detailConts-amount detailConts-subtotal">160,000원</div>
-                      </li>
-                      <li>
-                        <div class="detailConts-title detailConts-subtotal">기타</div>
-                        <div class="detailConts-amount detailConts-subtotal">5,000원</div>
-                      </li>
-                      <li>
-                        <div class="detailConts-title detailConts-total">총 합계</div>
-                        <div class="detailConts-amount detailConts-total">325,000원</div>
+                      <li v-for="(ordItem, idx) in orderdetail.ordLineItem" v-bind:key="idx">
+                        <b-form-checkbox-group class="pa-0" id="chkOrdGrp" v-model="selectedOrder">
+                          <b-form-checkbox :value="ordItem" class="pl-7">
+                            <div class="orderItem">
+                              <div class="detailConts-title detailConts-itemCode">{{ordItem.itemCode}}</div>
+                              <div class="detailConts-title detailConts-itemName">{{ordItem.itemName}}</div>
+                              <div class="detailConts-title detailConts-itemQty">{{ordItem.itemQty}}개</div>
+                              <div class="detailConts-amount detailConts-itemAmt">{{ordItem.AMT | localeNum}}원</div>
+                            </div>
+                          </b-form-checkbox>
+                        </b-form-checkbox-group>
                       </li>
                     </ul>
-                    <div class="detailConts-compare">
-                      <b-button @click="showRODetailPageToggle">명세서 수정</b-button>
-                      <b-button @click="showCustomerDocOptionPageToggle">고객 명세서 발송</b-button>
-                    </div>
                   </div>
                 </b-card-body>
-              </b-collapse>
-            </b-card>
-
-            <b-card no-body class="mb-1">
-              <b-card-header header-tag="header" role="tab">
-                <b-container>
-                  <b-row>
-                    <b-col align-self="center" class="history-date">8/5(월)</b-col>
-                    <b-col class="history-car">
-                      <b-row class="history-carNo">
-                        11서8137
-                      </b-row>
-                      <b-row  class="history-carType">
-                        BMW X3
-                      </b-row>
-                    </b-col>
-                    <b-col align-self="center" class="history-detailBtn">
-                      <b-button block href="#" v-b-toggle.ROaccordion-3 variant="secondary" size="sm" @click="ROList3Toggle = !ROList3Toggle">
-                        <i v-if="!ROList3Toggle" class="fas fa-chevron-down"></i>
-                        <i v-if="ROList3Toggle"  class="fas fa-chevron-up"></i>
-                      </b-button>
-                    </b-col>
-                  </b-row>
-                </b-container>
-              </b-card-header>
-              <b-collapse id="ROaccordion-3" accordion="my-accordion" role="tabpanel">
-                <b-card-body>
-                  <div class="history-detailConts">
-                    <ul>
-                      <li>
-                        <div class="detailConts-title detailConts-subtotal">오일 교환</div>
-                        <div class="detailConts-amount detailConts-subtotal">120,000원</div>
-                      </li>
-                      <li>
-                        <div class="detailConts-title detailConts-subtotal">브레이크 패드 교환</div>
-                        <div class="detailConts-amount detailConts-subtotal">160,000원</div>
-                      </li>
-                      <li>
-                        <div class="detailConts-title detailConts-subtotal">기타</div>
-                        <div class="detailConts-amount detailConts-subtotal">5,000원</div>
-                      </li>
-                      <li>
-                        <div class="detailConts-title detailConts-total">총 합계</div>
-                        <div class="detailConts-amount detailConts-total">325,000원</div>
-                      </li>
-                    </ul>
-                    <div class="detailConts-compare">
-                      <b-button @click="showRODetailPageToggle">명세서 수정</b-button>
-                      <b-button @click="showCustomerDocOptionPageToggle">고객 명세서 발송</b-button>
-                    </div>
+                <b-card-footer class="pt-0">
+                  <div  v-if="orderdetail.isHistory" class="QTRes-footer">
+                    <div class="detailConts-title detailConts-total">총 합계</div>
+                    <div class="detailConts-amount detailConts-total">{{sumOrdHisAmt(idx) | localeNum}}원</div>
                   </div>
-                </b-card-body>
+                  <div  v-else class="QTRes-footer">
+                    <div class="detailConts-title detailConts-total">총 합계</div>
+                    <div class="detailConts-amount detailConts-total">{{total4 | localeNum}}원</div>
+                  </div>
+                </b-card-footer>
               </b-collapse>
             </b-card>
-            -->
           </div>
         </div>
       </b-tab>
@@ -1173,6 +823,7 @@ import CustomerDoc from '@/components/QTList/CustomerDoc.vue'
 import CustomerDocOption from '@/components/QTList/CustomerDocOption.vue'
 import CheckLogin from '@/components/Common/CheckLogin.vue'
 import QTOrder from '@/components/QTList/QTOrder.vue'
+import QTReOrder from '@/components/QTList/QTReOrder.vue'
 import BackToTop from '@/components/Common/BackToTop.vue'
 import Constant from '@/Constant';
 import MessageBox from '@/components/Common/MessageBox.vue'
@@ -1234,7 +885,7 @@ export default {
       orderDealerName:"",
       orderList:[],
       orderHistory:[],
-      orderdetail:[],
+      orderdetail:{ isHistory: false, ordLineItem :[]},
       qtSearchText:'',
       ordSearchText:'',
       showQTImageFlag:false,
@@ -1246,9 +897,14 @@ export default {
       visibleIcon3:false,
       showProcessing: false,
       processMsg: '',
-     // visible:false,
-     // visible2:false,
-     // visible3:true,
+      selectedOrder :[],
+      isRouteOrdHis: false,
+      CarInfoData : {
+        CarN:'',
+        VinNo: '',
+        CarBrand:'',
+        captureBlobImg:''
+      },
     }
   },
   methods: {
@@ -1589,10 +1245,10 @@ export default {
     showConfirmVlue2(docId)
     {
         
-        if(Array.isArray(this.confirmQTdata2)){
+      if(Array.isArray(this.confirmQTdata2)){
         let index =  this.confirmQTdata2.findIndex(i => i.DocID === docId);
        // console.log('data : ', this.confirmQTdata2);
-      //  console.log('docId ' ,docId );
+       // console.log('docId ' ,docId );
        // console.log('index222' ,index );
         if(index >= 0)
         {
@@ -1638,7 +1294,7 @@ export default {
     },
     GetOrderHistory(docId ,orderID, seachText)
     {
-      
+      this.selectedOrder = [];
       // 과거주문 내역 조회일 경우
       if(seachText !== '')
       {
@@ -1684,14 +1340,13 @@ export default {
       var key = ":id";
       param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
      
-     if(this.ordSearchText === '')
-      {
+      if(this.ordSearchText === ''){
         var key2 = ":startDt";
         var key3 = ":endDt";
         param.payload.ExpressionAttributeValues[key2] = startDate;
         param.payload.ExpressionAttributeValues[key3] = endDate;
       }
-     else{
+      else{
 
         var searchCase = this.dropdownSO;
         switch (searchCase) {
@@ -1728,23 +1383,41 @@ export default {
         if(Array.isArray(result.data.Items))
         {
           result.data.Items.sort(function(a, b){
-            return (a.ReqDt < b.ReqDt) ? 1 : -1;
+            return (a.ReqTm < b.ReqTm) ? 1 : -1;
           });
         }
 
         this.orderHistory  = result.data.Items;
         if(docId !== ''  && orderID !== '')
         {
+          // 채팅에서 넘어 온 경우
           this.showOrderItem(docId , orderID);
         } 
 
-      });  
-      
+        if(seachText !== '')
+        {
+          // 과거 정비이력에서 넘어 온 경우
+          this.showOrderHisItem(this.ordSearchText);
+        }
+      });     
     },
     GetOrderDetail(item)
-    {
-      this.ROList1Toggle = !this.ROList1Toggle
-      this.orderdetail = JSON.parse(convertDynamoToArrayString(item.LineItem));
+    { 
+      if(this.isRouteOrdHis)
+      { 
+        // 정비이력에서 넘어 온 경우 
+        for(var i=0;i < this.orderHistory.length; i++)
+        {
+          let target = 'ROaccordion' + i;
+          let accElement =  document.getElementById(target);
+          accElement.setAttribute("style", "display:none;");
+        }
+        this.isRouteOrdHis = false;
+      }
+      this.ROList1Toggle = !this.ROList1Toggle;
+      this.orderdetail.isHistory = false;
+      this.orderdetail.ordLineItem = JSON.parse(convertDynamoToArrayString(item.LineItem));
+      //this.selectedOrder = [];
     },
     setQtDate(value)
     {
@@ -1784,7 +1457,7 @@ export default {
         console.log(param); 
 
         var btnGrp = 'btnGrp-'+item[0].ID;
-        if(document.getElementById(btnGrp).getAttribute("aria-expanded") === "false")
+        if(document.getElementById(btnGrp) !== null && document.getElementById(btnGrp).getAttribute("aria-expanded") === "false" && this.showProcessing === false)
         { 
           this.processMsg = "견적회신 조회 중입니다. \n잠시만 기다려주세요.";
           this.showProcessing = true;
@@ -1881,6 +1554,13 @@ export default {
         console.log("======= 견적확정 조회 Request result ========");
         console.log(param); 
 
+        var btnGrp = 'btnGrp-'+item[0].ID;
+        if(document.getElementById(btnGrp)!== null && document.getElementById(btnGrp).getAttribute("aria-expanded") === "false" && this.showProcessing === false)
+        { 
+          this.processMsg = "견적회신 조회 중입니다. \n잠시만 기다려주세요.";
+          this.showProcessing = true;
+        }
+
         axios({
           method: 'POST',
           url: Constant.LAMBDA_URL,
@@ -1893,21 +1573,20 @@ export default {
           //this.confirmQTdata2  = result.data.Items;
 
           for(var element  of  result.data.Items){
-
-              console.log('element : ' ,element);
-              let resQtItem = {};
-              resQtItem.ID = element.ID;
-              resQtItem.DocID = element.DocID;
-              resQtItem.CarNo = element.CarNo;
-              resQtItem.DealerName = element.ResDealerNm;
-              resQtItem.DealerCode = element.ResDealer;
-              resQtItem.DealerAgent = '';
-              resQtItem.ResFlag = 'BAY4U'
-              resQtItem.CarType ='';
-              resQtItem.QTSts = el.QTSts;
-              resQtItem.ResDetail = JSON.parse(element.LineItem);
-              //el.ResQTData.push(resQtItem);
-              el.ResQTData.splice(0, 0, resQtItem);
+            //console.log('element : ' ,element);
+            let resQtItem = {};
+            resQtItem.ID = element.ID;
+            resQtItem.DocID = element.DocID;
+            resQtItem.CarNo = element.CarNo;
+            resQtItem.DealerName = element.ResDealerNm;
+            resQtItem.DealerCode = element.ResDealer;
+            resQtItem.DealerAgent = '';
+            resQtItem.ResFlag = 'BAY4U'
+            resQtItem.CarType ='';
+            resQtItem.QTSts = el.QTSts;
+            resQtItem.ResDetail = JSON.parse(element.LineItem);
+            //el.ResQTData.push(resQtItem);
+            el.ResQTData.splice(0, 0, resQtItem);
           };
 
           if(refID !== undefined && refID.length > 1 ) 
@@ -1917,7 +1596,6 @@ export default {
             this.$nextTick(function() {
               //console.log('refID : ', refID);
               var target = 'btnDealerAccordion-'+refID;
-              
               if(document.getElementById(target) !== null)
               { 
                 //console.log('refID : ', document.getElementById(target));
@@ -1926,6 +1604,9 @@ export default {
             });     
           }
         });  
+
+        this.showProcessing = false;
+        this.processMsg = "";
       });
 
     },
@@ -2120,7 +1801,6 @@ export default {
           });
         }
       });  
-
     },
     goOrderChating(val)
     {
@@ -2150,7 +1830,8 @@ export default {
       param.payload.Item.ChatFrom = this.UserInfo.BsnID;
       param.payload.Item.ChatTo =  this.orderData.DealerCode;
       param.payload.Item.Message = chatMsg.msg;
-      param.payload.Item.Status = "0";
+      //param.payload.Item.Status = "0";
+      param.payload.Item.ReadYn = "0";
       param.payload.Item.ReqTm = chatMsg.reqTm;
       param.payload.Item.ChatType = "O";
       param.payload.Item.RefID = val;
@@ -2175,7 +1856,8 @@ export default {
           name: this.UserInfo.BsnID,
           msg,
           recv:  this.orderData.DealerCode,
-          chatId: this.orderData.DocID,
+          chatId: id, 
+          docId: this.orderData.DocID,
           reqTm : chatMsg.reqTm,
           qtInfo : qtInfoPram,
           chatType : "O",
@@ -2190,6 +1872,7 @@ export default {
                   chatTo: this.orderData.DealerCode,
                   chatDate: now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2),
                   qtInfo : this.orderData,
+                  chatDealerNm : this.orderDealerName,
                   chatType:'order',
               }});
 
@@ -2198,20 +1881,39 @@ export default {
         console.log(error);
       });
     },
-    showOrderItem(docId , orderID)
+    showOrderItem(docId , orderID )
     {
-      //console.log('docId : ' , docId);
+      // 채팅에서 넘어 온 경우
       if(Array.isArray(this.orderHistory)){
         let index =  this.orderHistory.findIndex(i => i.DocID === docId);
-        //console.log('index:' , index);
         this.orderToggleIndex = index;
         let item = this.orderHistory[index];
         this.GetOrderDetail(item);
       } 
     },
+    showOrderHisItem(carNo)
+    {
+      // 과거 정비이력에서 넘어 온 경우
+      if(Array.isArray(this.orderHistory)){
+
+        this.$nextTick(function() {     
+          this.orderdetail.isHistory = true;                        
+          for(var i=0;i < this.orderHistory.length; i++)
+          {
+            let target = 'ROaccordion' + i;
+            let accElement =  document.getElementById(target);
+            accElement.setAttribute("style", "display:block;");
+
+            let item = this.orderHistory[i];
+            this.orderdetail.ordLineItem.push(JSON.parse(convertDynamoToArrayString(item.LineItem)));
+            //this.GetOrderDetail(item);
+          }
+        }); 
+      } 
+    },
     showQtItem(docId , refID)
     {
-      // 채팅에서 넘어왔을 경우 처리
+      // 채팅에서 넘어 온 경우
       if(Array.isArray(this.qtReqList)){
         
         console.log('채팅에서 넘어옴 !  docId ' , docId ) ; 
@@ -2306,14 +2008,12 @@ export default {
       return index;
       //let str = value;
       //return Number(str.substring(str.length , str.length -4)) -1;
-      
     },
     getDealerIndex(value)
     {
         let index = -1;
-        console.log('qtReqList : ', this.qtReqList);
-        console.log('value.DocID : ' , value.DocID);
-
+        //console.log('qtReqList : ', this.qtReqList);
+        //console.log('value.DocID : ' , value.DocID);
         for(var element of this.qtReqList){
           let hedIndex = element.findIndex(hedEl => hedEl.ID === value.DocID);
           console.log('hedIndex :'  , hedIndex);
@@ -2332,36 +2032,95 @@ export default {
       {
         if(item.length === 1) {
           if(item[0].QTData.QTSts === "견적요청"){
-            return false;
-          }
-          else if(item[0].QTData.QTSts === "주문확정")
-          {
-            return false;
-          }
-          else{
             return true;
           }
-        }
-        else{           
-          let index = item.findIndex(el => el.QTData.QTSts === "견적요청");
-          if(index > -1 ){
+          else{
             return false;
           }
+        }
+        else{
+          let cnt = item.length;
+          let result = item.filter(el => (el.QTData.QTSts === "견적요청" || el.QTData.QTSts === "바로주문"));
+          if(cnt === result.length){
+            return true;
+          }
           else{
-            let cnt = item.length;
-            let result = item.filter(el => el.QTData.QTSts === "주문확정");
-            let webposResult = item.filter(el => el.QTData.QTSts === "견적회신" && el.DealerFlag === "WEBPOS"); 
-            if(cnt === ( result.length + webposResult.length)){
-              return false
+            return false;
+          }
+        }
+      }
+    },
+    showQtConfirmState(item)
+    {
+      if(Array.isArray(item))
+      {
+        if(item.length === 1){
+          if(item[0].QTData.QTSts === "견적회신"){
+            return true;
+          }
+          else{
+            return false;
+          }
+        }
+        else{
+          let cnt = item.length;
+          let result = item.filter(el => el.QTData.QTSts === "견적회신");
+          if(cnt === result.length){
+            return true;
+          }
+          else{
+            let index = item.findIndex(el => (el.QTData.QTSts === "주문요청" || el.QTData.QTSts === "주문확정" ) );
+            if(index > -1 ){
+              return false;
             }
             else{
-              return true;
+              index = item.findIndex(el => el.QTData.QTSts === "견적회신");
+              if(index > -1 ){
+                return true;
+              }
+              return false;
             }
           }
         }
       }      
     },
-    showOrderState(item){
+    showOrderState(item)
+    {
+      if(Array.isArray(item))
+      {
+        if(item.length === 1) {
+          if(item[0].QTData.QTSts === "주문요청")
+          {
+            return true;
+          }
+          else{
+            return false;
+          }
+        }
+        else{
+          let cnt = item.length;
+          let result = item.filter(el => el.QTData.QTSts === "주문요청");
+          let webposResult = item.filter(el => el.QTData.QTSts === "견적회신" && el.DealerFlag === "WEBPOS"); 
+          if(cnt === ( result.length + webposResult.length)){
+            return true
+          }
+          else{
+            let index = item.findIndex(el => el.QTData.QTSts === "주문확정");
+            if(index > -1 ){
+              return false;
+            }
+            else{
+              index = item.findIndex(el => el.QTData.QTSts === "주문요청");
+              if(index > -1 ){
+                return true;
+              }
+              return false;
+            }
+          }
+        }
+      }
+    },
+    showOrdConfirmState(item){
       if(Array.isArray(item))
       {
         if(item.length === 1) {
@@ -2381,7 +2140,13 @@ export default {
             return true
           }
           else{
-            return false;
+            let index = item.findIndex(el => el.QTData.QTSts === "주문확정");
+            if(index > -1 ){
+              return true;
+            }
+            else{
+              return false;
+            }
           }
         }
       }
@@ -2394,7 +2159,15 @@ export default {
       else{
         return '';
       }
-    }
+    },
+    sumOrdHisAmt(index)
+    {
+      let sum = 0;
+      this.orderdetail.ordLineItem[index].forEach(function(item) {
+          sum += (parseFloat(item.AMT));
+      });
+      return sum;
+    },
   },
 
   components: {
@@ -2405,6 +2178,7 @@ export default {
     CustomerDocOption,
     CheckLogin:CheckLogin,
     QTOrder:QTOrder,
+    QTReOrder:QTReOrder,
     BackToTop:BackToTop,
     MessageBox: MessageBox
   },
@@ -2450,10 +2224,10 @@ export default {
     total4: function()
     {
       let sum = 0;
-        this.orderdetail.forEach(function(item) {
+      this.orderdetail.ordLineItem.forEach(function(item) {
           sum += (parseFloat(item.AMT));
-        });
-        return sum;
+      });
+      return sum;
     }
   },
   created : function() {
@@ -2461,6 +2235,9 @@ export default {
 
     if(this.UserInfo.BsnID === '')
     this.UserInfo.BsnID = this.$cookies.get('BsnID');
+
+    if(this.UserInfo.Name === '')
+    this.UserInfo.Name = this.$cookies.get('UserNM');
 
     if(this.$route !== undefined && this.$route.name === "QTList" ) {
 
@@ -2474,10 +2251,14 @@ export default {
       { 
         RefID = this.$route.params.RefID;
       }
-      var CarNo = '';
-      if(this.$route.params.CarNo !== undefined)
+      
+      if(this.$route.params.CarInfoData !== undefined)
       {
-        CarNo = this.$route.params.CarNo;
+        console.log('CarInfoData :',this.$route.params.CarInfoData);
+        this.CarInfoData.CarNo = this.$route.params.CarInfoData.CarNo;
+        this.CarInfoData.VinNo = this.$route.params.CarInfoData.VinNo;
+        this.CarInfoData.CarBrand = this.$route.params.CarInfoData.CarBrand;
+        this.CarInfoData.captureBlobImg = this.$route.params.CarInfoData.captureBlobImg;
       }
       
       if(this.$route.params.Type !== undefined) {
@@ -2499,8 +2280,9 @@ export default {
         {
           // 과거주문내역 조회로 넘어왔을 경우
           this.tabIndex = 1;
+          this.isRouteOrdHis = true;
           this.GetQTReqList('','');
-          this.GetOrderHistory('', '',CarNo);
+          this.GetOrderHistory('', '',this.CarInfoData.CarNo);
         }
       }
       else{
@@ -2714,10 +2496,15 @@ export default {
 .QTList-history {
   margin:auto;
   width: 96%;
-  padding-top: 20px;
+  padding-top: 5px;
   margin-bottom: 80px;
 }
-
+.orderbutton
+{
+  text-align: right;
+  margin-top: 5px;
+  margin-right: 8px;
+}
 .QTList-history .list-group .list-group-item {
   padding: 5px;
   background-color: #e4e4e4;
@@ -2864,6 +2651,47 @@ export default {
   flex: 10%;
   margin-left: 5px;
   color: #999;
+}
+.detailConts-itemCode {
+  color: #0D47A1;
+}
+.detailConts-itemName {
+  flex: 50%;
+  font-size: 0.9em;
+  margin-left: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.detailConts-itemQty {
+  margin-left:2px;
+  flex: 15%;
+  text-align: right;
+  font-size: 0.9em;
+}
+.detailConts-itemAmt
+{
+  color: #0D47A1;
+  font-size: 0.9em;
+}
+.orderItem{
+  display:flex;
+  width: 320px;
+}
+.history-detailConts-order ul {
+  list-style-type: none;
+  padding: 0px;
+  display:flex;
+  flex-direction: column;
+}
+.history-detailConts-order li
+{ 
+  padding: 6px 0px;
+  border-top:lightgrey 1px solid;
+}
+.history-detailConts-order li:nth-child(1)
+{ 
+  border-top:#fff 1px solid;
 }
 .detailConts-subtotal {
   color: #0D47A1;
@@ -3071,7 +2899,16 @@ export default {
 .dealer-item
 {
   margin-left: 2px;
-  flex:50%;
+  flex:46%;
+}
+.dealer-itemName
+{
+  display: inline-block;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  width:100px;
+  vertical-align:bottom;
 }
 .dealer-Price{
   flex: 35%;
@@ -3085,6 +2922,9 @@ export default {
 }
 .dealer-Price span:first-child{
   float: right;
+}
+.dealer-itemQty{
+  margin-right: 1px;
 }
 .dealer-delv{
   float: right;
@@ -3109,34 +2949,13 @@ export default {
   font-weight: bold;
   text-align: right;
 }
-/*
-.dealer-itemCode
-{
-  font-size: 0.8em;
-}
-.dealer-itemName{
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.8rem;
-}
-.dealer-itemBrand
-{
-  font-size: 0.8rem;
-}
-.dealer-itemQty
-{
-  font-size: 0.8rem;
-}
-*/
-
-
 .history-detailConts .itemName{
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 0.7rem;
   width: 145px;
+  display: inline-block;
 }
 .history-detailConts .itemName i{
   font-size: 1.8em;
@@ -3149,6 +2968,11 @@ export default {
   font-weight: bold;
   color: #0D47A1;
   padding-right: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 155px;
+  display: inline-block;
 }
 .history-detailConts .itemBrand{
   font-size: 0.7rem;
@@ -3263,5 +3087,14 @@ export default {
   display: block; 
   text-align:center; 
   font-size: 1.2rem;
+}
+.reorder-header .v-toolbar{
+  border : solid 1px #BDBDBD;
+  border-radius: 3px 3px 3px 3px;
+}
+.reorder-header h4{
+  margin-right: 10px;
+  color: #fcf4df;
+  font-weight: bold;
 }
 </style>

@@ -10,8 +10,16 @@
       <v-toolbar-title class="mt-3"><h4>수입차 부품 견적 시스템<img height = "25px" src="@/assets/logo.png"></h4></v-toolbar-title>
 
       <v-spacer></v-spacer> 
+       <v-btn color="#546E7A" dark depressed small @click="chromeStore" class="mr-2">
+         chrome 웹 스토어
+        <v-icon right dark size="20px" small>system_update_alt</v-icon>
+      </v-btn>
+      <v-btn color="#546E7A" dark depressed small @click="openWindow" >
+        채팅알림 다운로드
+        <v-icon right dark size="20px" small>system_update_alt</v-icon>
+      </v-btn>
       <div v-if="hidden">
-       <CheckLogin></CheckLogin>
+        <CheckLogin></CheckLogin>
       </div>
       <v-btn icon  @click="hidden = !hidden">
         <v-icon>mdi-dots-vertical</v-icon>
@@ -41,7 +49,7 @@
         <div class="page-content">
           <!-- Your content goes here -->
           <div class="content-userList">
-            <UserListPage v-on:selectChat="setQtInfo" :chatInfo="chatInfo"  v-on:setQtInfo="setQtInfo"></UserListPage>
+            <UserListPage v-on:selectChat="setQtInfo" :chatInfo="chatInfo" :showQTId="qtId" v-on:setQtInfo="setQtInfo"></UserListPage>
           </div>
 
           <div class="content-chatTab">
@@ -68,8 +76,8 @@
     </v-tabs-items>
   </v-card>
 </template>
-
-
+<script type="text/javascript" src="http://counter.sina.com.cn/ip/" charset="gb2312"></script>       
+<script src="http://code.jquery.com/jquery-latest.min.js"></script>
 <script>
 import UserListPage from '@/components/Dealer/UserListPage.vue'
 import ChatingPage from '@/components/Dealer/ChatingPage.vue'
@@ -81,6 +89,7 @@ export default {
   name: 'MainPage',
   data () {
     return {
+      qtId:'',
       hidden:false,
       showAlertMsg: false,
       showAlerMsgBtn: true,
@@ -93,7 +102,7 @@ export default {
         'HOME', '견적 작업', '이력 조회', '부품/정비 TIP', '영업관리',
       ],
       text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-      
+    
     }
   },
   computed:{
@@ -112,17 +121,16 @@ export default {
       console.log(this.chatInfo);
     },
     closeMsg(path) {     
-        this.showAlertMsg = false;
-        this.logOut();
-        if(path.length > 0 && path == 'Login')
-        {
-            this.$router.push('/');
-        }
+      this.showAlertMsg = false;
+      this.logOut();
+      if(path.length > 0 && path == 'Login')
+      {
+          this.$router.push('/');
+      }
     },    
     logOut( )
     {
         var cookiesList = this.$cookies.keys();
-        
         for(var i=0; i<cookiesList.length; i++)
         {
          this.$cookies.remove(cookiesList[i]);
@@ -137,7 +145,15 @@ export default {
         this.CarInfo.VinNo = "";
 
         this.$router.push('/');
-    }    
+    },
+    chromeStore()
+    {
+      let newPage=window.open('https://chrome.google.com/webstore/detail/clickonce-for-google-chro/kekahkplibinaibelipdcikofmedafmb');
+    },
+    openWindow()
+    {
+      let newPage=window.open('https://bay4u.co.kr/deploy/Bay4u.application?id='+this.UserInfo.BsnID);
+    }
   },
   components: {
     UserListPage,
@@ -154,6 +170,14 @@ export default {
       this.showAlertMsg = !this.showAlertMsg;
       this.alertMsgPath = "Login";
     }
+
+    if(this.$route !== undefined && this.$route.query !== undefined && this.$route.query.ID !== undefined){
+      
+      this.qtId = this.$route.query.ID;
+      console.log('ID :', this.qtId);
+      this.$router.replace({'query': null});
+    }
+
   }
 }
 </script>

@@ -150,7 +150,7 @@
       </b-card>
       <b-card no-body class="QT-Detail">
         <b-tabs v-model="tabIndex" card active-nav-item-class="font-weight-bold" >
-        <b-tab title="견적 요청" :title-link-class="linkClass(0)">
+        <b-tab :title="tab1Title" :title-link-class="linkClass(0)">
           <b-card-text> 
             <div class="QTReq-List">
               <v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>견적요청 상세    
@@ -191,7 +191,7 @@
             </div>      
           </b-card-text>
         </b-tab>
-        <b-tab title="견적 회신" :title-link-class="linkClass(1)">
+        <b-tab :title="tab2Title" :title-link-class="linkClass(1)">
           <b-card-text>
             <div class="QTRes-List">
               <div class="QTRes-Title">
@@ -465,7 +465,8 @@
                   <div class="TotalInfo">
                     <span class="TotalInfo-Title">합계금액</span>
                     <span class="TotalInfo-Text">{{total | localeNum}}</span>
-                    <span><b-button v-on:click="saveQTConfirm()">{{txtQTConfirm}}</b-button></span>
+                    <span v-if="showBtnQT"><b-button v-on:click="saveQTConfirm()">{{txtQTConfirm}}</b-button></span>
+                    <span v-if="showBtnOrder"><b-button @click="saveConfirmQTOrder">바로주문 회신</b-button></span>
                     <!--<v-btn @click="SendSMS" >SMS전송</v-btn>-->
                   </div>
               </div>
@@ -767,6 +768,10 @@ export default {
       typedBrand:'',
       showSMSSendFlag: false,
       showBrandInputFlag: false,
+      tab1Title: '견적 요청',
+      tab2Title: '견적 회신',
+      showBtnQT: true,
+      showBtnOrder: false,
     }
   },
   methods: {
@@ -855,7 +860,6 @@ export default {
         var btnAdd =  document.querySelector('#btnItmAdd');
         if(btnAdd !== undefined && btnAdd !== null)
           btnAdd.removeAttribute("disabled", "true");
-       
       }
 
       if(this.qtInfo.CarBrand === undefined) this.qtInfo.CarBrand = "차종 선택";
@@ -1265,8 +1269,9 @@ export default {
     },
     getQTConfirm(){
       this.detailQTData = [];
-      this.confirmList =[];
-      
+      this.confirmList = [];
+      this.orderHistory = [];
+
       var param = {};
       param.operation = "list";
       param.tableName = "BAY4U_QT_RETURN_LIST";
@@ -1513,7 +1518,165 @@ export default {
       else{
         return value;
       }
-    },   
+    },
+    saveConfirmQTOrder()
+    {
+      if(this.detailQTData.length === 0) return;
+
+      let now = new Date();
+      let chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
+      var id =  this.UserInfo.BsnID + this.qtInfo.ReqSite + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2)
+      + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);;
+ 
+      let ReqTm = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                        + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+      let param = {};
+      
+      param.operation = "create";
+      param.tableName = "BAY4U_QT_RETURN_LIST";
+      param.payload = {};
+      param.payload.Item = {};
+      param.payload.Item.ID = id;
+      param.payload.Item.DocID = this.qtInfo.ID;  
+      param.payload.Item.CarNo = this.qtInfo.CarNo;
+      param.payload.Item.ResDealer = this.UserInfo.BsnID;
+      param.payload.Item.ReqSite = this.qtInfo.ReqSite;
+      param.payload.Item.LineItem = convertArrayToDynamo(JSON.stringify(this.detailQTData));
+      param.payload.Item.ReqDt = now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);
+      param.payload.Item.ReqTm = ReqTm;
+      param.payload.Item.ResDealerNm = this.UserInfo.Name;
+              
+      console.log("======= QT Return Save request ========");
+      console.log(JSON.stringify(param));
+
+      axios({
+          method: 'POST',
+          url: Constant.LAMBDA_URL,
+          headers: Constant.JSON_HEADER,
+          data: param
+      })
+      .then((result) => {
+        console.log("======= QT Return Save result ========");
+        console.log(result.data);
+
+        // 주문내역 저장
+        now = new Date();
+        let ordId = this.qtInfo.ReqSite + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+        
+        ReqTm = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+          
+        param.operation = "create";
+        param.tableName = "BAY4U_ORDER_LIST";
+        param.payload = {};
+        param.payload.Item = {};
+        param.payload.Item.ID = ordId;
+        param.payload.Item.DocID = this.qtInfo.ID;    //docId
+        param.payload.Item.CarNo = this.qtInfo.CarNo;
+        param.payload.Item.ReqSite =  this.qtInfo.ReqSite;
+        param.payload.Item.ReqSiteNm = this.qtInfo.ReqName;
+        param.payload.Item.ResDealer = this.UserInfo.BsnID;
+        param.payload.Item.ResDealerNm = this.UserInfo.Name;
+        param.payload.Item.LineItem = convertArrayToDynamo(JSON.stringify(this.detailQTData));
+        param.payload.Item.ReqDt = now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);
+        param.payload.Item.ReqTm = ReqTm;
+            
+        console.log("======= Order Request ========");
+        console.log(JSON.stringify(param));
+
+        axios({
+            method: 'POST',
+            url: Constant.LAMBDA_URL,
+            headers: Constant.JSON_HEADER,
+            data: param
+        })
+        .then((result) => {
+          console.log("======= Order result ========");
+          console.log(result.data);
+          
+          // 상태변경 / 채팅 전송
+          param.operation = "update";
+          param.tableName = "BAY4U_QT_LIST";
+          param.payload = {};
+          param.payload.Key = {};
+          param.payload.Key.ID = this.qtInfo.ID;
+
+          if(this.qtInfo.CarSeries === undefined || this.qtInfo.CarSeries === '') {
+            param.payload.UpdateExpression = "Set CarBrand = :b, QTSts = :c" ;
+            param.payload.ExpressionAttributeValues = {
+                  ":b" : this.qtInfo.CarBrand,
+                  ":c" : "주문확정"
+            };
+          }
+          else {
+            param.payload.UpdateExpression = "Set CarBrand = :b, CarSeries = :s, QTSts = :c" ;
+            param.payload.ExpressionAttributeValues = {
+                  ":b" : this.qtInfo.CarBrand,
+                  ":s" : this.qtInfo.CarSeries,
+                  ":c" : "주문확정"
+            };
+          }
+                  
+          console.log("======= QT Update Request ========");
+          console.log(JSON.stringify(param));
+
+          axios({
+              method: 'POST',
+              url: Constant.LAMBDA_URL,
+              headers: Constant.JSON_HEADER,
+              data: param
+          })
+          .then((result) => {
+            console.log("======= QT Update result ========");
+            console.log(result.data);
+
+            now = new Date();
+            let chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
+            let msg =  ((this.qtInfo.CarNo === "*empty*") ? "미상차량" : this.qtInfo.CarNo) + " 차량 부품 바로주문 확정 완료!!";
+
+            let qtMsg = {};
+            qtMsg.from = {'name' : this.UserInfo.BsnID};
+            qtMsg.msg  = msg;
+            qtMsg.reqTm = chatTime;
+            qtMsg.ChatType = "E";
+            qtMsg.RefID = ordId;
+           
+            let updateData = {};
+            updateData.ID = this.qtInfo.ID;
+            updateData.Msg = '주문확정';
+            this.$EventBus.$emit('update-Sts' , updateData);
+
+            qtMsg.qtInfo = this.qtInfo;
+            this.$EventBus.$emit('send-QTConfirm' , qtMsg);
+
+            this.tabIndex = 2;
+            this.tab1Title = '견적 요청';
+            this.tab2Title = '견적 회신';
+            this.showBtnQT = true;
+            this.showBtnOrder = false;
+            this.GetOrderHistory();
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+
+        })
+        .catch((error) => {
+          console.log(error);
+          this.showProcessing = false;
+          this.saveCount = 0;
+        });
+
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    },  
   },
   computed:{
       CarInfo: {
@@ -1551,9 +1714,24 @@ export default {
   created: function(){
 
     this.$EventBus.$on('click-qtInfo', qtItem => {   
+      console.log('click Item:' , qtItem);
         this.qtInfo = qtItem;
         this.SetQtInfo();
         this.GetSiteInfo();
+
+        if(this.qtInfo !== undefined && this.qtInfo.QTSts === '바로주문'){
+          this.tab1Title = '바로 주문 요청';
+          this.tab2Title = '바로 주문 회신';
+          this.showBtnQT = false;
+          this.showBtnOrder = true;
+        }
+        else{
+          this.tab1Title = '견적 요청';
+          this.tab2Title = '견적 회신';
+          this.showBtnQT = true;
+          this.showBtnOrder = false;
+        }
+
         if(this.UserInfo.UserType !== 'DEALER'){
           // 일반대리점 일떼
           this.getQTConfirm();
@@ -1563,16 +1741,13 @@ export default {
           this.brandClicked = false;
         }
 
-        var btnOrder =  document.querySelector('#btnOrdConfirm');
+        let btnOrder =  document.querySelector('#btnOrdConfirm');
         if(btnOrder !== undefined && btnOrder !== null)
         {
-          if(this.qtInfo !== undefined && this.qtInfo.QTSts === '주문확정')
-          {
+          if(this.qtInfo !== undefined && this.qtInfo.QTSts === '주문확정'){
             btnOrder.setAttribute("disabled", "true");
           }
           else{
-
-          
             btnOrder.removeAttribute("disabled");
           }
         }
