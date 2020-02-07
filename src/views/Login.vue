@@ -125,7 +125,6 @@ export default {
             this.UserInfo.UserType = type;
           }
           else {
-
             this.$cookies.set('BsnID', siteCode, '86400s');
             this.$cookies.set('UserID', id, '86400s');
             this.$cookies.set('UserNM', name, '86400s');

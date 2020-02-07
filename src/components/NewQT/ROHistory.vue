@@ -66,6 +66,7 @@
 <script src="http://code.jquery.com/jquery-latest.min.js"></script>
 <script>
 import Constant from '@/Constant';
+import {datePadding} from '@/utils/common.js'
 
 const axios = require('axios').default;
 
@@ -83,6 +84,8 @@ export default {
 
        this.roList = this.RoHistoryData;
        this.carName = this.roList[0].NM_CR_TEC;
+
+       datePadding();
     /*
         var param = {};
         param.BsnId = this.$store.state.UserInfo.BsnID;
@@ -126,39 +129,93 @@ export default {
     {
         GetRoItem(item)
         {
-            var param = {};
-            param.RequestDataJSON = "ID_TRN:" + item.ID_TRN + ","+"RO_CD:" + item.RO_CD;
-            
-            console.log("======= GetRoItem Request result ========");
-            console.log(param); 
+            if(this.UserInfo.UserType === 'SITE') {
+                var param = {};
+                param.RequestDataJSON = "ID_TRN:" + item.ID_TRN + ","+"RO_CD:" + item.RO_CD;
+                
+                console.log("======= GetRoItem Request result ========");
+                console.log(param); 
 
-            var rtnCode = "";
-            var rtnCount = 0;
+                var rtnCode = "";
+                var rtnCount = 0;
 
-            axios({
-                method: 'POST',
-                url: Constant.SCPIF_URL + 'GetROItemList',
-                headers: Constant.JSON_HEADER,
-                data: param
-            })
-            .then((result) => {
+                axios({
+                    method: 'POST',
+                    url: Constant.SCPIF_URL + 'GetROItemList',
+                    headers: Constant.JSON_HEADER,
+                    data: param
+                })
+                .then((result) => {
+                        console.log("======= GetRoItem Return result ========");
+                    console.log(result.data); 
+                    this.rtnCode = result.data.ReturnCode;
+                    this.rtnCount = Number(result.data.ReturnDataCount);
+                    this.roitemList = JSON.parse(result.data.ReturnDataJSON);
+
+                })
+                .catch((error) => {
+                    console.log(error);
+                })
+            }
+            else {
+                var now = new Date();
+                var startDate = (now.getFullYear() - 1) + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);        
+
+                var param = {};
+                param.carNo = this.CarInfo.CarNo;
+                param.idNo = this.UserInfo.BsnID;
+                param.sDate = startDate;
+
+                console.log("======= GetRoItem Request result ========");
+                console.log(param); 
+
+                var rtnCode = "";
+                var rtnCount = 0;
+                var selectedDate = item.DC_DY_BSN;
+                
+                axios({
+                    method: 'POST',
+                    url: Constant.INTRA_HISTIF_URL,
+                    headers: Constant.JSON_HEADER,
+                    data: param
+                })
+                .then((result) => {
                     console.log("======= GetRoItem Return result ========");
-                console.log(result.data); 
-                this.rtnCode = result.data.ReturnCode;
-                this.rtnCount = Number(result.data.ReturnDataCount);
-                this.roitemList = JSON.parse(result.data.ReturnDataJSON);
+                    console.log(result.data); 
+                    var rtnData = result.data;
+                    this.CarInfo.VinNo = "";
+                    if(rtnData.data.result === 'ok') {
+                        var roItemList = [];
 
-            })
-            .catch((error) => {
-                console.log(error);
-            })
+                        for(var his of rtnData.data.dataset) {
+                            if(his.inDay === selectedDate) {
+                                var item = {};
+                                item.NM_ITM = his.partName;
+                                item.QU_ITM_LM_RTN_SLS = his.qty;
+                                item.MO_PRC_REG = his.paysum / (his.qty === 0 ? 1 : his.qty);
+                                item.MO_EXTND = his.paysum;
+
+                                roItemList.push(item);
+                            }
+                        }
+                        this.roitemList = roItemList;
+                    }
+                })
+                .catch((error) => {
+                    console.log(error);
+                })
+            }
         }
     },
     computed:{
       CarInfo: {
           get() { return this.$store.getters.CarInfo },
           set(value) { this.$store.dispatch('UpdateCarInfo',value) }
-      }
+      },
+      UserInfo: {
+          get() { return this.$store.getters.UserInfo },
+          set(value) { this.$store.dispatch('UpdateUserInfo',value) }
+      },      
     }
 }
 </script>

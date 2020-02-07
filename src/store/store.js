@@ -7,7 +7,7 @@ export const store = new Vuex.Store({
     state: {
         //CarInfo: { CarNo: "", VinNo: "WBAJD3109JB316363" },
         CarInfo: { CarNo: "", VinNo: "" },
-        UserInfo: { UserID: "", BsnID: "", Name: "", EntNo: "" , UserType:""},
+        UserInfo: { UserID: "", BsnID: "", Name: "", EntNo: "", UserType:""},    // 사용자 ID, 사업장 코드, 사용자 명, 정비업코드, 사용자 타입
         msgDatas: [],
     },
     getters: {
