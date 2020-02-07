@@ -228,7 +228,7 @@
                               <span class="TotalInfo-Title">합계</span>
                               <span v-if="total === 0" class="TotalInfo-Text" style="margin-left:30px;">{{ total}} 원</span>
                               <span v-if="total !== 0" class="TotalInfo-Text">{{ total | localeNum}} 원</span><br>
-                              <span v-if="totalAmt === 0" class="TotalInfo-Text2" style="margin-left:30px;">({{totalAmt | localeNum}}) 원</span>
+                              <span v-if="totalAmt === 0" class="TotalInfo-Text2" style="margin-left:30px;">({{totalAmt}}) 원</span>
                               <span v-if="totalAmt !== 0" class="TotalInfo-Text2">({{totalAmt | localeNum}}) 원</span>
                             </div>
                           </div>
@@ -285,9 +285,9 @@
                                   <div><span class="dealer-itemCode">{{item.itemCode}}</span> / <span class="dealer-itemName">{{item.itemName}}</span></div>
                                 </div>
                                 <div class="dealer-Price">
-                                  <span v-if="item.AMT === 0" class="dealer-itemAmount">{{ item.AMT | localeNum}}원</span>
+                                  <span v-if="item.AMT === 0" class="dealer-itemAmount">{{ item.AMT}}원</span>
                                   <span v-if="item.AMT !== 0" class="dealer-itemAmount">{{ item.AMT | localeNum}}원</span>
-                                  <span v-if="item.itemPrice === 0" class="dealer-itemPrice">{{ item.itemPrice | localeNum}}</span>
+                                  <span v-if="item.itemPrice === 0" class="dealer-itemPrice">{{ item.itemPrice}}</span>
                                   <span v-if="item.itemPrice !== 0" class="dealer-itemPrice">{{ item.itemPrice | localeNum}}</span>
                                   <span class="dealer-itemQty">{{ item.itemQty }}개</span>
                                   
@@ -302,32 +302,13 @@
                               </li>
                             </ul>
                           </div>
-                          <!--<b-container>
-                            <b-row v-for="(item, index) in detailQTData2" v-bind:key = "index">
-                              <b-col class ="pt-0 pl-1">
-                              <div class="dealer-qtInfo">
-                                <div class="dealer-item">
-                                  <div><span class="dealer-itemBrand">{{item.itemBrand}}</span></div>
-                                  <div><span class="dealer-itemCode">{{item.itemCode}}</span> / <span class="dealer-itemName">{{item.itemName}}</span></div>
-                                </div>
-                                <div class="dealer-Price">
-                                  <span v-if="item.AMT === 0" class="dealer-itemAmount">{{ item.AMT | localeNum}}원</span>
-                                  <span v-if="item.AMT !== 0" class="dealer-itemAmount">{{ item.AMT | localeNum}}원</span>
-                                  <span v-if="item.itemPrice === 0" class="dealer-itemPrice">{{ item.itemPrice | localeNum}}</span>
-                                  <span v-if="item.itemPrice !== 0" class="dealer-itemPrice">{{ item.itemPrice | localeNum}}</span>
-                                  <span class="dealer-itemQty">{{ item.itemQty }}개</span>
-                                </div>
-                              </div>
-                              </b-col>
-                            </b-row>
-                          </b-container>-->
                         </b-card-body>
                       <b-card-footer>
                         <div class="QTRes-footer">
                           <div class="TotalInfo">
                               <v-btn color="#4E342E" dark depressed class="mr-3" @click="showQTOrderPopup(confrimInfo)" v-if="confrimInfo.QTSts !== '주문확정'">주문하기</v-btn>
                               <span class="TotalInfo-Title">합계</span>
-                              <span v-if="total2 === 0" class="TotalInfo-Text">{{total2 | localeNum}}원</span>
+                              <span v-if="total2 === 0" class="TotalInfo-Text">{{total2}}원</span>
                               <span v-if="total2 !== 0" class="TotalInfo-Text">{{total2 | localeNum}}원</span>
                           </div>
                         </div>
@@ -784,7 +765,7 @@
           <span class="order-itemCode">{{item.itemCode}}</span> / <span class="order-itemName"> {{item.itemName}}</span>
           <input v-model="item.itemQty" type="number" class="order-itemqty" @change="calculatorAMT(item)" @focus="$event.target.select()"/>
           <!--<span >{{item.AMT }}개</span>-->
-          <span v-if="item.itemPrice === 0" class="order-itemPrice">{{ item.itemPrice | localeNum}}원</span>
+          <span v-if="item.itemPrice === 0" class="order-itemPrice">{{ item.itemPrice}}원</span>
           <span v-if="item.itemPrice !== 0" class="order-itemPrice">{{ item.itemPrice | localeNum}}원</span>
           <i class="order-item-btn fas fa-times-circle"  @click="removeItem(item)"></i>
         </div>
