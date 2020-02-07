@@ -37,6 +37,7 @@
                 <span  class="Chart-date">{{setReqDt(qtReq.ReqDt)}}</span>
               </div>
               <span class="Dealer-name">{{SetDealerNm(qtReq.ResDealer)}}</span>
+              <div class="Chat-readCount"><b-badge v-if="qtReq.NotReadCnt !== 0" variant="warning" pill class="Chat-readbadge">{{qtReq.NotReadCnt}}</b-badge></div>
               <span type="button" class="Chat-detail">
                 <i class="fas fa-angle-double-right"></i>
               </span>
@@ -48,6 +49,7 @@
               </div>
 
               <span class="Dealer-name">{{SetDealerNm(qtReq.ResDealer)}}</span>
+              <div class="Chat-readCount"><b-badge v-if="qtReq.NotReadCnt !== 0" variant="warning" pill class="Chat-readbadge">{{qtReq.NotReadCnt}}</b-badge></div>
               <span type="button" class="Chat-detail">
                 <i class="fas fa-angle-double-right"></i>
               </span>
@@ -141,6 +143,7 @@ export default {
       dealer:"",
       showQTCamera: false,
       chatDealerName : '',
+      selectedQtData: [],
     }
   },
   components: {
@@ -193,6 +196,10 @@ export default {
       if(this.$route.params.chatType !== undefined && (this.$route.params.chatType === 'order' || this.$route.params.chatType === 'qt')){
         var item = {};
         item.ID =  this.docId;
+        if(this.$route.params.chatTo !== undefined){
+          this.dealer = this.$route.params.chatTo;  
+        }
+        this.selectedQtData = this.$route.params.qtInfo;
         this.showchating(item);
       }
       else{
@@ -217,9 +224,9 @@ export default {
         chatMsg.msg  = msg;
         chatMsg.reqTm = chatTime;
         this.msgDatas = chatMsg;
-
-        this.saveChatMsg(chatMsg,'Q');
-
+        this.selectedQtData = this.$route.params.qtInfo;
+        this.saveChatMsg(chatMsg,'Q', this.$route.params.qtInfo);
+/*
         this.$sendMessage({
           name: this.UserInfo.BsnID,
           msg,
@@ -228,7 +235,7 @@ export default {
           reqTm : chatTime,
           qtInfo : this.$route.params.qtInfo,
         });
-
+*/
         if(this.$route.params.append !== undefined) {
           this.showAppend = true;
         }
@@ -238,12 +245,13 @@ export default {
     //const $ths = this;
     this.$socket.on('chat', (data) => {
       console.log('Chat Recv : ', data);
-      if(this.docId === data.chatId) {
+      if(this.docId === data.docId) {
         var chatMsg = {};
         chatMsg.from = {'name' : data.from.name};
         chatMsg.to = {'name' : data.to.name};
         chatMsg.msg  = data.msg;
-        chatMsg.Chatid = this.docId;
+        chatMsg.Chatid =  data.chatID;
+        chatMsg.DocID =  this.docId;
         chatMsg.reqTm = data.reqTm;
         chatMsg.ChatType = data.chatType;
         chatMsg.RefID = data.refID;
@@ -278,6 +286,15 @@ export default {
             this.msgDatas = chatMsg;
           }
         }
+
+        // 읽음상태 저장
+        this.saveChatState(data);
+      }
+      else{
+        let index = this.qtReqList.findIndex(x => x.ID === data.docId);
+        if(index > -1){
+          this.qtReqList[index].NotReadCnt = this.qtReqList[index].NotReadCnt + 1;
+        }
       }
     });
 
@@ -305,19 +322,21 @@ export default {
       var chatMsg = {};
       chatMsg.from = {'name' : this.UserInfo.BsnID};
       chatMsg.to = {'name' : this.dealer};
-      chatMsg.Chatid = this.docId;
+      chatMsg.Chatid = '';
+      chatMsg.DocID =  this.docId;
       chatMsg.msg  = msg;
       chatMsg.reqTm  = chatTime;
+      
       this.msgDatas = chatMsg;
-      this.$sendMessage({
+      /*this.$sendMessage({
         //name: this.$route.params.username,
         name: this.UserInfo.BsnID,
         msg,
         recv: this.dealer,
         chatId: this.docId,
         chatDttm : chatTime,
-      });
-      this.saveChatMsg(chatMsg,'D');
+      });*/
+      this.saveChatMsg(chatMsg,'D', this.selectedQtData);
     },
     chatingToggle(item) {
 
@@ -325,14 +344,20 @@ export default {
       this.showChatPage = !this.showChatPage;
       if(item !== null) 
       {
+        item.NotChatIDList = [];
+        item.NotReadCnt = 0;
         this.docId = item.ID;
         this.dealer = item.ResDealer;
         this.chatDealerName = item.ResDealerNm;
-       
+        this.selectedQtData = item;
         this.showchating(item);
       }
+      else{
+        this.selectedQtData = [];
+      }
     },
-    saveChatMsg(chatMsg, chatType) {
+    saveChatMsg(chatMsg, chatType, qtData , imgId) {
+      console.log('dealer:',this.dealer);
       var param = {};
 
       var now = new Date();
@@ -350,13 +375,14 @@ export default {
       param.payload.Item.ChatFrom = this.UserInfo.BsnID;
       param.payload.Item.ChatTo =  this.dealer;
       param.payload.Item.Message = chatMsg.msg;
-      param.payload.Item.Status = "0";
+      //param.payload.Item.Status = "0";
+      param.payload.Item.ReadYn = "0";
       param.payload.Item.ReqTm = chatMsg.reqTm;
       param.payload.Item.IMG = chatMsg.imgId;
       param.payload.Item.ChatType = chatType;
       param.payload.Item.RefID = ' ';
 
-      console.log("Send Msg : ", JSON.stringify(param));
+      console.log("Send Msg2 : ", JSON.stringify(param));
 
       axios({
         method: 'POST',
@@ -367,12 +393,36 @@ export default {
       .then((result) => {
         console.log("======= Chat Save result ========");
         console.log(result.data);
-        })
+        
+        if(chatType !== "I"){
+          this.$sendMessage({
+            name: this.UserInfo.BsnID,
+            msg: chatMsg.msg,
+            recv:  this.dealer,
+            chatId: id, 
+            docId: this.docId,
+            reqTm : chatMsg.chatTime,
+            qtInfo : qtData,
+          });
+        }
+        else{
+          this.$sendMessage({
+            name: this.UserInfo.BsnID,
+            msg: chatMsg.msg,
+            recv:  this.dealer,
+            chatId: id, 
+            docId: this.docId,
+            reqTm : chatMsg.chatTime,
+            qtInfo : qtData,
+            imgId: imgId,
+          });
+        }
+  
+      })
       .catch((error) => {
         console.log(error);
       });
-    }
-    ,
+    },
     showchating(item)
     {
       console.log("Chat Id : " +  item.ID);
@@ -414,11 +464,11 @@ export default {
         }
 
         result.data.Items.forEach(element => { 
-          
           var chatMsg = {};
           chatMsg.from = {'name' : element['ChatFrom']};
           chatMsg.to = {'name' : element['ChatTo']};
-          chatMsg.Chatid = this.docId;
+          chatMsg.Chatid = element['ID'];
+          chatMsg.DocID = this.docId;
           chatMsg.msg  = element['Message'];
           chatMsg.reqTm = element['ReqTm'];
           chatMsg.imgId = element['IMG']; 
@@ -426,13 +476,44 @@ export default {
           chatMsg.ChatType = element['ChatType'];
           chatMsg.RefID = element['RefID'];
 
-          this.msgDatas = chatMsg;    
+          this.msgDatas = chatMsg;   
+          
+          // 읽음상태 저장
+          if(element['ReadYn'] === '0'){  
+            param = {};
+            param.operation = "update";
+            param.tableName = "BAY4U_CHAT";
+            param.payload = {};
+            param.payload.Key = {};
+            param.payload.Key.ID = element['ID'];
+            param.payload.Key.DocID = this.docId;
+            param.payload.UpdateExpression = "Set ReadYn = :a";
+            param.payload.ConditionExpression = "ChatTo = :p",
+            param.payload.ExpressionAttributeValues = {
+            ":a" : "1",
+            ":p" : this.UserInfo.BsnID,
+            };
+
+            console.log("======= chat read update Request ========");
+            console.log(JSON.stringify(param));
+
+            axios({
+              method: 'POST',
+              url: Constant.LAMBDA_URL,
+              headers: Constant.JSON_HEADER,
+              data: param
+            })
+            .then((result) => {
+              console.log("======= chat read update  result ========");
+              console.log(result.data);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+          }
         });
-        
         this.setImg(this.msgDatas);
-
       });
-
     },
     setImg(data)
     {
@@ -443,9 +524,43 @@ export default {
           
         });
     },
+    saveChatState(item)
+    {
+      let param = {};
+      param.operation = "update";
+      param.tableName = "BAY4U_CHAT";
+      param.payload = {};
+      param.payload.Key = {};
+      param.payload.Key.ID = item.chatId;
+      param.payload.Key.DocID = item.docId;
+      param.payload.UpdateExpression = "Set ReadYn = :a";
+      param.payload.ConditionExpression = "ChatTo = :p",
+      param.payload.ExpressionAttributeValues = {
+      ":a" : "1",
+      ":p" : this.UserInfo.BsnID,
+      };
+
+      console.log("======= chat read update Request ========");
+      console.log(JSON.stringify(param));
+
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+        console.log("======= chat read update  result ========");
+        console.log(result.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    },
     showQTReqList() {
-      if(this.UserInfo.BsnID === '')
-      this.UserInfo.BsnID = this.$cookies.get('BsnID');
+
+      if(this.UserInfo.BsnID === '')this.UserInfo.BsnID = this.$cookies.get('BsnID');
+
       var param = {};
       param.operation = "list";
       param.tableName = "BAY4U_QT_LIST";
@@ -455,7 +570,7 @@ export default {
       var key = ":id";
       param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
 
-       console.log("chating list pram : " + JSON.stringify(param));
+      console.log("chating list pram : " + JSON.stringify(param));
 
       axios({
         method: 'POST',
@@ -467,7 +582,6 @@ export default {
 
         if(Array.isArray(result.data.Items))
         {
-       
           result.data.Items.sort(function(a, b){
             return (a.ReqSeq < b.ReqSeq) ? 1 : -1;
           });
@@ -480,15 +594,62 @@ export default {
           else {
             result.data.Items[i].Kbn = "list-normal";
           }
+          result.data.Items[i].NotReadCnt = 0;
         }
 
         console.log("======= QT List result ========");
         console.log(result.data.Items);        
 
         this.qtReqList = result.data.Items;
-
+        this. getChatReadState();
         this.getDealerNm();
 
+      });
+    },
+    getChatReadState()
+    {
+      let param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_CHAT";
+      param.payload = {};
+      param.payload.ExpressionAttributeValues = {};
+
+      let filter = "";
+      let idx = 1;
+      for(let item of this.qtReqList)
+      { 
+        if(idx === 1){
+          filter = filter + "DocID = :docID"+idx;
+        }
+        else{
+          filter = filter + " OR DocID = :docID"+idx;
+        }
+        param.payload.ExpressionAttributeValues[":docID"+idx] = item.ID;
+        idx++;
+      }
+      param.payload.FilterExpression = filter;
+      //console.log("======= chat state request result ========");
+      //console.log(JSON.stringify(param));
+
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+        console.log("=======  result ========");
+        console.log(result.data);
+
+        let chatList = result.data.Items;
+        for(let qt of this.qtReqList)
+        {
+          let newChatState = chatList.filter(x => x.DocID === qt.ID && x.ChatTo === this.UserInfo.BsnID && x.ReadYn === '0' );
+          //console.log('newChatState:',newChatState);
+          qt.NotChatIDList = newChatState;
+          qt.NotReadCnt = newChatState.length;
+        }
+        console.log('this.qtReqList:', this.qtReqList);
       });
     },
     getDealerNm()
@@ -576,20 +737,21 @@ export default {
       var chatMsg = {};
       chatMsg.from = {'name' : this.UserInfo.BsnID};
       chatMsg.to = {'name' : this.dealer};
-      chatMsg.Chatid = this.docId;
+      chatMsg.Chatid = '';
+      chatMsg.DocID =  this.docId;
       chatMsg.msg = msg;
       chatMsg.img = pic;
       chatMsg.imgId = key + ".png";
       chatMsg.reqTm  = chatTime;
       this.msgDatas = chatMsg;
-      this.$sendMessage({
+      /*this.$sendMessage({
         name: this.UserInfo.BsnID,
         msg,
         recv: this.dealer,
         chatId: this.docId,
         imgId: key + ".png"
-      });
-      this.saveChatMsg(chatMsg);      
+      });*/
+      this.saveChatMsg(chatMsg, 'I',undefined,key + ".png");      
 
     },  
     setReqDt(value)
@@ -636,6 +798,7 @@ export default {
   list-style-type: none;
   padding: 0px;
   padding-bottom: 80px;
+  position: relative;
 }
 
 .Chat-list li {
@@ -693,11 +856,20 @@ export default {
 .Chat-detail {
   align-self: center;
   margin-left: auto;
+  float: right;
   color: #5d4038;
   -webkit-appearance:none;
   -moz-appearance:none;
 }
-
+.Chat-readCount{
+  position:absolute;
+  right:10px;
+}
+.Chat-readbadge{
+  position:absolute;
+  top:5px;
+  right:25px;
+}
 .Chating-headerBar {
   display: flex;
   height: 50px;

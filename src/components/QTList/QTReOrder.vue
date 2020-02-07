@@ -634,7 +634,8 @@ export default {
       param.payload.Item.ChatFrom = this.UserInfo.BsnID;
       param.payload.Item.ChatTo =  dealer.DEALER;
       param.payload.Item.Message = chatMsg.msg;
-      param.payload.Item.Status = "0";
+      //param.payload.Item.Status = "0";
+      param.payload.Item.ReadYn = "0";
       param.payload.Item.ReqTm = chatMsg.reqTm;
       param.payload.Item.ChatType = "O";
       param.payload.Item.RefID = val;
@@ -659,7 +660,8 @@ export default {
           name: this.UserInfo.BsnID,
           msg,
           recv:   dealer.DEALER,
-          chatId: docId,
+          chatId: id,
+          docId: docId,
           reqTm : chatMsg.reqTm,
           qtInfo : this.qtInfoData,
           chatType : "O",
