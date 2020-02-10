@@ -78,7 +78,7 @@ export default {
 
       this.$router.push({name:'QTList', 
                       params:{
-                            DocID: msg.Chatid, 
+                            DocID: msg.DocID, 
                             RefID: msg.RefID,
                             Type:chatType
                       }});

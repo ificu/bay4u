@@ -284,7 +284,6 @@ export default {
         for(let qt of this.qtReqList)
         {
           let newChatState = chatList.filter(x => x.DocID === qt.ID && x.ChatTo === this.UserInfo.BsnID && x.ReadYn === '0' );
-          console.log('newChatState:',newChatState);
           qt.NotChatIDList = newChatState;
           if(flag !== 'C'){
             qt.NotReadCnt = newChatState.length;
@@ -294,7 +293,6 @@ export default {
         // 미확인 조회
         if(filterRead !== undefined && filterRead === true){
           let list = this.qtReqList.filter(y => y.NotReadCnt > 0);
-          //console.log('list : ',list);
           this.qtReqList = list;
         }
         console.log('this.qtReqList:', this.qtReqList);
