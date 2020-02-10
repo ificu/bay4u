@@ -263,33 +263,27 @@ export default {
           chatMsg.img = Constant.IMG_URL + data.imgId;
           chatMsg.imgId = data.imgId;    
 
-          console.log('chatMsg1 : ', chatMsg);
-          console.log('msgDatas1 : ', this.msgDatas);
-
           let index = this.msgDatas.findIndex(element => element.msgData.reqTm === chatMsg.reqTm);
-          if(index === -1)
-          {
-            //console.log('msg index : ' , index);
-            //console.log('chatMsg.reqTm' , chatMsg.reqTm);
+          if(index === -1){
             this.msgDatas = chatMsg;
           }          
         }
         else {
-          //console.log('chatMsg2 : ', chatMsg);
-          //console.log('msgDatas2 : ', this.msgDatas);
-
           let index = this.msgDatas.findIndex(element => element.msgData.reqTm === chatMsg.reqTm);
-          if(index === -1)
-          {
-            //console.log('msg index : ' , index);
-            //console.log('chatMsg.reqTm', chatMsg.reqTm);
+          if(index === -1){
             this.msgDatas = chatMsg;
           }
         }
-
+        console.log('this.showChatPage:',this.showChatPage);
         if(this.showChatPage === true){
           // 읽음상태 저장
           this.saveChatState(data);
+        }
+        else{
+          let index = this.qtReqList.findIndex(x => x.ID === data.docId);
+          if(index > -1){
+            this.qtReqList[index].NotReadCnt = this.qtReqList[index].NotReadCnt + 1;
+          }
         }
       }
       else{
