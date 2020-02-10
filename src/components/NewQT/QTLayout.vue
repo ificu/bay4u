@@ -28,7 +28,7 @@
         <template  @click.stop="showROHistDialog = true" >
           <v-text-field class="pr-6 pl-4 mb-n4" label="차량번호" v-model="CarInfo.CarNo" outlined dense color="success" append-outer-icon="search" @click:append-outer="checkWebPOSHist" v-on:keypress.enter="checkWebPOSHist"></v-text-field>
         </template>
-        <v-dialog v-model="showROHistDialog" transition="dialog-bottom-transition" >
+        <v-dialog v-model="showROHistDialog" transition="dialog-bottom-transition">
 
           <!--<template v-slot:activator="{ on: { click } }">
             <v-text-field class="pr-6 pl-4 mb-n4" label="차량번호" v-model="CarInfo.CarNo" outlined dense color="success" append-outer-icon="search" @click:append-outer="checkWebPOSHist" v-on:keypress.enter="checkWebPOSHist"></v-text-field>
@@ -650,6 +650,7 @@ export default {
                 if(result.data.success === true) {
                   this.CarInfo.VinNo = result.data.data;
                   this.$cookies.set('VinNo', this.CarInfo.VinNo, '600s');
+                  this.setVinBrand();
                 }
                 else {
                   // 조회 에러가 났다면 고객명을 입력받아 차대 원부 조회
@@ -685,6 +686,7 @@ export default {
           if(result.data.success === true) {
             this.CarInfo.VinNo = result.data.data;
             this.$cookies.set('VinNo', this.CarInfo.VinNo, '600s');
+            this.setVinBrand();
           }
           else {
             if(result.data.data.indexOf("소유자 성명") >= 0)
@@ -774,9 +776,11 @@ export default {
               this.roList = JSON.parse(result.data.ReturnDataJSON);
               
               this.CarInfo.VinNo = result.data.ReturnObject;
+              this.setVinBrand();
             }
             else if (result.data.ReturnObject !== "" && result.data.ReturnObject !== null) {
               this.CarInfo.VinNo = result.data.ReturnObject;
+              this.setVinBrand();
             }
             else {
               // 정비이력 조회는 차량번호 입력 or 인식 후 자동 처리 되므로 차대번호 조회도 자동 처리하자...
@@ -1719,6 +1723,113 @@ export default {
       this.showMsgOrdConfirmBtn = false;
       this.alertYesNo = value;
     },
+    setVinBrand()
+    {
+      let pre = this.CarInfo.VinNo.substring(0,4).toUpperCase();
+      let param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_BRAND";
+      param.payload = {};
+      param.payload.FilterExpression = "PRE = :pre";
+      param.payload.ExpressionAttributeValues = {};
+      var key = ":pre";
+      param.payload.ExpressionAttributeValues[key] = pre;
+
+      //console.log("======= vin pre request ========");
+      //console.log(param);
+
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+        //console.log("======= vin pre result ========");
+        //console.log(result.data);
+
+        // VinNo 앞 4자리
+        if(result.data.Items.length > 0){
+          let index = this.brandList.indexOf(result.data.Items[0].BRAND);
+          if(index === -1){
+            this.brandSelected= '기타';
+          }
+          else{
+            this.brandSelected= result.data.Items[0].BRAND;
+          }
+        }
+        else{
+          pre = this.CarInfo.VinNo.substring(0,3).toUpperCase();
+          param.payload.ExpressionAttributeValues = {};
+          var key = ":pre";
+          param.payload.ExpressionAttributeValues[key] = pre;
+
+          //console.log("======= vin pre request ========");
+          //console.log(param);
+
+          axios({
+            method: 'POST',
+            url: Constant.LAMBDA_URL,
+            headers: Constant.JSON_HEADER,
+            data: param
+          })
+          .then((result) => {
+            console.log("======= vin pre result ========");
+            console.log(result.data);
+
+            // VinNo 앞 3자리
+            if(result.data.Items.length > 0){
+              let index = this.brandList.indexOf(result.data.Items[0].BRAND);
+              if(index === -1){
+                this.brandSelected= '기타';
+              }
+              else{
+                this.brandSelected= result.data.Items[0].BRAND;
+              }
+            }
+            else{
+              pre = this.CarInfo.VinNo.substring(0,2).toUpperCase();
+              param.payload.ExpressionAttributeValues = {};
+              var key = ":pre";
+              param.payload.ExpressionAttributeValues[key] = pre;
+
+              //console.log("======= vin pre request ========");
+              //console.log(param);
+
+              axios({
+                method: 'POST',
+                url: Constant.LAMBDA_URL,
+                headers: Constant.JSON_HEADER,
+                data: param
+              })
+              .then((result) => {
+                //console.log("======= vin pre result ========");
+                //console.log(result.data); 
+                // VinNo 앞 2자리
+                if(result.data.Items.length > 0){
+                  let index = this.brandList.indexOf(result.data.Items[0].BRAND);
+                  if(index === -1){
+                    this.brandSelected = '기타';
+                  }
+                  else{
+                    this.brandSelected = result.data.Items[0].BRAND;
+                  }
+                }
+              })
+              .catch((error) => {
+                console.log(error);
+              }); 
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+          }); 
+        }
+      })
+      .catch((error) => {
+				console.log(error);
+      });
+    }
   },
   components: {
     ItemCategory: ItemCategory,

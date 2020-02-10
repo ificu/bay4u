@@ -287,8 +287,10 @@ export default {
           }
         }
 
-        // 읽음상태 저장
-        this.saveChatState(data);
+        if(this.showChatPage === true){
+          // 읽음상태 저장
+          this.saveChatState(data);
+        }
       }
       else{
         let index = this.qtReqList.findIndex(x => x.ID === data.docId);
@@ -638,7 +640,7 @@ export default {
         data: param
       })
       .then((result) => {
-        console.log("=======  result ========");
+        console.log("=======  chat state result ========");
         console.log(result.data);
 
         let chatList = result.data.Items;
