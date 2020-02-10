@@ -80,8 +80,22 @@
             <img height='25' v-if="brandSelected === 'AUDI'" style="align-self:center" src="@/assets/BRAND-AUDI.png">
             <img height='40' v-if="brandSelected === 'BENZ'" style="align-self:center" src="@/assets/BRAND-BENZ.png">
             <img height='40' v-if="brandSelected === 'BMW'" style="align-self:center" src="@/assets/BRAND-BMW.png">
+            <img height='35' v-if="brandSelected === 'CADILLAC'" style="align-self:center" src="@/assets/BRAND-CADILLAC.png">
+            <img height='16' v-if="brandSelected === 'CHRYSLER'" style="align-self:center" src="@/assets/BRAND-CHRYSLER.png">
+            <img height='25' v-if="brandSelected === 'CITROEN'" style="align-self:center" src="@/assets/BRAND-CITROEN.png">
+            <img width="75" v-if="brandSelected === 'DODGE'" style="align-self:center" src="@/assets/BRAND-DODGE.png">
+            <img height='32' v-if="brandSelected === 'FIAT'" style="align-self:center" src="@/assets/BRAND-FIAT.png">
             <img height='25' v-if="brandSelected === 'FORD'" style="align-self:center" src="@/assets/BRAND-FORD.png">
+            <img height='25' v-if="brandSelected === 'HONDA'" style="align-self:center" src="@/assets/BRAND-HONDA.png">
+            <img height='20' v-if="brandSelected === 'JEEP'" style="align-self:center" src="@/assets/BRAND-JEEP.png">
+            <img height='25' v-if="brandSelected === 'LANDROVER'" style="align-self:center" src="@/assets/BRAND-LANDROVER.png">
             <img height='40' v-if="brandSelected === 'LEXUS'" style="align-self:center" src="@/assets/BRAND-LEXUS.png">
+            <img height='32' v-if="brandSelected === 'LINCOLN'" style="align-self:center" src="@/assets/BRAND-LINCOLN.png">
+            <img height='25' v-if="brandSelected === 'MINI'" style="align-self:center" src="@/assets/BRAND-MINI.png">
+            <img height='30' v-if="brandSelected === 'PEUGEOT'" style="align-self:center" src="@/assets/BRAND-PEUGEOT.png">
+            <img height='35' v-if="brandSelected === 'PORSCHE'" style="align-self:center" src="@/assets/BRAND-PORSCHE.png">
+            <img height='30' v-if="brandSelected === 'TOYOTA'" style="align-self:center" src="@/assets/BRAND-TOYOTA.png">
+            <img height='35' v-if="brandSelected === 'VOLVO'" style="align-self:center" src="@/assets/BRAND-VOLVO.png">
             <img height='40' v-if="brandSelected === 'VW'" style="align-self:center" src="@/assets/BRAND-VW.png">
           </v-col>
         </v-row>
@@ -1751,12 +1765,12 @@ export default {
         // VinNo 앞 4자리
         if(result.data.Items.length > 0){
           let index = this.brandList.indexOf(result.data.Items[0].BRAND);
-          if(index === -1){
-            this.brandSelected= '기타';
+          if(index === -1){ 
+            //this.brandSelected= '기타';
+            this.brandList.push(result.data.Items[0].BRAND);
           }
-          else{
-            this.brandSelected= result.data.Items[0].BRAND;
-          }
+          
+          this.brandSelected= result.data.Items[0].BRAND;
         }
         else{
           pre = this.CarInfo.VinNo.substring(0,3).toUpperCase();
@@ -1781,11 +1795,12 @@ export default {
             if(result.data.Items.length > 0){
               let index = this.brandList.indexOf(result.data.Items[0].BRAND);
               if(index === -1){
-                this.brandSelected= '기타';
+                //this.brandSelected= '기타';
+                this.brandList.push(result.data.Items[0].BRAND);
               }
-              else{
-                this.brandSelected= result.data.Items[0].BRAND;
-              }
+
+              this.brandSelected= result.data.Items[0].BRAND;
+              
             }
             else{
               pre = this.CarInfo.VinNo.substring(0,2).toUpperCase();
@@ -1809,11 +1824,12 @@ export default {
                 if(result.data.Items.length > 0){
                   let index = this.brandList.indexOf(result.data.Items[0].BRAND);
                   if(index === -1){
-                    this.brandSelected = '기타';
+                    //this.brandSelected = '기타';
+                    this.brandList.push(result.data.Items[0].BRAND);
                   }
-                  else{
-                    this.brandSelected = result.data.Items[0].BRAND;
-                  }
+                  
+                  this.brandSelected = result.data.Items[0].BRAND;
+                  
                 }
               })
               .catch((error) => {
