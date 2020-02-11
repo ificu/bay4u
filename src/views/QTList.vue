@@ -1197,7 +1197,7 @@ export default {
 				if(Array.isArray(this.qtList))
 				{
 					this.qtList.sort(function(a, b){
-						return (a.ReqSeq < b.ReqSeq) ? 1 : -1;
+						return (a.ReqDt < b.ReqDt) ? 1 : -1;
 					});
 				}
 
