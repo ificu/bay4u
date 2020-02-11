@@ -1157,7 +1157,7 @@ export default {
         }
       }
 
-      console.log("======= 견적확정 조회 Request result ========");
+      console.log("======= Webpos 견적확정 조회 Request result ========");
       console.log(param); 
 
       var rtnCode = "";
@@ -1169,7 +1169,7 @@ export default {
           data: param
       })
       .then((result) => {
-				console.log("======= 견적확정 조회 Return result ========");     
+				console.log("======= Webpos 견적확정 조회 Return result ========");     
 				console.log(result.data); 
 				
 				this.rtnCode = result.data.ReturnCode;
@@ -1446,97 +1446,97 @@ export default {
       console.log('webpos item :' , item);
       console.log('webpos index : ', index);
       item.forEach(el =>{
+        
+        if(el.DealerFlag === "WEBPOS"){
+          var param = {};
+          param.BsnId = this.UserInfo.BsnID;
+          param.CarNo = el.CarNo;
+          param.VinNo = el.CarVin;
+          param.RequestDataJSON = el.ID;
 
-        var param = {};
-        param.BsnId = this.UserInfo.BsnID;
-        param.CarNo = el.CarNo;
-        param.VinNo = el.CarVin;
-        param.RequestDataJSON = el.ID;
+          console.log("======= Webpos QT Request result ========");
+          console.log(param); 
 
-        console.log("======= QT Detail Request result ========");
-        console.log(param); 
+          var btnGrp = 'btnGrp-'+item[0].ID;
+          if(document.getElementById(btnGrp) !== null && document.getElementById(btnGrp).getAttribute("aria-expanded") === "false" && this.showProcessing === false)
+          { 
+            this.processMsg = "견적회신 조회 중입니다. \n잠시만 기다려주세요.";
+            this.showProcessing = true;
+          }
 
-        var btnGrp = 'btnGrp-'+item[0].ID;
-        if(document.getElementById(btnGrp) !== null && document.getElementById(btnGrp).getAttribute("aria-expanded") === "false" && this.showProcessing === false)
-        { 
-          this.processMsg = "견적회신 조회 중입니다. \n잠시만 기다려주세요.";
-          this.showProcessing = true;
-        }
-
-        var rtnCode = "";
-
-        axios({
-            method: 'POST',
-            url: Constant.SCPIF_URL + 'GetQTData',
-            headers: Constant.JSON_HEADER,
-            data: param
-        })
-        .then((result) => {
-            console.log("======= QT LiST Return result ========");     
-            console.log( JSON.stringify(result.data)); 
-          
-            this.rtnCode = result.data.ReturnCode;
-            el.ResQTData = [];
-            if(this.rtnCode === 0)
-            {
-              var rtnQTData = JSON.parse(result.data.ReturnDataJSON);
-              var headQTData = rtnQTData['ESTM_HED'];
-              
-              if(headQTData.length > 0)
+          var rtnCode = "";
+          axios({
+              method: 'POST',
+              url: Constant.SCPIF_URL + 'GetQTData',
+              headers: Constant.JSON_HEADER,
+              data: param
+          })
+          .then((result) => {
+              console.log("======= Webpos QT Return result ========");     
+              console.log( JSON.stringify(result.data)); 
+            
+              this.rtnCode = result.data.ReturnCode;
+              el.ResQTData = [];
+              if(this.rtnCode === 0)
               {
-                var dtlQtData = rtnQTData['ESTM_DTL'];
-               // console.log('ESTM_STS :', headQTData[0].ESTM_STS);
-               // console.log('ESTM_DTL :', dtlQtData.length);
-                if(headQTData[0].ESTM_STS !== '0' && headQTData[0].ESTM_STS !== '1' && headQTData[0].ESTM_STS !== '6' && rtnQTData['ESTM_DTL'].length !== 0)
+                var rtnQTData = JSON.parse(result.data.ReturnDataJSON);
+                var headQTData = rtnQTData['ESTM_HED'];
+                
+                if(headQTData.length > 0)
                 {
-                  //var dtlQtData = rtnQTData['ESTM_DTL'];
-                  console.log("ESTM_DTL : " , dtlQtData);
-
-                  headQTData.forEach(element => {
-                
-                    //console.log('element : ',element);
-                    let resQtItem = {};
-                    resQtItem.ID = element.ESTM_ID;
-                    resQtItem.DocID = element.ESTM_ID;
-                    resQtItem.CarNo = element.CAR_NO;
-                    resQtItem.DealerName = '부품지원센터';
-                    resQtItem.DealerCode = 'PARTS';
-                    resQtItem.DealerAgent = element.AGENT_NM;
-                    resQtItem.ResFlag = 'WEBPOS';
-                    resQtItem.CarType = element.SERIES;
-                    resQtItem.ResDetail = dtlQtData;
-                    resQtItem.QTSts = el.QTSts;
-                    //el.ResQTData.push(resQtItem); 
-                    el.ResQTData.splice(0, 0, resQtItem);
-                  });
-
-                  if(index !== undefined & index >= 0)
+                  var dtlQtData = rtnQTData['ESTM_DTL'];
+                // console.log('ESTM_STS :', headQTData[0].ESTM_STS);
+                // console.log('ESTM_DTL :', dtlQtData.length);
+                  if(headQTData[0].ESTM_STS !== '0' && headQTData[0].ESTM_STS !== '1' && headQTData[0].ESTM_STS !== '6' && rtnQTData['ESTM_DTL'].length !== 0)
                   {
-                     // 채팅에서 넘어왔을 경우 상세 조회
-                    this.$nextTick(function() {
-                                       
-                      var target = 'btnAccordion-'+index;
-                      console.log('target : ', document.getElementById(target));
-                      if(document.getElementById(target) !== null)
-                      {
-                        document.getElementById(target).click();
-                      }
-                    }); 
+                    //var dtlQtData = rtnQTData['ESTM_DTL'];
+                    console.log("ESTM_DTL : " , dtlQtData);
+
+                    headQTData.forEach(element => {
+                  
+                      //console.log('element : ',element);
+                      let resQtItem = {};
+                      resQtItem.ID = element.ESTM_ID;
+                      resQtItem.DocID = element.ESTM_ID;
+                      resQtItem.CarNo = element.CAR_NO;
+                      resQtItem.DealerName = '부품지원센터';
+                      resQtItem.DealerCode = 'PARTS';
+                      resQtItem.DealerAgent = element.AGENT_NM;
+                      resQtItem.ResFlag = 'WEBPOS';
+                      resQtItem.CarType = element.SERIES;
+                      resQtItem.ResDetail = dtlQtData;
+                      resQtItem.QTSts = el.QTSts;
+                      //el.ResQTData.push(resQtItem); 
+                      el.ResQTData.splice(0, 0, resQtItem);
+                    });
+
+                    if(index !== undefined & index >= 0)
+                    {
+                      // 채팅에서 넘어왔을 경우 상세 조회
+                      this.$nextTick(function() {
+                                        
+                        var target = 'btnAccordion-'+index;
+                        console.log('target : ', document.getElementById(target));
+                        if(document.getElementById(target) !== null)
+                        {
+                          document.getElementById(target).click();
+                        }
+                      }); 
+                    }
+                  
                   }
-                
                 }
               }
-            }
 
-            this.showProcessing = false;
-            this.processMsg = "";
-        })
-        .catch((error) => {
-            console.log(error);
-            this.showProcessing = false;
-            this.processMsg = "";
-        }) 
-
+              this.showProcessing = false;
+              this.processMsg = "";
+          })
+          .catch((error) => {
+              console.log(error);
+              this.showProcessing = false;
+              this.processMsg = "";
+          }) 
+        }
       });  
     },
     GetDealerResData(item, refID) { 
