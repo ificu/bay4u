@@ -831,6 +831,8 @@ export default {
               this.estmStsNm = headQTData[0].ESTM_STS_NM;
 
               this.qtInfo.CarSeries = headQTData[0].SERIES;
+
+              this.tabIndex = 1;
             }
           }
       })
@@ -898,6 +900,7 @@ export default {
     },
     sendQTconfirmMsg()
     {
+      if(this.detailQTData.length === 0) return;
       var now = new Date();
       var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                 + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
@@ -1736,6 +1739,13 @@ export default {
           // 일반대리점 일떼
           this.getQTConfirm();
         }
+        
+        // 부품지원센터 일때
+        if(this.UserInfo.UserType === 'DEALER')
+        {
+          this.GetQtList();
+        }
+
         if(this.brandClicked === true){
           document.getElementById('btnBrandSelect').click();
           this.brandClicked = false;
