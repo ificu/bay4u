@@ -616,6 +616,13 @@ export default {
     },
     // DB에서 차대번호를 조회 이력이 있는지 체크
     checkCarVin(){
+      if(this.CarInfo.CarNo === null || this.CarInfo.CarNo === ''){
+        if(this.CarInfo.VinNo !== null && this.CarInfo.VinNo !== undefined){
+          this.setVinBrand();
+        }
+        return;
+      }
+
       var param = {};
       param.operation = "list";
       param.tableName = "BAY4U_CAR_VIN";
@@ -749,6 +756,7 @@ export default {
     },
     // WebPOS에 과거 정비내역이 있는지 체크
     checkWebPOSHist(){
+     
       if((this.CarInfo.CarNo === '' || this.CarInfo.CarNo === null || this.CarInfo.CarNo === undefined) &&
           (this.CarInfo.VinNo === '' || this.CarInfo.VinNo === null || this.CarInfo.VinNo === undefined)) 
       return;
@@ -757,7 +765,7 @@ export default {
 
         var param = {};
         param.BsnId = this.UserInfo.BsnID;
-        param.CarNo = this.CarInfo.CarNo;
+        param.CarNo = (this.CarInfo.CarNo === null)?'':this.CarInfo.CarNo;
         param.VinNo = this.CarInfo.VinNo;
 
         this.$cookies.set('CarNo', this.CarInfo.CarNo, '600s');
@@ -767,7 +775,9 @@ export default {
 
         var rtnCode = "";
         var rtnCount = 0;
-      
+        if(this.CarInfo.VinNo === null || this.CarInfo.VinNo === undefined){
+          this.CarInfo.VinNo = "WebPOS 이력 조회 중...";
+        }
         axios({
             method: 'POST',
             url: Constant.SCPIF_URL + 'GetROList',
@@ -800,14 +810,13 @@ export default {
               // 정비이력 조회는 차량번호 입력 or 인식 후 자동 처리 되므로 차대번호 조회도 자동 처리하자...
               this.checkCarVin();
             }
-            
             this.showVINSearchBtn = true;
         })
         .catch((error) => {
             console.log(error);
             this.CarInfo.VinNo = "";
         })
-        this.CarInfo.VinNo = "WebPOS 이력 조회 중...";
+       // this.CarInfo.VinNo = "WebPOS 이력 조회 중...";
       }
       else { // 일반 카세터면 WebPOS 조회 없이 자체 저장 내역 체크
 
@@ -1739,7 +1748,9 @@ export default {
     },
     setVinBrand()
     {
-      let pre = this.CarInfo.VinNo.substring(0,4).toUpperCase();
+      if(this.CarInfo.VinNo === null)return;
+
+      let pre = this.CarInfo.VinNo.substring(0,5).toUpperCase();
       let param = {};
       param.operation = "list";
       param.tableName = "BAY4U_BRAND";
@@ -1749,8 +1760,8 @@ export default {
       var key = ":pre";
       param.payload.ExpressionAttributeValues[key] = pre;
 
-      //console.log("======= vin pre request ========");
-      //console.log(param);
+      console.log("======= vin pre request ========");
+      console.log(param);
 
       axios({
         method: 'POST',
@@ -1827,9 +1838,7 @@ export default {
                     //this.brandSelected = '기타';
                     this.brandList.push(result.data.Items[0].BRAND);
                   }
-                  
                   this.brandSelected = result.data.Items[0].BRAND;
-                  
                 }
               })
               .catch((error) => {

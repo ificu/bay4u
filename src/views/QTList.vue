@@ -1187,7 +1187,7 @@ export default {
 				if(Array.isArray(this.qtList))
 				{
 					this.qtList.sort(function(a, b){
-						return (a.ReqDt < b.ReqDt) ? 1 : -1;
+						return (a.ReqSeq < b.ReqSeq) ? 1 : -1;
 					});
 				}
 
@@ -1593,7 +1593,7 @@ export default {
     },
     showQtReqItem(item , index)
     {
-      //console.log('item : ', item);
+      console.log('item : ', item);
       this.qtReqToggleIndex = index;
       this.visibleIcon = !this.visibleIcon;
       //this.SOList2Toggle = !this.SOList2Toggle;
@@ -1608,7 +1608,6 @@ export default {
         });
       }
       else{
-
         this.qtReqItem = JSON.parse(convertDynamoToArrayString(item.QTData.LineItem)); 
       }
     },
