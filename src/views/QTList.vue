@@ -21,6 +21,16 @@
               </b-input-group-append>
             </b-input-group>
           </div>
+          <div>
+            <v-icon color="#5d4038" style="margin-left:10px;margin-right:3px;font-size:1.1em;">hourglass_empty</v-icon>
+            <span style="margin-right:6px;font-size:0.85em;">견적진행중</span>
+            <v-icon color="#5d4038" style="margin-right:3px;font-size:1.1em;">mobile_friendly</v-icon>
+            <span style="margin-right:6px;font-size:0.85em;">견적회신완료</span>
+            <v-icon color="#5d4038" style="margin-right:3px;font-size:1.1em;">shopping_cart</v-icon>
+            <span style="margin-right:6px;font-size:0.85em;">주문요청</span>
+            <v-icon color="#5d4038" style="margin-right:3px;font-size:1.1em;">local_shipping</v-icon>
+            <span style="font-size:0.85em;">주문확정</span>
+          </div>
           <div class="QTList-history">
             <!--견적내역-->
             <b-card no-body class="mb-1" v-for="(qtItem , idx) in qtReqList" v-bind:key="idx" >
@@ -53,13 +63,13 @@
                     <b-col class="history-car" :class="{ 'history-car2' :(qtItem[0].CarSeries !== undefined && qtItem[0].CarSeries !== '') ? true :false}">
                       <b-row class="history-carNo">
                         <!--견적요청-->
-                        <v-icon color="#FFF59D" style="margin-right:4px;margin-top:4px;font-size:1.1em;" v-if="showQtState(qtItem)">far fa-clock</v-icon>
+                        <v-icon color="#FFF59D" style="margin-right:4px;margin-top:4px;font-size:1.5em;" v-if="showQtState(qtItem)">hourglass_empty</v-icon>
                         <!--견적회신-->
-                        <v-icon color="#FFF59D" style="margin-right:4px;margin-top:4px;font-size:1.45em;" v-if="showQtConfirmState(qtItem)">receipt</v-icon>
+                        <v-icon color="#FFF59D" style="margin-right:4px;margin-top:4px;font-size:1.45em;" v-if="showQtConfirmState(qtItem)">mobile_friendly</v-icon>
                         <!--주문요청-->
-                        <v-icon color="#FFF59D" style="margin-right:4px;margin-top:3px;font-size:1.35em;" v-if="showOrderState(qtItem)">local_grocery_store</v-icon>
+                        <v-icon color="#FFF59D" style="margin-right:4px;margin-top:3px;font-size:1.5em;" v-if="showOrderState(qtItem)">shopping_cart</v-icon>
                         <!--주문확정-->
-                        <v-icon color="#FFF59D" style="margin-right:4px;margin-top:3px;font-size:1.08em;" v-if="showOrdConfirmState(qtItem)">fas fa-truck</v-icon>
+                        <v-icon color="#FFF59D" style="margin-right:4px;margin-top:3px;font-size:1.43em;" v-if="showOrdConfirmState(qtItem)">local_shipping</v-icon>
                         {{(qtItem[0].CarNo === "*empty*")?"미상차량" : qtItem[0].CarNo }}
                       </b-row>
                       <!--<b-row class="history-carSeries">
