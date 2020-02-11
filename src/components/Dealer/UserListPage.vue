@@ -36,9 +36,9 @@
         style="color:#FF8F00"
       >
         <v-chip class="mr-1 pr-2 pl-2" @click="showQTReqList(0)">당일</v-chip>
-        <v-chip class="mr-1 pr-2 pl-2" @click="showQTReqList(1)">어제</v-chip>
+        <!--<v-chip class="mr-1 pr-2 pl-2" @click="showQTReqList(1)">어제</v-chip>-->
         <v-chip class="mr-1 pr-2 pl-2" @click="showQTReqList(2)">일주일</v-chip>
-        <!--<v-chip class="mr-1 pr-2 pl-2" @click="showQTReqList(3)">한달</v-chip>-->
+        <v-chip class="mr-1 pr-2 pl-2" @click="showQTReqList(3)">한달</v-chip>
         <v-chip class="mr-1 pr-2 pl-2" @click="showQTReqList(4)">미확인</v-chip>
       </v-chip-group>          
     </v-row>
@@ -453,7 +453,7 @@ export default {
       //if(this.UserInfo.BsnID !==  docId.qtInfo.ResDealer ) return;
       var flag = '';
       var checkExist = false;
-      console.log('aaa:',  this.qtReqList);
+      
       for (var chat of this.qtReqList) {
         if(chat.ID === data.docId) {
           console.log('chat:',chat );
