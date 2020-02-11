@@ -818,12 +818,16 @@ export default {
             {
               if(headQTData[0].ESTM_STS !== '1' && rtnQTData['ESTM_DTL'].Length !== 0)
               {
+                //console.log('ESTM_DTL :' , JSON.stringify(rtnQTData['ESTM_DTL'])); 
+                console.log('headQTData[0].ESTM_STS : ',headQTData[0].ESTM_STS);
                 this.detailQTData = rtnQTData['ESTM_DTL'];
-                //console.log(JSON.stringify(rtnQTData['ESTM_DTL'])); 
                 this.showSum = !this.showSum; 
-                
+                // 견적완료 상태이면 메시지 전송
+                if(headQTData[0].ESTM_STS === '2'){
+                  this.sendQTconfirmMsg();
+                  this.tabIndex = 1;
+                }
               }
-
               /* var qtKeys = Object.keys(rtnQTData );*/
               /*console.log("ESTM_HED : " + this.headQTData );
               console.log("ESTM_DTL : " + this.detailQTData );*/
@@ -833,9 +837,6 @@ export default {
 
               this.qtInfo.CarSeries = headQTData[0].SERIES;
             }
-          }
-          if(this.qtInfo.QTSts !== "견적요청"){
-            this.tabIndex = 1;
           }
       })
       .catch((error) => {
