@@ -821,6 +821,7 @@ export default {
                 this.detailQTData = rtnQTData['ESTM_DTL'];
                 //console.log(JSON.stringify(rtnQTData['ESTM_DTL'])); 
                 this.showSum = !this.showSum; 
+                
               }
 
               /* var qtKeys = Object.keys(rtnQTData );*/
@@ -831,9 +832,10 @@ export default {
               this.estmStsNm = headQTData[0].ESTM_STS_NM;
 
               this.qtInfo.CarSeries = headQTData[0].SERIES;
-
-              this.tabIndex = 1;
             }
+          }
+          if(this.qtInfo.QTSts !== "견적요청"){
+            this.tabIndex = 1;
           }
       })
       .catch((error) => {
