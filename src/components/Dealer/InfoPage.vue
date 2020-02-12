@@ -823,8 +823,12 @@ export default {
                 this.detailQTData = rtnQTData['ESTM_DTL'];
                 this.showSum = !this.showSum; 
                 // 견적완료 상태이면 메시지 전송
-                if(headQTData[0].ESTM_STS === '2'){
+                if(headQTData[0].ESTM_STS === '2' && this.qtInfo.QTSts === "견적요청"){
                   this.sendQTconfirmMsg();
+                  this.tabIndex = 1;
+                }
+
+                if(this.qtInfo.QTSts === "견적회신"){
                   this.tabIndex = 1;
                 }
               }
