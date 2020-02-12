@@ -2040,11 +2040,21 @@ export default {
       if(Array.isArray(item))
       {
         if(item.length === 1) {
-          if(item[0].QTData.QTSts === "견적요청"){
-            return true;
+          if(item[0].WebposOnly === "Y"){
+            if(item[0].QTSts === "견적요청"){
+              return true;
+            }
+            else{
+              return false;
+            }
           }
           else{
-            return false;
+            if(item[0].QTData.QTSts === "견적요청"){
+              return true;
+            }
+            else{
+              return false;
+            }
           }
         }
         else{
@@ -2061,14 +2071,24 @@ export default {
     },
     showQtConfirmState(item)
     {
-      if(Array.isArray(item))
-      {
+      
+      if(Array.isArray(item)){
         if(item.length === 1){
-          if(item[0].QTData.QTSts === "견적회신"){
+          if(item[0].WebposOnly === "Y"){
+            if(item[0].QTSts === "견적회신"){
             return true;
+            }
+            else{
+              return false;
+            }
           }
           else{
-            return false;
+            if(item[0].QTData.QTSts === "견적회신"){
+            return true;
+            }
+            else{
+              return false;
+            }
           }
         }
         else{
