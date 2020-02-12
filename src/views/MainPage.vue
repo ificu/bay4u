@@ -175,6 +175,7 @@ export default {
       
       this.qtId = this.$route.query.ID;
       console.log('ID :', this.qtId);
+      // router 초기화
       this.$router.replace({'query': null});
     }
 
