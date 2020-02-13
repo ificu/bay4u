@@ -20,7 +20,8 @@
       </div>
       <div class="UserInfo-maintenanceMaster">
         <div class="itemMaster-title">내 공임 마스터</div>
-        <div class="itemMaster-btn"><b-button @click="showMaintenanceMasterModal">설 정</b-button></div>
+        <!--<div class="itemMaster-btn"><b-button @click="showMaintenanceMasterModal">설 정</b-button></div>-->
+        <div class="itemMaster-btn"><b-button>설 정</b-button></div>
       </div>
     </div>
     <div class="UserInfo-footer">
