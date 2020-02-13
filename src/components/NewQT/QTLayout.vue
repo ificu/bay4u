@@ -2112,7 +2112,6 @@ export default {
   color: #848180;
   margin-top: 5px;
 }
-
 .NewQT-footer a span i {
   font-size: 2.5rem;
 }
