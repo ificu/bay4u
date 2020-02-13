@@ -26,10 +26,10 @@
             <span style="margin-right:6px;font-size:0.85em;">견적진행중</span>
             <v-icon color="#5d4038" style="margin-right:3px;font-size:1.1em;">mobile_friendly</v-icon>
             <span style="margin-right:6px;font-size:0.85em;">견적회신완료</span>
-            <v-icon color="#5d4038" style="margin-right:3px;font-size:1.1em;">shopping_cart</v-icon>
+            <!--<v-icon color="#5d4038" style="margin-right:3px;font-size:1.1em;">shopping_cart</v-icon>
             <span style="margin-right:6px;font-size:0.85em;">주문요청</span>
             <v-icon color="#5d4038" style="margin-right:3px;font-size:1.1em;">local_shipping</v-icon>
-            <span style="font-size:0.85em;">주문확정</span>
+            <span style="font-size:0.85em;">주문확정</span>-->
           </div>
           <div class="QTList-history">
             <!--견적내역-->

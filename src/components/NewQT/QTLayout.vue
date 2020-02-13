@@ -317,7 +317,7 @@
           </li>
         </ul>-->
       </span>
-      <span slot="reorder"><v-btn color="#4E342E" dark depressed class="btnOrder" @click="checkQtOrder">바로주문</v-btn></span>
+      <!--<span slot="reorder"><v-btn color="#4E342E" dark depressed class="btnOrder" @click="checkQtOrder">바로주문</v-btn></span>-->
       <span slot="list2">
         <div class="qtConfirm-itemList" v-for="(item, index) in qtRequest" v-bind:key="index">
           <span class="qtConfirm-itemDel">{{item.ITM_NM}}</span>
