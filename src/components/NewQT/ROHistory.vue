@@ -131,12 +131,18 @@ export default {
             console.log(error);
         })
         */
-    },   
+		},   
+		created: function()
+		{
+			this.$EventBus.$on('ROHistory.SetROInfo', data => {
+				this.SetROInfo(data);
+			});	
+		},
     methods:
     {
         GetRoItem(item)
         {
-            if(this.UserInfo.UserType === 'SITE') {
+            if(this.UserInfo.UserType === 'SITE' || this.UserInfo.UserType === 'DEALER' ) {
                 var param = {};
                 param.RequestDataJSON = "ID_TRN:" + item.ID_TRN + ","+"RO_CD:" + item.RO_CD;
                 
@@ -215,7 +221,12 @@ export default {
                     console.log(error);
                 })
             }
-        }
+				},
+				SetROInfo(data)
+				{
+					this.roList = data;
+					this.carName = this.roList[0].NM_CR_TEC;
+				},
     },
     computed:{
       CarInfo: {
