@@ -28,6 +28,10 @@
         header-tag="header"
         header-bg-variant="dark"
       >
+        <template v-slot:header>
+          차량 정보
+          <b-button v-if="UserInfo.UserType === 'DEALER'" class="pa-0 btnRoHistory" @click="getRoHistory">정비이력 확인</b-button>
+        </template>
         <b-card-text>
           <div class="Car-Info">
             <v-container>
@@ -655,7 +659,32 @@
 
           </v-card-actions>
         </v-card>
-      </v-dialog>          
+      </v-dialog>  
+
+      <v-dialog v-model="showROHistDialog" width="400px" max-height="100%">
+        <v-card>
+            <v-toolbar dark color="primary"> 
+              <v-toolbar-title>
+                <v-icon medium>fas fa-edit</v-icon>
+                과거 정비이력  <span class="roCarNo">{{qtInfo.CarNo}}</span>
+              </v-toolbar-title>                 
+              <v-spacer></v-spacer>
+              <v-toolbar-items>
+              </v-toolbar-items>
+              <v-btn icon dark @click="closeRoHistory">
+                <v-icon>mdi-close</v-icon>
+              </v-btn>
+            </v-toolbar>
+            <v-card-text>
+              <v-container class="mx-n2 pe-0">
+                <ROHistory :RoHistoryData="roList"></ROHistory>
+              </v-container>
+            </v-card-text>    
+            <v-card-actions>
+
+            </v-card-actions>     
+            </v-card>
+      </v-dialog>
 
     </div>   
   </v-app>
@@ -665,6 +694,7 @@
 <script>
 import {datePadding, convertDynamoToString , convertDynamoToArrayString, convertArrayToDynamo} from '@/utils/common.js'
 import Constant from '@/Constant';
+import ROHistory from '@/components/NewQT/ROHistory.vue'
 
 const axios = require('axios').default;
 export default {
@@ -772,8 +802,13 @@ export default {
       tab2Title: '견적 회신',
       showBtnQT: true,
       showBtnOrder: false,
+      roList: [],
+      showROHistDialog: false,          // WebPOS 정비이력 조회 팝업
     }
   },
+	components: {
+		ROHistory
+	},
   methods: {
     onCalculatorAMT(){
      this.editedItem.AMT = this.editedItem.itemPrice * this.editedItem.itemQty;
@@ -1686,7 +1721,54 @@ export default {
       .catch((error) => {
         console.log(error);
       });
-    },  
+    }, 
+    getRoHistory()
+    {
+      if(this.qtInfo.ReqSite === undefined || this.qtInfo.CarNo === undefined) return;
+      this.roList = [];
+
+      var param = {};
+      param.BsnId = this.qtInfo.ReqSite;
+      param.CarNo = (this.qtInfo.CarNo === null)?'':this.qtInfo.CarNo;
+      param.VinNo = this.qtInfo.CarVin;
+
+      console.log("======= ROHistory Request result ========");
+      console.log(param); 
+
+      var rtnCode = "";
+      var rtnCount = 0;
+
+      axios({
+          method: 'POST',
+          url: Constant.SCPIF_URL + 'GetROList',
+          headers: Constant.JSON_HEADER,
+          data: param
+      })
+      .then((result) => {
+        console.log("======= ROHistory Return result ========");
+        console.log(result.data); 
+        if(result.data.ReturnDataCount > 0) {
+
+          if(Array.isArray(result.data.ReturnDataJSON))
+          {
+            result.data.ReturnDataJSON.sort(function(a, b){
+              return (a.DC_DY_BSN > b.DC_DY_BSN) ? 1 : -1;
+            });
+          }
+          this.roList = JSON.parse(result.data.ReturnDataJSON);
+          this.showROHistDialog = true;
+          this.$EventBus.$emit('ROHistory.SetROInfo',this.roList);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      })
+    },
+    closeRoHistory()
+    {
+      this.roList = [];
+      this.showROHistDialog = false;
+    }
   },
   computed:{
       CarInfo: {
@@ -2108,5 +2190,10 @@ td.text-center{
   background-color: lightyellow;
   font-weight: bold;
   color: #E50914;
+}
+.btnRoHistory{
+  float: right;
+  width: 110px;
+  height: 30px;
 }
 </style>
