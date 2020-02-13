@@ -2181,9 +2181,20 @@ export default {
       }
     },
     showQtStateText(value , index1 , index2)
-    {   
+    {
+      console.log('value:',value);   
       if(value !== '' && value !== undefined){
-        return value.substring(index1 , index2);
+        if(value !== '견적회신'){
+          return value.substring(index1 , index2);
+        }
+        else{
+          if(index1 === 2 && index2 === 4){
+            return "완료";
+          }
+          else{
+            return value.substring(index1 , index2);
+          }
+        }
       }
       else{
         return '';
