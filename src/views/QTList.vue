@@ -26,10 +26,10 @@
             <span style="margin-right:6px;font-size:0.85em;">견적진행중</span>
             <v-icon color="#5d4038" style="margin-right:3px;font-size:1.1em;">mobile_friendly</v-icon>
             <span style="margin-right:6px;font-size:0.85em;">견적회신완료</span>
-            <v-icon color="#5d4038" style="margin-right:3px;font-size:1.1em;">shopping_cart</v-icon>
+            <!--<v-icon color="#5d4038" style="margin-right:3px;font-size:1.1em;">shopping_cart</v-icon>
             <span style="margin-right:6px;font-size:0.85em;">주문요청</span>
             <v-icon color="#5d4038" style="margin-right:3px;font-size:1.1em;">local_shipping</v-icon>
-            <span style="font-size:0.85em;">주문확정</span>
+            <span style="font-size:0.85em;">주문확정</span>-->
           </div>
           <div class="QTList-history">
             <!--견적내역-->
@@ -2040,11 +2040,21 @@ export default {
       if(Array.isArray(item))
       {
         if(item.length === 1) {
-          if(item[0].QTData.QTSts === "견적요청"){
-            return true;
+          if(item[0].WebposOnly === "Y"){
+            if(item[0].QTSts === "견적요청"){
+              return true;
+            }
+            else{
+              return false;
+            }
           }
           else{
-            return false;
+            if(item[0].QTData.QTSts === "견적요청"){
+              return true;
+            }
+            else{
+              return false;
+            }
           }
         }
         else{
@@ -2061,14 +2071,24 @@ export default {
     },
     showQtConfirmState(item)
     {
-      if(Array.isArray(item))
-      {
+      
+      if(Array.isArray(item)){
         if(item.length === 1){
-          if(item[0].QTData.QTSts === "견적회신"){
+          if(item[0].WebposOnly === "Y"){
+            if(item[0].QTSts === "견적회신"){
             return true;
+            }
+            else{
+              return false;
+            }
           }
           else{
-            return false;
+            if(item[0].QTData.QTSts === "견적회신"){
+            return true;
+            }
+            else{
+              return false;
+            }
           }
         }
         else{
@@ -2161,9 +2181,20 @@ export default {
       }
     },
     showQtStateText(value , index1 , index2)
-    {   
+    {
+      console.log('value:',value);   
       if(value !== '' && value !== undefined){
-        return value.substring(index1 , index2);
+        if(value !== '견적회신'){
+          return value.substring(index1 , index2);
+        }
+        else{
+          if(index1 === 2 && index2 === 4){
+            return "완료";
+          }
+          else{
+            return value.substring(index1 , index2);
+          }
+        }
       }
       else{
         return '';
