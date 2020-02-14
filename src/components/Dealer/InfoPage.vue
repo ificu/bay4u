@@ -661,6 +661,7 @@
         </v-card>
       </v-dialog>  
 
+      <!--과거정비 이력 조회-->
       <v-dialog v-model="showROHistDialog" width="400px" max-height="100%">
         <v-card>
             <v-toolbar dark color="primary"> 
@@ -686,7 +687,17 @@
             </v-card>
       </v-dialog>
 
-    </div>   
+    <!-- 프로세싱 메시지 -->
+    <MessageBox v-if="showProcessing">
+      <div slot="header"><h5 >처리 중...</h5></div>
+      <span slot="body" class="showProcessing">
+        <pre>{{processMsg}}</pre>
+        <v-icon large color="orange darken-2">fas fa-sync-alt fa-spin</v-icon>
+      </span>
+    </MessageBox> 
+
+    </div>
+  
   </v-app>
 </template>
 <!--<script src="https://unpkg.com/axios/dist/axios.min.js"></script>-->
@@ -695,6 +706,7 @@
 import {datePadding, convertDynamoToString , convertDynamoToArrayString, convertArrayToDynamo} from '@/utils/common.js'
 import Constant from '@/Constant';
 import ROHistory from '@/components/NewQT/ROHistory.vue'
+import MessageBox from '@/components/Common/MessageBox.vue'
 
 const axios = require('axios').default;
 export default {
@@ -804,10 +816,13 @@ export default {
       showBtnOrder: false,
       roList: [],
       showROHistDialog: false,          // WebPOS 정비이력 조회 팝업
+      showProcessing: false,
+      processMsg: '',
     }
   },
 	components: {
-		ROHistory
+    ROHistory,
+    MessageBox
 	},
   methods: {
     onCalculatorAMT(){
@@ -1730,10 +1745,13 @@ export default {
       var param = {};
       param.BsnId = this.qtInfo.ReqSite;
       param.CarNo = (this.qtInfo.CarNo === null)?'':this.qtInfo.CarNo;
-      param.VinNo = this.qtInfo.CarVin;
+      param.VinNo = (this.qtInfo.CarVin === '99999999999999999') ? '' : this.qtInfo.CarVin;
 
       console.log("======= ROHistory Request result ========");
       console.log(param); 
+
+      this.processMsg = "과거 정비이력 조회 중입니다. \n잠시만 기다려주세요.";
+      this.showProcessing = true;
 
       var rtnCode = "";
       var rtnCount = 0;
@@ -1759,8 +1777,16 @@ export default {
           this.showROHistDialog = true;
           this.$EventBus.$emit('ROHistory.SetROInfo',this.roList);
         }
+        else{
+          alert('과거 정비이력이 없습니다.');
+        }
+
+        this.showProcessing = false;
+        this.processMsg = "";
       })
       .catch((error) => {
+        this.showProcessing = false;
+        this.processMsg = "";
         console.log(error);
       })
     },
