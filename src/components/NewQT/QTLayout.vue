@@ -23,7 +23,7 @@
       </div>    
       <div>
         <div class="text-left pl-6 mb-n9"><v-btn  color="#FFECB3" depressed @click="CarInfoClear()">CLEAR</v-btn></div>
-        <div class="text-right mb-2 pr-6"><v-btn  color="#FFECB3" depressed @click="SetDummyCar()">미상차량</v-btn></div>
+        <div class="mb-2" style="margin-left:115px;"><v-btn  color="#FFECB3" depressed @click="SetDummyCar()">미상차량</v-btn></div>
         <!-- 과거 정비이력 Popup / 차량번호 입력 -->
         <template  @click.stop="showROHistDialog = true" >
           <v-text-field class="pr-6 pl-4 mb-n4" label="차량번호" v-model="CarInfo.CarNo" outlined dense color="success" append-outer-icon="search" @click:append-outer="checkWebPOSHist" v-on:keypress.enter="checkWebPOSHist"></v-text-field>
@@ -1750,14 +1750,14 @@ export default {
     {
       if(this.CarInfo.VinNo === null)return;
 
-      let pre = this.CarInfo.VinNo.substring(0,5).toUpperCase();
+      let pre = this.CarInfo.VinNo.substring(0,2).toUpperCase();
       let param = {};
       param.operation = "list";
       param.tableName = "BAY4U_BRAND";
       param.payload = {};
-      param.payload.FilterExpression = "PRE = :pre";
+      param.payload.FilterExpression = "contains(PRE, :pre)";
       param.payload.ExpressionAttributeValues = {};
-      var key = ":pre";
+      let key = ":pre";
       param.payload.ExpressionAttributeValues[key] = pre;
 
       console.log("======= vin pre request ========");
@@ -1770,85 +1770,72 @@ export default {
         data: param
       })
       .then((result) => {
-        //console.log("======= vin pre result ========");
-        //console.log(result.data);
+        console.log("======= vin pre result ========");
+        console.log(result.data);
 
-        // VinNo 앞 4자리
-        if(result.data.Items.length > 0){
-          let index = this.brandList.indexOf(result.data.Items[0].BRAND);
-          if(index === -1){ 
-            //this.brandSelected= '기타';
-            this.brandList.push(result.data.Items[0].BRAND);
-          }
+        let vinList = result.data.Items;
+        let index  = -1;
+
+        // VinNo 앞 5자리 체크
+        let vinNo5 = this.CarInfo.VinNo.substring(0,5).toUpperCase();
+        let vinIndex = vinList.findIndex(x => x.PRE === vinNo5);
+        
+        if(vinIndex === -1){
+          // VinNo 앞 5자리 불일치
+          // VinNo 앞 4자리 체크
+          let vinNo4 = this.CarInfo.VinNo.substring(0,4).toUpperCase();
+          vinIndex = vinList.findIndex(x => x.PRE === vinNo4);
           
-          this.brandSelected= result.data.Items[0].BRAND;
-        }
-        else{
-          pre = this.CarInfo.VinNo.substring(0,3).toUpperCase();
-          param.payload.ExpressionAttributeValues = {};
-          var key = ":pre";
-          param.payload.ExpressionAttributeValues[key] = pre;
-
-          //console.log("======= vin pre request ========");
-          //console.log(param);
-
-          axios({
-            method: 'POST',
-            url: Constant.LAMBDA_URL,
-            headers: Constant.JSON_HEADER,
-            data: param
-          })
-          .then((result) => {
-            console.log("======= vin pre result ========");
-            console.log(result.data);
-
-            // VinNo 앞 3자리
-            if(result.data.Items.length > 0){
-              let index = this.brandList.indexOf(result.data.Items[0].BRAND);
-              if(index === -1){
-                //this.brandSelected= '기타';
-                this.brandList.push(result.data.Items[0].BRAND);
+          if(vinIndex === -1){
+            // VinNo 앞 4자리 불일치
+            // VinNo 앞 3자리 체크
+            let vinNo3 = this.CarInfo.VinNo.substring(0,3).toUpperCase();
+            vinIndex = vinList.findIndex(x => x.PRE === vinNo3);
+            
+            if(vinIndex === -1){
+              // VinNo 앞 3자리 불일치
+              // VinNo 앞 2자리 체크
+              let vinNo2 = this.CarInfo.VinNo.substring(0,2).toUpperCase();
+              vinIndex = vinList.findIndex(x => x.PRE === vinNo2);
+              console.log('VinNo 앞 2자리:', vinNo2 +'/'+vinIndex);
+              if(vinIndex === -1){
+                // VinNo 앞 2자리 불일치
+                this.brandSelected= '기타';
               }
-
-              this.brandSelected= result.data.Items[0].BRAND;
-              
+              else{
+                // VinNo 앞 2자리 일치
+                index = this.brandList.indexOf(vinList[vinIndex].BRAND);
+                if(index === -1){ 
+                  this.brandList.push(vinList[vinIndex].BRAND);
+                }
+                this.brandSelected = vinList[vinIndex].BRAND;
+              }
             }
             else{
-              pre = this.CarInfo.VinNo.substring(0,2).toUpperCase();
-              param.payload.ExpressionAttributeValues = {};
-              var key = ":pre";
-              param.payload.ExpressionAttributeValues[key] = pre;
-
-              //console.log("======= vin pre request ========");
-              //console.log(param);
-
-              axios({
-                method: 'POST',
-                url: Constant.LAMBDA_URL,
-                headers: Constant.JSON_HEADER,
-                data: param
-              })
-              .then((result) => {
-                //console.log("======= vin pre result ========");
-                //console.log(result.data); 
-                // VinNo 앞 2자리
-                if(result.data.Items.length > 0){
-                  let index = this.brandList.indexOf(result.data.Items[0].BRAND);
-                  if(index === -1){
-                    //this.brandSelected = '기타';
-                    this.brandList.push(result.data.Items[0].BRAND);
-                  }
-                  this.brandSelected = result.data.Items[0].BRAND;
-                }
-              })
-              .catch((error) => {
-                console.log(error);
-              }); 
+              // VinNo 앞 3자리 일치
+              index = this.brandList.indexOf(vinList[vinIndex].BRAND);
+              if(index === -1){ 
+                this.brandList.push(vinList[vinIndex].BRAND);
+              }
+              this.brandSelected = vinList[vinIndex].BRAND;
             }
-          })
-          .catch((error) => {
-            console.log(error);
-          }); 
+          }
+          else{
+            // VinNo 앞 4자리 일치
+            index = this.brandList.indexOf(vinList[vinIndex].BRAND);
+            if(index === -1){ 
+              this.brandList.push(vinList[vinIndex].BRAND);
+            }
+            this.brandSelected = vinList[vinIndex].BRAND;
+          }
+        }
+        else{
+          // VinNo 앞 5자리 일치
+          index = this.brandList.indexOf(vinList[vinIndex].BRAND);
+          if(index === -1){ 
+            this.brandList.push(vinList[vinIndex].BRAND);
+          }
+          this.brandSelected = vinList[vinIndex].BRAND;
         }
       })
       .catch((error) => {

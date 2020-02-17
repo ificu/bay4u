@@ -267,8 +267,8 @@ export default {
         idx++;
       }
       param.payload.FilterExpression = filter;
-      console.log("======= chat state request result ========");
-      console.log(JSON.stringify(param));
+      //console.log("======= chat state request result ========");
+      //console.log(JSON.stringify(param));
 
       axios({
         method: 'POST',
