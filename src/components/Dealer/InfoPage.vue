@@ -1095,6 +1095,19 @@ export default {
           console.log("======= sendQTSMS Return result ========");     
           console.log(result.data); 
           console.log(result.data.ReturnMessage)
+
+          var now = new Date();
+          var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
+          var qtMsg = {};
+          qtMsg.from = {'name' : this.UserInfo.BsnID};
+          qtMsg.msg  = "SMS 전송 하였습니다. 확인 부탁합니다.";
+          qtMsg.reqTm = chatTime;
+          qtMsg.ChatType = "R";
+          
+          this.$EventBus.$emit('send-QTConfirm' , qtMsg);
+
       })
       .catch((error) => {
           console.log(error);

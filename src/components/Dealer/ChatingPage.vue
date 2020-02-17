@@ -182,8 +182,13 @@ export default {
           body : data.msg
         };
         console.log("ChatMessage Popup : ", data);
-        new Notification('채팅 메시지 (' + data.from.name + ')', options);
+        //new Notification('채팅 메시지 (' + data.from.name + ')', options);
         this.$EventBus.$emit('update-chatMsg', data);  
+        this.$sendCommand({
+          command: 'NewChats',
+          userId: this.UserInfo.BsnID,   
+          message: data.msg
+        });        
       }
     });
 

@@ -30,6 +30,7 @@ const SocketPlugin = {
             socket.emit('command', {
                 command: $payload.command,
                 userId: $payload.userId,
+                message: $payload.message,
             });
         };
 
