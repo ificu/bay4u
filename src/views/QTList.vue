@@ -2130,20 +2130,28 @@ export default {
           let cnt = item.length;
           let result = item.filter(el => el.QTData.QTSts === "주문요청");
           let webposResult = item.filter(el => el.QTData.QTSts === "견적회신" && el.DealerFlag === "WEBPOS"); 
-          if(cnt === ( result.length + webposResult.length)){
-            return true
+
+          let webposOnlyList = item.filter(el => el.DealerFlag === "WEBPOS"); 
+
+          if(cnt === webposOnlyList.length){
+            return false;
           }
           else{
-            let index = item.findIndex(el => el.QTData.QTSts === "주문확정");
-            if(index > -1 ){
-              return false;
+            if(cnt === ( result.length + webposResult.length)){
+              return true
             }
             else{
-              index = item.findIndex(el => el.QTData.QTSts === "주문요청");
+              let index = item.findIndex(el => el.QTData.QTSts === "주문확정");
               if(index > -1 ){
-                return true;
+                return false;
               }
-              return false;
+              else{
+                index = item.findIndex(el => el.QTData.QTSts === "주문요청");
+                if(index > -1 ){
+                  return true;
+                }
+                return false;
+              }
             }
           }
         }
@@ -2165,16 +2173,23 @@ export default {
           let cnt = item.length;
           let result = item.filter(el => el.QTData.QTSts === "주문확정");
           let webposResult = item.filter(el => el.QTData.QTSts === "견적회신" && el.DealerFlag === "WEBPOS"); 
-          if(cnt === ( result.length + webposResult.length)){
-            return true
+          let webposOnlyList = item.filter(el => el.DealerFlag === "WEBPOS"); 
+
+          if(cnt === webposOnlyList.length){
+            return false;
           }
           else{
-            let index = item.findIndex(el => el.QTData.QTSts === "주문확정");
-            if(index > -1 ){
-              return true;
+            if(cnt === ( result.length + webposResult.length)){
+              return true
             }
             else{
-              return false;
+              let index = item.findIndex(el => el.QTData.QTSts === "주문확정");
+              if(index > -1 ){
+                return true;
+              }
+              else{
+                return false;
+              }
             }
           }
         }
