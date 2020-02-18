@@ -33,6 +33,7 @@
         </span>
       </router-link>
     </div>
+		<BackToTop></BackToTop>
   </div>
 </template>
 
@@ -41,6 +42,7 @@
 	import ConfirmList from '@/components/QTList/ConfirmList.vue'
 	import OrderList from '@/components/QTList/OrderList.vue'
 	import ROList from '@/components/QTList/ROList.vue'
+	import BackToTop from '@/components/Common/BackToTop.vue'
 
 	export default {
 		name: 'QTList',
@@ -59,7 +61,9 @@
 			this.UserInfo.Name = this.$cookies.get('UserNM');
 
 			if(this.$route !== undefined && this.$route.name === "QTList" ) {
-				if(this.$route.params.Type !== undefined && this.$route.params.Type === 'order'){
+
+				if(this.$route.params.Type !== undefined && (this.$route.params.Type === 'order' || this.$route.params.Type === 'orderHistory')){
+					// 주문요청 완료 채팅이나 과거주문내역 조회 넘어왔을 경우
 					this.tabIndex = 1;
 				}
 			}
@@ -82,7 +86,8 @@
 		components: {
 			ROList,
 			OrderList,
-			ConfirmList
+			ConfirmList,
+			BackToTop,
 		}
 	}
 </script>

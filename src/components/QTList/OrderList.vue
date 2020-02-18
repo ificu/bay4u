@@ -146,6 +146,7 @@
 				},
 				orderHistory:[],
 				orderdetail:{ isHistory: false, ordLineItem :[]},
+				isRouteOrdHis: false,
 			}
 		},
 		components: {
@@ -182,6 +183,11 @@
 				if(this.$route.params.Type !== undefined && this.$route.params.Type === 'order'){
           // 주문요청 완료 채팅에서 넘어왔을 경우
 					this.GetOrderHistory(docID, RefID,'');
+				}
+				else if(this.$route.params.Type !== undefined && this.$route.params.Type === 'orderHistory'){
+          // 과거주문내역 조회로 넘어왔을 경우
+					this.isRouteOrdHis = true;
+					this.GetOrderHistory('', '',this.carInfoData.CarNo);
 				}
 				else{
 					this.GetOrderHistory('','','');
