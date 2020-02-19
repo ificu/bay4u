@@ -872,13 +872,15 @@ export default {
                 
                 this.detailQTData = rtnQTData['ESTM_DTL'];
                 this.showSum = !this.showSum; 
+
+                this.sendWebposQtMsg(headQTData[0].ESTM_STS);
                 // 견적완료 상태이면 메시지 전송
-                if(headQTData[0].ESTM_STS === '2' && this.qtInfo.QTSts === "견적요청"){
+                /*if(headQTData[0].ESTM_STS === '2' && this.qtInfo.QTSts === "견적요청"){
                   console.log('headQTData[0].ESTM_STS : ',headQTData[0].ESTM_STS);
                   console.log(' this.qtInfo.QTSts : ', this.qtInfo.QTSts);
                   this.sendQTconfirmMsg();
                   this.tabIndex = 1;
-                }
+                }*/
 
                 if(this.qtInfo.QTSts === "견적회신"){
                   this.tabIndex = 1;
@@ -890,7 +892,6 @@ export default {
               this.series = headQTData[0].SERIES;
               this.angentNm = headQTData[0].AGENT_NM;
               this.estmStsNm = headQTData[0].ESTM_STS_NM;
-
               this.qtInfo.CarSeries = headQTData[0].SERIES;
             }
           }
@@ -898,6 +899,38 @@ export default {
       .catch((error) => {
           console.log(error);
       })   
+    },
+    sendWebposQtMsg(estmSts){
+
+      var param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_QT_LIST";
+      param.payload = {};
+      param.payload.FilterExpression = "ID = :id";
+      param.payload.ExpressionAttributeValues = {};
+      var key = ":id";   
+      param.payload.ExpressionAttributeValues[key] =  this.qtInfo.ID;
+
+      //console.log("======= QT state Request result ========");
+      //console.log(param); 
+
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+
+        let qtSts = result.data.Items[0].QTSts;
+        if(estmSts === '2' && qtSts === "견적요청"){
+          this.sendQTconfirmMsg();
+          this.tabIndex = 1;
+        }
+      })
+      .catch((error) => {
+          console.log(error);
+      }) 
     },
     SetQtInfo(){
       console.log('UserType : ' , this.UserInfo );
@@ -2223,5 +2256,10 @@ td.text-center{
   float: right;
   width: 110px;
   height: 30px;
+}
+.showProcessing
+{
+  text-align:center; 
+  font-size: 1.1rem;
 }
 </style>
