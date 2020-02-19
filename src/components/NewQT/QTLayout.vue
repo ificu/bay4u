@@ -648,6 +648,7 @@ export default {
           console.log(result.data);
           if(result.data.Count > 0) {
             this.CarInfo.VinNo = result.data.Items[0].VIN;
+            this.setVinBrand();
             this.$cookies.set('VinNo', this.CarInfo.VinNo, '600s');
           }
           else {
