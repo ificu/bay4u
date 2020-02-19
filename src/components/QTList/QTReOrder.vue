@@ -59,7 +59,7 @@
 											<span class="order-itemName">{{item.itemName}}</span>
 										</div>
 										<input v-model="item.itemQty" type="number" pattern="\d*" placeholder="number" class="order-itemqty" @change="calculatorAMT(item)" @focus="$event.target.select()"/>	
-										<span v-if="item.itemPrice === 0" class="order-itemPrice">{{ item.itemPrice | localeNum}}원</span>
+										<span v-if="item.itemPrice === 0" class="order-itemPrice">0원</span>
 										<span v-if="item.itemPrice !== 0" class="order-itemPrice">{{ item.itemPrice | localeNum}}원</span>
 										<i class="orderList-itemDel fas fa-times-circle"  @click="removeItem(item)"></i>
 									</div>
