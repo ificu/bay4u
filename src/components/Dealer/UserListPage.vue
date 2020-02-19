@@ -135,8 +135,6 @@ export default {
       }
     },
     showQTReqList(idx) {
-      //console.log("showQTReqList??????????????????????? : ", idx);
-
       this.initQTData();
 
       var now = new Date();
@@ -310,6 +308,8 @@ export default {
     {
       var readCount = item.NotReadCnt;
 
+      var checkForLoop = 1;
+
       for(let chat of item.NotChatIDList)
       {
         let param = {};
@@ -342,11 +342,19 @@ export default {
             readCount = readCount-1;
             item.NotReadCnt = readCount;
           }
+          if(checkForLoop++ === item.NotChatIDList.length) {
+            console.log("======= chat read Command ========");
+            this.$sendCommand({
+              command: 'ChatRead',
+              userId: this.UserInfo.BsnID,        
+            });
+          }
         })
         .catch((error) => {
           console.log(error);
         });
       }
+
     },
     initQTData()
     {

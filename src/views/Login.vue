@@ -109,10 +109,12 @@ export default {
 
           console.log('ID 체크 : ', id);
 
+          // 비밀번호 체크
           if(pwd !== this.pwd && this.pwd !== 'bay1234')  {
             this.loginAlertMessage = "비밀번호 불일치";
             this.loginAlert = true;   
-          }
+          } 
+          // 카센터 인 경우
           else if(type === "SITE" || type === "SITE2") {
             this.$cookies.set('BsnID', siteCode, '86400s');
             this.$cookies.set('UserNM', name, '86400s');
@@ -124,6 +126,7 @@ export default {
             this.UserInfo.EntNo = entNo;
             this.UserInfo.UserType = type;
           }
+          // 부품 대리점 인 경우
           else {
             this.$cookies.set('BsnID', siteCode, '86400s');
             this.$cookies.set('UserID', id, '86400s');
@@ -135,6 +138,11 @@ export default {
             this.UserInfo.BsnID = siteCode;
             this.UserInfo.Name = name;
             this.UserInfo.UserType = type;
+
+            var url = 'https://bay4u.co.kr/deploy/Bay4u.application?id=' + this.UserInfo.BsnID;
+            var title = "메시지 알림 서비스 설치";
+            var option = "width = 500, height = 500, top = 100, left = 200, location = no"
+            window.open(url, title, option);
           }
         }
       });

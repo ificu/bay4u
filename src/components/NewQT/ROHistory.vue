@@ -37,11 +37,16 @@
         <v-expansion-panel-content class="ml-n4 mr-n4">
             <div v-for="(item,idx) in roitemList" :key="idx">
                 <div>
-									<div class="roHistory-itemName">{{item.NM_ITM}}</div>	
-									<div class="roHistory-content">
-										<div class="roHistory-itemcode">{{item.ID_ITM}}</div>
-										<div class="roHistory-amount"><span class="amount-title">판매단가</span><span class="amount-info">{{item.MO_PRC_REG | localeNum}} 원</span></div>
-									</div>
+                    <div class="roHistory-itemName">{{item.NM_ITM}}</div>	
+                    <div class="roHistory-content">
+                        <div class="roHistory-itemcode">{{item.ID_ITM}}</div>
+                        <div v-if="item.MO_PRC_REG !== 0" class="roHistory-amount">
+                            <span class="amount-title">판매단가</span><span class="amount-info">{{item.MO_PRC_REG | localeNum}} 원</span>                      
+                        </div>
+                        <div v-if="item.MO_PRC_REG === 0" class="roHistory-amount">
+                            <span class="amount-title">판매단가</span><span class="amount-info">0 원</span>
+                        </div>                        
+                    </div>
                 </div>
                  <!--<div class="roHistory-amount">{{item.MO_PRC_REG | localeNum}} 원</div>-->
             </div>
@@ -200,10 +205,13 @@ export default {
 
                         for(var his of rtnData.data.dataset) {
                             if(his.inDay === selectedDate) {
+                                console.log("his : ", his); 
+
                                 var item = {};
                                 item.NM_ITM = his.partName;
                                 item.QU_ITM_LM_RTN_SLS = his.qty;
-                                item.MO_PRC_REG = his.paysum / (his.qty === 0 ? 1 : his.qty);
+                                item.MO_PRC_REG = his.paysum / (his.qty === '0' ? 1 : parseInt(his.qty));
+                                //item.MO_PRC_REG = his.paysum;
                                 item.MO_EXTND = his.paysum;
 
                                 roItemList.push(item);

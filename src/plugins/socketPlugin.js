@@ -26,6 +26,14 @@ const SocketPlugin = {
             });
         };
 
+        vue.prototype.$sendCommand = ($payload) => {
+            socket.emit('command', {
+                command: $payload.command,
+                userId: $payload.userId,
+                message: $payload.message,
+            });
+        };
+
         // 인스턴스 메소드 추가
         vue.prototype.$socket = socket;
     },
