@@ -164,7 +164,7 @@ export default {
         if(data.qtInfo !== undefined && data.qtInfo.QTSts !== undefined ){
           // 견적상태 변경 처리
           let updateData = {};
-          updateData.ID = data.chatId;
+          updateData.ID = data.docId;
           updateData.Msg = data.qtInfo.QTSts;
           this.$EventBus.$emit('update-Sts' , updateData);
 

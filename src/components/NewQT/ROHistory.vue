@@ -1,6 +1,7 @@
 <template>
 <v-row align="center">
     <div class="roHistoryCarinfo"><v-icon small class="carInfo-icon">fas fa-car</v-icon>{{carName}}</div>
+		<div v-show="UserInfo.UserType === 'DEALER'">차대번호 : {{vinNO}}</div>
     <v-divider></v-divider>
     <div>     
     <v-expansion-panels accordion focusable>
@@ -83,14 +84,16 @@ export default {
             roList: [],
             roitemList: [],
             paramCarno: this.value,
-            carName : ""
+						carName : "",
+						vinNO : "",
         }
     },
     props:['RoHistoryData'],
     mounted() {
 
-       this.roList = this.RoHistoryData;
-       this.carName = this.roList[0].NM_CR_TEC;
+			this.roList = this.RoHistoryData;
+			this.carName = this.roList[0].NM_CR_TEC;
+			this.vinNO = this.roList[0].VIN_NO;
 
        datePadding();
     /*
@@ -226,6 +229,7 @@ export default {
 				{
 					this.roList = data;
 					this.carName = this.roList[0].NM_CR_TEC;
+					this.vinNO = this.roList[0].VIN_NO;
 				},
     },
     computed:{
