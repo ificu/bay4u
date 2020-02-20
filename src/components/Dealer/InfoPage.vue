@@ -30,8 +30,8 @@
       >
         <template v-slot:header>
           차량 정보
-          <b-button v-if="UserInfo.UserType === 'DEALER'" class="pa-0 btnRoHistory">차량정보 수정</b-button>
           <b-button v-if="UserInfo.UserType === 'DEALER'" class="pa-0 btnRoHistory" @click="getRoHistory">정비이력 확인</b-button>
+          <b-button v-if="UserInfo.UserType === 'DEALER'" class="pa-0 btnRoHistory">차량정보 수정</b-button>
         </template>
         <b-card-text>
           <div class="Car-Info">
@@ -2383,6 +2383,7 @@ td.text-center{
   float: right;
   width: 110px;
   height: 30px;
+  margin-right: 6px;
 }
 .showProcessing
 {
