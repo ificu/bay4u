@@ -53,7 +53,7 @@
               </v-container>
             </v-card-text>    
             <v-card-actions>
-              <v-row  align="center" justify="end" class="mt-n6 mb-4 mr-4" >
+              <v-row align="center" justify="end" class="mt-n6 mb-4 mr-4" >
                 <v-btn color="#4E342E" dark depressed @click="goOrderList()"> 
                   과거주문내역조회
                 </v-btn>
@@ -74,6 +74,7 @@
               append-outer-icon="fas fa-car"
               single-line
               solo
+              disabled
             ></v-select>
           </v-col>
           <v-col cols="2">
@@ -101,6 +102,7 @@
         </v-row>
 
         <!--<v-text-field label="차량종류" outlined dense color="success" class="mt-n5"></v-text-field>-->
+        <v-btn outlined small color="red darken-1" class="mt-n6 mb-6 ml-5 " @click="showCarBrandPopup=!showCarBrandPopup">기타차종 선택</v-btn>
         <v-btn outlined small color="red darken-1" class="mt-n6 mb-4 mr-4 float-right" v-if="showVINSearchBtn" @click="checkCarVin">차대번호 조회</v-btn>
         <v-btn outlined small color="red darken-1" class="mt-n6 mb-4 mr-1 float-right" v-if="showROHistBtn" @click="showROHistDialog=!showROHistDialog">정비이력</v-btn>
 
@@ -119,7 +121,77 @@
               <v-btn color="green darken-1" text @click="showVINSearchAgreePopup = false; CarInfo.VinNo = '';">취소</v-btn>
             </v-card-actions>
           </v-card>
-        </v-dialog>        
+        </v-dialog>    
+
+        <!-- 브랜드 선택 Popup-->
+        <v-dialog v-model="showCarBrandPopup">
+          <v-card>
+            <v-card-title class="pa-0 brandTitle">브랜드 선택</v-card-title>
+            <!--<v-card-text></v-card-text>-->
+            <v-card class="ml-4 mr-4 mb-1" outlined>
+              <v-card-title class="pa-0 brandType"><span>FAVORITE</span></v-card-title>
+              <v-card-text class="pa-1">
+                <v-chip v-for="(brand, index) in favoriteBrand" v-bind:key = "index" class="ma-1" color="#3cadc0" outlined link @click="clickBrandSelect(brand)">
+                <img height='18' class="mr-2" v-if="brand === 'AUDI'" src="@/assets/BRAND-AUDI.png">
+                <img height='22' class="mr-2" v-if="brand === 'BENZ'" src="@/assets/BRAND-BENZ.png">
+                <img height='25' class="mr-2" v-if="brand === 'BMW'" src="@/assets/BRAND-BMW.png">
+                <img height='25' class="mr-2" v-if="brand === 'LEXUS'" src="@/assets/BRAND-LEXUS.png">
+                <img height='22' class="mr-2" v-if="brand === 'MINI'" src="@/assets/BRAND-MINI.png">
+                <img height='22' class="mr-2" v-if="brand === 'VW'" src="@/assets/BRAND-VW.png">
+                {{brand}}
+                </v-chip>
+              </v-card-text>              
+            </v-card>
+            <v-card class="ml-4 mr-4 mb-1" outlined>
+                <v-card-title class="pa-0 brandType"><span>EUROPE</span></v-card-title>
+                <v-card-text class="pa-1">
+                  <v-chip v-for="(brand, index) in europeBrand" v-bind:key = "index" class="ma-1" color="#3cadc0" outlined link @click="clickBrandSelect(brand)">
+                    <img height='25' class="mr-2" v-if="brand === 'LANDROVER'" src="@/assets/BRAND-LANDROVER.png">
+                    <img height='22' class="mr-2" v-if="brand === 'VOLVO'" src="@/assets/BRAND-VOLVO.png">
+                    <img height='25' class="mr-2" v-if="brand === 'PEUGEOT'" src="@/assets/BRAND-PEUGEOT.png">
+                    <img height='25' class="mr-2" v-if="brand === 'PORSCHE'" src="@/assets/BRAND-PORSCHE.png">
+                    {{brand}}
+                  </v-chip>
+                </v-card-text>              
+            </v-card>
+            <v-card class="ml-4 mr-4 mb-1" outlined>
+              <v-card-title class="pa-0 brandType"><span>USA</span></v-card-title>
+              <v-card-text class="pa-1">
+                <v-chip v-for="(brand, index) in usaBrand" v-bind:key = "index" class="ma-1" color="#3cadc0" outlined link @click="clickBrandSelect(brand)">
+                  <img height='20' class="mr-2" v-if="brand === 'JEEP'" src="@/assets/BRAND-JEEP.png">
+                  <img height='25' class="mr-2" v-if="brand === 'LINCOLN'" src="@/assets/BRAND-LINCOLN.png">
+                  <img height='20' class="mr-2" v-if="brand === 'FORD'" src="@/assets/BRAND-FORD.png">
+                  <img height='20' class="mr-2" v-if="brand === 'CHRYSLER'" src="@/assets/BRAND-CHRYSLER.png">
+                {{brand}}
+                </v-chip>
+              </v-card-text>              
+            </v-card>
+            <v-card class="ml-4 mr-4 mb-1" outlined>
+              <v-card-title class="pa-0 brandType"><span>ASIA</span></v-card-title>
+              <v-card-text class="pa-1">
+                <v-chip v-for="(brand, index) in asiaBrand" v-bind:key = "index" class="ma-1" color="#3cadc0" outlined link @click="clickBrandSelect(brand)">
+                  <img height='25' class="mr-2" v-if="brand === 'HONDA'" src="@/assets/BRAND-HONDA.png">
+                  <img height='22' class="mr-2" v-if="brand === 'TOYOTA'" src="@/assets/BRAND-TOYOTA.png">
+                {{brand}}
+                </v-chip>
+              </v-card-text>              
+            </v-card> 
+            <v-card class="ml-4 mr-4" outlined>
+              <v-card-title class="pa-1 brandType"><span>All Brand</span></v-card-title>
+              <v-chip v-for="(brand, index) in carBrand" v-bind:key = "index" class="ma-1" color="#3cadc0" outlined link @click="clickBrandSelect(brand)">
+                <img height='25' class="mr-2" v-if="brand === 'CADILLAC'" src="@/assets/BRAND-CADILLAC.png">
+                <img height='25' class="mr-2" v-if="brand === 'CITROEN'" src="@/assets/BRAND-CITROEN.png">
+                <img height='18' class="mr-2" v-if="brand === 'DODGE'" src="@/assets/BRAND-DODGE.png">
+                <img height='25' class="mr-2" v-if="brand === 'FIAT'" src="@/assets/BRAND-FIAT.png">
+                {{brand}}
+              </v-chip>
+            </v-card>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="green darken-1" text @click="showCarBrandPopup = false;">닫기</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>      
 
       </div>    
     </v-card>
@@ -458,13 +530,19 @@ export default {
       isScroll:false,
       brandSelected: '차종 선택',
       brandList: [
-        '차종 선택', 'BMW', 'BENZ', 'AUDI', 'VW', 'FORD', 'LEXUS', '기타'
-      ],     
+        '', 'BMW', 'BENZ', 'AUDI', 'VW', 'FORD', 'LEXUS', '기타'
+      ], 
+      favoriteBrand:['BENZ', 'BMW','AUDI','LEXUS','MINI', 'VW'],
+      europeBrand:['LANDROVER','VOLVO', 'JAGUAR', 'PORSCHE','PEUGEOT'],
+      usaBrand:['LINCOLN','JEEP','CHRYSLER','FORD',],
+      asiaBrand:['HONDA','TOYOTA'],  
+      carBrand:[ 'CADILLAC', 'CITROEN', 'DODGE', 'FIAT',],
       selectedDealer: [],
       showProcessing: false,
       processMsg: '',
       saveCount: 0,
       reqDealerList: [],
+      showCarBrandPopup: false, // 브랜드 팝업
     }
   },
   props:['NewQTData'],
@@ -761,6 +839,8 @@ export default {
       if((this.CarInfo.CarNo === '' || this.CarInfo.CarNo === null || this.CarInfo.CarNo === undefined) &&
           (this.CarInfo.VinNo === '' || this.CarInfo.VinNo === null || this.CarInfo.VinNo === undefined)) 
       return;
+
+      this.showROHistBtn = false;
 
       if(this.UserInfo.UserType === 'SITE') { // WebPOS일 경우 정비 이력 조회 이후 차대번호 세팅
 
@@ -1842,7 +1922,15 @@ export default {
       .catch((error) => {
 				console.log(error);
       });
-    }
+    },
+    clickBrandSelect(brand) {
+      let targetIndex = this.brandList.indexOf(brand);
+      if(targetIndex === -1){ 
+        this.brandList.push(brand);
+      }
+      this.brandSelected = brand;
+      this.showCarBrandPopup = !this.showCarBrandPopup;
+    },
   },
   components: {
     ItemCategory: ItemCategory,
@@ -2254,5 +2342,19 @@ export default {
   position: absolute;
   right:0;
   top:-10px;
+}
+.brandTitle{
+  margin: 0px 0px 5px 20px;
+}
+.brandType{
+  background-color:#5d4038;
+  color: #fff;
+  justify-self: center;
+  font-size: 0.7em;
+  height: 20px;
+  line-height: 10px;
+}
+.brandType span{
+  padding-left: 10px;
 }
 </style>
