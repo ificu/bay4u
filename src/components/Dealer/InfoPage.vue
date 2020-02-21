@@ -31,6 +31,7 @@
         <template v-slot:header>
           차량 정보
           <b-button v-if="UserInfo.UserType === 'DEALER'" class="pa-0 btnRoHistory" @click="getRoHistory">정비이력 확인</b-button>
+          <b-button v-if="UserInfo.UserType === 'DEALER'" class="pa-0 btnRoHistory">차량정보 수정</b-button>
         </template>
         <b-card-text>
           <div class="Car-Info">
@@ -39,11 +40,11 @@
                 <v-col cols = "12" md="10">
                   <v-row  class="mb-n10">
                     <v-col cols="12" md="4">
-                      <v-text-field label="차량번호" outlined dense color="blue accent-1" :value="(this.qtInfo.CarNo==='*empty*')?'미상차량' : this.qtInfo.CarNo">
+                      <v-text-field label="차량번호" outlined dense color="blue accent-1" :value="(this.qtInfo.CarNo ==='*empty*')?'미상차량' : this.qtInfo.CarNo">
                       </v-text-field>
                     </v-col>
                     <v-col cols="12" md="8">
-                      <v-text-field label="차대번호" outlined dense color="blue accent-1" :value="this.qtInfo.CarVin">
+                      <v-text-field label="차대번호" outlined dense color="blue accent-1" :value="this.qtInfo.CarVin" :background-color="vinNoBackColor">
                       </v-text-field>
                     </v-col>
                   </v-row>
@@ -84,8 +85,7 @@
                   <v-row>   
                     <b-collapse id="collapse-1" class="mt-n6 mb-6 ml-4">
                       <b-card>
-                        <v-chip v-for="(brand, index) in carBrand" v-bind:key = "index" class="ma-2" color="#3cadc0" outlined link @click="clickBrandSelect(brand)">
-
+                        <!--<v-chip v-for="(brand, index) in carBrand" v-bind:key = "index" class="ma-2" color="#3cadc0" outlined link @click="clickBrandSelect(brand)">
                           <img height='18' class="mr-2" v-if="brand === 'AUDI'" src="@/assets/BRAND-AUDI.png">
                           <img height='22' class="mr-2" v-if="brand === 'BENZ'" src="@/assets/BRAND-BENZ.png">
                           <img height='25' class="mr-2" v-if="brand === 'BMW'" src="@/assets/BRAND-BMW.png">
@@ -109,7 +109,66 @@
 
                           {{brand}}
 
-                        </v-chip>
+                        </v-chip>-->
+                        <div>
+                          <b-card-group columns>
+                            <b-card header="Favorite" header-tag="header" class="mb-2">
+                              <b-card-text class="pa-0">
+                                <v-chip v-for="(brand, index) in favoriteBrand" v-bind:key = "index" class="ma-1" color="#3cadc0" outlined link @click="clickBrandSelect(brand)">
+                                <img height='18' class="mr-2" v-if="brand === 'AUDI'" src="@/assets/BRAND-AUDI.png">
+                                <img height='22' class="mr-2" v-if="brand === 'BENZ'" src="@/assets/BRAND-BENZ.png">
+                                <img height='25' class="mr-2" v-if="brand === 'BMW'" src="@/assets/BRAND-BMW.png">
+                                <img height='25' class="mr-2" v-if="brand === 'LEXUS'" src="@/assets/BRAND-LEXUS.png">
+                                <img height='22' class="mr-2" v-if="brand === 'MINI'" src="@/assets/BRAND-MINI.png">
+                                <img height='22' class="mr-2" v-if="brand === 'VW'" src="@/assets/BRAND-VW.png">
+                                {{brand}}
+                                </v-chip>
+                              </b-card-text>
+                            </b-card>
+                            <b-card header="Europe" header-tag="header" >
+                              <b-card-text class="pa-0">
+                                <v-chip v-for="(brand, index) in europeBrand" v-bind:key = "index" class="ma-1" color="#3cadc0" outlined link @click="clickBrandSelect(brand)">
+                                  <img height='25' class="mr-2" v-if="brand === 'LANDROVER'" src="@/assets/BRAND-LANDROVER.png">
+                                  <img height='22' class="mr-2" v-if="brand === 'VOLVO'" src="@/assets/BRAND-VOLVO.png">
+                                  <img height='25' class="mr-2" v-if="brand === 'PEUGEOT'" src="@/assets/BRAND-PEUGEOT.png">
+                                  <img height='25' class="mr-2" v-if="brand === 'PORSCHE'" src="@/assets/BRAND-PORSCHE.png">
+                                  {{brand}}
+                                </v-chip>
+                                </b-card-text>
+                            </b-card>
+                            <b-card header="Usa" header-tag="header" >
+                              <b-card-text class="pa-0">
+                                <v-chip v-for="(brand, index) in usaBrand" v-bind:key = "index" class="ma-1" color="#3cadc0" outlined link @click="clickBrandSelect(brand)">
+                                  <img height='20' class="mr-2" v-if="brand === 'JEEP'" src="@/assets/BRAND-JEEP.png">
+                                  <img height='25' class="mr-2" v-if="brand === 'LINCOLN'" src="@/assets/BRAND-LINCOLN.png">
+                                  <img height='20' class="mr-2" v-if="brand === 'FORD'" src="@/assets/BRAND-FORD.png">
+                                  <img height='20' class="mr-2" v-if="brand === 'CHRYSLER'" src="@/assets/BRAND-CHRYSLER.png">
+                                {{brand}}
+                                </v-chip>
+                              </b-card-text>
+                            </b-card>
+                            <b-card header="Asia" header-tag="header" >
+                              <b-card-text class="pa-0">
+                                <v-chip v-for="(brand, index) in asiaBrand" v-bind:key = "index" class="ma-1"  color="#3cadc0" outlined link @click="clickBrandSelect(brand)">
+                                  <img height='25' class="mr-2" v-if="brand === 'HONDA'" src="@/assets/BRAND-HONDA.png">
+                                  <img height='22' class="mr-2" v-if="brand === 'TOYOTA'" src="@/assets/BRAND-TOYOTA.png">
+                                {{brand}}
+                                </v-chip>
+                              </b-card-text>
+                            </b-card>
+                            <b-card header="AllBrand" header-tag="header" >
+                              <b-card-text class="pa-0">
+                                <v-chip v-for="(brand, index) in carBrand" v-bind:key = "index" class="ma-1"  color="#3cadc0" outlined link @click="clickBrandSelect(brand)">
+                                <img height='25' class="mr-2" v-if="brand === 'CADILLAC'" src="@/assets/BRAND-CADILLAC.png">
+                                <img height='25' class="mr-2" v-if="brand === 'CITROEN'" src="@/assets/BRAND-CITROEN.png">
+                                <img height='18' class="mr-2" v-if="brand === 'DODGE'" src="@/assets/BRAND-DODGE.png">
+                                <img height='25' class="mr-2" v-if="brand === 'FIAT'" src="@/assets/BRAND-FIAT.png">
+                                {{brand}}
+                              </v-chip>
+                              </b-card-text>
+                            </b-card>
+                          </b-card-group>
+                        </div>
                       </b-card>
                     </b-collapse>     
                   </v-row>                             
@@ -794,7 +853,12 @@ export default {
       },
       itemsPerPage: -1,
       //carBrand:['차종 선택', 'BMW', 'BENZ', 'AUDI', 'VW', 'FORD', 'LEXUS', '기타'],
-      carBrand:['차종 선택', 'AUDI', 'BENZ', 'BMW', 'CADILLAC', 'CHRYSLER', 'CITROEN', 'DODGE', 'FIAT', 'FORD', 'HONDA', 'JEEP', 'LANDROVER', 'LEXUS', 'LINCOLN', 'MINI', 'PEUGEOT', 'PORSCHE', 'TOYOTA', 'VOLVO', 'VW', '기타'],
+      //carBrand:['차종 선택', 'AUDI', 'BENZ', 'BMW', 'CADILLAC', 'CHRYSLER', 'CITROEN', 'DODGE', 'FIAT', 'FORD', 'HONDA', 'JEEP', 'LANDROVER', 'LEXUS', 'LINCOLN', 'MINI', 'PEUGEOT', 'PORSCHE', 'TOYOTA', 'VOLVO', 'VW', '기타'],
+      carBrand:['CADILLAC', 'CITROEN', 'DODGE', 'FIAT','기타'],
+      favoriteBrand:['BENZ', 'BMW','AUDI','LEXUS','MINI', 'VW'],
+      europeBrand:['LANDROVER','VOLVO', 'JAGUAR', 'PORSCHE','PEUGEOT'],
+      usaBrand:['LINCOLN','JEEP','CHRYSLER','FORD',],
+      asiaBrand:['HONDA','TOYOTA'],  
       afterBrand:['MANN','FRAM','MEYLE','BOSCH','TRW'],
       SMSList:['모바일 견적 회신 메시지를 확인해 주세요.', '도면 회신했습니다. 모바일서 확인해 주세요.', '직접입력'],
       delvType:['택배','퀵'],
@@ -818,6 +882,7 @@ export default {
       showROHistDialog: false,          // WebPOS 정비이력 조회 팝업
       showProcessing: false,
       processMsg: '',
+      vinNoBackColor: '',
     }
   },
 	components: {
@@ -913,7 +978,7 @@ export default {
 
       //console.log("======= QT state Request result ========");
       //console.log(param); 
-
+      
       axios({
         method: 'POST',
         url: Constant.LAMBDA_URL,
@@ -922,6 +987,8 @@ export default {
       })
       .then((result) => {
 
+        console.log("======= QT state result ========");
+        console.log(result.data); 
         let qtSts = result.data.Items[0].QTSts;
         if(estmSts === '2' && qtSts === "견적요청"){
           this.sendQTconfirmMsg();
@@ -936,6 +1003,7 @@ export default {
       console.log('UserType : ' , this.UserInfo );
       console.log("QT Info 설정" + JSON.stringify(this.qtInfo));  
       this.tabIndex = 0;
+      this.vinNoBackColor = "";
       
       if( this.qtInfo.LineItem !== undefined)
       { 
@@ -993,6 +1061,45 @@ export default {
     sendQTconfirmMsg()
     {
       if(this.detailQTData.length === 0) return;
+
+      if(this.qtInfo.CarVin === '99999999999999999' || this.qtInfo.CarVin === ''){
+        var param = {};
+        param.CarNo = this.qtInfo.CarNo;
+        
+        console.log("=======  VinNo result ========");
+        console.log(param); 
+
+        var rtnCode = "";
+        var rtnCount = 0;
+
+        axios({
+            method: 'POST',
+            url: Constant.SCPIF_URL + 'GetROList',
+            headers: Constant.JSON_HEADER,
+            data: param
+        })
+        .then((result) => {
+          console.log("======= Return VinNo result ========");
+          console.log(result.data); 
+
+          if(result.data.ReturnDataCount > 0) {
+            let vinList = JSON.parse(result.data.ReturnDataJSON);
+            this.qtInfo.CarVin = vinList[0].SSN_CAR;
+            this.updateQt();
+          }
+          else{
+           this.updateQt();
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        })
+      }
+      else{
+        this.updateQt();
+      }
+    },
+    updateQt(){
       var now = new Date();
       var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                 + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
@@ -1025,18 +1132,20 @@ export default {
         param.payload.Key = {};
         param.payload.Key.ID = this.qtInfo.ID;
         if(this.qtInfo.CarSeries === undefined || this.qtInfo.CarSeries === '') {
-          param.payload.UpdateExpression = "Set CarBrand = :b, QTSts = :c" ;
+          param.payload.UpdateExpression = "Set CarBrand = :b, QTSts = :c, CarVin = :d";
           param.payload.ExpressionAttributeValues = {
                 ":b" : this.qtInfo.CarBrand,
-                ":c" : "견적회신"
+                ":c" : "견적회신",
+                ":d" : this.qtInfo.CarVin
           };
         }
         else {
-          param.payload.UpdateExpression = "Set CarBrand = :b, CarSeries = :s, QTSts = :c" ;
+          param.payload.UpdateExpression = "Set CarBrand = :b, CarSeries = :s, QTSts = :c, CarVin = :d" ;
           param.payload.ExpressionAttributeValues = {
                 ":b" : this.qtInfo.CarBrand,
                 ":s" : this.qtInfo.CarSeries,
-                ":c" : "견적회신"
+                ":c" : "견적회신",
+                ":d" : this.qtInfo.CarVin
           };
         }
                 
@@ -1216,9 +1325,9 @@ export default {
       }
 
       if(checkMsg === false)
-        msg = ((this.qtInfo.CarNo==='*empty*')?'미상' : this.qtInfo.CarNo) + " 차량에 대한 견적이 완료됐습니다.";
+        msg = ((this.qtInfo.CarNo ==='*empty*')?'미상' : this.qtInfo.CarNo) + " 차량에 대한 견적이 완료됐습니다.";
       else
-        msg = ((this.qtInfo.CarNo==='*empty*')?'미상' : this.qtInfo.CarNo) + " 차량에 대한 견적이 수정 후 재전송 되었습니다.";
+        msg = ((this.qtInfo.CarNo ==='*empty*')?'미상' : this.qtInfo.CarNo) + " 차량에 대한 견적이 수정 후 재전송 되었습니다.";
 
       var id =  this.UserInfo.BsnID + this.qtInfo.ReqSite + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2)
       + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);;
@@ -1822,6 +1931,11 @@ export default {
             });
           }
           this.roList = JSON.parse(result.data.ReturnDataJSON);
+          // 차대번호가 다르면 Webpos 차대번호로 변경
+          if(this.qtInfo.CarVin !== this.roList[0].VIN_NO && this.roList[0].VIN_NO !== ''){
+            this.qtInfo.CarVin = this.roList[0].VIN_NO;
+            this.vinNoBackColor = "yellow lighten-4";
+          }
           this.showROHistDialog = true;
           this.$EventBus.$emit('ROHistory.SetROInfo',this.roList);
         }
@@ -2269,6 +2383,7 @@ td.text-center{
   float: right;
   width: 110px;
   height: 30px;
+  margin-right: 6px;
 }
 .showProcessing
 {
