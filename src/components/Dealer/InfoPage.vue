@@ -31,7 +31,7 @@
         <template v-slot:header>
           차량 정보
           <b-button v-if="UserInfo.UserType === 'DEALER'" class="pa-0 btnRoHistory" @click="getRoHistory">정비이력 확인</b-button>
-          <b-button v-if="UserInfo.UserType === 'DEALER'" class="pa-0 btnRoHistory">차량정보 수정</b-button>
+          <b-button class="pa-0 btnRoHistory" @click="saveCarInfo">차량정보 수정</b-button>
         </template>
         <b-card-text>
           <div class="Car-Info">
@@ -754,6 +754,16 @@
         <v-icon large color="orange darken-2">fas fa-sync-alt fa-spin</v-icon>
       </span>
     </MessageBox> 
+    
+    <!-- 알림 메시지 팝업 -->
+    <MessageBox v-if="showAlertMsg"  @close="showAlertMsg=!showAlertMsg">
+      <div slot="header"><h5 >알림</h5></div>
+      <span slot="body" @click="showAlertMsg=!showAlertMsg"><pre>{{alertMsg}}</pre>
+      </span>
+      <div slot="footer">
+        <v-btn depressed small color="#967d5f" dark @click="showAlertMsg=!showAlertMsg"> 확인</v-btn>
+      </div>
+    </MessageBox>
 
     </div>
   
@@ -883,6 +893,8 @@ export default {
       showProcessing: false,
       processMsg: '',
       vinNoBackColor: '',
+      showAlertMsg: false,
+      alertMsg: "",
     }
   },
 	components: {
@@ -990,7 +1002,7 @@ export default {
         console.log("======= QT state result ========");
         console.log(result.data); 
         let qtSts = result.data.Items[0].QTSts;
-        if(estmSts === '2' && qtSts === "견적요청"){
+        if((estmSts === '2' || estmSts === '4' ) && qtSts === "견적요청"){
           this.sendQTconfirmMsg();
           this.tabIndex = 1;
         }
@@ -1956,7 +1968,43 @@ export default {
     {
       this.roList = [];
       this.showROHistDialog = false;
-    }
+    },
+    saveCarInfo()
+    {
+      var param = {};
+      param.operation = "update";
+      param.tableName = "BAY4U_QT_LIST";
+      param.payload = {};
+      param.payload.Key = {};
+      param.payload.Key.ID = this.qtInfo.ID;
+      param.payload.UpdateExpression = "Set CarBrand = :b, CarNo = :c, CarVin = :d , CarSeries = :e ";
+      param.payload.ExpressionAttributeValues = {
+        ":b" : this.qtInfo.CarBrand,
+        ":c" : this.qtInfo.CarNo,
+        ":d" : this.qtInfo.CarVin,
+        ":e" : this.qtInfo.CarSeries
+      };
+
+      console.log("======= Car Info Update Request ========");
+      console.log(JSON.stringify(param));
+
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+        console.log("======= Car Info Update result ========");
+        console.log(result.data);
+        this.alertMsg = "차량정보가 수정되었습니다.";
+        this.showAlertMsg = !this.showAlertMsg;
+        this.vinNoBackColor = '';
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    },
   },
   computed:{
       CarInfo: {
