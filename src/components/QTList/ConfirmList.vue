@@ -638,7 +638,7 @@
 				});
 			},
 			GetWebPosQtList(docId ,refID){
-
+				
 				this.confirmQTdata  = [];
 				
 				var param = {};

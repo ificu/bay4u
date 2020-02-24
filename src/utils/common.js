@@ -64,7 +64,7 @@ export function dataURItoBlob(dataURI) {
         ia[i] = byteString.charCodeAt(i);
     }
 
-    return new Blob([ia], {type:mimeString});
+    return new Blob([ia], { type: mimeString });
 }
 
 export function arrayGroupBy(array, f) {
@@ -80,5 +80,23 @@ export function arrayGroupBy(array, f) {
 }
 
 export function sleep(ms) {
-    return new Promise(resolve=>setTimeout(resolve, ms));
-  }
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+export function convertArrayToSpecStr(arr) {
+
+    var array1 = arr;
+    for (var i of array1) {
+        let arrKeys = Object.keys(i);
+        for (var x of arrKeys) {
+            var str = i[x];
+            if (typeof str === 'string') {
+                if (str.length > 0) {
+                    str = str.replace(",", "&#44;");
+                    i[x] = str;
+                }
+            }
+        }
+    }
+    return array1;
+}

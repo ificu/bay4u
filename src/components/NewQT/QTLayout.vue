@@ -462,7 +462,7 @@ import QTConfirm from '@/components/NewQT/QTConfirm.vue'
 import QTCamera from '@/components/NewQT/QTCamera.vue'
 import ROHistory from '@/components/NewQT/ROHistory.vue'
 import MessageBox from '@/components/Common/MessageBox.vue'
-import {datePadding, convertStringToDynamo, convertArrayToDynamo, dataURItoBlob} from '@/utils/common.js'
+import {datePadding, convertStringToDynamo, convertArrayToDynamo, dataURItoBlob, convertArrayToSpecStr} from '@/utils/common.js'
 import Constant from '@/Constant';
 
 const axios = require('axios').default;
@@ -1164,7 +1164,11 @@ export default {
           param.Memo = this.qtReqMemo;
           if(this.qtRequest !== undefined || this.qtRequest !== null || this.qtRequest.length !== 0 )
           {
-              param.RequestDataJSON = JSON.stringify(this.qtRequest);
+              let qtList = JSON.parse(JSON.stringify( this.qtRequest ));
+              qtList = convertArrayToSpecStr(qtList);
+              console.log('QT List : ' , qtList );
+              console.log('this.qtRequest : ' , this.qtRequest );
+              param.RequestDataJSON = JSON.stringify(qtList);
           }
 
           console.log("======= webpos Request result ========");
