@@ -6,10 +6,10 @@ import NewQT from '@/views/NewQT'
 import NewNewQT from '@/views/NewNewQT'
 import NewNewNewQT from '@/views/NewNewNewQT'
 import Chat from '@/views/Chat'
-//import QTList from '@/views/QTList'
+import QTList from '@/views/QTList'
 import UserInfo from '@/views/UserInfo'
 import MainPage from '@/views/MainPage'
-import NewQTList from '@/views/NewQTList'
+//import NewQTList from '@/views/NewQTList'
 
 Vue.use(VueRouter)
 
@@ -38,16 +38,16 @@ const routes = [{
         name: 'Chat',
         component: Chat
     },
-    /*{
+    {
         path: '/QTList',
         name: 'QTList',
         component: QTList
-    },*/
+    },/*
     {
         path: '/QTList',
         name: 'QTList',
         component: NewQTList
-    },
+    },*/
     {
         path: '/UserInfo',
         name: 'UserInfo',
