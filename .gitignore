@@ -1,6 +1,12 @@
 .DS_Store
 node_modules
 /dist
+/src/serverside/bay4u-rest/node_modules
+/src/serverside/chat-server/node_modules
+
+private.key
+ca_bundle.crt
+certificate.crt
 
 # local env files
 .env.local

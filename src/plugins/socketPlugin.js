@@ -31,6 +31,7 @@ const SocketPlugin = {
                 command: $payload.command,
                 userId: $payload.userId,
                 message: $payload.message,
+                chatId: $payload.chatId,
             });
         };
 
