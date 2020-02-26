@@ -477,11 +477,13 @@
 				}
 				
 				if(this.$route.params.Type !== undefined) {
-					if(this.$route.params.Type === 'qt')
-					{
+					if(this.$route.params.Type === 'qt'){
 						// 견적확정 채팅에서 넘어왔을 경우
 						this.tabIndex = 0;
 						this.GetQTReqList(docID ,RefID);
+					}
+					else{
+						this.GetQTReqList('','');
 					}
 				}
 				else{
@@ -638,7 +640,7 @@
 				});
 			},
 			GetWebPosQtList(docId ,refID){
-
+				
 				this.confirmQTdata  = [];
 				
 				var param = {};

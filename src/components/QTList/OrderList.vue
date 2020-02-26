@@ -106,7 +106,7 @@
 					<b-card-footer>
 						<div  v-if="orderdetail.isHistory" class="orderlist-footer">
 							<div class="detailConts-title detailConts-total">총 합계</div>
-							<div class="detailConts-amount detailConts-total">{{sumOrdHisAmt(idx) | localeNum}}원</div>
+							<div class="detailConts-amount detailConts-total">{{SumOrdHisAmt(idx) | localeNum}}원</div>
 						</div>
 						<div  v-else class="orderlist-footer">
 							<div class="detailConts-title detailConts-total">총 합계</div>
@@ -158,8 +158,9 @@
 			
 		},
 		mounted: function(){
+			
 			if(this.$route !== undefined && this.$route.name === "QTList" ) {
-				
+			
 				var docID = '';
 				if(this.$route.params.DocID !== undefined)
 				{
@@ -179,15 +180,20 @@
 					this.carInfoData.CarBrand = this.$route.params.CarInfoData.CarBrand;
 					this.carInfoData.captureBlobImg = this.$route.params.CarInfoData.captureBlobImg;
 				}
-
-				if(this.$route.params.Type !== undefined && this.$route.params.Type === 'order'){
-          // 주문요청 완료 채팅에서 넘어왔을 경우
-					this.GetOrderHistory(docID, RefID,'');
-				}
-				else if(this.$route.params.Type !== undefined && this.$route.params.Type === 'orderHistory'){
-          // 과거주문내역 조회로 넘어왔을 경우
-					this.isRouteOrdHis = true;
-					this.GetOrderHistory('', '',this.carInfoData.CarNo);
+	
+				if(this.$route.params.Type !== undefined){
+					if(this.$route.params.Type === 'order'){
+						// 주문요청 완료 채팅에서 넘어왔을 경우
+						this.GetOrderHistory(docID, RefID,'');
+					}
+					else if(this.$route.params.Type === 'orderHistory'){
+						// 과거주문내역 조회로 넘어왔을 경우
+						this.isRouteOrdHis = true;
+						this.GetOrderHistory('', '',this.carInfoData.CarNo);
+					}
+					else{
+						this.GetOrderHistory('','','');
+					}  
 				}
 				else{
 					this.GetOrderHistory('','','');
@@ -308,13 +314,13 @@
 						// 채팅에서 넘어 온 경우
 						this.ShowOrderItem(docId , orderID);
 					} 
-
+					/*
 					if(seachText !== ''){
 						// 과거 정비이력에서 넘어 온 경우
-						this.showOrderHisItem(this.ordSearchText);
+							this.ShowOrderHisItem(this.ordSearchText);
 						// 초기화
 						this.$router.replace({'params': undefined});
-					}
+					}*/
 				});     
 			},
 			GetOrderDetail(item)
@@ -357,6 +363,34 @@
 					let item = this.orderHistory[index];
 					this.GetOrderDetail(item);
 				} 
+			},
+			ShowOrderHisItem(carNo)
+			{
+				// 과거 정비이력에서 넘어 온 경우
+				if(Array.isArray(this.orderHistory)){
+
+					this.$nextTick(function() {     
+						this.orderdetail.isHistory = true;                        
+						for(var i=0;i < this.orderHistory.length; i++)
+						{
+							let target = 'ROaccordion' + i;
+							let accElement =  document.getElementById(target);
+							accElement.setAttribute("style", "display:block;");
+
+							let item = this.orderHistory[i];
+							this.orderdetail.ordLineItem.push(JSON.parse(convertDynamoToArrayString(item.LineItem)));
+							//this.GetOrderDetail(item);
+						}
+					}); 
+				} 
+			},
+			SumOrdHisAmt(index)
+			{
+				let sum = 0;
+				this.orderdetail.ordLineItem[index].forEach(function(item) {
+						sum += (parseFloat(item.AMT));
+				});
+				return sum;
 			},
 		}
 	}

@@ -23,7 +23,7 @@
       </div>    
       <div>
         <div class="text-left pl-6 mb-n9"><v-btn  color="#FFECB3" depressed @click="CarInfoClear()">CLEAR</v-btn></div>
-        <div class="mb-2" style="margin-left:115px;"><v-btn  color="#FFECB3" depressed @click="SetDummyCar()">미상차량</v-btn></div>
+        <div class="mb-2" style="margin-left:115px;"><v-btn  color="#FFECB3" depressed @click="ShowDummyCarAlert()">미상차량</v-btn></div>
         <!-- 과거 정비이력 Popup / 차량번호 입력 -->
         <template  @click.stop="showROHistDialog = true" >
           <v-text-field class="pr-6 pl-4 mb-n4" label="차량번호" v-model="CarInfo.CarNo" outlined dense color="success" append-outer-icon="search" @click:append-outer="checkWebPOSHist" v-on:keypress.enter="checkWebPOSHist"></v-text-field>
@@ -451,6 +451,16 @@
         <v-icon large color="orange darken-2">fas fa-sync-alt fa-spin</v-icon>
       </span>
     </MessageBox>
+
+    <MessageBox v-if="showAlertPopup"  @close="closePopup()">
+      <div slot="header"><h5 >알림</h5></div>
+      <span slot="body" @click="closePopup()"><pre>{{alertMsg}}</pre>
+      </span>
+      <div slot="footer">
+        <v-btn depressed small color="#967d5f" dark @click="SetDummyCar()">확인</v-btn>
+        <v-btn depressed small color="blue-grey lighten-2"  @click="closePopup()">취소</v-btn>
+      </div>
+    </MessageBox>
   </v-app>  
 </template>
 
@@ -462,7 +472,7 @@ import QTConfirm from '@/components/NewQT/QTConfirm.vue'
 import QTCamera from '@/components/NewQT/QTCamera.vue'
 import ROHistory from '@/components/NewQT/ROHistory.vue'
 import MessageBox from '@/components/Common/MessageBox.vue'
-import {datePadding, convertStringToDynamo, convertArrayToDynamo, dataURItoBlob} from '@/utils/common.js'
+import {datePadding, convertStringToDynamo, convertArrayToDynamo, dataURItoBlob, convertArrayToSpecStr} from '@/utils/common.js'
 import Constant from '@/Constant';
 
 const axios = require('axios').default;
@@ -502,6 +512,7 @@ export default {
       chkCustAgree: false,              // 차대번호 조회를 위한 고객 동의 체크 여부
       custName: "",
       showAlertMsg: false,
+      showAlertPopup:false,
       showAlerMsgConfirmBtn :false,
       showMsgOrdConfirmBtn: false,
       showAlertOrdMsg:false,
@@ -1164,7 +1175,11 @@ export default {
           param.Memo = this.qtReqMemo;
           if(this.qtRequest !== undefined || this.qtRequest !== null || this.qtRequest.length !== 0 )
           {
-              param.RequestDataJSON = JSON.stringify(this.qtRequest);
+              let qtList = JSON.parse(JSON.stringify( this.qtRequest ));
+              qtList = convertArrayToSpecStr(qtList);
+              console.log('QT List : ' , qtList );
+              console.log('this.qtRequest : ' , this.qtRequest );
+              param.RequestDataJSON = JSON.stringify(qtList);
           }
 
           console.log("======= webpos Request result ========");
@@ -1500,10 +1515,20 @@ export default {
         */
       if(this.CarInfo.VinNo === undefined || this.CarInfo.VinNo === null || this.CarInfo.VinNo.length === 0 || this.CarInfo.VinNo === "국토부 차대번호 조회 중...")
       {
-        this.alertMsg = "차대번호가 없습니다.\n차대번호 없이 요청하시겠습니까?"
+        //this.alertMsg = "차대번호가 없습니다.\n차대번호 없이 요청하시겠습니까?"
+        this.alertMsg = "차대번호가 없거나 조회 중입니다.\n차대번호를 확인 해 주세요."
         this.showAlertMsg = !this.showAlertMsg;
-        this.showAlerMsgBtn = false;
-        this.showAlerMsgConfirmBtn = !this.showAlerMsgConfirmBtn;  
+        this.showAlerMsgBtn = true;
+        this.showAlerMsgConfirmBtn = false;  
+        return false;
+      }
+
+      if(this.CarInfo.CarNo.length > 0 && this.CarInfo.VinNo === "99999999999999999")
+      {
+        this.alertMsg = "차대번호를 확인 해 주세요."
+        this.showAlertMsg = !this.showAlertMsg;
+        this.showAlerMsgBtn = true;
+        this.showAlerMsgConfirmBtn = false;  
         return false;
       }
       /*
@@ -1534,9 +1559,20 @@ export default {
       this.showAlerMsgConfirmBtn = false;
       this.alertYesNo = value;
     },
+    ShowDummyCarAlert()
+    {
+      this.alertMsg = "미상차량으로 요청하시겠습니까?"
+      this.showAlertPopup = true;
+      return false;
+    },
     SetDummyCar() {
+      this.CarInfo.CarNo = "";
       this.CarInfo.VinNo = "99999999999999999";
       this.e6 = 2;
+      this.showAlertPopup = false;
+    },
+    closePopup(){
+      this.showAlertPopup = false;
     },
     CarInfoClear() {
       this.CarInfo.CarNo = "";
