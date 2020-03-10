@@ -110,8 +110,8 @@
                           {{brand}}
 
                         </v-chip>-->
-                        <div>
-                          <b-card-group columns>
+                        <div class="brandGroup">
+                          <b-card-group columns tag="div">
                             <b-card header="Favorite" header-tag="header" class="mb-2">
                               <b-card-text class="pa-0">
                                 <v-chip v-for="(brand, index) in favoriteBrand" v-bind:key = "index" class="ma-1" color="#3cadc0" outlined link @click="clickBrandSelect(brand)">
@@ -132,17 +132,21 @@
                                   <img height='22' class="mr-2" v-if="brand === 'VOLVO'" src="@/assets/BRAND-VOLVO.png">
                                   <img height='25' class="mr-2" v-if="brand === 'PEUGEOT'" src="@/assets/BRAND-PEUGEOT.png">
                                   <img height='25' class="mr-2" v-if="brand === 'PORSCHE'" src="@/assets/BRAND-PORSCHE.png">
+                                  <img height='25' class="mr-2" v-if="brand === 'CITROEN'" src="@/assets/BRAND-CITROEN.png">
+                                  <img height='25' class="mr-2" v-if="brand === 'FIAT'" src="@/assets/BRAND-FIAT.png">
                                   {{brand}}
                                 </v-chip>
                                 </b-card-text>
                             </b-card>
-                            <b-card header="Usa" header-tag="header" >
+                            <b-card header="USA" header-tag="header" >
                               <b-card-text class="pa-0">
                                 <v-chip v-for="(brand, index) in usaBrand" v-bind:key = "index" class="ma-1" color="#3cadc0" outlined link @click="clickBrandSelect(brand)">
                                   <img height='20' class="mr-2" v-if="brand === 'JEEP'" src="@/assets/BRAND-JEEP.png">
                                   <img height='25' class="mr-2" v-if="brand === 'LINCOLN'" src="@/assets/BRAND-LINCOLN.png">
                                   <img height='20' class="mr-2" v-if="brand === 'FORD'" src="@/assets/BRAND-FORD.png">
                                   <img height='20' class="mr-2" v-if="brand === 'CHRYSLER'" src="@/assets/BRAND-CHRYSLER.png">
+                                  <img height='25' class="mr-2" v-if="brand === 'CADILLAC'" src="@/assets/BRAND-CADILLAC.png">
+                                  <img height='18' class="mr-2" v-if="brand === 'DODGE'" src="@/assets/BRAND-DODGE.png">
                                 {{brand}}
                                 </v-chip>
                               </b-card-text>
@@ -159,10 +163,6 @@
                             <b-card header="AllBrand" header-tag="header" >
                               <b-card-text class="pa-0">
                                 <v-chip v-for="(brand, index) in carBrand" v-bind:key = "index" class="ma-1"  color="#3cadc0" outlined link @click="clickBrandSelect(brand)">
-                                <img height='25' class="mr-2" v-if="brand === 'CADILLAC'" src="@/assets/BRAND-CADILLAC.png">
-                                <img height='25' class="mr-2" v-if="brand === 'CITROEN'" src="@/assets/BRAND-CITROEN.png">
-                                <img height='18' class="mr-2" v-if="brand === 'DODGE'" src="@/assets/BRAND-DODGE.png">
-                                <img height='25' class="mr-2" v-if="brand === 'FIAT'" src="@/assets/BRAND-FIAT.png">
                                 {{brand}}
                               </v-chip>
                               </b-card-text>
@@ -254,7 +254,7 @@
             </div>      
           </b-card-text>
         </b-tab>
-        <b-tab :title="tab2Title" :title-link-class="linkClass(1)">
+        <b-tab :title="tab2Title" :title-link-class="linkClass(1)" v-if="visibleTab">
           <b-card-text>
             <div class="QTRes-List">
               <div class="QTRes-Title">
@@ -536,7 +536,7 @@
             </div>
           </b-card-text>
         </b-tab>
-        <b-tab title="주문 내역" :title-link-class="linkClass(2)"  v-if="UserInfo.UserType !== 'DEALER'">
+        <b-tab title="주문 내역" :title-link-class="linkClass(2)"  v-if="UserInfo.UserType !== 'DEALER' && visibleTab">
           <b-card-text>
             <div class="QTRes-List">
               <div class="QTRes-Title">
@@ -864,10 +864,10 @@ export default {
       itemsPerPage: -1,
       //carBrand:['차종 선택', 'BMW', 'BENZ', 'AUDI', 'VW', 'FORD', 'LEXUS', '기타'],
       //carBrand:['차종 선택', 'AUDI', 'BENZ', 'BMW', 'CADILLAC', 'CHRYSLER', 'CITROEN', 'DODGE', 'FIAT', 'FORD', 'HONDA', 'JEEP', 'LANDROVER', 'LEXUS', 'LINCOLN', 'MINI', 'PEUGEOT', 'PORSCHE', 'TOYOTA', 'VOLVO', 'VW', '기타'],
-      carBrand:['CADILLAC', 'CITROEN', 'DODGE', 'FIAT','기타'],
+      carBrand:['기타'],
       favoriteBrand:['BENZ', 'BMW','AUDI','LEXUS','MINI', 'VW'],
-      europeBrand:['LANDROVER','VOLVO', 'JAGUAR', 'PORSCHE','PEUGEOT'],
-      usaBrand:['LINCOLN','JEEP','CHRYSLER','FORD',],
+      europeBrand:['LANDROVER','VOLVO', 'JAGUAR', 'PORSCHE','PEUGEOT', 'FIAT', 'CITROEN'],
+      usaBrand:['LINCOLN','JEEP','CHRYSLER','FORD','CADILLAC', 'DODGE'],
       asiaBrand:['HONDA','TOYOTA'],  
       afterBrand:['MANN','FRAM','MEYLE','BOSCH','TRW'],
       SMSList:['모바일 견적 회신 메시지를 확인해 주세요.', '도면 회신했습니다. 모바일서 확인해 주세요.', '직접입력'],
@@ -886,6 +886,7 @@ export default {
       showBrandInputFlag: false,
       tab1Title: '견적 요청',
       tab2Title: '견적 회신',
+      visibleTab : false,
       showBtnQT: true,
       showBtnOrder: false,
       roList: [],
@@ -943,6 +944,8 @@ export default {
             
             if(headQTData.length > 0)
             {
+              console.log('webpos 상태 :', (headQTData[0].ESTM_STS));
+
               if(headQTData[0].ESTM_STS !== '1' && rtnQTData['ESTM_DTL'].Length !== 0)
               {
                 //console.log('ESTM_DTL :' , JSON.stringify(rtnQTData['ESTM_DTL'])); 
@@ -1144,20 +1147,24 @@ export default {
         param.payload.Key = {};
         param.payload.Key.ID = this.qtInfo.ID;
         if(this.qtInfo.CarSeries === undefined || this.qtInfo.CarSeries === '') {
-          param.payload.UpdateExpression = "Set CarBrand = :b, QTSts = :c, CarVin = :d";
+          param.payload.UpdateExpression = "Set CarBrand = :b, QTSts = :c, CarVin = :d, AgentName = :e, ResUserID = :f";
           param.payload.ExpressionAttributeValues = {
                 ":b" : this.qtInfo.CarBrand,
                 ":c" : "견적회신",
-                ":d" : this.qtInfo.CarVin
+                ":d" : this.qtInfo.CarVin,
+                ":e" : this.UserInfo.Name,
+                ":f" : this.UserInfo.UserID
           };
         }
         else {
-          param.payload.UpdateExpression = "Set CarBrand = :b, CarSeries = :s, QTSts = :c, CarVin = :d" ;
+          param.payload.UpdateExpression = "Set CarBrand = :b, CarSeries = :s, QTSts = :c, CarVin = :d, AgentName = :e, ResUserID = :f" ;
           param.payload.ExpressionAttributeValues = {
                 ":b" : this.qtInfo.CarBrand,
                 ":s" : this.qtInfo.CarSeries,
                 ":c" : "견적회신",
-                ":d" : this.qtInfo.CarVin
+                ":d" : this.qtInfo.CarVin,
+                ":e" : this.UserInfo.Name,
+                ":f" : this.UserInfo.UserID
           };
         }
                 
@@ -1177,6 +1184,12 @@ export default {
           let updateData = {};
           updateData.ID = this.qtInfo.ID;
           updateData.Msg = '견적회신';
+          updateData.AgentName = this.UserInfo.Name;
+          if(this.qtInfo.AgentName !== this.UserInfo.Name){
+            updateData.UpdateRead = 'Y';
+          }
+          updateData.ChatType = "R";
+          updateData.SendFlag = "DEALER";
           this.$EventBus.$emit('update-Sts' , updateData);
 
           qtMsg.qtInfo = this.qtInfo;
@@ -1370,6 +1383,7 @@ export default {
       param.payload.Item.ReqDt = now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);
       param.payload.Item.ReqTm = ReqTm;
       param.payload.Item.ResDealerNm = this.UserInfo.Name;
+      param.payload.Item.ResUserID = this.UserInfo.UserID;
               
       console.log("======= QT Return Save Request ========");
       console.log(JSON.stringify(param));
@@ -1385,8 +1399,8 @@ export default {
         console.log(result.data);
         this.txtQTConfirm = "견적 재회신";
 
-        console.log("======= Check QT ========");
-        console.log(JSON.stringify(this.qtInfo));
+        //console.log("======= Check QT ========");
+        //console.log(JSON.stringify(this.qtInfo));
 
         param.operation = "update";
         param.tableName = "BAY4U_QT_LIST";
@@ -1394,18 +1408,22 @@ export default {
         param.payload.Key = {};
         param.payload.Key.ID = this.qtInfo.ID;
         if(this.qtInfo.CarSeries === undefined || this.qtInfo.CarSeries === '') {
-          param.payload.UpdateExpression = "Set CarBrand = :b, QTSts = :c" ;
+          param.payload.UpdateExpression = "Set CarBrand = :b, QTSts = :c, AgentName = :d, ResUserID = :e";
           param.payload.ExpressionAttributeValues = {
                 ":b" : this.qtInfo.CarBrand,
-                ":c" : "견적회신"
+                ":c" : "견적회신",
+                ":d" : this.UserInfo.Name,
+                ":e" : this.UserInfo.UserID
           };
         }
         else {
-          param.payload.UpdateExpression = "Set CarBrand = :b, CarSeries = :s, QTSts = :c" ;
+          param.payload.UpdateExpression = "Set CarBrand = :b, CarSeries = :s, QTSts = :c, AgentName = :d, ResUserID = :e";
           param.payload.ExpressionAttributeValues = {
                 ":b" : this.qtInfo.CarBrand,
                 ":s" : this.qtInfo.CarSeries,
-                ":c" : "견적회신"
+                ":c" : "견적회신",
+                ":d" : this.UserInfo.Name,
+                ":e" : this.UserInfo.UserID
           };
         }
                 
@@ -1425,9 +1443,17 @@ export default {
           let updateData = {};
           updateData.ID = this.qtInfo.ID;
           updateData.Msg = '견적회신';
+          updateData.AgentName = this.UserInfo.Name;
+          if(this.qtInfo.AgentName !== this.UserInfo.Name){
+            updateData.UpdateRead = 'Y';
+          }
+          updateData.ChatType = "R";
+          updateData.SendFlag = "DEALER";
           this.$EventBus.$emit('update-Sts' , updateData);
 
           qtMsg.qtInfo = this.qtInfo;
+          qtMsg.SaveName = this.UserInfo.Name;
+          qtMsg.SaveID = this.UserInfo.UserID;
           this.$EventBus.$emit('send-QTConfirm' , qtMsg);
         })
         .catch((error) => {
@@ -1439,8 +1465,10 @@ export default {
         console.log(error);
       });
     },
+    // 주문확정 저장
     saveOrderConfirm()
     {
+ 
       if(this.orderHistory.length === 0 ) return;
 
       var now = new Date();
@@ -1455,6 +1483,8 @@ export default {
       qtMsg.reqTm = chatTime;
       qtMsg.ChatType = "E";
       qtMsg.RefID = this.orderID;
+      qtMsg.SaveName = this.UserInfo.Name;
+      qtMsg.SaveID = this.UserInfo.UserID;
       
       var param = {};
       param.operation = "update";
@@ -1462,9 +1492,11 @@ export default {
       param.payload = {};
       param.payload.Key = {};
       param.payload.Key.ID =  this.qtInfo.ID;
-      param.payload.UpdateExpression = "Set QTSts = :c" ;
+      param.payload.UpdateExpression = "Set QTSts = :c, AgentName = :d, ResUserID = :e" ;
       param.payload.ExpressionAttributeValues = {
-            ":c" : "주문확정",
+          ":c" : "주문확정",
+          ":d" : this.UserInfo.Name,
+          ":e" : this.UserInfo.UserID
       };
 
       console.log("======= QT Update Request ========");
@@ -1486,6 +1518,12 @@ export default {
         let updateData = {};
         updateData.ID = this.qtInfo.ID;
         updateData.Msg = '주문확정';
+        updateData.AgentName = this.UserInfo.Name;
+        if(this.qtInfo.AgentName !== this.UserInfo.Name){
+          updateData.UpdateRead = 'Y';
+        }
+        updateData.ChatType = "E";
+        updateData.SendFlag = "DEALER";
         this.$EventBus.$emit('update-Sts' , updateData);
 
         qtMsg.qtInfo = this.qtInfo;
@@ -1553,10 +1591,7 @@ export default {
     },
     getConfirmData()
     {
-       //console.log(' selectedConfirm: ' , this.selectedConfirm);
-       //console.log(' confirmList: ' , this.confirmList);
        let index = this.confirmList.findIndex(x => x.value === this.selectedConfirm);
-       //console.log('index : ' , index);
        this.detailQTData = JSON.parse(convertDynamoToArrayString(this.confirmList[index].data.LineItem));
     },
     clipImageAdd() { 
@@ -1748,6 +1783,7 @@ export default {
         return value;
       }
     },
+    // 바로주문 저장
     saveConfirmQTOrder()
     {
       if(this.detailQTData.length === 0) return;
@@ -1776,6 +1812,7 @@ export default {
       param.payload.Item.ReqDt = now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);
       param.payload.Item.ReqTm = ReqTm;
       param.payload.Item.ResDealerNm = this.UserInfo.Name;
+      param.payload.Item.ResUserID = this.UserInfo.UserID;
               
       console.log("======= QT Return Save request ========");
       console.log(JSON.stringify(param));
@@ -1812,6 +1849,7 @@ export default {
         param.payload.Item.LineItem = convertArrayToDynamo(JSON.stringify(this.detailQTData));
         param.payload.Item.ReqDt = now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);
         param.payload.Item.ReqTm = ReqTm;
+        param.payload.Item.ResUserID = this.UserInfo.UserID;
             
         console.log("======= Order Request ========");
         console.log(JSON.stringify(param));
@@ -1834,18 +1872,22 @@ export default {
           param.payload.Key.ID = this.qtInfo.ID;
 
           if(this.qtInfo.CarSeries === undefined || this.qtInfo.CarSeries === '') {
-            param.payload.UpdateExpression = "Set CarBrand = :b, QTSts = :c" ;
+            param.payload.UpdateExpression = "Set CarBrand = :b, QTSts = :c, AgentName = :d, ResUserID = :e" ;
             param.payload.ExpressionAttributeValues = {
-                  ":b" : this.qtInfo.CarBrand,
-                  ":c" : "주문확정"
+                ":b" : this.qtInfo.CarBrand,
+                ":c" : "주문확정",
+                ":d" : this.UserInfo.Name,
+                ":e" : this.UserInfo.UserID
             };
           }
           else {
-            param.payload.UpdateExpression = "Set CarBrand = :b, CarSeries = :s, QTSts = :c" ;
+            param.payload.UpdateExpression = "Set CarBrand = :b, CarSeries = :s, QTSts = :c, AgentName = :d, ResUserID = :e" ;
             param.payload.ExpressionAttributeValues = {
-                  ":b" : this.qtInfo.CarBrand,
-                  ":s" : this.qtInfo.CarSeries,
-                  ":c" : "주문확정"
+                ":b" : this.qtInfo.CarBrand,
+                ":s" : this.qtInfo.CarSeries,
+                ":c" : "주문확정",
+                ":d" : this.UserInfo.Name,
+                ":e" : this.UserInfo.UserID
             };
           }
                   
@@ -1874,10 +1916,19 @@ export default {
             qtMsg.reqTm = chatTime;
             qtMsg.ChatType = "E";
             qtMsg.RefID = ordId;
-           
+            qtMsg.SaveName = this.UserInfo.Name;
+            qtMsg.SaveID = this.UserInfo.UserID;
+
             let updateData = {};
             updateData.ID = this.qtInfo.ID;
             updateData.Msg = '주문확정';
+            updateData.AgentName = this.UserInfo.Name;
+            if(this.qtInfo.AgentName !== this.UserInfo.Name){
+              updateData.UpdateRead = 'Y';
+            }
+            updateData.ChatType = "E";
+            updateData.SendFlag = "DEALER";
+            
             this.$EventBus.$emit('update-Sts' , updateData);
 
             qtMsg.qtInfo = this.qtInfo;
@@ -2047,7 +2098,7 @@ export default {
         this.SetQtInfo();
         this.GetSiteInfo();
 
-        if(this.qtInfo !== undefined && this.qtInfo.QTSts === '바로주문'){
+        if(this.qtInfo !== undefined && this.qtInfo.QTSts === '바로주문' || this.qtInfo.QTSts === '주문접수'){
           this.tab1Title = '바로 주문 요청';
           this.tab2Title = '바로 주문 회신';
           this.showBtnQT = false;
@@ -2061,6 +2112,12 @@ export default {
         }
 
         if(this.UserInfo.UserType !== 'DEALER'){
+          if(qtItem.QTSts === "견적요청"){
+            this.visibleTab = false;
+          }
+          else{
+            this.visibleTab = true;
+          }
           // 일반대리점 일떼
           this.getQTConfirm();
         }
@@ -2069,6 +2126,7 @@ export default {
         if(this.UserInfo.UserType === 'DEALER')
         {
           this.GetQtList();
+          this.visibleTab = true;
         }
 
         if(this.brandClicked === true){
@@ -2437,5 +2495,10 @@ td.text-center{
 {
   text-align:center; 
   font-size: 1.1rem;
+}
+.brandGroup{
+  height: 400px;
+  overflow:auto;
+  overflow-x:hidden;
 }
 </style>

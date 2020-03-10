@@ -309,11 +309,18 @@
 					}
 
 					this.orderHistory  = result.data.Items;
+					console.log('userType : ' , this.UserInfo.UserType);
 
-					if(docId !== ''  && orderID !== ''){
+					if(this.UserInfo.UserType === "SITE"){
+						this.GetWebposOrderList(docId ,orderID);
+					}
+					else{
 						// 채팅에서 넘어 온 경우
-						this.ShowOrderItem(docId , orderID);
-					} 
+						if(docId !== ''  && orderID !== ''){
+							this.ShowOrderItem(docId , orderID);
+						} 
+					}
+					
 					/*
 					if(seachText !== ''){
 						// 과거 정비이력에서 넘어 온 경우
@@ -338,7 +345,86 @@
 				}
 				this.ROList1Toggle = !this.ROList1Toggle;
 				this.orderdetail.isHistory = false;
-				this.orderdetail.ordLineItem = JSON.parse(convertDynamoToArrayString(item.LineItem));
+				if(item.Flag !== undefined && item.Flag === "WEBPOS"){
+					this.orderdetail.ordLineItem = item.LineItem;
+				}
+				else{
+					this.orderdetail.ordLineItem = JSON.parse(convertDynamoToArrayString(item.LineItem));
+				}
+			},
+			GetWebposOrderList(docId ,orderID){
+				var param = {};
+				param.MethodName = "GetOrderList";
+				param.BsnId = this.UserInfo.BsnID;
+				if(this.dropdownSO === "차량번호" && this.ordSearchText !== ""){
+					param.CarNo = this.ordSearchText;
+				}
+				if(this.dropdownSO === "날짜" && this.ordSearchText !== ""){
+					param.RequestDataJSON = this.ordSearchText;
+				}
+
+        console.log("======= Webpos Order Request ========");
+        console.log(param); 
+
+        var rtnCode = "";
+        var rtnCount = 0;
+
+        axios({
+            method: 'POST',
+            url: Constant.SCPIF_URL + 'BackendService',
+            headers: Constant.JSON_HEADER,
+            data: param
+        })
+        .then((result) => {
+					console.log("=======  Webpos Order Return ========");
+					console.log(result.data);
+					
+					if(result.data.ReturnCode === 0){
+
+						let rtnQTData = JSON.parse(result.data.ReturnDataJSON);
+						let hedData = rtnQTData['ORD_HED'];
+						let dtlData = rtnQTData['ORD_DTL'];
+						
+						if(hedData.length > 0){
+							hedData.forEach(el => {
+								let webposItem = {};
+								webposItem.ResDealerNm = "부품지원센터";
+								webposItem.ReqTm = el.DC_DY_BSN.replace(/[/]/gi, "") + "000000";
+								webposItem.DocID = el.ID_TRN;
+								webposItem.CarNo = el.CAR_NO;
+								webposItem.ResDealer = "PARTS";
+								webposItem.ReqSiteNm = el.NM_BSN_UN;
+								webposItem.ReqDt = el.DC_DY_BSN;
+
+								if(dtlData.length > 0){
+									let list = dtlData.filter(x => x.ID_TRN === el.ID_TRN);
+									webposItem.LineItem = list;
+								}
+								else{
+									webposItem.LineItem = [];
+								}
+								webposItem.ID = "";
+								webposItem.ReqSite = el.ID_BSN_UN;
+								webposItem.Flag = "WEBPOS";
+								this.orderHistory.push(webposItem);
+							});
+						}
+						if(Array.isArray(this.orderHistory))
+						{
+							this.orderHistory.sort(function(a, b){
+								return (a.ReqTm < b.ReqTm) ? 1 : -1;
+							});
+						}
+
+						// 채팅에서 넘어 온 경우
+						if(docId !== ''  && orderID !== ''){
+							this.ShowOrderItem(docId , orderID);
+						} 
+					}
+        })
+        .catch((error) => {
+          console.log(error); 
+        })
 			},
 			linkToggle(idx)
 			{
@@ -392,6 +478,12 @@
 				});
 				return sum;
 			},
+			test(item, item2){
+				alert('ddd');
+				console.log('check:',item2);
+				this.selectedOrder = [];
+				return false;
+			}
 		}
 	}
 </script>

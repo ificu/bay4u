@@ -1825,6 +1825,8 @@ export default {
       param.payload.Item.ReqTm = chatMsg.reqTm;
       param.payload.Item.ChatType = "O";
       param.payload.Item.RefID = val;
+      param.payload.Item.SaveName = this.UserInfo.Name;
+      param.payload.Item.SaveID = this.UserInfo.UserID;
 
       console.log("Send Msg : ", JSON.stringify(param));
 
@@ -1852,6 +1854,9 @@ export default {
           qtInfo : qtInfoPram,
           chatType : "O",
           refId: val,
+          sendId: this.UserInfo.UserID,
+          sendName: this.UserInfo.Name,
+          sendFlag: "CARCENTER"
         });
 
         this.$router.push({name:'Chat', 

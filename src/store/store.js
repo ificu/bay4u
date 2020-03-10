@@ -7,7 +7,7 @@ export const store = new Vuex.Store({
     state: {
         //CarInfo: { CarNo: "", VinNo: "WBAJD3109JB316363" },
         CarInfo: { CarNo: "", VinNo: "" },
-        UserInfo: { UserID: "", BsnID: "", Name: "", EntNo: "", UserType:""},    // 사용자 ID, 사업장 코드, 사용자 명, 정비업코드, 사용자 타입
+        UserInfo: { UserID: "", BsnID: "", Name: "", EntNo: "", UserType: "" }, // 사용자 ID, 사업장 코드, 사용자 명, 정비업코드, 사용자 타입
         msgDatas: [],
     },
     getters: {
@@ -23,10 +23,15 @@ export const store = new Vuex.Store({
             state.UserInfo = userInfo
         },
         SetMsgData(state, msgData) {
-            state.msgDatas.push(msgData);
+            //console.log('state : ', state.msgDatas);
+            //console.log('msgData2 : ', msgData.msgData.Chatid);
+            let chatid = msgData.msgData.Chatid;
+            let extIdx = state.msgDatas.findIndex(el => el.msgData.Chatid === chatid);
+            if (extIdx === -1) {
+                state.msgDatas.push(msgData);
+            }
         },
-        InitMsgData(state)
-        {
+        InitMsgData(state) {
             state.msgDatas = []
         }
     },
@@ -40,5 +45,5 @@ export const store = new Vuex.Store({
         UpdateMsgData({ commit }, msgData) {
             commit('SetMsgData', { msgData })
         }
-    }
+    },
 });

@@ -1,5 +1,6 @@
 <template>
-  <div v-auto-bottom="msgs" class="Chating-chatingList" id="test">
+  <!--<div v-auto-bottom="msgs" class="Chating-chatingList" id="test">-->
+  <div v-auto-bottom="msgs" :class="SetCahtpageStyle()" id="test">
     <transition-group name="list" >
       <div v-for="(msg,index) in msgs" v-bind:key="index" class="chatitem">
           <div v-if="msg.msgData.from.name === UserInfo.BsnID">
@@ -12,8 +13,11 @@
                 <div class="Chating-me-contents" v-if="msg.msgData.imgId !== undefined">
                     <v-img class="grey lighten-3"  v-bind:src="msg.msgData.img" max-width="200px" @click="$EventBus.$emit('click-showImage' , msg.msgData.img)"></v-img>
                 </div>
-                <div class="Chating-me-requestTime"> 
+                <div class="Chating-me-requestTime" v-if="msg.msgData.SaveName === undefined "> 
                   {{setRequestTime(msg.msgData.reqTm)}}
+                </div>
+                <div class="Chating-me-requestTime" v-else> 
+                  {{setRequestTime(msg.msgData.reqTm)}} ({{msg.msgData.SaveName}})
                 </div>
             </div>
           </div>
@@ -30,8 +34,11 @@
                   <v-img class="grey lighten-3"  v-bind:src="msg.msgData.img" max-width="200px" @click="$EventBus.$emit('click-showImage' , msg.msgData.img)"></v-img>
               </div> 
             </div>
-            <div class="Chating-dealer-requestTime"> 
+            <div class="Chating-dealer-requestTime"  v-if="msg.msgData.SaveName === undefined "> 
                 {{setRequestTime(msg.msgData.reqTm)}}
+            </div>
+            <div class="Chating-me-requestTime" v-else> 
+                {{setRequestTime(msg.msgData.reqTm)}} ({{msg.msgData.SaveName}})
             </div>
           </div>
       </div>
@@ -83,6 +90,20 @@ export default {
                             Type:chatType
                       }});
     },
+    SetCahtpageStyle(){
+      var agent = navigator.userAgent.toLowerCase();
+      if(agent.search("iphone") > -1){
+        if(agent.indexOf('safari') !== -1 && agent.search('naver') === -1){
+          return 'Chating-chatingList-iphone';
+        }
+        else{
+          return 'Chating-chatingList';
+        }
+      }
+      else{
+        return 'Chating-chatingList';
+      } 
+    },
   }
 };
 </script>
@@ -120,22 +141,31 @@ export default {
     overflow-x:hidden;
   }
 }
+.Chating-chatingList-iphone{
+  margin:auto;
+  width: 90%;
+  padding-top: 70px;
+  height: calc(100vh - 50px - 70px - 90px);
+  overflow:auto;
+  overflow-x:hidden;
+  padding-bottom: 10px;
+}
 .chatitem{ 
 z-index: 1;
 }
-.Chating-chatingList .Chating-dealer {
+ .Chating-dealer {
   display: flex;
 }
-.Chating-chatingList .Chating-dealer .Chating-icon{
+.Chating-dealer .Chating-icon{
   font-size: 2.5rem;
   color: #5d4038;
   margin-top: -10px;
   margin-right: -20px;
 }
-.Chating-chatingList .Chating-dealer .Chating-icon img{
+.Chating-dealer .Chating-icon img{
   width: 60%;
 }
-.Chating-chatingList .Chating-dealer .Chating-dealer-contents {
+.Chating-dealer .Chating-dealer-contents {
   border: 1px solid #bebebe;
   border-radius: 0px 15px 15px 15px;
   margin-bottom: 0px;
@@ -145,10 +175,10 @@ z-index: 1;
   background-color: #fff;
   max-width: 90%;
 }
-.Chating-chatingList .Chating-me {
+.Chating-me {
   text-align: right;
 }
-.Chating-chatingList .Chating-me-contents {
+.Chating-me-contents {
   border: 1px solid #bebebe;
   border-radius: 15px 0px 15px 15px;
   margin-bottom: 0px;
@@ -160,12 +190,12 @@ z-index: 1;
   font-weight: bold;
   max-width: 90%;
 }
-.Chating-chatingList .Chating-dealer-requestTime{
+.Chating-dealer-requestTime{
    font-size: 0.4em;
    margin-bottom: 10px;
    margin-left: 60px;
 }
-.Chating-chatingList .Chating-me-requestTime{
+.Chating-me-requestTime{
   font-size: 0.5em;
   margin-bottom: 10px;
   margin-right: 10px;

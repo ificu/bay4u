@@ -139,19 +139,29 @@ export default {
       console.log('chatItem.ID : ' + this.chatItem.ID + ' / ' + 'data.docId : ' + data.docId);
 
       // 같은 대리점 채팅이 아니면 리턴
-      if(data.qtInfo !== undefined && this.UserInfo.BsnID !==  data.qtInfo.ResDealer ) return;
-     
+      if(data.qtInfo !== undefined)
+      {
+        if(Array.isArray(data.qtInfo) === true){
+          if(this.UserInfo.BsnID !== data.to.name)return;
+        }
+        else{
+          if(this.UserInfo.BsnID !==  data.qtInfo.ResDealer ) return;
+        }
+      } 
+       
       if(this.chatItem.ID === data.docId) {        
         var chatMsg = {};
         chatMsg.from = {'name' : data.from.name};
         chatMsg.to = {'name' : data.to.name};
         chatMsg.msg  = data.msg;
-        chatMsg.Chatid = data.chatID;
+        chatMsg.Chatid = data.chatId;
         chatMsg.DocID = this.chatItem.ID;
         chatMsg.reqTm = data.reqTm;
         chatMsg.ChatType = data.chatType;
         chatMsg.RefID = data.refID;
-
+        chatMsg.SaveName = data.sendName;
+        chatMsg.SaveID = data.sendId;
+   
         if(data.imgId !== undefined) {   
           chatMsg.img = Constant.IMG_URL + data.imgId;
           chatMsg.imgId = data.imgId;    
@@ -166,16 +176,24 @@ export default {
           let updateData = {};
           updateData.ID = data.docId;
           updateData.Msg = data.qtInfo.QTSts;
+          updateData.AgentName = data.sendName;
+          updateData.ChatType = data.chatType;
+          updateData.SendFlag = data.sendFlag;
           this.$EventBus.$emit('update-Sts' , updateData);
 
-          if(data.qtInfo.QTSts === "주문요청")
-          { 
+          if(data.qtInfo.QTSts === "주문요청"){ 
             // 주문요청이면 주문내역 조회
             this.$EventBus.$emit('get-orderList' , data.qtInfo);
           }
         }
         // 같은채팅창이면 읽음처리
-        this.saveChatState(data.docId , data.chatId);
+        if(data.sendFlag === "CARCENTER" && this.chatItem.AgentName === this.UserInfo.Name){
+          this.saveChatState(data.docId , data.chatId);
+        }
+        else{
+          if(data.sendName === this.UserInfo.Name)
+          this.saveChatState(data.docId , data.chatId);
+        }
       }
       else {
         var options = {
@@ -194,8 +212,8 @@ export default {
     });
 
     this.$EventBus.$on('click-qtInfo', chatItem => {  
-        this.showchating(chatItem);
-        this.chatItem = chatItem;     
+      this.chatItem = chatItem;    
+      this.showchating(chatItem);     
     });
 
     this.$EventBus.$on('init-qtInfo', chatItem => {   
@@ -212,6 +230,7 @@ export default {
       
         console.log('ChatingPage/채팅전달 : ', qtMsg);
         this.msgDatas = qtMsg;
+     
       /*  this.$sendMessage({
             name: this.UserInfo.BsnID,
             msg: qtMsg.msg,
@@ -283,6 +302,8 @@ export default {
       chatMsg.img = imgData;
       chatMsg.imgId = key + '.' + bolbData.type.replace('image/', '');
       chatMsg.reqTm = chatTime;
+      chatMsg.SaveName = this.UserInfo.Name;
+      chatMsg.SaveID = this.UserInfo.ID;
       this.msgDatas = chatMsg;
       /*this.$sendMessage({
         name: this.UserInfo.BsnID,
@@ -325,13 +346,26 @@ export default {
       var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                 + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
 
+      var id = '';
+      if(this.dragFileSendCount > 0)
+      {
+        id =  this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2) + this.dragFileSendCount;
+      }
+      else{
+        id =  this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+      }
+
       var chatMsg = {};
       chatMsg.from = {'name' : this.UserInfo.BsnID};
       chatMsg.to = {'name' : this.chatItem.ReqSite};
-      chatMsg.Chatid = '';
+      chatMsg.Chatid = id;
       chatMsg.DocID = this.chatItem.ID;
       chatMsg.msg  = msg;
       chatMsg.reqTm = chatTime;
+      chatMsg.SaveName = this.UserInfo.Name;
+      chatMsg.SaveID = this.UserInfo.UserID;
       this.msgDatas = chatMsg;
       /*this.$sendMessage({
         name: this.UserInfo.BsnID,
@@ -352,15 +386,20 @@ export default {
     saveChatMsg(chatMsg, imgId) {
       var param = {};
       var now = new Date();
+
       var id = '';
-      if(this.dragFileSendCount > 0)
-      {
-        id =  this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
-                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2) + this.dragFileSendCount;
+      if(chatMsg.Chatid !== undefined && chatMsg.Chatid.length > 0){
+        id = chatMsg.Chatid;
       }
       else{
-        id =  this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
-                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+        if(this.dragFileSendCount > 0){
+          id =  this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                  + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2) + this.dragFileSendCount;
+        }
+        else{
+          id =  this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                  + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+        }
       }
 
       var key = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
@@ -391,6 +430,8 @@ export default {
       else{
          param.payload.Item.RefID = " ";
       }
+      param.payload.Item.SaveName = this.UserInfo.Name;
+      param.payload.Item.SaveID = this.UserInfo.UserID;
 
       console.log("======= Chat Save Request ========");
       console.log(JSON.stringify(param));
@@ -416,12 +457,17 @@ export default {
           refId: chatMsg.RefID,
           qtInfo: chatMsg.qtInfo,
           imgId: imgId,
+          sendId: this.UserInfo.UserID,
+          sendName: this.UserInfo.Name,
+          sendFlag: "DEALER"
         });
 
       })
       .catch((error) => {
         console.log(error);
       });
+
+      return id;
     },
     showchating(item)
     {
@@ -484,6 +530,7 @@ export default {
           chatMsg.img = ''; 
           chatMsg.ChatType = element['ChatType'];
           chatMsg.RefID = element['RefID'];
+          chatMsg.SaveName = element['SaveName'];
 
           this.msgDatas = chatMsg;
              
@@ -616,6 +663,8 @@ export default {
       chatMsg.img = fileImage.src;
       chatMsg.imgId = key + '.' + bolbData.type.replace('image/', '');
       chatMsg.reqTm = chatTime;
+      chatMsg.SaveName = this.UserInfo.Name;
+      chatMsg.SaveID = this.UserInfo.ID;
       this.msgDatas = chatMsg;
       /*this.$sendMessage({
         name: this.UserInfo.BsnID,
@@ -687,6 +736,8 @@ export default {
       chatMsg.img = fileImage.src;
       chatMsg.imgId = key + '.' + bolbData.type.replace('image/', '');
       chatMsg.reqTm = chatTime;
+      chatMsg.SaveName = this.UserInfo.Name;
+      chatMsg.SaveID = this.UserInfo.ID;
       this.msgDatas = chatMsg;
       /*this.$sendMessage({
         name: this.UserInfo.BsnID,
