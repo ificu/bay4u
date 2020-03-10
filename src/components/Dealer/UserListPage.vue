@@ -346,7 +346,9 @@ export default {
             console.log("======= chat read Command ========");
             this.$sendCommand({
               command: 'ChatRead',
-              userId: this.UserInfo.BsnID,        
+              //userId: this.UserInfo.BsnID,   
+              userId: this.UserInfo.UserId,   
+              bsnId: this.UserInfo.BsnID,  
             });
           }
         })

@@ -63,6 +63,7 @@ io.on('connection', function(socket){
     var msg = {
       command: data.command,
       userId: data.userId,
+      bsnId: data.bsnId,
       message: data.message,
       chatId: data.chatId
     };

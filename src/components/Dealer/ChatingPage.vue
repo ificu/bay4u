@@ -186,11 +186,17 @@ export default {
         this.$EventBus.$emit('update-chatMsg', data);  
         this.$sendCommand({
           command: 'NewChats',
-          userId: data.to.name,   
+          //userId: data.to.name,   
+          userId: this.UserInfo.UserId,
+          bsnId: this.UserInfo.BsnID,
           message: data.msg,
           chatId: data.chatId
         }); 
       }
+    });
+
+    this.$socket.on('command', (data) => { 
+      console.log("Command Message : ", data);
     });
 
     this.$EventBus.$on('click-qtInfo', chatItem => {  

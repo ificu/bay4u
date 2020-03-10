@@ -128,10 +128,10 @@ export default {
           }
           // 부품 대리점 인 경우
           else {
-            this.$cookies.set('BsnID', siteCode, '86400s');
-            this.$cookies.set('UserID', id, '86400s');
-            this.$cookies.set('UserNM', name, '86400s');
-            this.$cookies.set('UserType', type, '86400s');
+            this.$cookies.set('BsnID', siteCode, '864000s');
+            this.$cookies.set('UserID', id, '864000s');
+            this.$cookies.set('UserNM', name, '864000s');
+            this.$cookies.set('UserType', type, '864000s');
             
             this.$router.push('/MainPage');
             this.UserInfo.UserID = id;
