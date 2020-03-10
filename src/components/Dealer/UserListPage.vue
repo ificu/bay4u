@@ -45,7 +45,7 @@
       <div class="Chat-list">
         <ul>
          <li v-for="(qtReq, index) in qtReqList" v-bind:key = "index" v-on:click="SetQTInfo(qtReq,index)" >
-           <div class="chat-item flex-direction_row" :class="{selectItem : selectedList(index), noReadItem : qtReq.isRead === false}">
+           <div class="chat-item flex-direction_row" :class="{selectItem : selectedList(index), noReadItem : qtReq.isRead === false || qtReq.NotReadCnt !== 0}">
              <div class="carBrand">
                 <!--<i class="Carcenter-type fas fa-wrench" style="color:#fbc02e;" v-if="qtReq.isRead === true"></i>     
                 <i class="Carcenter-type fas fa-wrench" style="color:red;" v-else-if="qtReq.isRead === false"></i>-->    
@@ -75,6 +75,7 @@
                 <div class="carInfo">
                   <span class="Carcenter-name">{{qtReq.ReqName}} ({{(qtReq.CarNo === "*empty*")?"미상차량" : qtReq.CarNo}})</span>
                   <span class="Carcenter-reqdt">{{qtReq.ReqDt}}</span><span :class="linkQtSts(qtReq.QTSts)">{{qtReq.QTSts}}</span>
+                  <span v-if="qtReq.AgentName !== undefined && qtReq.AgentName !== '*empty*'" class="agent-name">{{qtReq.AgentName}}</span>
                   <span class="carSeries">{{qtReq.CarSeries}}</span>
                 </div>
                 <!--<div>
@@ -93,6 +94,35 @@
       </div>
     </b-tab>
   </b-tabs>
+  <!--견적접수 메시지-->
+  <MessageBox v-if="showQTAccept"  @close="CloseAlerPopup('A')">
+      <div slot="header"><h5>알림</h5></div>
+      <span slot="body" @click="CloseAlerPopup('A')"><span class="msgBigBody">{{alertMsg}}</span>
+      </span>
+      <div slot="footer">
+        <v-btn depressed small color="#967d5f" dark @click="SaveQtAccept()">확인</v-btn>
+        <v-btn depressed small color="blue-grey lighten-2"  @click="CloseAlerPopup('A')">취소</v-btn>
+      </div>
+  </MessageBox>
+  <!--주문접수 메시지-->
+  <MessageBox v-if="showOrderAccept"  @close="CloseAlerPopup('O')">
+      <div slot="header"><h5>알림</h5></div>
+      <span slot="body" @click="CloseAlerPopup('O')"><span class="msgBigBody">{{alertMsg}}</span>
+      </span>
+      <div slot="footer">
+        <v-btn depressed small color="#967d5f" dark @click="SaveOrderAccept()">확인</v-btn>
+        <v-btn depressed small color="blue-grey lighten-2"  @click="CloseAlerPopup('O')">취소</v-btn>
+      </div>
+  </MessageBox>
+  <!--확인 메시지-->
+  <MessageBox v-if="showAlert"  @close="CloseAlerPopup()">
+      <div slot="header"><h5>알림</h5></div>
+      <span slot="body" @click="CloseAlerPopup()"><pre>{{alertMsg}}</pre>
+      </span>
+      <div slot="footer">
+        <v-btn depressed small color="#967d5f" dark @click="CloseAlerPopup()">확인</v-btn>
+      </div>
+  </MessageBox>
   </div>   
 </template>
 
@@ -102,6 +132,7 @@
 import {datePadding} from '@/utils/common.js'
 import Constant from '@/Constant';
 import {arrayGroupBy} from '@/utils/common.js'
+import MessageBox from '@/components/Common/MessageBox.vue'
 
 const axios = require('axios').default;
 
@@ -115,9 +146,16 @@ export default {
       searchText:'',
       toggle_exclusive: undefined,
       targetQtId:'',
+      showQTAccept: false,
+      showOrderAccept:false,
+      showAlert: false,
+      alertMsg: '',
     }
   },
   props:['chatInfo', 'showQTId'],
+  components: {
+    MessageBox: MessageBox,
+  },
   methods: {
     linkClass(idx) {
       if (this.tabIndex === idx) {
@@ -281,10 +319,13 @@ export default {
         let chatList = result.data.Items;
         for(let qt of this.qtReqList)
         {
-          let newChatState = chatList.filter(x => x.DocID === qt.ID && x.ChatTo === this.UserInfo.BsnID && x.ReadYn === '0' );
-          qt.NotChatIDList = newChatState;
-          if(flag !== 'C'){
-            qt.NotReadCnt = newChatState.length;
+          //console.log('user :' , qt.AgentName + "/" + this.UserInfo.Name);
+          if(qt.AgentName === undefined || qt.AgentName === this.UserInfo.Name){
+            let newChatState = chatList.filter(x => x.DocID === qt.ID && x.ChatTo === this.UserInfo.BsnID && x.ReadYn === '0' );
+            qt.NotChatIDList = newChatState;
+            if(flag !== 'C'){
+              qt.NotReadCnt = newChatState.length;
+            }
           }
         }
         
@@ -299,17 +340,41 @@ export default {
     SetQTInfo(item , idx)
     {
       this.$emit('setQtInfo' ,item);
-      this.$EventBus.$emit('click-qtInfo' , item)
       this.qtItemIndex = idx;
       this.qtReqList[idx].isRead = true;
-      this.saveChatState(item);
+        
+      // 부품지원센터 
+      if(this.UserInfo.UserType === "DEALER"){ 
+        this.$EventBus.$emit('click-qtInfo' , item)
+        this.saveChatState(item);
+      }
+      else{
+        if(item.QTSts === "견적요청"){
+          this.alertMsg = ((item.CarNo==='*empty*')?'미상' : item.CarNo) + " 차량 견적접수 하시겠습니까?";
+          this.showQTAccept = true;
+        }
+        else if(item.QTSts === "바로주문"){
+          this.alertMsg = ((item.CarNo==='*empty*')?'미상' : item.CarNo) + " 차량 주문접수 하시겠습니까?";
+          this.showOrderAccept = true;
+        }
+        else{
+          console.log('AgentName :',item.AgentName + "/" + this.UserInfo.Name);
+          this.$EventBus.$emit('click-qtInfo' , item);
+          if(item.AgentName === this.UserInfo.Name)
+          {
+            // 담당자 일때 읽음 처리
+            this.saveChatState(item);
+          }
+        }
+      }
     },
     saveChatState(item)
     {
       var readCount = item.NotReadCnt;
-
       var checkForLoop = 1;
-
+      if(item.NotChatIDList === undefined) return;
+      console.log('state : ', item);
+      
       for(let chat of item.NotChatIDList)
       {
         let param = {};
@@ -322,8 +387,8 @@ export default {
         param.payload.UpdateExpression = "Set ReadYn = :a";
         param.payload.ConditionExpression = "ChatTo = :p",
         param.payload.ExpressionAttributeValues = {
-        ":a" : "1",
-        ":p" : this.UserInfo.BsnID,
+          ":a" : "1",
+          ":p" : this.UserInfo.BsnID,
         };
 
         console.log("======= chat read update Request ========");
@@ -354,7 +419,6 @@ export default {
           console.log(error);
         });
       }
-
     },
     initQTData()
     {
@@ -400,6 +464,9 @@ export default {
       if(value === '견적요청'){
         return 'qtSts-1';
       }
+      else if(value === '견적접수' || value === '주문접수'){
+        return 'qtSts-5';
+      }
       else if(value === '견적회신'){
         return 'qtSts-2';
       }
@@ -432,7 +499,254 @@ export default {
       let index = this.qtReqList.findIndex(i => i.ID === ID);
       this.SetQTInfo(this.qtReqList[index], index);
       this.targetQtId = '';
-    }
+    },
+    CloseAlerPopup(Flag){
+      this.showQTAccept = false;
+      this.showOrderAccept = false;
+      this.showAlert = false;
+      if(Flag !== undefined && (Flag === 'A' || Flag === 'O') ){
+        this.$EventBus.$emit('click-qtInfo' , this.qtReqList[this.qtItemIndex])
+      }
+    },
+    SaveQtAccept()
+    {
+      let targetQtItem = this.qtReqList[this.qtItemIndex];
+        
+      // 견적상태 체크 후 견적접수
+      var param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_QT_LIST";
+      param.payload = {};
+      param.payload.FilterExpression = "ID = :id";
+      param.payload.ExpressionAttributeValues = {};
+      var key = ":id";   
+      param.payload.ExpressionAttributeValues[key] = targetQtItem.ID;
+      
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+        let qtSts = result.data.Items[0].QTSts;
+        if(qtSts === "견적요청"){
+
+          // 견적상태 변경 / 담당자 저장
+          param.operation = "update";
+          param.tableName = "BAY4U_QT_LIST";
+          param.payload = {};
+          param.payload.Key = {};
+          param.payload.Key.ID = targetQtItem.ID;
+          param.payload.UpdateExpression = "Set AgentName = :b, QTSts = :c, ResUserID = :e" ;
+          param.payload.ExpressionAttributeValues = {
+              ":b" : this.UserInfo.Name,
+              ":c" : "견적접수",
+              ":e" : this.UserInfo.UserID
+          };
+                  
+          console.log("======= QT Update Request ========");
+          console.log(JSON.stringify(param));
+
+          axios({
+              method: 'POST',
+              url: Constant.LAMBDA_URL,
+              headers: Constant.JSON_HEADER,
+              data: param
+          })
+          .then((result) => {
+            console.log("======= QT Update result ========");
+            console.log(result.data);
+
+            targetQtItem.QTSts = "견적접수";
+            targetQtItem.AgentName = this.UserInfo.Name;
+            targetQtItem.NotReadCnt = 0;
+            this.showQTAccept = false;
+
+            // 견적접수 메시지 전송
+            let now = new Date();
+            let chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
+            let msg = ((targetQtItem.CarNo==='*empty*')?'미상' : targetQtItem.CarNo) + " 차량에 대한 견적이 접수됐습니다.";
+            let qtMsg = {};
+            qtMsg.from = {'name' : this.UserInfo.BsnID};
+            qtMsg.msg  = msg;
+            qtMsg.reqTm = chatTime;
+            qtMsg.ChatType = "A";
+            qtMsg.qtInfo = targetQtItem;
+            this.SaveAcceptChatMsg(qtMsg);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+        }
+        else{
+          this.alertMsg = "견적요청 상태가 아닙니다.";
+          this.showAlert = true;
+          targetQtItem.QTSts = qtSts;
+          targetQtItem.NotReadCnt = 0;
+          targetQtItem.isRead = true;
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      })
+    },
+    SaveOrderAccept()
+    {
+      let targetQtItem = this.qtReqList[this.qtItemIndex];
+        
+      // 견적상태 체크 후 주문접수
+      var param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_QT_LIST";
+      param.payload = {};
+      param.payload.FilterExpression = "ID = :id";
+      param.payload.ExpressionAttributeValues = {};
+      var key = ":id";   
+      param.payload.ExpressionAttributeValues[key] = targetQtItem.ID;
+      
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+        let qtSts = result.data.Items[0].QTSts;
+        if(qtSts === "바로주문"){
+
+          // 견적상태 변경 / 담당자 저장
+          param.operation = "update";
+          param.tableName = "BAY4U_QT_LIST";
+          param.payload = {};
+          param.payload.Key = {};
+          param.payload.Key.ID = targetQtItem.ID;
+          param.payload.UpdateExpression = "Set AgentName = :b, QTSts = :c, ResUserID = :e" ;
+          param.payload.ExpressionAttributeValues = {
+              ":b" : this.UserInfo.Name,
+              ":c" : "주문접수",
+              ":e" : this.UserInfo.UserID
+          };
+                  
+          console.log("======= QT Update Request ========");
+          console.log(JSON.stringify(param));
+
+          axios({
+              method: 'POST',
+              url: Constant.LAMBDA_URL,
+              headers: Constant.JSON_HEADER,
+              data: param
+          })
+          .then((result) => {
+            console.log("======= QT Update result ========");
+            console.log(result.data);
+
+            targetQtItem.QTSts = "주문접수";
+            targetQtItem.NotReadCnt = 0;
+            targetQtItem.AgentName = this.UserInfo.Name;
+            this.showOrderAccept = false;
+
+            // 견적접수 메시지 전송
+            let now = new Date();
+            let chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
+            let msg = ((targetQtItem.CarNo==='*empty*')?'미상' : targetQtItem.CarNo) + " 차량에 대한 주문이 접수됐습니다.";
+            let qtMsg = {};
+            qtMsg.from = {'name' : this.UserInfo.BsnID};
+            qtMsg.msg  = msg;
+            qtMsg.reqTm = chatTime;
+            qtMsg.ChatType = "A";
+            qtMsg.qtInfo = targetQtItem;
+            this.SaveAcceptChatMsg(qtMsg);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+        }
+        else{
+          this.alertMsg = "바로주문 상태가 아닙니다.";
+          this.showAlert = true;
+          targetQtItem.QTSts = qtSts;
+          targetQtItem.NotReadCnt = 0;
+          targetQtItem.isRead = true;
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      })
+    },
+    SaveAcceptChatMsg(chatMsg) {
+      // 견적접수 메시지 저장
+      var param = {};
+      var now = new Date();
+      var id = '';
+      id =  this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
+      var key = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
+      param.operation = "create";
+      param.tableName = "BAY4U_CHAT";
+      param.payload = {};
+      param.payload.Item = {};
+      param.payload.Item.ID = id;
+      param.payload.Item.DocID = chatMsg.qtInfo.ID;  //docId
+      param.payload.Item.ChatFrom = this.UserInfo.BsnID;
+      param.payload.Item.ChatTo = chatMsg.qtInfo.ReqSite;
+      param.payload.Item.Message = chatMsg.msg;
+      //param.payload.Item.Status = "0";
+      param.payload.Item.ReadYn = "0";
+      param.payload.Item.ReqTm = chatMsg.reqTm;
+      if(chatMsg.ChatType !== undefined){
+        param.payload.Item.ChatType = chatMsg.ChatType;
+      }
+      else{
+         param.payload.Item.ChatType = "D";
+      }
+      param.payload.Item.SaveName = this.UserInfo.Name;
+      param.payload.Item.SaveID = this.UserInfo.UserID;
+
+      console.log("======= Chat Save Request ========");
+      console.log(JSON.stringify(param));
+
+      axios({
+          method: 'POST',
+          url: Constant.LAMBDA_URL,
+          headers: Constant.JSON_HEADER,
+          data: param
+      })
+      .then((result) => {
+        console.log("======= Chat Save result ========");
+        console.log(result.data);
+
+        this.$EventBus.$emit('click-qtInfo' , chatMsg.qtInfo);
+        console.log('aaa:',chatMsg.qtInfo);
+        this.saveChatState(chatMsg.qtInfo);
+
+        this.$sendMessage({
+          name: this.UserInfo.BsnID,
+          msg: chatMsg.msg,
+          recv: chatMsg.qtInfo.ReqSite,
+          chatId: id, 
+          docId: chatMsg.qtInfo.ID,
+          reqTm: chatMsg.reqTm,
+          chatType: chatMsg.ChatType,
+          refId: chatMsg.RefID,
+          qtInfo: chatMsg.qtInfo,
+          sendId: this.UserInfo.UserID,
+          sendName: this.UserInfo.Name,
+          sendFlag: "DEALER"
+        });
+
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    },
   },
   updated(){
     if(this.targetQtId !== '')
@@ -465,10 +779,46 @@ export default {
       for (var chat of this.qtReqList) {
         if(chat.ID === data.docId) {
           console.log('chat:',chat );
+          console.log('chat.NotReadCnt:',chat.NotReadCnt );
           chat.isRead = false;
-          chat.NotReadCnt = chat.NotReadCnt + 1;
+     
+          if(data.sendFlag === 'DEALER'){
+            
+            if(data.chatType === "A"){
+              // 견적접수나 주문접수 채팅이면 읽음 처리 , 담당자 변경
+              chat.isRead = true;
+              chat.NotReadCnt = 0;
+              chat.AgentName = data.sendName;
+            }
+            else{
+              // 다른 User 전송메시지이면 상태 읽음처리
+              if(data.sendName !== this.UserInfo.Name){
+                chat.isRead = true;
+                chat.NotReadCnt = 0;
+              }
+              // 일반메시지 전송일때는 담당자 변경 안함
+              if(data.chatType !== undefined && data.chatType !== "D"){
+                chat.AgentName = data.sendName;
+              }
+            }
+          }
+          else{
+            if(chat.AgentName === this.UserInfo.Name || chat.AgentName === ''){
+              if(chat.NotReadCnt === undefined){
+                chat.NotReadCnt = 1;
+              }
+              else{
+                chat.NotReadCnt = chat.NotReadCnt + 1;
+              }
+            }
+            else{
+              chat.isRead = true;
+              chat.NotReadCnt = 0;
+            }
+          }
+
           checkExist = true;
-          if(data.qtInfo !== undefined){
+          if(data.qtInfo !== undefined && data.chatType !== undefined && data.chatType !== "D"){
             chat.QTSts = data.qtInfo.QTSts; 
           }
         }
@@ -507,20 +857,28 @@ export default {
           }
         }
       }
-
       //this.$nextTick(function(){
         this.getChatReadState(flag);
       //});
     }); 
     
     this.$EventBus.$on('update-Sts', updateData => {
+      console.log('updateData :' ,updateData);
+   
+        let index = this.qtReqList.findIndex(element => element.ID === updateData.ID);
+        if(index >= 0){
+          if(updateData.ChatType !== undefined && updateData.chatType !== "D"){
+            this.qtReqList[index].QTSts = updateData.Msg;
+          }
+          
+          if(updateData.AgentName !== undefined && updateData.SendFlag === "DEALER"){
+            this.qtReqList[index].AgentName = updateData.AgentName;
+          }
 
-      let index = this.qtReqList.findIndex(element => element.ID === updateData.ID);
-      if(index >= 0)
-      {
-        this.qtReqList[index].QTSts = updateData.Msg;
-       // console.log('update : ', this.qtReqList[index].QTSts);
-      }
+          if(updateData.UpdateRead !== undefined && updateData.UpdateRead === "Y"){
+            this.saveChatState(this.qtReqList[index]);
+          }
+        }
     });
   },    
   computed:{
@@ -681,6 +1039,13 @@ export default {
   font-size: 0.85em;
   line-height: 15px;
 }
+.agent-name{
+  font-size: 0.86em;
+  background-color:#EEE8AA;
+  margin-left: 10px;
+  padding:0px 6px;
+  border-radius: 10px 0px 0px 0px;
+}
 .carSeries{
   position: absolute;;
   line-height: 10px;
@@ -737,5 +1102,13 @@ export default {
   font-weight: bold;
   margin-left:10px;
   color:#FF6D00;
+}
+
+/*견적접수 */
+.qtSts-5{
+  font-size: 0.8em;
+  font-weight: bold;
+  margin-left:10px;
+  color:#7B0099;
 }
 </style>

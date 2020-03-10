@@ -169,8 +169,8 @@ export default {
 			this.reOrderBrand = this.orderCarInfo.CarBrand;
 			this.reOrderMemo = this.orderCarInfo.Memo;
 			this.reOrderCaptureBlobImg = this.orderCarInfo.captureBlobImg;
-			/*console.log('orderList : ', this.orderList);
-			console.log('reOrderCarNo : ', this.reOrderCarNo);
+			console.log('orderList : ', this.orderList);
+			/*console.log('reOrderCarNo : ', this.reOrderCarNo);
 			console.log('reOrderVinNo : ', this.reOrderVinNo);
 			console.log('reOrderBrand : ', this.reOrderBrand);
 			console.log('reOrderCaptureBlobImg : ', this.reOrderCaptureBlobImg);*/
@@ -639,7 +639,9 @@ export default {
       param.payload.Item.ReqTm = chatMsg.reqTm;
       param.payload.Item.ChatType = "O";
       param.payload.Item.RefID = val;
-
+			param.payload.Item.SaveName = this.UserInfo.Name;
+			param.payload.Item.SaveID = this.UserInfo.UserID;
+			
       console.log("Send Msg : ", JSON.stringify(param));
 
       axios({
@@ -665,7 +667,10 @@ export default {
           reqTm : chatMsg.reqTm,
           qtInfo : this.qtInfoData,
           chatType : "O",
-          refId: val,
+					refId: val,
+					sendId: this.UserInfo.UserID,
+					sendName: this.UserInfo.Name,
+					sendFlag: "CARCENTER"
 				});
 				
 				if( this.selectedDealer.length === this.saveCount )

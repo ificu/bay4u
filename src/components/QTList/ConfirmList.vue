@@ -979,7 +979,9 @@
 				param.payload.Item.ReqTm = chatMsg.reqTm;
 				param.payload.Item.ChatType = "O";
 				param.payload.Item.RefID = val;
-
+				param.payload.Item.SaveName = this.UserInfo.Name;
+				param.payload.Item.SaveID = this.UserInfo.UserID;
+			
 				console.log("Send Msg : ", JSON.stringify(param));
 
 				axios({
@@ -1006,6 +1008,9 @@
 						qtInfo : qtInfoPram,
 						chatType : "O",
 						refId: val,
+						sendId: this.UserInfo.UserID,
+						sendName: this.UserInfo.Name,
+						sendFlag: "CARCENTER"
 					});
 
 					this.$router.push({name:'Chat', 
@@ -1065,6 +1070,7 @@
 				return str.substring(5,7) + '/'+str.substring(8,10) + '(' + getInputDayWeek(value) +')';
 			},
 			ShowQtState(item){
+
 				if(Array.isArray(item))
 				{
 					if(item.length === 1) {
@@ -1077,7 +1083,8 @@
 							}
 						}
 						else{
-							if(item[0].QTData.QTSts === "견적요청"){
+					
+							if(item[0].QTData.QTSts === "견적요청" || item[0].QTSts === "견적접수" ){
 								return true;
 							}
 							else{
@@ -1087,7 +1094,7 @@
 					}
 					else{
 						let cnt = item.length;
-						let result = item.filter(el => (el.QTData.QTSts === "견적요청" || el.QTData.QTSts === "바로주문"));
+						let result = item.filter(el => (el.QTData.QTSts === "견적요청" || el.QTData.QTSts === "바로주문" || el.QTData.QTSts === "견적접수"));
 						if(cnt === result.length){
 							return true;
 						}
@@ -1098,7 +1105,6 @@
 				}
 			},
 			ShowQtConfirmState(item){
-				
 				if(Array.isArray(item)){
 					if(item.length === 1){
 						if(item[0].WebposOnly === "Y"){

@@ -10,10 +10,22 @@
       </div>
       <div class="UserInfo-info">
         <div class="info-name">{{UserInfo.Name}}</div>
-        <div class="info-tel">{{siteInfo.TEL}}</div>
-        <div class="info-tel">{{siteInfo.HP}}</div>
-        <div class="info-addr">{{siteInfo.ADDR}}</div>
+        <div v-if="UserInfo.UserType !== 'SITEADMIN'" class="info-tel">{{siteInfo.TEL}}</div>
+        <div v-if="UserInfo.UserType !== 'SITEADMIN'" class="info-tel">{{siteInfo.HP}}</div>
+        <div v-if="UserInfo.UserType !== 'SITEADMIN'" class="info-addr">{{siteInfo.ADDR}}</div>
       </div>
+      <div v-if="adminYn === 'Y' || UserInfo.UserType === 'SITEADMIN'">
+        <b-button block class = "btnCarcenter" v-b-toggle.collapse-1>카센터 선택
+          <span class="icon-down"><i class="fas fa-chevron-down"></i></span>
+        </b-button>
+      </div>
+      <b-collapse id="collapse-1" class="mt-n6 mb-6 ml-3 carcenterList" v-model="carCenterClicked">
+        <b-card no-body header="담당 카센터">
+          <b-list-group flush>
+            <b-list-group-item button v-for="(center, index) in carCenterLsit" v-bind:key="index" @click="SetCarCenter(center)">{{center.NAME}}</b-list-group-item>
+          </b-list-group>
+        </b-card>
+      </b-collapse>
       <div class="UserInfo-itemMaster">
         <div class="itemMaster-title">내 부품 마스터</div>
         <div class="itemMaster-btn"><b-button>설 정</b-button></div>
@@ -53,6 +65,14 @@
         확인 <i class="fas fa-check"></i>
       </span>
     </MaintenanceMaster>
+    <!--확인 메시지-->
+    <MessageBox v-if="showAlert"  @close="showAlert=false">
+      <div slot="header"><h5>알림</h5></div>
+        <span slot="body" @click="showAlert=false"><pre>{{alertMsg}}</pre></span>
+      <div slot="footer">
+        <v-btn depressed small color="#967d5f" dark @click="showAlert=false">확인</v-btn>
+      </div>
+    </MessageBox>
   </div>
 </template>
 
@@ -60,6 +80,7 @@
 import MaintenanceMaster from '@/components/UserInfo/MaintenanceMaster.vue'
 import CheckLogin from '@/components/Common/CheckLogin.vue'
 import Constant from '@/Constant';
+import MessageBox from '@/components/Common/MessageBox.vue'
 
 const axios = require('axios').default;
 
@@ -67,9 +88,13 @@ export default {
   name: 'UserInfo',
   data () {
     return {
-      text: '',
       showMaintenanceMaster: false,
-      siteInfo:[],
+      siteInfo: [],
+      carCenterLsit: [],
+      carCenterClicked: false,
+      adminYn : "",
+      alertMsg: "",
+      showAlert: false,
     }
   },
   methods: {
@@ -84,8 +109,8 @@ export default {
       param.payload = {};
       param.payload.FilterExpression = "CODE = :id";
       param.payload.ExpressionAttributeValues = {};
+      
       var key = ":id";
-
       param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
 
       axios({
@@ -97,13 +122,66 @@ export default {
       .then((result) => {
         console.log("======= Site result ========");
         console.log(result.data);
-        this.siteInfo = result.data.Items[0];
+        if( result.data.Items.length > 0){
+          this.siteInfo = result.data.Items[0];
+        }
       });
     },
+    GetCarCenter(){
+      var param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_SITE_ADMIN";
+      param.payload = {};
+      param.payload.FilterExpression = "ADMIN = :id";
+      param.payload.ExpressionAttributeValues = {};
+      
+      var key = ":id";
+      param.payload.ExpressionAttributeValues[key] = this.UserInfo.UserID;
+
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+        this.carCenterLsit = result.data.Items;
+      });
+    },
+    SetCarCenter(item){
+      this.carCenterClicked = false;
+      var param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_USER";
+      param.payload = {};
+      param.payload.FilterExpression = "CODE = :id";
+      param.payload.ExpressionAttributeValues = {};
+      
+      var key = ":id";
+      param.payload.ExpressionAttributeValues[key] = item.SITE;
+
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+        if(result.data.Items.length > 0){
+          localStorage.setItem('AdminName', this.UserInfo.Name);
+          this.UserInfo.BsnID = result.data.Items[0].CODE;
+          this.UserInfo.Name = result.data.Items[0].NAME;
+          this.UserInfo.EntNo = result.data.Items[0].ENTNO;
+          this.UserInfo.UserType = result.data.Items[0].TYPE;
+          this.GetSiteInfo();
+        }
+      });
+    }
   },
   components: {
     MaintenanceMaster: MaintenanceMaster,
-    CheckLogin:CheckLogin
+    CheckLogin:CheckLogin,
+    MessageBox: MessageBox,
   },
   computed:{
       UserInfo: {
@@ -112,7 +190,24 @@ export default {
       },
   },
   mounted(){
+    this.adminYn = localStorage.getItem('AdminYn');
     this.GetSiteInfo();
+    this.GetCarCenter();
+  },
+  beforeRouteLeave (to, from, next) {
+    if(to.name === "Login"){
+      next();
+    }
+    else{
+      if(this.UserInfo.UserType === 'SITEADMIN'){
+        this.alertMsg = "카센터를 선택 해주세요.";
+        this.showAlert = true;
+        next(false);
+      }
+      else{
+        next();
+      }
+    }
   }
 }
 </script>
@@ -230,9 +325,6 @@ export default {
   font-weight: bold;
   border: none;
 }
-
-
-
 .UserInfo-footer {
   z-index: 100;
   position: fixed;
@@ -245,20 +337,26 @@ export default {
   border-top: 1px solid #bebebe;
   background: #eeeeee;
 }
-
 .UserInfo-footer a {
   flex:25%;
   text-align: center;
   color: #848180;
   margin-top: 5px;
 }
-
 .UserInfo-footer a span i {
   font-size: 2.5rem;
 }
 .footer-selected {
   color : #5d4038;
 }
-
-
+.btnCarcenter{
+  width:200px;
+  margin: 5px 5px 5px 16px;
+}
+.carcenterList{
+  width:320px;
+}
+.icon-down{
+  float: right;
+}
 </style>
