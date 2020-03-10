@@ -172,7 +172,6 @@ export default {
     }),*/
   },
   created : function() {
-
     this.showQTReqList();
 
     if(this.$route.params.chatid !== undefined) {
@@ -188,8 +187,7 @@ export default {
 
       // 초기 메시지 입력
       //console.log ('route : ', this.$route.params);
-      if(this.$route.params.chatDealerNm !== undefined)
-      {
+      if(this.$route.params.chatDealerNm !== undefined){
         this.chatDealerName = this.$route.params.chatDealerNm;
       }
   
@@ -204,6 +202,10 @@ export default {
       }
       else{
 
+        var now = new Date();
+        var id = this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
         var msg = "";
         if(this.$route.params.carNo === null || this.$route.params.carNo.length === 0){
           msg = "미상차량에 대한 견적이 요청됐습니다.";
@@ -212,7 +214,6 @@ export default {
           msg = this.$route.params.carNo + " 차량에 대한 견적이 요청됐습니다.";
         }
 
-        var now = new Date();
         var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                   + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
 
@@ -221,9 +222,14 @@ export default {
         //chatMsg.from = {'name' : '나'};
         chatMsg.from = {'name' : this.UserInfo.BsnID};
         chatMsg.to = {'name' : this.dealer};
+        chatMsg.Chatid = id;
+        chatMsg.DocID = this.docId;
         chatMsg.msg  = msg;
         chatMsg.reqTm = chatTime;
+        chatMsg.SaveName = this.UserInfo.Name;
+        chatMsg.SaveID = this.UserInfo.UserID;
         this.msgDatas = chatMsg;
+
         this.selectedQtData = this.$route.params.qtInfo;
         this.saveChatMsg(chatMsg,'Q', this.$route.params.qtInfo);
 /*
@@ -250,11 +256,13 @@ export default {
         chatMsg.from = {'name' : data.from.name};
         chatMsg.to = {'name' : data.to.name};
         chatMsg.msg  = data.msg;
-        chatMsg.Chatid =  data.chatID;
+        chatMsg.Chatid =  data.chatId;
         chatMsg.DocID =  this.docId;
         chatMsg.reqTm = data.reqTm;
         chatMsg.ChatType = data.chatType;
         chatMsg.RefID = data.refID;
+        chatMsg.SaveName = data.sendName;
+        chatMsg.SaveID = data.sendId;
 
         if(data.imgId !== undefined) {       
 
@@ -314,16 +322,21 @@ export default {
       var now = new Date();
       var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                 + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+      
+      var id = this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+          + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
 
       var chatMsg = {};
       chatMsg.from = {'name' : this.UserInfo.BsnID};
       chatMsg.to = {'name' : this.dealer};
-      chatMsg.Chatid = '';
+      chatMsg.Chatid = id;
       chatMsg.DocID =  this.docId;
       chatMsg.msg  = msg;
       chatMsg.reqTm  = chatTime;
-      
+      chatMsg.SaveName = this.UserInfo.Name;
+      chatMsg.SaveID = this.UserInfo.UserID;
       this.msgDatas = chatMsg;
+      
       /*this.$sendMessage({
         //name: this.$route.params.username,
         name: this.UserInfo.BsnID,
@@ -357,8 +370,16 @@ export default {
       var param = {};
 
       var now = new Date();
-      var id = this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
-                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+      var id = '';
+
+      if(chatMsg.Chatid !== undefined && chatMsg.Chatid.length > 0){
+        id = chatMsg.Chatid;
+      }
+      else{
+        id = this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+          + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+      }
+
       var key = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                 + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
 
@@ -377,6 +398,8 @@ export default {
       param.payload.Item.IMG = chatMsg.imgId;
       param.payload.Item.ChatType = chatType;
       param.payload.Item.RefID = ' ';
+      param.payload.Item.SaveName = this.UserInfo.Name;
+      param.payload.Item.SaveID = this.UserInfo.UserID;
 
       console.log("Send Msg2 : ", JSON.stringify(param));
 
@@ -397,8 +420,11 @@ export default {
             recv:  this.dealer,
             chatId: id, 
             docId: this.docId,
-            reqTm : chatMsg.chatTime,
+            reqTm : chatMsg.reqTm,
             qtInfo : qtData,
+            sendId: this.UserInfo.UserID,
+            sendName: this.UserInfo.Name,
+            sendFlag: "CARCENTER"
           });
         }
         else{
@@ -408,9 +434,12 @@ export default {
             recv:  this.dealer,
             chatId: id, 
             docId: this.docId,
-            reqTm : chatMsg.chatTime,
+            reqTm : chatMsg.reqTm,
             qtInfo : qtData,
             imgId: imgId,
+            sendId: this.UserInfo.UserID,
+            sendName: this.UserInfo.Name,
+            sendFlag: "CARCENTER"
           });
         }
   
@@ -471,6 +500,7 @@ export default {
           chatMsg.img = ''; 
           chatMsg.ChatType = element['ChatType'];
           chatMsg.RefID = element['RefID'];
+          chatMsg.SaveName = element['SaveName'];
 
           this.msgDatas = chatMsg;   
           
@@ -575,7 +605,7 @@ export default {
         data: param
       })
       .then((result) => {
-
+        
         if(Array.isArray(result.data.Items))
         {
           result.data.Items.sort(function(a, b){
@@ -726,6 +756,9 @@ export default {
         console.log(error);
       }); 
       
+      var id = this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+          + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
       var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                 + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
 
@@ -733,12 +766,14 @@ export default {
       var chatMsg = {};
       chatMsg.from = {'name' : this.UserInfo.BsnID};
       chatMsg.to = {'name' : this.dealer};
-      chatMsg.Chatid = '';
+      chatMsg.Chatid = id;
       chatMsg.DocID =  this.docId;
       chatMsg.msg = msg;
       chatMsg.img = pic;
       chatMsg.imgId = key + ".png";
       chatMsg.reqTm  = chatTime;
+      chatMsg.SaveName = this.UserInfo.Name;
+      chatMsg.SaveID = this.UserInfo.ID;
       this.msgDatas = chatMsg;
       /*this.$sendMessage({
         name: this.UserInfo.BsnID,
@@ -894,6 +929,10 @@ export default {
 }
 .Chating-page {
   background-color: #ddd;
+  min-height: calc(100vh - 50px - 70px + 10px);
+}
+.Chating-page-iphone{
+  background-color: lightpink;
   min-height: calc(100vh - 50px - 70px + 10px);
 }
 .Chating-input {

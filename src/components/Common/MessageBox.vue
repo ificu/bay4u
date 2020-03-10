@@ -79,7 +79,13 @@
     background-color: #fff;
 }
 .msg-modal-body .msgBody{
-    font-size: 0.65em;
+   font-size: 0.65em;
+}
+.msg-modal-body .msgBigBody{
+  display: flex;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 1em;
 }
 .msg-modal-footer {
     padding-top:5px;

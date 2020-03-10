@@ -1254,6 +1254,7 @@ export default {
       param.payload.Item.ResDealerNm = dealerNm;
       param.payload.Item.Memo = convertStringToDynamo(this.qtReqMemo);
       param.payload.Item.QTSts = "견적요청";
+      param.payload.Item.ReqUserID = this.UserInfo.UserID;
       if(this.captureBlobImg !== '')
         param.payload.Item.IMG = imgKey + ".png";
       else
@@ -1342,9 +1343,6 @@ export default {
     },
     goChating()
     {
-      //console.log('SendDocId :', this.sendDocId);
-      //console.log('SEndDealer :',this.sendDealer);      
-      //console.log('SendQtInfo :',this.sendqtInfoData);    
       // 대표 대리점 채팅 전송
       var now = new Date();
       this.$router.push({name:'Chat', 
@@ -1399,6 +1397,8 @@ export default {
       param.payload.Item.IMG = chatMsg.imgId;
       param.payload.Item.ChatType = 'Q';
       param.payload.Item.RefID = ' ';
+      param.payload.Item.SaveName = this.UserInfo.Name;
+      param.payload.Item.SaveID = this.UserInfo.UserID;
 
       console.log("Send Msg : ", JSON.stringify(param));
 
@@ -1421,6 +1421,9 @@ export default {
           reqTm : chatTime,
           qtInfo : this.qtInfoData,
           chatType : "Q",
+          sendId: this.UserInfo.UserID,
+          sendName: this.UserInfo.Name,
+          sendFlag: "CARCENTER"
         });
 
         })
@@ -1523,6 +1526,15 @@ export default {
         return false;
       }
 
+      if(this.CarInfo.VinNo === "WebPOS 이력 조회 중..." || this.CarInfo.VinNo === "국토부 차대번호 조회 중..." || this.CarInfo.VinNo === "이미지 인식 중..." || this.CarInfo.VinNo === "IntraVan 이력 조회 중..." || this.CarInfo.VinNo === "차대 원부 조회 중...")
+      {
+        this.alertMsg = "차대번호 조회 중입니다.\n잠시 후 견적요청 해주세요. ."
+        this.showAlertMsg = !this.showAlertMsg;
+        this.showAlerMsgBtn = true;
+        this.showAlerMsgConfirmBtn = false;  
+        return false;
+      }
+
       if(this.CarInfo.CarNo.length > 0 && this.CarInfo.VinNo === "99999999999999999")
       {
         this.alertMsg = "차대번호를 확인 해 주세요."
@@ -1552,7 +1564,7 @@ export default {
       if(value === true){
         this.CarInfo.VinNo = "99999999999999999";
         this.addNewQTRequest();
-        console.log("VinNo : ", this.CarInfo.VinNo);
+        //console.log("VinNo : ", this.CarInfo.VinNo);
       }
       
       this.showAlertMsg = false;
@@ -1561,7 +1573,7 @@ export default {
     },
     ShowDummyCarAlert()
     {
-      this.alertMsg = "미상차량으로 요청하시겠습니까?"
+      this.alertMsg = "차량정보 입력 없이 진행하시겠습니까?"
       this.showAlertPopup = true;
       return false;
     },
@@ -1696,6 +1708,7 @@ export default {
         param.payload.Item.ResDealerNm = dealer.DEALER_NAME;
         param.payload.Item.Memo = convertStringToDynamo(this.qtReqMemo);
         param.payload.Item.QTSts = "바로주문";
+        param.payload.Item.ReqUserID = this.UserInfo.UserID;
         if(this.captureBlobImg !== '')
           param.payload.Item.IMG = imgKey + ".png";
         else
@@ -1806,6 +1819,8 @@ export default {
       param.payload.Item.ReqTm = chatMsg.reqTm;
       param.payload.Item.ChatType = "O";
       param.payload.Item.RefID = ' ';
+      param.payload.Item.SaveName = this.UserInfo.Name;
+      param.payload.Item.SaveID = this.UserInfo.UserID;
 
       console.log("Send Msg : ", JSON.stringify(param));
 
@@ -1829,6 +1844,9 @@ export default {
           qtInfo: this.qtInfoData,
           chatType: "O",
           refId: ' ',
+          sendId: this.UserInfo.UserID,
+          sendName: this.UserInfo.Name,
+          sendFlag: "CARCENTER"
 				});
 				
 				if( dealerList.length === this.saveCount )

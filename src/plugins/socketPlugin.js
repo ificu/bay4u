@@ -23,7 +23,11 @@ const SocketPlugin = {
                 qtInfo: $payload.qtInfo,
                 chatType: $payload.chatType,
                 refID: $payload.refId,
+                sendId: $payload.sendId,
+                sendName: $payload.sendName,
+                sendFlag: $payload.sendFlag,
             });
+            //console.log('aaa:', $payload);
         };
 
         vue.prototype.$sendCommand = ($payload) => {

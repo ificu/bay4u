@@ -7,28 +7,48 @@
       height = '30px'
     >
       <v-app-bar-nav-icon></v-app-bar-nav-icon>
-      <v-toolbar-title class="mt-3"><h4>수입차 부품 견적 시스템<img height = "25px" src="@/assets/logo.png"></h4></v-toolbar-title>
+      <v-toolbar-title class="mt-3">
+        <div  class="page-title">
+          <span class="font-weight-light"><h4>수입차 부품 견적 시스템<img height = "25px" src="@/assets/logo.png"></h4></span>
+          <span>
+            <v-chip color="#4E342E" text-color="white">
+            <v-avatar><v-icon class="mr-1">account_circle</v-icon></v-avatar>
+            {{this.UserInfo.Name}}
+            </v-chip>
+          </span>
+        </div>
+        <!--<h4>수입차 부품 견적 시스템<img height = "25px" src="@/assets/logo.png"></h4>-->
+      </v-toolbar-title>
 
-      <v-spacer></v-spacer> 
-       <v-btn color="#546E7A" dark depressed small @click="chromeStore" class="mr-2">
-         chrome 웹 스토어
-        <v-icon right dark size="20px" small>system_update_alt</v-icon>
-      </v-btn>
-      <v-btn color="#546E7A" dark depressed small @click="openWindow" >
-        채팅알림 다운로드
-        <v-icon right dark size="20px" small>system_update_alt</v-icon>
-      </v-btn>
-      <div v-if="hidden">
-        <CheckLogin></CheckLogin>
+      <v-spacer></v-spacer>       
+      <div class="page-top">
+        <div class="download">
+          <v-btn color="#546E7A" dark depressed small @click="chromeStore" class="mr-2">
+          chrome 웹 스토어
+          <v-icon right dark size="20px" small>system_update_alt</v-icon>
+          </v-btn>
+          <v-btn color="#546E7A" dark depressed small @click="openWindow" >
+
+          채팅알림 다운로드
+          <v-icon right dark size="20px" small>system_update_alt</v-icon>
+          </v-btn>
+        </div>
+        <div class="logout">
+          <!--<CheckLogin></CheckLogin>-->
+          <v-btn color="#90A4AE" dark depressed small @click="logOut">
+            로그아웃
+            <v-icon right dark size="20px">fas fa-sign-out-alt</v-icon>
+          </v-btn>
+        </div>
       </div>
-      <v-btn icon  @click="hidden = !hidden">
-        <v-icon>mdi-dots-vertical</v-icon>
-      </v-btn>
+
       <template v-slot:extension>
         <v-tabs
           v-model="tab"
           fixed-tabs
           background-color="#9e9e9e"
+          height="35px"
+          class="page-tabs"
         >
           <v-tabs-slider color="yellow"></v-tabs-slider>
           <v-tab href="#tab-1" disabled>HOME</v-tab>
@@ -82,7 +102,7 @@
 import UserListPage from '@/components/Dealer/UserListPage.vue'
 import ChatingPage from '@/components/Dealer/ChatingPage.vue'
 import InfoPage from '@/components/Dealer/InfoPage.vue'
-import CheckLogin from '@/components/Common/CheckLogin.vue'
+//import CheckLogin from '@/components/Common/CheckLogin.vue'
 import MessageBox from '@/components/Common/MessageBox.vue'
 
 export default {
@@ -116,6 +136,67 @@ export default {
     }
   },
   methods: {
+    CheckLogin(){
+      if(this.UserInfo.UserID === '')
+      this.UserInfo.UserID = this.$cookies.get('UserID');
+
+      if(this.UserInfo.BsnID === '')
+        this.UserInfo.BsnID = this.$cookies.get('BsnID');
+
+      if(this.UserInfo.Name === '')
+        this.UserInfo.Name = this.$cookies.get('UserNM');
+
+      if(this.UserInfo.UserType === '')
+        this.UserInfo.UserType = this.$cookies.get('UserType');
+
+      if(this.$cookies.get('CarNo') !== undefined || this.$cookies.get('CarNo') !== '' || this.$cookies.get('CarNo') !== 'null') {
+        this.CarInfo.CarNo = this.$cookies.get('CarNo');
+      }
+      if(this.$cookies.get('VinNo') !== undefined || this.$cookies.get('VinNo') !== '' || this.$cookies.get('VinNo') !== 'null') {
+        this.CarInfo.VinNo = this.$cookies.get('VinNo');
+      }
+
+      if(this.UserInfo === null){
+        this.alertMsg = "로그인 정보가 없습니다.\n다시 로그인 해주세요."
+        this.showAlertMsg = !this.showAlertMsg;
+        this.alertMsgPath = "Login";
+        return;
+      }
+
+      if(this.UserInfo.BsnID === undefined || this.UserInfo.BsnID === null || this.UserInfo.BsnID.length === 0 )
+      {
+        this.alertMsg = "사이트 정보가 없습니다.\n다시 로그인 해주세요."
+        this.showAlertMsg = !this.showAlertMsg;
+        this.alertMsgPath = "Login";
+        return;
+      }
+
+      if(this.UserInfo.UserID === undefined || this.UserInfo.UserID === null || this.UserInfo.UserID === 0 )
+      {
+        this.alertMsg = "로그인 정보가 없습니다.\n다시 로그인 해주세요."
+        this.showAlertMsg = !this.showAlertMsg;
+        this.alertMsgPath = "Login";
+        return;
+      }
+
+      if(this.UserInfo.BsnID === undefined || this.UserInfo.BsnID === null || this.UserInfo.BsnID.length === 0 )
+      {
+        this.alertMsg = "사이트 정보가 없습니다.\n다시 로그인 해주세요."
+        this.showAlertMsg = !this.showAlertMsg;
+        this.alertMsgPath = "Login";
+        return;
+      }
+      
+      if(this.UserInfo.Name === undefined || this.UserInfo.Name === null || this.UserInfo.Name.length === 0 )
+      {
+        this.alertMsg = "사이트 정보가 없습니다.\n다시 로그인 해주세요."
+        this.showAlertMsg = !this.showAlertMsg;
+        this.alertMsgPath = "Login";
+        return;
+      }
+      this.adminYn = localStorage.getItem('AdminYn');
+      this.adminName = localStorage.getItem('AdminName');
+    },
     setQtInfo(info) {
       this.chatInfo = info;
       console.log(this.chatInfo);
@@ -133,13 +214,14 @@ export default {
         var cookiesList = this.$cookies.keys();
         for(var i=0; i<cookiesList.length; i++)
         {
-         this.$cookies.remove(cookiesList[i]);
+          this.$cookies.remove(cookiesList[i]);
         }
      
         this.UserInfo.UserID = "";
         this.UserInfo.BsnID = "";
         this.UserInfo.Name = "";
         this.UserInfo.EntNo = "";
+        localStorage.clear();
 
         this.CarInfo.CarNo = "";
         this.CarInfo.VinNo = "";
@@ -159,7 +241,7 @@ export default {
     UserListPage,
     ChatingPage,
     InfoPage,
-    CheckLogin,
+   // CheckLogin,
     MessageBox
   },
   created : function() {
@@ -170,6 +252,8 @@ export default {
       this.showAlertMsg = !this.showAlertMsg;
       this.alertMsgPath = "Login";
     }
+
+    this.CheckLogin();
 
     if(this.$route !== undefined && this.$route.query !== undefined && this.$route.query.ID !== undefined){
       
@@ -232,5 +316,29 @@ a:hover {
 }
 .page-content .content-info{
   flex: 55%;
+}
+.page-title{
+  width:550px;
+  display: flex;
+  position:absolute;
+  top:5px;
+}
+.page-title span:nth-child(2){
+ margin-left: 15px;
+ margin-top: 0px;
+}
+.page-tabs{
+  padding-top: 13px;
+}
+.page-top{
+  width: 430px;
+  padding-top: 10px
+}
+.page-top .logout{
+  float:right;
+}
+.download{
+  position: absolute;
+  top: 5px;
 }
 </style>

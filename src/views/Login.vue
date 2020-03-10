@@ -114,17 +114,29 @@ export default {
             this.loginAlertMessage = "비밀번호 불일치";
             this.loginAlert = true;   
           } 
-          // 카센터 인 경우
-          else if(type === "SITE" || type === "SITE2") {
+          // 카센터 / 일반카센터 관리자 인 경우
+          else if(type === "SITE" || type === "SITE2" || type === "SITEADMIN") {
             this.$cookies.set('BsnID', siteCode, '86400s');
             this.$cookies.set('UserNM', name, '86400s');
             this.$cookies.set('UserType', type, '86400s');
-            this.$router.push('/NewQT');
+            this.$cookies.set('UserID', id, '86400s');
+            if(type === "SITEADMIN"){
+              this.$router.push('/UserInfo');
+            }
+            else{
+              this.$router.push('/NewQT');
+            }
             this.UserInfo.UserID = id;
             this.UserInfo.BsnID = siteCode;
             this.UserInfo.Name = name;
             this.UserInfo.EntNo = entNo;
             this.UserInfo.UserType = type;
+            if(type === "SITEADMIN"){
+              localStorage.setItem('AdminYn', 'Y');
+            }
+            else{
+              localStorage.setItem('AdminYn', 'N');
+            }
           }
           // 부품 대리점 인 경우
           else {
@@ -174,6 +186,9 @@ export default {
       }
       else if(type === "DEALER" || type === "DEALER2") {
         this.$router.push('/MainPage');
+      }
+      else if(type === "SITEADMIN"){
+        this.$router.push('/UserInfo');
       }
     }
   }

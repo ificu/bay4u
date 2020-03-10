@@ -1,11 +1,16 @@
 <template>
   <div class="LoginCheck">
-    <div><span class="login-site">{{this.UserInfo.Name}}점</span></div>
+    <div v-if="adminYn === 'Y' && adminName !=='' && adminName !== null" >
+      <span class="login-site">{{this.UserInfo.Name}}점 ({{adminName}})</span>
+    </div>
+    <div v-else>
+      <span class="login-site">{{this.UserInfo.Name}}점</span>
+    </div>
     <div class="logout-btn">
-        <v-btn color="#90A4AE" dark depressed small @click="logOut">
-            로그아웃
-            <v-icon right dark size="20px">fas fa-sign-out-alt</v-icon>
-        </v-btn>
+      <v-btn color="#90A4AE" dark depressed small @click="logOut">
+          로그아웃
+          <v-icon right dark size="20px">fas fa-sign-out-alt</v-icon>
+      </v-btn>
     </div>
 
   <!-- 알림 메시지 팝업 -->
@@ -34,6 +39,8 @@ export default {
       showAlerMsgBtn: true,
       alertMsg: "",
       alertMsgPath: "",
+      adminName: "",
+      adminYn : "",
     }
   },
   computed:{
@@ -47,9 +54,12 @@ export default {
     }
   },
   created : function() {
+    if(this.UserInfo.UserID === '')
+      this.UserInfo.UserID = this.$cookies.get('UserID');
 
     if(this.UserInfo.BsnID === '')
       this.UserInfo.BsnID = this.$cookies.get('BsnID');
+
     if(this.UserInfo.Name === '')
       this.UserInfo.Name = this.$cookies.get('UserNM');
 
@@ -101,10 +111,14 @@ export default {
       this.alertMsgPath = "Login";
       return;
     }
+    this.adminYn = localStorage.getItem('AdminYn');
+    this.adminName = localStorage.getItem('AdminName');
+  },
+  updated(){
+    this.adminName = localStorage.getItem('AdminName');
   },
   methods:
   {
-  
     closeMsg(path) {     
         this.showAlertMsg = false;
         if(path.length > 0 && path == 'Login')
@@ -119,13 +133,14 @@ export default {
         
         for(var i=0; i<cookiesList.length; i++)
         {
-         this.$cookies.remove(cookiesList[i]);
+          this.$cookies.remove(cookiesList[i]);
         }
      
         this.UserInfo.UserID = "";
         this.UserInfo.BsnID = "";
         this.UserInfo.Name = "";
         this.UserInfo.EntNo = "";
+        localStorage.clear();
 
         this.CarInfo.CarNo = "";
         this.CarInfo.VinNo = "";
@@ -138,7 +153,7 @@ export default {
 
 <style>
 .LoginCheck{
-  width:300px;
+  width:400px;
   position:relative;
 }
 .logout-btn{
@@ -151,6 +166,12 @@ export default {
   margin-bottom: 0px;
   top: -15px;
   right: 0;
+  position: absolute;
+}
+.login-name{
+  font-size: 0.54em;
+  top: -15px;
+  color: #5d4038;
   position: absolute;
 }
 </style>
