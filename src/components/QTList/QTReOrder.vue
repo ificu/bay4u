@@ -146,7 +146,7 @@ export default {
       processMsg: '',
     };
 	},
-	props:['orderData', 'orderCarInfo'],
+	props:['orderData', 'orderCarInfo', 'orderDealer'],
 	components: {
     MessageBox: MessageBox,
   }, 
@@ -164,12 +164,14 @@ export default {
 			this.fixBody();
 
 			this.orderList = this.orderData;
+			this.dealerList = this.orderDealer;
 			this.reOrderCarNo = this.orderCarInfo.CarNo;
 			this.reOrderVinNo = this.orderCarInfo.VinNo;
 			this.reOrderBrand = this.orderCarInfo.CarBrand;
 			this.reOrderMemo = this.orderCarInfo.Memo;
 			this.reOrderCaptureBlobImg = this.orderCarInfo.captureBlobImg;
 			console.log('orderList : ', this.orderList);
+			console.log('dealerList :', this.dealerList);
 			/*console.log('reOrderCarNo : ', this.reOrderCarNo);
 			console.log('reOrderVinNo : ', this.reOrderVinNo);
 			console.log('reOrderBrand : ', this.reOrderBrand);
@@ -638,8 +640,17 @@ export default {
       param.payload.Item.ReadYn = "0";
       param.payload.Item.ReqTm = chatMsg.reqTm;
       param.payload.Item.ChatType = "O";
-      param.payload.Item.RefID = val;
-			param.payload.Item.SaveName = this.UserInfo.Name;
+			param.payload.Item.RefID = val;
+			
+			var adminYn = localStorage.getItem('AdminYn');
+      var adminName = localStorage.getItem('AdminName');
+      if(adminYn === "Y"){
+        param.payload.Item.SaveName = adminName;
+      }
+      else{
+        param.payload.Item.SaveName = this.UserInfo.Name;
+			}
+			
 			param.payload.Item.SaveID = this.UserInfo.UserID;
 			
       console.log("Send Msg : ", JSON.stringify(param));
@@ -658,6 +669,11 @@ export default {
         qtInfoPram.ResDealer =  dealer.DEALER;
         qtInfoPram.QTSts = '주문요청';
 				*/
+				var sendNm = this.UserInfo.Name
+        if(adminYn === "Y"){
+          sendNm = adminName;
+				}
+				
         this.$sendMessage({
           name: this.UserInfo.BsnID,
           msg,
@@ -669,7 +685,7 @@ export default {
           chatType : "O",
 					refId: val,
 					sendId: this.UserInfo.UserID,
-					sendName: this.UserInfo.Name,
+					sendName: sendNm,
 					sendFlag: "CARCENTER"
 				});
 				

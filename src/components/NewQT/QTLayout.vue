@@ -1369,11 +1369,21 @@ export default {
       var now = new Date();
       var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
           + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+      
+      var adminYn = localStorage.getItem('AdminYn');
+      var adminName = localStorage.getItem('AdminName');
+
       var chatMsg = {};
       chatMsg.from = {'name' : this.UserInfo.BsnID};
       chatMsg.to = {'name' : dealer};
       chatMsg.msg  = msg;
       chatMsg.reqTm = chatTime;
+      if(adminYn === "Y"){
+        chatMsg.SaveName = adminName;
+      }
+      else{
+        chatMsg.SaveName = this.UserInfo.Name;
+      }
       this.msgDatas = chatMsg;
         
       var param = {};
@@ -1397,7 +1407,14 @@ export default {
       param.payload.Item.IMG = chatMsg.imgId;
       param.payload.Item.ChatType = 'Q';
       param.payload.Item.RefID = ' ';
-      param.payload.Item.SaveName = this.UserInfo.Name;
+
+      if(adminYn === "Y"){
+        param.payload.Item.SaveName = adminName;
+      }
+      else{
+        param.payload.Item.SaveName = this.UserInfo.Name;
+      }
+      
       param.payload.Item.SaveID = this.UserInfo.UserID;
 
       console.log("Send Msg : ", JSON.stringify(param));
@@ -1411,6 +1428,11 @@ export default {
       .then((result) => {
         console.log("======= Chat Save result ========");
         console.log(result.data);
+        
+        var sendNm = this.UserInfo.Name
+        if(adminYn === "Y"){
+          sendNm = adminName;
+        }
 
         this.$sendMessage({
           name: this.UserInfo.BsnID,
@@ -1422,7 +1444,7 @@ export default {
           qtInfo : this.qtInfoData,
           chatType : "Q",
           sendId: this.UserInfo.UserID,
-          sendName: this.UserInfo.Name,
+          sendName: sendNm,
           sendFlag: "CARCENTER"
         });
 
@@ -1819,7 +1841,16 @@ export default {
       param.payload.Item.ReqTm = chatMsg.reqTm;
       param.payload.Item.ChatType = "O";
       param.payload.Item.RefID = ' ';
-      param.payload.Item.SaveName = this.UserInfo.Name;
+
+      var adminYn = localStorage.getItem('AdminYn');
+      var adminName = localStorage.getItem('AdminName');
+      if(adminYn === "Y"){
+        param.payload.Item.SaveName = adminName;
+      }
+      else{
+        param.payload.Item.SaveName = this.UserInfo.Name;
+      }
+     
       param.payload.Item.SaveID = this.UserInfo.UserID;
 
       console.log("Send Msg : ", JSON.stringify(param));
@@ -1834,6 +1865,11 @@ export default {
         console.log("======= Chat Save result ========");
         console.log(result.data);
         
+        var sendNm = this.UserInfo.Name
+        if(adminYn === "Y"){
+          sendNm = adminName;
+        }
+
         this.$sendMessage({
           name: this.UserInfo.BsnID,
           msg,
@@ -1845,7 +1881,7 @@ export default {
           chatType: "O",
           refId: ' ',
           sendId: this.UserInfo.UserID,
-          sendName: this.UserInfo.Name,
+          sendName: sendNm,
           sendFlag: "CARCENTER"
 				});
 				
