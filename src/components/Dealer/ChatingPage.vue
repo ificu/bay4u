@@ -199,22 +199,18 @@ export default {
         var options = {
           body : data.msg
         };
-        console.log("ChatMessage Popup : ", data);
+        console.log("ChatMessage Popup : ", this.UserInfo);
         //new Notification('채팅 메시지 (' + data.from.name + ')', options);
         this.$EventBus.$emit('update-chatMsg', data);  
         this.$sendCommand({
           command: 'NewChats',
           //userId: data.to.name,   
-          userId: this.UserInfo.UserId,
+          userId: this.UserInfo.UserID,
           bsnId: this.UserInfo.BsnID,
           message: data.msg,
           chatId: data.chatId
         }); 
       }
-    });
-
-    this.$socket.on('command', (data) => { 
-      console.log("Command Message : ", data);
     });
 
     this.$EventBus.$on('click-qtInfo', chatItem => {  

@@ -151,7 +151,7 @@ export default {
             this.UserInfo.Name = name;
             this.UserInfo.UserType = type;
 
-            var url = 'https://bay4u.co.kr/deploy/Bay4u.application?id=' + this.UserInfo.BsnID;
+            var url = 'https://bay4u.co.kr/deploy/Bay4u.application?id=' + this.UserInfo.UserID;
             var title = "메시지 알림 서비스 설치";
             var option = "width = 500, height = 500, top = 100, left = 200, location = no"
             window.open(url, title, option);

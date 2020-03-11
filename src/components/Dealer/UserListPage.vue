@@ -412,7 +412,7 @@ export default {
             this.$sendCommand({
               command: 'ChatRead',
               //userId: this.UserInfo.BsnID,   
-              userId: this.UserInfo.UserId,   
+              userId: this.UserInfo.UserID,   
               bsnId: this.UserInfo.BsnID,  
             });
           }

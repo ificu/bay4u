@@ -234,7 +234,7 @@ export default {
     },
     openWindow()
     {
-      let newPage=window.open('https://bay4u.co.kr/deploy/Bay4u.application?id='+this.UserInfo.BsnID);
+      let newPage=window.open('https://bay4u.co.kr/deploy/Bay4u.application?id='+this.UserInfo.UserID);
     }
   },
   components: {
