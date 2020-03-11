@@ -89,11 +89,11 @@
 						<div v-else class="history-detailConts">
 							<ul>
 								<li v-for="(ordItem, dtlIdx) in orderdetail.ordLineItem" v-bind:key="dtlIdx">
-									<div v-if="item.Flag ==='WEBPOS'" class="orderItem">
-										<div class="detailConts-title detailConts-itemCode">{{ordItem.itemCode}}</div>
-										<div class="detailConts-title detailConts-itemName">{{ordItem.itemName}}</div>
-										<div class="detailConts-itemQty">{{ordItem.itemQty}}개</div>
-										<div class="detailConts-amount detailConts-itemAmt">{{ordItem.AMT | localeNum}}원</div>
+									<div v-if="item.Flag ==='WEBPOS'" class="orderItem-webpos">
+										<div class="webpos-title itemCode">{{ordItem.itemCode}}</div>
+										<div class="webpos-title itemName">{{ordItem.itemName}}</div>
+										<div class="itemQty">{{ordItem.itemQty}}개</div>
+										<div class="webpos-amount itemAmt">{{ordItem.AMT | localeNum}}원</div>
 									</div>
 									<div v-else>
 										<b-form-checkbox-group class="pa-0" id="chkOrdGrp" v-model="selectedOrder">
@@ -320,7 +320,8 @@
 					this.orderHistory  = result.data.Items;
 					//console.log('userType : ' , this.UserInfo.UserType);
 
-					if(this.UserInfo.UserType === "SITE"){
+					// 과거주문 내역 조회에서 넘어온 경우에만 부품지원센터 내역 조회
+					if(this.UserInfo.UserType === "SITE" && seachText !== ''){
 						this.GetWebposOrderList(docId ,orderID);
 					}
 					else{
@@ -406,7 +407,7 @@
 								webposItem.ReqDt = el.DC_DY_BSN;
 
 								if(dtlData.length > 0){
-									let list = dtlData.filter(x => x.ID_TRN === el.ID_TRN);
+									let list = dtlData.filter(x => x.ID_TRN === el.ID_TRN && x.RO_CD === el.RO_CD ) ;
 									webposItem.LineItem = list;
 								}
 								else{
@@ -640,6 +641,45 @@
   color: #0D47A1;
   font-size: 0.9em;
 }
+.orderItem-webpos{
+	display:flex;
+  width: 100%px;
+}
+.orderItem-webpos .webpos-title {
+  flex: 40%;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+.orderItem-webpos .webpos-amount {
+  flex: 30%;
+  font-size: 0.9rem;
+  font-weight: bold;
+  text-align: right;
+  color: #EA4335;
+}
+.orderItem-webpos .itemCode {
+	color: #0D47A1;
+	flex: 20%;
+}
+.orderItem-webpos .itemName {
+	margin-left: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+	float: left;
+}
+.orderItem-webpos .itemQty {
+	margin-left:2px;
+  text-align: right;
+  font-size: 0.9em;
+}
+.orderItem-webpos .itemAmt
+{
+  color: #0D47A1;
+  font-size: 0.9em;
+	flex: 15%;
+}
+
 .orderlist-footer{
   font-size: 1.25rem;
   line-height: 1.5;
