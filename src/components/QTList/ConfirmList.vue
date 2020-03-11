@@ -952,11 +952,21 @@
 				var now = new Date();
 				var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
 						+ datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+				
+				var adminYn = localStorage.getItem('AdminYn');
+				var adminName = localStorage.getItem('AdminName');
+				
 				var chatMsg = {};
 				chatMsg.from = {'name' : this.UserInfo.BsnID};
 				chatMsg.to = {'name' : this.orderData.DealerCode};
 				chatMsg.msg  = msg;
 				chatMsg.reqTm = chatTime;
+				if(adminYn === "Y"){
+					chatMsg.SaveName = adminName;
+				}
+				else{
+					chatMsg.SaveName = this.UserInfo.Name;
+				}
 				this.msgDatas = chatMsg;
 					
 				var param = {};
@@ -979,7 +989,14 @@
 				param.payload.Item.ReqTm = chatMsg.reqTm;
 				param.payload.Item.ChatType = "O";
 				param.payload.Item.RefID = val;
-				param.payload.Item.SaveName = this.UserInfo.Name;
+
+				if(adminYn === "Y"){
+					param.payload.Item.SaveName = adminName;
+				}
+				else{
+					param.payload.Item.SaveName = this.UserInfo.Name;
+				}
+				
 				param.payload.Item.SaveID = this.UserInfo.UserID;
 			
 				console.log("Send Msg : ", JSON.stringify(param));
@@ -998,6 +1015,11 @@
 					qtInfoPram.ResDealer = this.orderData.DealerCode;
 					qtInfoPram.QTSts = '주문요청';
 
+					var sendNm = this.UserInfo.Name
+					if(adminYn === "Y"){
+						sendNm = adminName;
+					}
+
 					this.$sendMessage({
 						name: this.UserInfo.BsnID,
 						msg,
@@ -1009,7 +1031,7 @@
 						chatType : "O",
 						refId: val,
 						sendId: this.UserInfo.UserID,
-						sendName: this.UserInfo.Name,
+						sendName: sendNm,
 						sendFlag: "CARCENTER"
 					});
 

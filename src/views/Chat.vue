@@ -226,7 +226,16 @@ export default {
         chatMsg.DocID = this.docId;
         chatMsg.msg  = msg;
         chatMsg.reqTm = chatTime;
-        chatMsg.SaveName = this.UserInfo.Name;
+
+        var adminYn = localStorage.getItem('AdminYn');
+        var adminName = localStorage.getItem('AdminName');
+        if(adminYn === "Y"){
+          chatMsg.SaveName = adminName;
+        }
+        else{
+          chatMsg.SaveName = this.UserInfo.Name;
+        }
+        
         chatMsg.SaveID = this.UserInfo.UserID;
         this.msgDatas = chatMsg;
 
@@ -333,7 +342,15 @@ export default {
       chatMsg.DocID =  this.docId;
       chatMsg.msg  = msg;
       chatMsg.reqTm  = chatTime;
-      chatMsg.SaveName = this.UserInfo.Name;
+
+      var adminYn = localStorage.getItem('AdminYn');
+      var adminName = localStorage.getItem('AdminName');
+      if(adminYn === "Y"){
+        chatMsg.SaveName = adminName;
+      }
+      else{
+        chatMsg.SaveName = this.UserInfo.Name;
+      }
       chatMsg.SaveID = this.UserInfo.UserID;
       this.msgDatas = chatMsg;
       
@@ -398,7 +415,14 @@ export default {
       param.payload.Item.IMG = chatMsg.imgId;
       param.payload.Item.ChatType = chatType;
       param.payload.Item.RefID = ' ';
-      param.payload.Item.SaveName = this.UserInfo.Name;
+      var adminYn = localStorage.getItem('AdminYn');
+      var adminName = localStorage.getItem('AdminName');
+      if(adminYn === "Y"){
+        param.payload.Item.SaveName = adminName;
+      }
+      else{
+        param.payload.Item.SaveName = this.UserInfo.Name;
+      }
       param.payload.Item.SaveID = this.UserInfo.UserID;
 
       console.log("Send Msg2 : ", JSON.stringify(param));
@@ -412,7 +436,11 @@ export default {
       .then((result) => {
         console.log("======= Chat Save result ========");
         console.log(result.data);
-        
+        var sendNm = this.UserInfo.Name
+        if(adminYn === "Y"){
+          sendNm = adminName;
+        }
+
         if(chatType !== "I"){
           this.$sendMessage({
             name: this.UserInfo.BsnID,
@@ -423,7 +451,7 @@ export default {
             reqTm : chatMsg.reqTm,
             qtInfo : qtData,
             sendId: this.UserInfo.UserID,
-            sendName: this.UserInfo.Name,
+            sendName: sendNm,
             sendFlag: "CARCENTER"
           });
         }
@@ -438,7 +466,7 @@ export default {
             qtInfo : qtData,
             imgId: imgId,
             sendId: this.UserInfo.UserID,
-            sendName: this.UserInfo.Name,
+            sendName: sendNm,
             sendFlag: "CARCENTER"
           });
         }
@@ -772,7 +800,16 @@ export default {
       chatMsg.img = pic;
       chatMsg.imgId = key + ".png";
       chatMsg.reqTm  = chatTime;
-      chatMsg.SaveName = this.UserInfo.Name;
+
+      var adminYn = localStorage.getItem('AdminYn');
+      var adminName = localStorage.getItem('AdminName');
+      if(adminYn === "Y"){
+        chatMsg.SaveName = adminName;
+      }
+      else{
+        chatMsg.SaveName = this.UserInfo.Name;
+      }
+      
       chatMsg.SaveID = this.UserInfo.ID;
       this.msgDatas = chatMsg;
       /*this.$sendMessage({
