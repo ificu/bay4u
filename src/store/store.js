@@ -23,12 +23,15 @@ export const store = new Vuex.Store({
             state.UserInfo = userInfo
         },
         SetMsgData(state, msgData) {
-            //console.log('state : ', state.msgDatas);
-            //console.log('msgData2 : ', msgData.msgData.Chatid);
+
             let chatid = msgData.msgData.Chatid;
             let extIdx = state.msgDatas.findIndex(el => el.msgData.Chatid === chatid);
             if (extIdx === -1) {
                 state.msgDatas.push(msgData);
+            } else {
+                if (chatid === undefined) {
+                    state.msgDatas.push(msgData);
+                }
             }
         },
         InitMsgData(state) {

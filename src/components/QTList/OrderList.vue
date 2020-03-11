@@ -20,7 +20,7 @@
 		</div>
 		<div class="reOrderbutton">
 			<!-- 재주문 요청-->
-			<QTReOrder :orderData="selectedOrder" :orderCarInfo="carInfoData">
+			<QTReOrder :orderData="selectedOrder" :orderCarInfo="carInfoData" :orderDealer="selectedDealer">
 				<div slot="trigger"  slot-scope="slotProps">
 					<v-btn color="#4E342E" dark depressed @click="slotProps.open">재주문하기</v-btn>
 				</div>
@@ -72,7 +72,7 @@
 					<b-card-body>
 						<div v-if="orderdetail.isHistory" class="history-detailConts">
 							<ul>
-								<li v-for="(ordItem, idx) in orderdetail.ordLineItem[idx]" v-bind:key="idx">
+								<li v-for="(ordItem, dtlIdx) in orderdetail.ordLineItem[idx]" v-bind:key="dtlIdx">
 									<b-form-checkbox-group class="pa-0" id="chkOrdGrp" v-model="selectedOrder">
 										<b-form-checkbox :value="ordItem">
 											<div class="orderItem">
@@ -88,17 +88,25 @@
 						</div>
 						<div v-else class="history-detailConts">
 							<ul>
-								<li v-for="(ordItem, idx) in orderdetail.ordLineItem" v-bind:key="idx">
-									<b-form-checkbox-group class="pa-0" id="chkOrdGrp" v-model="selectedOrder">
-										<b-form-checkbox :value="ordItem">
-											<div class="orderItem">
-												<div class="detailConts-title detailConts-itemCode">{{ordItem.itemCode}}</div>
-												<div class="detailConts-title detailConts-itemName">{{ordItem.itemName}}</div>
-												<div class="detailConts-itemQty">{{ordItem.itemQty}}개</div>
-												<div class="detailConts-amount detailConts-itemAmt">{{ordItem.AMT | localeNum}}원</div>
-											</div>
-										</b-form-checkbox>
-									</b-form-checkbox-group>
+								<li v-for="(ordItem, dtlIdx) in orderdetail.ordLineItem" v-bind:key="dtlIdx">
+									<div v-if="item.Flag ==='WEBPOS'" class="orderItem">
+										<div class="detailConts-title detailConts-itemCode">{{ordItem.itemCode}}</div>
+										<div class="detailConts-title detailConts-itemName">{{ordItem.itemName}}</div>
+										<div class="detailConts-itemQty">{{ordItem.itemQty}}개</div>
+										<div class="detailConts-amount detailConts-itemAmt">{{ordItem.AMT | localeNum}}원</div>
+									</div>
+									<div v-else>
+										<b-form-checkbox-group class="pa-0" id="chkOrdGrp" v-model="selectedOrder">
+											<b-form-checkbox :value="ordItem" :id="'chk'+idx+'/'+dtlIdx" @change="AddOrdDealer('chk'+idx+'/'+dtlIdx ,item)">
+												<div class="orderItem">
+													<div class="detailConts-title detailConts-itemCode">{{ordItem.itemCode}}</div>
+													<div class="detailConts-title detailConts-itemName">{{ordItem.itemName}}</div>
+													<div class="detailConts-itemQty">{{ordItem.itemQty}}개</div>
+													<div class="detailConts-amount detailConts-itemAmt">{{ordItem.AMT | localeNum}}원</div>
+												</div>
+											</b-form-checkbox>
+										</b-form-checkbox-group>
+									</div>
 								</li>
 							</ul>
 						</div>
@@ -147,6 +155,7 @@
 				orderHistory:[],
 				orderdetail:{ isHistory: false, ordLineItem :[]},
 				isRouteOrdHis: false,
+				selectedDealer:[],
 			}
 		},
 		components: {
@@ -309,7 +318,7 @@
 					}
 
 					this.orderHistory  = result.data.Items;
-					console.log('userType : ' , this.UserInfo.UserType);
+					//console.log('userType : ' , this.UserInfo.UserType);
 
 					if(this.UserInfo.UserType === "SITE"){
 						this.GetWebposOrderList(docId ,orderID);
@@ -478,11 +487,21 @@
 				});
 				return sum;
 			},
-			test(item, item2){
-				alert('ddd');
-				console.log('check:',item2);
-				this.selectedOrder = [];
-				return false;
+			AddOrdDealer(target, dealer){
+				let el = document.getElementById(target);
+				let index = this.selectedDealer.findIndex(x => x.ResDealer === dealer.ResDealer);
+				if(index === -1){
+					if(el.checked === true){
+						let dealerItem = {};
+						dealerItem.ResDealerNm = dealer.ResDealerNm;
+						dealerItem.ResDealer = dealer.ResDealer;
+						this.selectedDealer.push(dealerItem);
+					}
+					else{
+						if(index > -1)
+						this.selectedDealer.splice(index, 1);
+					}
+				}
 			}
 		}
 	}
