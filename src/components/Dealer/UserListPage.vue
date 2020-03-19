@@ -49,21 +49,21 @@
              <div class="carBrand">
                 <!--<i class="Carcenter-type fas fa-wrench" style="color:#fbc02e;" v-if="qtReq.isRead === true"></i>     
                 <i class="Carcenter-type fas fa-wrench" style="color:red;" v-else-if="qtReq.isRead === false"></i>-->    
-                <img height='18' v-if="qtReq.CarBrand === 'AUDI'" style="align-self:center;" src="@/assets/BRAND-AUDI.png">
+                <img height='18' v-if="qtReq.CarBrand === 'AUDI'" style="align-self:center;width:36px;" src="@/assets/BRAND-AUDI.png">
                 <img height='25' v-if="qtReq.CarBrand === 'BENZ'" style="align-self:center;" src="@/assets/BRAND-BENZ.png">
                 <img height='30' v-if="qtReq.CarBrand === 'BMW'" style="align-self:center;width:32px;" src="@/assets/BRAND-BMW.png">
                 <img height='30' v-if="qtReq.CarBrand === 'CADILLAC'" style="align-self:center; " src="@/assets/BRAND-CADILLAC.png">
-                <img height='10' v-if="qtReq.CarBrand === 'CHRYSLER'" style="align-self:center; " src="@/assets/BRAND-CHRYSLER.png">
+                <img height='10' v-if="qtReq.CarBrand === 'CHRYSLER'" style="align-self:center;width:36px;" src="@/assets/BRAND-CHRYSLER.png">
                 <img height='25' v-if="qtReq.CarBrand === 'CITROEN'" style="align-self:center; " src="@/assets/BRAND-CITROEN.png">
-                <img height='18' v-if="qtReq.CarBrand === 'DODGE'" style="align-self:center;width:48px;" src="@/assets/BRAND-DODGE.png">
+                <img height='18' v-if="qtReq.CarBrand === 'DODGE'" style="align-self:center;width:36px;" src="@/assets/BRAND-DODGE.png">
                 <img height='30' v-if="qtReq.CarBrand === 'FIAT'" style="align-self:center; " src="@/assets/BRAND-FIAT.png">
-                <img height='25' v-if="qtReq.CarBrand === 'FORD'" style="align-self:center;width:46px;" src="@/assets/BRAND-FORD.png">
+                <img height='25' v-if="qtReq.CarBrand === 'FORD'" style="align-self:center;width:36px;" src="@/assets/BRAND-FORD.png">
                 <img height='25' v-if="qtReq.CarBrand === 'HONDA'" style="align-self:center;" src="@/assets/BRAND-HONDA.png">
-                <img height='15' v-if="qtReq.CarBrand === 'JEEP'" style="align-self:center;width:46px;" src="@/assets/BRAND-JEEP.png">
+                <img height='15' v-if="qtReq.CarBrand === 'JEEP'" style="align-self:center;width:36px;" src="@/assets/BRAND-JEEP.png">
                 <img height='17' v-if="qtReq.CarBrand === 'LANDROVER'" style="align-self:center; " src="@/assets/BRAND-LANDROVER.png">
                 <img height='25' v-if="qtReq.CarBrand === 'LEXUS'" style="align-self:center;" src="@/assets/BRAND-LEXUS.png">
                 <img height='30' v-if="qtReq.CarBrand === 'LINCOLN'" style="align-self:center;margin-left:6px;" src="@/assets/BRAND-LINCOLN.png">
-                <img height='18' v-if="qtReq.CarBrand === 'MINI'" style="align-self:center;width:46px;" src="@/assets/BRAND-MINI.png">
+                <img height='18' v-if="qtReq.CarBrand === 'MINI'" style="align-self:center;width:36px;" src="@/assets/BRAND-MINI.png">
                 <img height='25' v-if="qtReq.CarBrand === 'PEUGEOT'" style="align-self:center;" src="@/assets/BRAND-PEUGEOT.png">
                 <img height='30' v-if="qtReq.CarBrand === 'PORSCHE'" style="align-self:center;" src="@/assets/BRAND-PORSCHE.png">
                 <img height='25' v-if="qtReq.CarBrand === 'TOYOTA'" style="align-self:center;width:34px;" src="@/assets/BRAND-TOYOTA.png">
@@ -75,7 +75,7 @@
                 <div class="carInfo">
                   <span class="Carcenter-name">{{qtReq.ReqName}} ({{(qtReq.CarNo === "*empty*")?"미상차량" : qtReq.CarNo}})</span>
                   <span class="Carcenter-reqdt">{{qtReq.ReqDt}}</span><span :class="linkQtSts(qtReq.QTSts)">{{qtReq.QTSts}}</span>
-                  <span v-if="qtReq.AgentName !== undefined && qtReq.AgentName !== '*empty*'" class="agent-name">{{qtReq.AgentName}}</span>
+                  <span v-if="qtReq.AgentName !== undefined && qtReq.AgentName !== '*empty*'" class="agent-name" :style="SetColor(qtReq.AgentName)" >{{qtReq.AgentName}}</span>
                   <span class="carSeries">{{qtReq.CarSeries}}</span>
                 </div>
                 <!--<div>
@@ -83,10 +83,10 @@
                 </div>-->
              </div>
              <div>
-              <b-badge v-show="qtReq.NotReadCnt !== 0" variant="warning" pill class="mr-1">{{qtReq.NotReadCnt}}</b-badge>
+              <b-badge v-show="qtReq.NotReadCnt !== 0" variant="warning" pill class=" mr-1 read-count" >{{qtReq.NotReadCnt}}</b-badge>
               <span type="button" class="Chat-detail">
                 <i class="fas fa-angle-double-right"></i>
-              </span> 
+              </span>
              </div>
            </div>
           </li>
@@ -150,6 +150,7 @@ export default {
       showOrderAccept:false,
       showAlert: false,
       alertMsg: '',
+      agentList: []
     }
   },
   props:['chatInfo', 'showQTId'],
@@ -170,6 +171,41 @@ export default {
         return true
       } else {
         return false
+      }
+    },
+    GetUserColor(){
+      var param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_USER";
+      param.payload = {};
+      param.payload.ExpressionAttributeValues = {};
+      param.payload.FilterExpression = "CODE = :id";
+      var key = ":id";
+      param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;  
+
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+        this.agentList = result.data.Items;
+        //console.log('agentList : ', this.agentList) ; 
+      });
+    },
+    SetColor(value){
+      let idx = this.agentList.findIndex(x => x.NAME === value);
+      if(idx > -1){
+        if(this.agentList[idx].COLOR === undefined){
+          return 'color:#fff;background-color:#37474F';
+        }
+        else{
+          return 'color:#fff;background-color:' + this.agentList[idx].COLOR;
+        }
+      }
+      else{
+        return 'color:#fff;background-color:#37474F';
       }
     },
     showQTReqList(idx) {
@@ -339,10 +375,14 @@ export default {
     },
     SetQTInfo(item , idx)
     {
+      var viewMode = localStorage.getItem('LoginMode');
+      
       this.$emit('setQtInfo' ,item);
       this.qtItemIndex = idx;
+
+      if(viewMode !== "VIEW")
       this.qtReqList[idx].isRead = true;
-        
+
       // 부품지원센터 
       if(this.UserInfo.UserType === "DEALER"){ 
         this.$EventBus.$emit('click-qtInfo' , item)
@@ -358,7 +398,7 @@ export default {
           this.showOrderAccept = true;
         }
         else{
-          console.log('AgentName :',item.AgentName + "/" + this.UserInfo.Name);
+          //console.log('AgentName :',item.AgentName + "/" + this.UserInfo.Name);
           this.$EventBus.$emit('click-qtInfo' , item);
           if(item.AgentName === this.UserInfo.Name)
           {
@@ -370,9 +410,13 @@ export default {
     },
     saveChatState(item)
     {
+      var viewMode = localStorage.getItem('LoginMode');
+      // 관전모드이면 읽음 처리 안함
+      if(viewMode === 'VIEW')return; 
+
       var readCount = item.NotReadCnt;
       var checkForLoop = 1;
-      if(item.NotChatIDList === undefined) return;
+      if(item.NotChatIDList === undefined || item.NotChatIDList.length === 0)  return;
       console.log('state : ', item);
       
       for(let chat of item.NotChatIDList)
@@ -411,7 +455,8 @@ export default {
             console.log("======= chat read Command ========");
             this.$sendCommand({
               command: 'ChatRead',
-              userId: this.UserInfo.BsnID,        
+              userId: this.UserInfo.BsnID,
+              chatId: item.ID
             });
           }
         })
@@ -724,7 +769,6 @@ export default {
         console.log(result.data);
 
         this.$EventBus.$emit('click-qtInfo' , chatMsg.qtInfo);
-        console.log('aaa:',chatMsg.qtInfo);
         this.saveChatState(chatMsg.qtInfo);
 
         this.$sendMessage({
@@ -755,6 +799,7 @@ export default {
     }
   },
   mounted(){
+    this.GetUserColor();
     this.showQTReqList();
   },
   created : function() {
@@ -768,22 +813,41 @@ export default {
     if(this.UserInfo.UserType === '')
       this.UserInfo.UserType = this.$cookies.get('UserType');
 
-    this.$EventBus.$on('update-chatMsg', data => {  
+    this.$socket.on('command', (data) => {
       
+      if(data.command === 'ChatRead' ){
+        //console.log('ChatRead : ' , data);
+        let docId = data.chatId;
+        let idx = this.qtReqList.findIndex(x => x.ID === docId);
+        //console.log('read index : ' , this.qtReqList[idx]);
+        if(idx > -1 ){
+          // 읽음처리
+          if(this.qtReqList[idx].NotReadCnt > 0){
+            this.qtReqList[idx].isRead = true;
+            this.qtReqList[idx].NotReadCnt = 0;
+          }
+        }
+      }
+    });
+
+    this.$EventBus.$on('UserListPage.AddNewChat', data => {  
       console.log('docId : ' , data);
-      // 같은 대리점 채팅이 아니면 리턴
-      //if(this.UserInfo.BsnID !==  docId.qtInfo.ResDealer ) return;
       var flag = '';
       var checkExist = false;
       
       for (var chat of this.qtReqList) {
+        // 중복체크
+        if(chat.NotChatIDList !== undefined && chat.NotChatIDList.length > 0){
+          let chkIndex = chat.NotChatIDList.findIndex(c => c.ID === data.chatId);
+          if(chkIndex > -1) return;
+        }
+
         if(chat.ID === data.docId) {
           console.log('chat:',chat );
           console.log('chat.NotReadCnt:',chat.NotReadCnt );
           chat.isRead = false;
-     
-          if(data.sendFlag === 'DEALER'){
-            
+          // 대리점 메시지 일때
+          if(data.sendFlag === 'DEALER'){           
             if(data.chatType === "A"){
               // 견적접수나 주문접수 채팅이면 읽음 처리 , 담당자 변경
               chat.isRead = true;
@@ -792,17 +856,26 @@ export default {
             }
             else{
               // 다른 User 전송메시지이면 상태 읽음처리
-              if(data.sendName !== this.UserInfo.Name){
+              /*(data.sendName !== this.UserInfo.Name){
                 chat.isRead = true;
                 chat.NotReadCnt = 0;
-              }
-              // 일반메시지 전송일때는 담당자 변경 안함
+              }*/
+              // 일반메시지 전송이 아닐 때 담당자 변경
               if(data.chatType !== undefined && data.chatType !== "D"){
                 chat.AgentName = data.sendName;
               }
             }
           }
           else{
+            // 정비소 메시지 일때
+            if(chat.NotReadCnt === undefined){
+              chat.NotReadCnt = 1;
+            }
+            else{
+              chat.NotReadCnt = chat.NotReadCnt + 1;
+            }
+
+            /*
             if(chat.AgentName === this.UserInfo.Name || chat.AgentName === ''){
               if(chat.NotReadCnt === undefined){
                 chat.NotReadCnt = 1;
@@ -814,10 +887,12 @@ export default {
             else{
               chat.isRead = true;
               chat.NotReadCnt = 0;
-            }
+            }*/
           }
 
           checkExist = true;
+          
+          // 일반 메시지가 아니면 상태 변경
           if(data.qtInfo !== undefined && data.chatType !== undefined && data.chatType !== "D"){
             chat.QTSts = data.qtInfo.QTSts; 
           }
@@ -828,8 +903,7 @@ export default {
       if(checkExist === false) {
         flag = 'C';
         //console.log('docId.qtInfo : ' , docId.qtInfo);
-        if(data.qtInfo !== undefined)
-        {
+        if(data.qtInfo !== undefined){
           console.log('Param qtInfo : ' , data.qtInfo);
           var newQtData = {};
           newQtData.CarBrand = data.qtInfo.CarBrand;
@@ -865,20 +939,21 @@ export default {
     this.$EventBus.$on('update-Sts', updateData => {
       console.log('updateData :' ,updateData);
    
-        let index = this.qtReqList.findIndex(element => element.ID === updateData.ID);
-        if(index >= 0){
-          if(updateData.ChatType !== undefined && updateData.chatType !== "D"){
-            this.qtReqList[index].QTSts = updateData.Msg;
-          }
-          
-          if(updateData.AgentName !== undefined && updateData.SendFlag === "DEALER"){
-            this.qtReqList[index].AgentName = updateData.AgentName;
-          }
-
-          if(updateData.UpdateRead !== undefined && updateData.UpdateRead === "Y"){
-            this.saveChatState(this.qtReqList[index]);
-          }
+      let index = this.qtReqList.findIndex(element => element.ID === updateData.ID);
+      if(index >= 0){
+        // 일반 채팅 메시지가 아닐때는 상태변경
+        if(updateData.ChatType !== undefined && updateData.chatType !== "D"){
+          this.qtReqList[index].QTSts = updateData.Msg;
         }
+        
+        if(updateData.AgentName !== undefined && updateData.SendFlag === "DEALER"){
+          this.qtReqList[index].AgentName = updateData.AgentName;
+        }
+
+        if(updateData.UpdateRead !== undefined && updateData.UpdateRead === "Y"){
+          this.saveChatState(this.qtReqList[index]);
+        }
+      }
     });
   },    
   computed:{
@@ -973,7 +1048,7 @@ export default {
 }
 .Chat-list .chatInfo2
 {
-  padding-left: 35px;
+  padding-left: 24px;
   flex:50%;
 }
 .Chat-list .carInfo{
@@ -1041,10 +1116,14 @@ export default {
 }
 .agent-name{
   font-size: 0.86em;
-  background-color:#EEE8AA;
-  margin-left: 10px;
+  /*background-color:#EEE8AA;*/
+  margin-left: 8px;
   padding:0px 6px;
   border-radius: 10px 0px 0px 0px;
+}
+.read-count{
+  padding-left: 5px;
+  text-align: center;
 }
 .carSeries{
   position: absolute;;

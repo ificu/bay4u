@@ -11,9 +11,12 @@
         <div  class="page-title">
           <span class="font-weight-light"><h4>수입차 부품 견적 시스템<img height = "25px" src="@/assets/logo.png"></h4></span>
           <span>
-            <v-chip color="#4E342E" text-color="white">
+            <v-chip color="#4E342E" text-color="white" @click="ShowUserInfo">
             <v-avatar><v-icon class="mr-1">account_circle</v-icon></v-avatar>
             {{this.UserInfo.Name}}
+            </v-chip>
+            <v-chip v-if="mode === 'VIEW'" color="#FBC02D" small text-color="white">
+            {{mode}}
             </v-chip>
           </span>
         </div>
@@ -80,7 +83,7 @@
             <InfoPage></InfoPage>
           </div>
 
-          <!-- 알림 메시지 팝업 -->
+          <!-- Login 메시지 팝업 -->
           <MessageBox v-if="showAlertMsg"  @close="closeMsg(alertMsgPath)">
             <div slot="header"><h5 >알림</h5></div>
             <span slot="body" @click="closeMsg(alertMsgPath)"><pre>{{alertMsg}}</pre>
@@ -89,7 +92,47 @@
               <v-btn depressed small color="#967d5f" dark @click="closeMsg(alertMsgPath)"> 확인</v-btn>
             </div>
           </MessageBox>
+
+          <!-- 알림 메시지 팝업 -->
+          <MessageBox v-if="showAlertMsgs"  @close="showAlertMsgs=false">
+            <div slot="header"><h5 >알림</h5></div>
+            <span slot="body"><pre>{{alertMsg}}</pre>
+            </span>
+            <div slot="footer">
+              <v-btn depressed small color="#967d5f" dark @click="closePopup()"> 확인</v-btn>
+            </div>
+          </MessageBox>
           
+          <!-- 사용자 정보 팝업 -->
+          <DealerInfo v-if="showInfo">
+            <div slot="header">
+              <h5>내정보</h5>
+              <v-btn icon dark @click="closeInfo">
+								<v-icon>mdi-close</v-icon>
+							</v-btn>
+            </div>
+            <div slot="body">
+              <v-list two-line dense flat>
+                <!--<v-subheader>{{UserInfo.Name}}</v-subheader>-->
+                <v-list-item>
+                  <v-list-item-content>
+                    <!--<v-list-item-title>별칭</v-list-item-title>
+                    <v-list-item-subtitle></v-list-item-subtitle>-->
+                     <v-text-field label="별칭" v-model="nickName"></v-text-field>
+                  </v-list-item-content>
+                </v-list-item>
+                <v-list-item>
+                  <v-list-item-content>
+                    <v-list-item-title>Color</v-list-item-title>
+                    <v-color-picker class="ma-1" dot-size="20" canvas-height="100" width="230px" type="hex" hide-mode-switch hide-inputs v-model="userColor" >
+                      </v-color-picker>
+                  </v-list-item-content>
+                </v-list-item>
+              </v-list>
+              <v-btn depressed color="#4E342E" dark width="100%" @click="SaveUserInfo"> 저장</v-btn>
+            </div>
+          </DealerInfo>
+
         </div>
        </v-card>
       </v-tab-item>
@@ -99,11 +142,16 @@
 <script type="text/javascript" src="http://counter.sina.com.cn/ip/" charset="gb2312"></script>       
 <script src="http://code.jquery.com/jquery-latest.min.js"></script>
 <script>
+import Constant from '@/Constant';
+import {convertStringToDynamo,convertDynamoToString} from '@/utils/common.js'
 import UserListPage from '@/components/Dealer/UserListPage.vue'
 import ChatingPage from '@/components/Dealer/ChatingPage.vue'
 import InfoPage from '@/components/Dealer/InfoPage.vue'
 //import CheckLogin from '@/components/Common/CheckLogin.vue'
 import MessageBox from '@/components/Common/MessageBox.vue'
+import DealerInfo from '@/components/Common/DealerInfo.vue'
+
+const axios = require('axios').default;
 
 export default {
   name: 'MainPage',
@@ -115,14 +163,17 @@ export default {
       showAlerMsgBtn: true,
       qtKey: '',
       chatInfo:[],
-      alertMsg: "",
-      alertMsgPath: "",
+      alertMsg: '',
+      alertMsgPath: '',
       tab: null,
       items: [
         'HOME', '견적 작업', '이력 조회', '부품/정비 TIP', '영업관리',
       ],
-      text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-    
+      mode: '',
+      showInfo: false,
+      userColor: '#37474F',
+      nickName:'',
+      showAlertMsgs: false,
     }
   },
   computed:{
@@ -204,29 +255,34 @@ export default {
     closeMsg(path) {     
       this.showAlertMsg = false;
       this.logOut();
-      if(path.length > 0 && path == 'Login')
-      {
+      if(path.length > 0 && path == 'Login'){
           this.$router.push('/');
       }
-    },    
+    },   
+    closePopup(){
+      this.showAlertMsgs = false;
+    },
+    closeInfo() {
+      this.showInfo = false;
+    },
     logOut( )
     {
-        var cookiesList = this.$cookies.keys();
-        for(var i=0; i<cookiesList.length; i++)
-        {
-          this.$cookies.remove(cookiesList[i]);
-        }
-     
-        this.UserInfo.UserID = "";
-        this.UserInfo.BsnID = "";
-        this.UserInfo.Name = "";
-        this.UserInfo.EntNo = "";
-        localStorage.clear();
+      var cookiesList = this.$cookies.keys();
+      for(var i=0; i<cookiesList.length; i++)
+      {
+        this.$cookies.remove(cookiesList[i]);
+      }
+    
+      this.UserInfo.UserID = "";
+      this.UserInfo.BsnID = "";
+      this.UserInfo.Name = "";
+      this.UserInfo.EntNo = "";
+      localStorage.clear();
 
-        this.CarInfo.CarNo = "";
-        this.CarInfo.VinNo = "";
+      this.CarInfo.CarNo = "";
+      this.CarInfo.VinNo = "";
 
-        this.$router.push('/');
+      this.$router.push('/');
     },
     chromeStore()
     {
@@ -235,6 +291,52 @@ export default {
     openWindow()
     {
       let newPage=window.open('https://bay4u.co.kr/deploy/Bay4u.application?id='+this.UserInfo.BsnID);
+    },
+    ShowUserInfo(){
+      let info = JSON.parse(localStorage.getItem('UserInfo'));
+      if(info.Color !== undefined){
+        this.userColor = info.Color;
+      }
+      else{
+        this.userColor = '#37474F';
+      }
+      if(info.NickName !== undefined){
+        this.nickName = convertDynamoToString(info.NickName);
+      }
+      else{
+        this.nickName = '';
+      }
+      this.showInfo = true;
+    },
+    SaveUserInfo(){
+      let param = {};
+      param.operation = "update";
+      param.tableName = "BAY4U_USER";
+      param.payload = {};
+      param.payload.Key = {};
+      param.payload.Key.ID = this.UserInfo.UserID;
+      param.payload.UpdateExpression = "Set COLOR = :a , NickName = :b";
+      param.payload.ExpressionAttributeValues = {
+        ":a" : this.userColor,
+        ":b" : convertStringToDynamo(this.nickName),
+      };
+
+      console.log("======= userInfo update Request ========");
+      console.log(JSON.stringify(param));
+
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+        this.showInfo = false;
+        let info = {};
+        info.Color = this.userColor;
+        info.NickName = this.nickName;
+        localStorage.setItem('UserInfo' , JSON.stringify(info));
+      });
     }
   },
   components: {
@@ -242,7 +344,8 @@ export default {
     ChatingPage,
     InfoPage,
    // CheckLogin,
-    MessageBox
+    MessageBox,
+    DealerInfo
   },
   created : function() {
     // 혹시 모바일에서 접근하는 케이스라면 에러 처리 하자.
@@ -255,6 +358,7 @@ export default {
 
     this.CheckLogin();
 
+    this.mode = localStorage.getItem('LoginMode');
     if(this.$route !== undefined && this.$route.query !== undefined && this.$route.query.ID !== undefined){
       
       this.qtId = this.$route.query.ID;
@@ -262,7 +366,6 @@ export default {
       // router 초기화
       this.$router.replace({'query': null});
     }
-
   }
 }
 </script>
@@ -340,5 +443,13 @@ a:hover {
 .download{
   position: absolute;
   top: 5px;
+}
+.div-color{
+  display: flex;
+}
+.div-circle{
+  width: 20px;
+  border-radius: 50%;
+  position:relative;
 }
 </style>

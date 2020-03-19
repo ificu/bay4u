@@ -18,7 +18,7 @@
 				</b-input-group-append>
 			</b-input-group>
 		</div>
-		<div class="reOrderbutton">
+		<div class="reOrderbutton" @click="ResetOrderData">
 			<!-- 재주문 요청-->
 			<QTReOrder :orderData="selectedOrder" :orderCarInfo="carInfoData" :orderDealer="selectedDealer">
 				<div slot="trigger"  slot-scope="slotProps">
@@ -26,11 +26,12 @@
 				</div>
 				<div class="reorder-header" slot="header" slot-scope="slotProps">
 					<v-toolbar flat color="#696565"> 
-						<v-toolbar-title>
-							<h4>총 {{slotProps.dealerCount}}개 대리점에 <br> 주문요청을 보냅니다</h4>
+						<v-toolbar-title >
+							
 						</v-toolbar-title>                 
 						<v-spacer></v-spacer>
-						<v-toolbar-items> 
+						<v-toolbar-items>
+							<h4>총 {{slotProps.dealerCount}}개 대리점에 <br> 주문요청을 보냅니다</h4> 
 						</v-toolbar-items>
 							<v-btn icon dark @click="slotProps.close">
 								<v-icon>mdi-close</v-icon>
@@ -97,7 +98,7 @@
 									</div>
 									<div v-else>
 										<b-form-checkbox-group class="pa-0" id="chkOrdGrp" v-model="selectedOrder">
-											<b-form-checkbox :value="ordItem" :id="'chk'+idx+'/'+dtlIdx" @change="AddOrdDealer('chk'+idx+'/'+dtlIdx ,item)">
+											<b-form-checkbox :value="ordItem" :id="'chk'+idx+'/'+dtlIdx" @change="AddOrdDealer('chk'+idx+'/'+dtlIdx ,item, ordItem)">
 												<div class="orderItem">
 													<div class="detailConts-title detailConts-itemCode">{{ordItem.itemCode}}</div>
 													<div class="detailConts-title detailConts-itemName">{{ordItem.itemName}}</div>
@@ -228,6 +229,7 @@
 			}
 		},
 		methods:{
+
 			GetOrderHistory(docId ,orderID, seachText)
 			{
 				this.selectedOrder = [];
@@ -488,22 +490,53 @@
 				});
 				return sum;
 			},
-			AddOrdDealer(target, dealer){
+			AddOrdDealer(target, dealer , ordItem){
+				
 				let el = document.getElementById(target);
 				let index = this.selectedDealer.findIndex(x => x.ResDealer === dealer.ResDealer);
-				if(index === -1){
-					if(el.checked === true){
+				
+				if(el.checked === true){
+					if(index === -1){
 						let dealerItem = {};
+						let lineItem = [];
 						dealerItem.ResDealerNm = dealer.ResDealerNm;
 						dealerItem.ResDealer = dealer.ResDealer;
+						lineItem.push(ordItem);
+						dealerItem.OrderItem = lineItem;
 						this.selectedDealer.push(dealerItem);
 					}
 					else{
-						if(index > -1)
-						this.selectedDealer.splice(index, 1);
+						this.selectedDealer[index].OrderItem.push(ordItem);
 					}
 				}
-			}
+				else{
+					if(index > -1){
+						let ordIdx = this.selectedDealer[index].OrderItem.findIndex(y => y.itemCode === ordItem.itemCode);
+						if(ordIdx > -1){
+							this.selectedDealer[index].OrderItem.splice(ordIdx, 1);
+						}
+						if(this.selectedDealer[index].OrderItem.length === 0){
+							this.selectedDealer.splice(index, 1);
+						}
+					}
+				}
+			},
+			ResetOrderData()
+			{
+				for(var i=0;i < this.orderHistory.length; i++ ){
+				
+					let dtlList = JSON.parse(this.orderHistory[i].LineItem);
+					for(var j=0;j < dtlList.length; j++){
+						let el = document.getElementById('chk'+i+'/'+j);
+						if(el.checked === null)return;
+						if(el.checked === true){
+							el.checked = false;
+						}
+					}
+				} 
+
+				this.selectedDealer = [];
+			},
 		}
 	}
 </script>
@@ -723,7 +756,7 @@
   border-radius: 3px 3px 3px 3px;
 }
 .reorder-header h4{
-  margin-right: 10px;
+  /*margin-right: 10px;*/
   color: #fcf4df;
   font-weight: bold;
 }
