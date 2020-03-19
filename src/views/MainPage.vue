@@ -234,7 +234,7 @@ export default {
     },
     openWindow()
     {
-      let newPage=window.open('https://bay4u.co.kr/deploy/Bay4u.application?id='+this.UserInfo.UserID);
+      let newPage=window.open(Constant.LAMBDA_URL.MESSAGE_POPUP + this.UserInfo.UserID);
     }
   },
   components: {

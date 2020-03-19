@@ -79,7 +79,7 @@ export default {
       param.payload.FilterExpression = "ID = :id";
       param.payload.ExpressionAttributeValues = {};
       var key = ":id";
-      param.payload.ExpressionAttributeValues[key] = this.id;
+      param.payload.ExpressionAttributeValues[key] = this.id.toLowerCase();
 
       if(this.id === '' || this.id === null) {
         this.loginAlertMessage = "아이디 입력 필요";
@@ -151,7 +151,7 @@ export default {
             this.UserInfo.Name = name;
             this.UserInfo.UserType = type;
 
-            var url = 'https://bay4u.co.kr/deploy/Bay4u.application?id=' + this.UserInfo.UserID;
+            var url = Constant.LAMBDA_URL.MESSAGE_POPUP + this.UserInfo.UserID;
             var title = "메시지 알림 서비스 설치";
             var option = "width = 500, height = 500, top = 100, left = 200, location = no"
             window.open(url, title, option);
