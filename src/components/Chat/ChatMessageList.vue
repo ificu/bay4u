@@ -23,7 +23,12 @@
           </div>
           <div v-else>
             <div class="Chating-dealer">
-              <div class="Chating-icon"> <img src="@/assets/user-icon.png"> </div>
+              <div class="Chating-icon"> <!--<img src="@/assets/user-icon.png">--> 
+                <div v-if="msg.msgData.SaveName === undefined || msg.msgData.SaveName.length <= 0">
+                  <img src="@/assets/user-icon.png">
+                </div>
+                <div v-else class="div-circle" :style="SetColor(msg.msgData)"><span>{{msg.msgData.SaveName.substring(0,3)}}</span></div>
+              </div>
               <div class="Chating-dealer-contents" v-if="msg.msgData.imgId === undefined">
                   <span class="order-chat" v-if="msg.msgData.ChatType !== undefined && msg.msgData.ChatType ==='O'">{{msg.msgData.msg}}</span>
                   <span class="order-end-chat" v-else-if="msg.msgData.ChatType !== undefined && msg.msgData.ChatType ==='E'" @click="goChating(msg.msgData,'order')">{{msg.msgData.msg}}</span>
@@ -47,25 +52,141 @@
 </template>
 
 <script>
+import Constant from '@/Constant';
+const axios = require('axios').default;
+
 export default {
   name: 'MessageList',
   props: ['msgs'],
+  data () {
+    return {
+     blankColor: 'background-color: #37474F',
+     colorList: []
+    }
+  },
   updated() {
     //console.log("Update msg : ", JSON.stringify(this.msgs));
+    this.SetUserColor(); 
   },
   created : function() {
     //console.log("Check msg : ", JSON.stringify(this.msgs));
-    //console.log(this.$store.state.UserInfo.BsnID);
-    
+    //console.log(this.$store.state.UserInfo.BsnID); 
   },
   computed: {
     UserInfo: {
         get() { return this.$store.getters.UserInfo },
         set(value) { this.$store.dispatch('UpdateUserInfo',value) }
-    },    
+    },
   },
   methods:
   {
+    SetUserColor(){
+      /*for(var x of this.msgs){
+        if(x.msgData.from.name !== this.UserInfo.BsnID){
+          let idx = this.colorList.findIndex(y => y.name === x.msgData.SaveName);
+          if(idx === -1){
+            let item = {};
+            item.name = x.msgData.SaveName;
+            item.color = '#' + Math.floor(Math.random()*16777215).toString(16);
+            this.colorList.push(item);
+          }
+        }
+      }*/
+
+      var sendList = [];
+      for(var x of this.msgs){
+        if(x.msgData.from.name !== this.UserInfo.BsnID){
+          let saveID = x.msgData.SaveID;
+          let index = sendList.indexOf(saveID);
+          if(index === -1){
+            sendList.push(saveID);
+          }
+        }
+      }
+      
+      var param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_USER";
+      param.payload = {};
+      param.payload.ExpressionAttributeValues = {};
+
+      var filter = "";
+      var idx = 1;
+      for(var y of sendList){
+        if(idx === 1){
+          filter = filter + "ID = :id"+idx;
+        }
+        else{
+          filter = filter + " OR ID = :id"+idx;
+        }
+        param.payload.ExpressionAttributeValues[":id"+idx] = y;   
+        idx++;
+      }
+      param.payload.FilterExpression = filter;
+      //console.log('param : ' , param);
+     
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+        var userList = result.data.Items;
+        for(var x of this.msgs){
+          let idx = userList.findIndex(y => y.NAME === x.msgData.SaveName);
+          if(idx > -1){
+            x.msgData.Color = userList[idx].COLOR;
+          }
+        }
+      });
+    },
+    SetColor(item){
+      if(item.Color === undefined){
+        let idx = this.msgs.findIndex(y => y.msgData.SaveID === item.SaveID && y.msgData.Color !== undefined);
+        
+        if(idx > -1){
+          item.Color = this.msgs[idx].msgData.Color;
+          return 'background-color:' + this.msgs[idx].msgData.Color;
+        }
+        else{   
+          var param = {};
+          param.operation = "list";
+          param.tableName = "BAY4U_USER";
+          param.payload = {};
+          param.payload.ExpressionAttributeValues = {};
+          param.payload.FilterExpression = "ID = :id";
+          var key = ":id";
+          param.payload.ExpressionAttributeValues[key] = item.SaveID;  
+
+          axios({
+            method: 'POST',
+            url: Constant.LAMBDA_URL,
+            headers: Constant.JSON_HEADER,
+            data: param
+          })
+          .then((result) => {
+            if(result.data.Items.length > 0){
+              var pickColor = result.data.Items[0].COLOR;
+              if(pickColor === undefined){
+                return this.blankColor;
+              }
+              else{
+                this.$forceUpdate();
+                return 'background-color:' + pickColor;
+              }
+            }
+            else{
+              return this.blankColor;
+            }
+          });
+          return this.blankColor;
+        }
+      }
+      else{
+        return 'background-color:' + item.Color;
+      }
+    },
     setRequestTime(value)
     { 
       if(value !== undefined){
@@ -154,13 +275,14 @@ export default {
 z-index: 1;
 }
  .Chating-dealer {
-  display: flex;
+  display:flex;
 }
 .Chating-dealer .Chating-icon{
   font-size: 2.5rem;
   color: #5d4038;
   margin-top: -10px;
   margin-right: -20px;
+  padding-right: 25px;
 }
 .Chating-dealer .Chating-icon img{
   width: 60%;
@@ -203,8 +325,20 @@ z-index: 1;
 .order-chat{
   color: #E50914;
 }
-.order-end-chat
-{
-   color: #E65100;
+.order-end-chat{
+  color: #E65100;
+}
+.div-circle{
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  position:relative;
+}
+.div-circle span{
+  font-size: 0.25em;
+  color:#fff;
+  position: absolute;
+  top:11px;
+  left:6px;
 }
 </style>

@@ -14,8 +14,35 @@
 						</div>
 
 						<div class="modal-body">
-								<v-container  id="scroll-target" style="max-height:495px" class="overflow-y-auto pa-0">
-								<div class="body-subTitle">
+							<v-container  id="scroll-target" style="max-height:495px" class="overflow-y-auto pa-0">
+								<div>
+									<div class="body-subTitle" ><h6>주문요청 내역</h6></div>
+									<div class="body-item" v-for="(item, index) in orderItems" v-bind:key="index">
+										<div class="body-dealerTitle">{{item.ResDealerNm}}
+											<span v-if="item.DealerType ==='A'" class="main-dealer" ><i class="fas fa-star"></i></span>
+										</div>
+										<div class="body-orderList">
+											<div class="orderList-items" v-for="(orditem, index2) in item.OrderItem" v-bind:key="index2">
+												<div class="orderList-item">
+													<span class="order-itemCode">{{orditem.itemCode}}</span><br>
+													<span class="order-itemName">{{orditem.itemName}}</span>
+												</div>
+												<input v-model="orditem.itemQty" type="number" pattern="\d*" placeholder="number" class="order-itemqty" @change="calculatorAMT(orditem)" @focus="$event.target.select()"/>	
+												<span v-if="orditem.itemPrice === 0" class="order-itemPrice">0원</span>
+												<span v-if="orditem.itemPrice !== 0" class="order-itemPrice">{{ orditem.itemPrice | localeNum}}원</span>
+												<i class="orderList-itemDel fas fa-times-circle"  @click="removeItem(index , index2)"></i>
+											</div>
+											<div class="orderList-footer">
+											<div class="TotalInfo">
+												<span class="TotalInfo-Title">합계금액</span>
+												<span class="TotalInfo-Text">{{SumOrdAmt(item.OrderItem) | localeNum}}원</span>
+											</div>
+										</div>
+										</div>
+									</div>
+								</div>
+
+								<!--<div class="body-subTitle">
 									<h6>주문 요청 대리점</h6>
 								</div>
 								<div class="body-dealer">
@@ -69,7 +96,7 @@
 										<span class="TotalInfo-Title">합계금액</span>
 										<span class="TotalInfo-Text">{{orderTotal | localeNum}}원</span>
 									</div>
-								</div>
+								</div>-->
 								</v-container>
 						</div>
 
@@ -105,7 +132,7 @@
 <script>
 import Constant from '@/Constant';
 import MessageBox from '@/components/Common/MessageBox.vue'
-import {datePadding, convertStringToDynamo, convertArrayToDynamo, dataURItoBlob} from '@/utils/common.js'
+import {datePadding, convertStringToDynamo, convertArrayToDynamo, dataURItoBlob , sleep} from '@/utils/common.js'
 
 const axios = require('axios').default;
 
@@ -129,6 +156,7 @@ export default {
 			dealerList: [],         // 주문요청 대리점 리스트
 			orderList:[],						// 주문요청 부품 리스트
 			qtList:[],							// 견적요청 리스트
+			orderItems:[],
 			reOrderCarNo: '',
 			reOrderVinNo: '',
 			reOrderBrand: '',
@@ -139,6 +167,7 @@ export default {
       sendDealer: '',
       senddealerNm: '',
 			sendqtInfoData: {},
+			sendOrdData:[],
 			saveCount: 0,
 			showAlertMsg: false,
 			alertMsg: '',
@@ -158,25 +187,27 @@ export default {
   },
   methods: {
     open(event) {
-      //console.log(event);
+      //console.log('evnet :' , event);
       this.initialFocus = event.target;
       this.modalOpen = true;
 			this.fixBody();
 
 			this.orderList = this.orderData;
-			this.dealerList = this.orderDealer;
+			//this.orderItems = this.orderDealer;
+			this.SetDealer(this.orderDealer);
+
 			this.reOrderCarNo = this.orderCarInfo.CarNo;
 			this.reOrderVinNo = this.orderCarInfo.VinNo;
 			this.reOrderBrand = this.orderCarInfo.CarBrand;
 			this.reOrderMemo = this.orderCarInfo.Memo;
 			this.reOrderCaptureBlobImg = this.orderCarInfo.captureBlobImg;
-			console.log('orderList : ', this.orderList);
-			console.log('dealerList :', this.dealerList);
-			/*console.log('reOrderCarNo : ', this.reOrderCarNo);
+			//console.log('orderList : ', this.orderList);
+			/*console.log('orderItems :', this.orderItems);
+			console.log('reOrderCarNo : ', this.reOrderCarNo);
 			console.log('reOrderVinNo : ', this.reOrderVinNo);
 			console.log('reOrderBrand : ', this.reOrderBrand);
 			console.log('reOrderCaptureBlobImg : ', this.reOrderCaptureBlobImg);*/
-			this.qtList = [];
+			/*this.qtList = [];
 			this.orderList.forEach(item => {
 				let qtItem = {};
 				qtItem.ITM_ICON = " ";
@@ -188,9 +219,9 @@ export default {
 				qtItem.GRP_NM = " ";
 				qtItem.SEQ = item.seq;
 				this.qtList.push(qtItem);
-			});
+			});*/
 
-			this.getDealerList();
+			//this.getDealerList();
     },
     close() {
       this.modalOpen = false;
@@ -245,6 +276,73 @@ export default {
     getWindowOffset() {
       this.scrollY = window.scrollY;
 		},
+		SetDealer(data){
+			if(data.length === 0 )return;
+
+			var param = {};
+			param.operation = "list";
+			param.tableName = "BAY4U_CARCENTER_DEALER";
+			param.payload = {};
+			param.payload.ExpressionAttributeValues = {};
+			
+			let filter = "";
+
+			if(data.length === 1){
+				filter = filter + "CARCENTER = :center and  DEALER = :dealer";
+				param.payload.ExpressionAttributeValues[":dealer"] = data[0].ResDealer;
+			}
+			else{
+				let idx = 1;
+				for(let item of data)
+				{ 
+					if(idx === 1){
+						filter = filter + "CARCENTER = :center and ( DEALER = :dealer"+idx;
+					}
+					else{
+						filter = filter + " OR DEALER = :dealer"+idx + ")";
+					}
+					param.payload.ExpressionAttributeValues[":dealer"+idx] = item.ResDealer;
+					idx++;
+				}
+			}
+      
+			param.payload.FilterExpression = filter;
+			param.payload.ExpressionAttributeValues[":center"] = this.UserInfo.BsnID;
+			
+			console.log("======= dealerList request ========");
+			console.log(param);
+			
+			axios({
+				method: 'POST',
+				url: Constant.LAMBDA_URL,
+				headers: Constant.JSON_HEADER,
+				data: param
+			})
+			.then((result) => {
+				console.log("======= dealerList result ========");
+				console.log(result.data);
+				if(result.data.Items.length > 0){
+					for(var i=0; i < data.length; i++){
+						let dealerCode = data[i].ResDealer;
+						let dealerIdx = result.data.Items.findIndex(x => x.DEALER === dealerCode);
+						if(dealerIdx > -1){
+							data[i].ResDealerNm = result.data.Items[dealerIdx].DEALER_NAME;
+							data[i].DealerType = result.data.Items[dealerIdx].TYPE;
+						}
+					}
+				}
+
+				if(Array.isArray(data))
+				{
+					data.sort(function(a, b){
+					return (a.DealerType > b.DealerType) ? 1 : -1;
+					});
+				}
+				this.orderItems = data;
+				//this.orderDealer = [];
+				//console.log('orderItems :', this.orderItems);
+			});
+		},
 		getDealerList() {
 	
 			this.dealerList = [];
@@ -296,22 +394,23 @@ export default {
     },
 		saveReQT(){
 			
-			if(this.selectedDealer.length === 0){
+			/*if(this.selectedDealer.length === 0){
 				this.showAlertMsg = true;
 				this.alertMsg = "주문 할 대리점을 선택 해 주세요.";
 				return;
-			}
+			}*/
 
-			if(this.orderList.length === 0){
+			if(this.orderItems.length === 0){
 				this.showAlertMsg = true;
 				this.alertMsg = "주문요청 리스트가 없습니다.\n주문 부품을 선택 해 주세요.";
 				return;
 			}
 
-			let index = this.selectedDealer.findIndex(i => i.TYPE === 'A');
+			let index = this.orderItems.findIndex(i => i.DealerType === 'A');
 			if(index === -1){
 				// 선택 된 대리점 중 대표대리점이 없으면 첫번째 대리점을 대표로 설정
-				this.selectedDealer[0].TYPE = 'A'
+				//this.selectedDealer[0].TYPE = 'A'
+				this.orderItems[0].DealerType  = 'A';
 			}
 
 			if(this.reOrderCarNo === '' || this.reOrderCarNo === undefined){
@@ -342,15 +441,17 @@ export default {
 				this.showProcessing = true;
 			}
 			
-			this.selectedDealer.forEach(dealer => {
+			this.orderItems.forEach(dealer => {
 
 				this.saveCount++;
-				
+	
 				now = new Date();
+				reqSeq = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+									+ datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
 				docId = this.UserInfo.BsnID + now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2)  + this.reOrderVinNo + 
-											datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2) ;
+											datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2) + this.saveCount;
 				imgKey = this.UserInfo.BsnID + now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
-                  + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+                  + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2) + this.saveCount;
 
 				// 신규견적 생성
 				let param = {};
@@ -366,8 +467,8 @@ export default {
 				param.payload.Item.ReqSite = this.UserInfo.BsnID;
 				param.payload.Item.ReqName = this.UserInfo.Name;
 				param.payload.Item.ReqSeq = reqSeq;
-				param.payload.Item.ResDealer = dealer.DEALER;
-				param.payload.Item.ResDealerNm = dealer.DEALER_NAME;
+				param.payload.Item.ResDealer = dealer.ResDealer;
+				param.payload.Item.ResDealerNm = dealer.ResDealerNm;
 				param.payload.Item.Memo = this.reOrderMemo;
 				param.payload.Item.QTSts = "바로주문";
 				if(this.reOrderCaptureBlobImg !== '')
@@ -375,15 +476,30 @@ export default {
 				else
 					param.payload.Item.IMG = "*empty*";
 				
+				this.qtList = [];
+				dealer.OrderItem.forEach(el => {
+					let qtItem = {};
+					qtItem.ITM_ICON = " ";
+					qtItem.ITM_QTY = el.itemQty;
+					qtItem.GRP_ID = " ";
+					qtItem.ITM_NM = el.itemName;
+					qtItem.SORT = el.seq;
+					qtItem.ITM_VAL = el.itemName + el.seq;
+					qtItem.GRP_NM = " ";
+					qtItem.SEQ = el.seq;
+					this.qtList.push(qtItem);
+				});
+
 				param.payload.Item.LineItem = convertArrayToDynamo(JSON.stringify(this.qtList));
 
 				this.qtInfoData = param.payload.Item;
-				if(dealer.TYPE === 'A')
+				if(dealer.DealerType === 'A')
 				{
 					this.sendDocId =  docId;
-					this.sendDealer = dealer.DEALER;
-					this.sendDealerNm =dealer.DEALER_NAME;
+					this.sendDealer = dealer.ResDealer;
+					this.sendDealerNm =dealer.ResDealerNm;
 					this.sendqtInfoData = this.qtInfoData;
+					this.sendOrdData = dealer;
 				}
 				console.log("======= QT Save Request ========");
 				console.log(JSON.stringify(param));
@@ -400,9 +516,11 @@ export default {
 
 					// 견적회신 저장
 					//this.saveReQTConfirm(docId , dealer);
-
-					this.saveChating(docId , dealer, ' ');
-
+				
+					var chatDocId = param.payload.Item.ID;
+					var paramData =  param.payload.Item;
+					this.saveChating(chatDocId , dealer, ' ',paramData);
+					
 					if(this.reOrderCaptureBlobImg !== '') {
 						param = {};
 						param.name = imgKey + ".png";
@@ -450,7 +568,7 @@ export default {
 				});
 			});
 		},
-		saveReQTConfirm(docId , dealer){
+		/*saveReQTConfirm(docId , dealer){
 
       let now = new Date();
       let id =  dealer.DEALER + this.UserInfo.BsnID + now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2)
@@ -608,24 +726,25 @@ export default {
           });
         }
       });  
-		},
-		saveChating(docId , dealer ,val)
+		},*/
+		saveChating(docId , dealer ,val, paramData)
     {
+			let saveSeq = docId.substring(docId.length - 1);
       let msg =  ((this.reOrderCarNo === "*empty*") ? "미상차량" : this.reOrderCarNo) + " 차량 부품 바로주문 요청 완료!!";
       let now = new Date();
       let chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
           + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
       let chatMsg = {};
       chatMsg.from = {'name' : this.UserInfo.BsnID};
-      chatMsg.to = {'name' : dealer.DEALER};
+      chatMsg.to = {'name' : dealer.ResDealer};
       chatMsg.msg  = msg;
       chatMsg.reqTm = chatTime;
         
       let param = {};
       let id = this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
-                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2)+saveSeq;
       let key = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
-                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2)+saveSeq;
 
       param.operation = "create";
       param.tableName = "BAY4U_CHAT";
@@ -634,7 +753,7 @@ export default {
       param.payload.Item.ID = id;
       param.payload.Item.DocID = docId;
       param.payload.Item.ChatFrom = this.UserInfo.BsnID;
-      param.payload.Item.ChatTo =  dealer.DEALER;
+      param.payload.Item.ChatTo =  dealer.ResDealer;
       param.payload.Item.Message = chatMsg.msg;
       //param.payload.Item.Status = "0";
       param.payload.Item.ReadYn = "0";
@@ -677,11 +796,11 @@ export default {
         this.$sendMessage({
           name: this.UserInfo.BsnID,
           msg,
-          recv:   dealer.DEALER,
+          recv:   dealer.ResDealer,
           chatId: id,
           docId: docId,
           reqTm : chatMsg.reqTm,
-          qtInfo : this.qtInfoData,
+          qtInfo : paramData,
           chatType : "O",
 					refId: val,
 					sendId: this.UserInfo.UserID,
@@ -689,7 +808,7 @@ export default {
 					sendFlag: "CARCENTER"
 				});
 				
-				if( this.selectedDealer.length === this.saveCount )
+				if( this.orderItems.length === this.saveCount )
 				{
 					this.showProcessing = false;
 					this.close();
@@ -701,12 +820,12 @@ export default {
 										chatFrom: this.UserInfo.BsnID,
 										chatTo: this.sendDealer,
 										chatDate: now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2),
-										qtInfo : this.orderData,
+										qtInfo : this.sendOrdData,
 										chatDealerNm : this.sendDealerNm,
 										chatType:'order',
 								}});
 				}
-
+				id = '';
       })
       .catch((error) => {
 				console.log(error);
@@ -715,8 +834,9 @@ export default {
       });
 		},
 		goQTRequest()
-		{
-			if(this.orderList.length === 0){
+		{ 
+			
+			if(this.orderItems.length === 0){
 				this.showAlertMsg = true;
 				this.alertMsg = "견적요청 부품이 없습니다.\n견적 부품을 선택 해 주세요.";
 				return;
@@ -734,6 +854,24 @@ export default {
 				this.reOrderBrand = "차종 선택";
 			}
 
+			this.qtList = [];
+			this.orderItems.forEach(item => {
+				var count = 1;
+				item.OrderItem.forEach(el => {
+					let qtItem = {};
+					qtItem.ITM_ICON = " ";
+					qtItem.ITM_QTY = el.itemQty;
+					qtItem.GRP_ID = " ";
+					qtItem.ITM_NM = el.itemName;
+					qtItem.SORT = count;
+					qtItem.ITM_VAL = el.itemName + count;
+					qtItem.GRP_NM = " ";
+					qtItem.SEQ = count;
+					this.qtList.push(qtItem);
+					count++;
+				});
+			});
+
 			this.close();
 
 			let newQtData = {};
@@ -749,6 +887,20 @@ export default {
 													}
 			});
 		},
+		SumOrdAmt(data){
+			let sum = 0;
+			data.forEach(function(item) {
+				sum += (parseFloat(item.AMT));
+			});
+			return sum;
+		},
+		removeItem(index , ordIndex) {
+			//this.orderList = this.orderList.filter(it => it.itemCode != item.itemCode);
+			this.orderItems[index].OrderItem.splice(ordIndex, 1);
+			if(this.orderItems[index].OrderItem.length === 0){
+				this.orderItems.splice(index, 1);
+			}
+    },
 	},
 	computed:{
     UserInfo: {
@@ -764,53 +916,16 @@ export default {
         return sum;
 		},
 		dealerCount: function() {
-        let dealerCount = 0;
-        dealerCount = this.selectedDealer.length;
-        return dealerCount;
+			let dealerCount = 0;
+			//dealerCount = this.selectedDealer.length;
+			dealerCount = this.orderItems.length;
+			return dealerCount;
     },
   },
 };
 </script>
 
 <style lang="css" scoped>
-
-	.body-subTitle {
-		margin-top: 15px;
-		text-align: left;
-	}
-	.body-subTitle input {
-		margin-left: 20px;
-	}
-	.body-subTitle h6 {
-		font-weight: bold;
-	}
-	.modal-body .custom-control {
-		margin-left: 15px;
-		font-size: 0.9rem;
-	}
-	.body-dealerTitle {
-		width: 98%;
-		margin: auto;
-		background-color: #eee;
-		border-style: solid;
-		border-width: thin;
-		border-color: #ddd;
-		padding: 5px 10px;
-		font-size: 0.9rem;
-		font-weight: bold;
-		text-align: left;
-	}
-	.body-dealerList {
-		width: 98%;
-		margin: auto;
-		border-style: solid;
-		border-width: thin;
-		border-color: #ddd;
-		padding: 5px 10px;
-		font-size: 0.9rem;
-		text-align: left;
-		border-top-style: none;
-	}
 	.modal-mask {
 		position: fixed;
 		z-index: 9998;
@@ -864,6 +979,53 @@ export default {
 		-webkit-transform: scale(1.1);
 		transform: scale(1.1);
 	}
+	.body-subTitle {
+		margin-top: 0px;
+		text-align: left;
+	}
+	.body-subTitle input {
+		margin-left: 20px;
+	}
+	.body-subTitle h6 {
+		font-weight: bold;
+	}
+	.modal-body .custom-control {
+		margin-left: 15px;
+		font-size: 0.9rem;
+	}
+	.body-dealerTitle {
+		width: 98%;
+		background-color: #eee;
+		/*margin: auto;
+		border-style: solid;
+		border-width: thin;
+		border-color: #ddd;*/
+		padding: 5px 10px;
+		font-size: 0.9rem;
+		font-weight: bold;
+		text-align: left;
+	}
+	.body-dealerList {
+		width: 98%;
+		margin: auto;
+		border-style: solid;
+		border-width: thin;
+		border-color: #ddd;
+		/*padding: 5px 10px;*/
+		font-size: 0.9rem;
+		text-align: left;
+		border-top-style: none;
+	}
+	.body-item{
+		border-style: solid;
+		/*border-width: thin;*/
+		border-width:2px;
+		border-color: #ddd;
+		border-radius: 5px;
+		margin-top: 5px;
+		margin-bottom: 5px;
+		background-color:#EFEBE9;
+	}
 	.dealerList span:nth-child(1){
   font-size: 1.1em;
 	}
@@ -873,17 +1035,29 @@ export default {
 		float:right;
 		text-align: end;
 	}
+	.main-dealer{
+		color:#FFBB00;
+		margin-left: 6px;
+	}
+	.body-orderList{
+		background-color: #fff;
+	}
 	.orderList-items {
 		width: 98%;
 		margin: auto;
-		border-style: solid;
-		border-width: thin;
+		border-top-style:dotted;
+		border-top-width: thin;
+		border-top-color: #ddd;
+		/*border-style: solid;
 		border-radius: 5px;
-		border-color: #ddd;
+		border-color: #ddd;*/
 		font-size: 0.9rem;
 		margin-bottom: 5px;
 		padding: 3px 2px;
 		display: flex;
+	}
+	.orderList-items:first-child{
+		border-top:0px;
 	}
 	.orderList-item
 	{
@@ -936,7 +1110,11 @@ export default {
 	.orderList-footer{
 		font-size: 1.25rem;
 		line-height: 1.5;
-		border-radius: 0.3rem;
+		/*border-radius: 0.3rem;*/
+		padding-bottom: 2px;
+		border-top-style: solid;
+		border-top-width: thin;
+		border-top-color: #ddd;
 		display: flex;
 		justify-content: flex-end;
 	}

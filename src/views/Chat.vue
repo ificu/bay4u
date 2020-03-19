@@ -36,7 +36,11 @@
                 <span class="Chart-carInfo">{{(qtReq.CarNo === "*empty*")?"미상차량" : qtReq.CarNo }}</span> / 
                 <span  class="Chart-date">{{setReqDt(qtReq.ReqDt)}}</span>
               </div>
-              <span class="Dealer-name">{{SetDealerNm(qtReq.ResDealer)}}</span>
+              <div class="dealer-info">
+                <div class="Dealer-name">{{qtReq.ResDealerNm}}</div>
+                <div class="Dealer-agent" v-if="qtReq.NickName === undefined || qtReq.NickName ==='*empty*' ">{{qtReq.AgentName}}</div>
+                <div class="Dealer-agent" v-else>{{qtReq.NickName}}</div>
+              </div>
               <div class="Chat-readCount"><b-badge v-if="qtReq.NotReadCnt !== 0" variant="warning" pill class="Chat-readbadge">{{qtReq.NotReadCnt}}</b-badge></div>
               <span type="button" class="Chat-detail">
                 <i class="fas fa-angle-double-right"></i>
@@ -47,8 +51,10 @@
               <div class="Chart-qtinfo">
                 <span class="Chart-carInfo2">┗</span>
               </div>
-
-              <span class="Dealer-name">{{SetDealerNm(qtReq.ResDealer)}}</span>
+              <div class="dealer-DivIndent">
+                <div class="Dealer-name">{{qtReq.ResDealerNm}}</div>
+                <div class="Dealer-agent">{{qtReq.AgentName}}</div>
+              </div>
               <div class="Chat-readCount"><b-badge v-if="qtReq.NotReadCnt !== 0" variant="warning" pill class="Chat-readbadge">{{qtReq.NotReadCnt}}</b-badge></div>
               <span type="button" class="Chat-detail">
                 <i class="fas fa-angle-double-right"></i>
@@ -515,7 +521,7 @@ export default {
             return (a.ReqTm > b.ReqTm) ? 1 : -1;
           });
         }
-
+        
         result.data.Items.forEach(element => { 
           var chatMsg = {};
           chatMsg.from = {'name' : element['ChatFrom']};
@@ -529,7 +535,109 @@ export default {
           chatMsg.ChatType = element['ChatType'];
           chatMsg.RefID = element['RefID'];
           chatMsg.SaveName = element['SaveName'];
+          chatMsg.SaveID = element['SaveID'];
+          this.msgDatas = chatMsg;   
+          
+          // 읽음상태 저장
+          if(element['ReadYn'] === '0' && element['ChatTo'] === this.UserInfo.BsnID ){  
+            param = {};
+            param.operation = "update";
+            param.tableName = "BAY4U_CHAT";
+            param.payload = {};
+            param.payload.Key = {};
+            param.payload.Key.ID = element['ID'];
+            param.payload.Key.DocID = this.docId;
+            param.payload.UpdateExpression = "Set ReadYn = :a";
+            param.payload.ConditionExpression = "ChatTo = :p",
+            param.payload.ExpressionAttributeValues = {
+            ":a" : "1",
+            ":p" : this.UserInfo.BsnID,
+            };
 
+            console.log("======= chat read update Request ========");
+            console.log(JSON.stringify(param));
+
+            axios({
+              method: 'POST',
+              url: Constant.LAMBDA_URL,
+              headers: Constant.JSON_HEADER,
+              data: param
+            })
+            .then((result) => {
+              console.log("======= chat read update  result ========");
+              console.log(result.data);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+          }
+        });
+        this.setImg(this.msgDatas);
+      });
+    },
+    SetUserColor(data){
+      var sendList = [];
+      for(var x of data){
+        if(x.ChatFrom !== this.UserInfo.BsnID){
+          let saveID = x.SaveID;
+          let index = sendList.indexOf(saveID);
+          if(index === -1){
+            sendList.push(saveID);
+          }
+        }
+      }
+      
+      var param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_USER";
+      param.payload = {};
+      param.payload.ExpressionAttributeValues = {};
+
+      var filter = "";
+      var idx = 1;
+      for(var y of sendList){
+        if(idx === 1){
+          filter = filter + "ID = :id"+idx;
+        }
+        else{
+          filter = filter + " OR ID = :id"+idx;
+        }
+        param.payload.ExpressionAttributeValues[":id"+idx] = y;   
+        idx++;
+      }
+      param.payload.FilterExpression = filter;
+      //console.log('param : ' , param);
+     
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+        var userList = result.data.Items;
+        for(var x of data){
+          let idx = userList.findIndex(y => y.NAME === x.SaveName);
+          if(idx > -1){
+            x.COLOR = userList[idx].COLOR;
+          }
+        }
+
+        data.forEach(element => { 
+          var chatMsg = {};
+          chatMsg.from = {'name' : element['ChatFrom']};
+          chatMsg.to = {'name' : element['ChatTo']};
+          chatMsg.Chatid = element['ID'];
+          chatMsg.DocID = this.docId;
+          chatMsg.msg  = element['Message'];
+          chatMsg.reqTm = element['ReqTm'];
+          chatMsg.imgId = element['IMG']; 
+          chatMsg.img = ''; 
+          chatMsg.ChatType = element['ChatType'];
+          chatMsg.RefID = element['RefID'];
+          chatMsg.SaveName = element['SaveName'];
+          chatMsg.SaveID = element['SaveID'];
+          chatMsg.Color = element['COLOR'];
           this.msgDatas = chatMsg;   
           
           // 읽음상태 저장
@@ -566,7 +674,9 @@ export default {
             });
           }
         });
+
         this.setImg(this.msgDatas);
+
       });
     },
     setImg(data)
@@ -613,7 +723,8 @@ export default {
     },
     showQTReqList() {
 
-      if(this.UserInfo.BsnID === '')this.UserInfo.BsnID = this.$cookies.get('BsnID');
+      if(this.UserInfo.BsnID === '')
+      this.UserInfo.BsnID = this.$cookies.get('BsnID');
 
       var param = {};
       param.operation = "list";
@@ -634,13 +745,13 @@ export default {
       })
       .then((result) => {
         
-        if(Array.isArray(result.data.Items))
-        {
+        if(Array.isArray(result.data.Items)){
           result.data.Items.sort(function(a, b){
             return (a.ReqSeq < b.ReqSeq) ? 1 : -1;
           });
         }
-
+        
+        var agentLsit = [];
         for(var i = 0; i<result.data.Items.length; i++) {      
           if(i > 0 && (result.data.Items[i].ReqSeq === result.data.Items[i-1].ReqSeq)) {
             result.data.Items[i].Kbn = "list-indent";
@@ -649,6 +760,12 @@ export default {
             result.data.Items[i].Kbn = "list-normal";
           }
           result.data.Items[i].NotReadCnt = 0;
+          if(result.data.Items[i].ResUserID !== undefined){
+            var agentIdx = agentLsit.indexOf(result.data.Items[i].ResUserID);
+            if(agentIdx === -1){
+              agentLsit.push(result.data.Items[i].ResUserID);
+            }
+          }
         }
 
         console.log("======= QT List result ========");
@@ -658,6 +775,41 @@ export default {
         this. getChatReadState();
         this.getDealerNm();
 
+        param.operation = "list";
+        param.tableName = "BAY4U_USER";
+        param.payload = {};
+        param.payload.ExpressionAttributeValues = {};
+
+        var filter = "";
+        var idx = 1;
+        for(var y of agentLsit){
+          if(idx === 1){
+            filter = filter + "ID = :id"+idx;
+          }
+          else{
+            filter = filter + " OR ID = :id"+idx;
+          }
+          param.payload.ExpressionAttributeValues[":id"+idx] = y;   
+          idx++;
+        }
+        param.payload.FilterExpression = filter;
+      
+        axios({
+          method: 'POST',
+          url: Constant.LAMBDA_URL,
+          headers: Constant.JSON_HEADER,
+          data: param
+        })
+        .then((result) => {
+          var userList = result.data.Items;
+          for(var x of this.qtReqList){
+            let idx = userList.findIndex(y => y.ID === x.ResUserID);
+            if(idx > -1){
+              x.NickName = userList[idx].NickName;
+            }
+          }
+          this.$forceUpdate();
+        });
       });
     },
     getChatReadState()
@@ -892,16 +1044,35 @@ export default {
 .Chat-DivNormal {
   display:contents;
 }
-.Chat-DivIndent {
-  display:contents;
-}
-
 .Dealer-type {
   align-self: center;
   font-size: 1.5rem;
 }
-.Dealer-name {
+.dealer-info{
   padding-left: 15px;
+  margin-top: 15px;
+}
+.Dealer-name {
+  line-height: 10px;
+  font-weight: bold;
+}
+.Dealer-agent{
+  line-height: 20px;
+  text-align: center;
+  font-size: 0.8em;
+  margin-top: 0px;
+}
+.Chat-DivIndent {
+  display:contents;
+}
+.dealer-DivIndent{
+  margin-top: 5px;
+}
+.dealer-DivIndent .Dealer-name{
+  line-height: 20px;
+}
+.Chat-DivIndent .Dealer-agent{
+  line-height: 15px;
 }
 .Chart-qtinfo {
   padding-left: 10px;
@@ -966,10 +1137,6 @@ export default {
 }
 .Chating-page {
   background-color: #ddd;
-  min-height: calc(100vh - 50px - 70px + 10px);
-}
-.Chating-page-iphone{
-  background-color: lightpink;
   min-height: calc(100vh - 50px - 70px + 10px);
 }
 .Chating-input {

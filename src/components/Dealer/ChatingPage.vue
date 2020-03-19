@@ -201,7 +201,7 @@ export default {
         };
         console.log("ChatMessage Popup : ", data);
         //new Notification('채팅 메시지 (' + data.from.name + ')', options);
-        this.$EventBus.$emit('update-chatMsg', data);  
+        this.$EventBus.$emit('UserListPage.AddNewChat', data);  
         this.$sendCommand({
           command: 'NewChats',
           userId: data.to.name,   
@@ -472,14 +472,14 @@ export default {
     showchating(item)
     {
       console.log("Chat Id : " +  item.ID);
+
       //if(this.msgDatas.length !== 0)
       //{   
         // msgDatas 초기화
-        this.$store.commit('InitMsgData');
+      //  this.$store.commit('InitMsgData');
       //}
 
-      if(this.msgDatas.length !== 0)
-      {   
+      if(this.msgDatas.length !== 0){   
         // msgDatas 초기화
         this.$store.commit('InitMsgData');
         this.showChatArea = false;
@@ -491,9 +491,11 @@ export default {
       param.payload = {};
       param.payload.FilterExpression = "DocID = :id";
       param.payload.ExpressionAttributeValues = {};
-      var key = ":id";
-     
+      var key = ":id";     
       param.payload.ExpressionAttributeValues[key] = item.ID;
+
+      //console.log("======= Chat Msg List param ========");
+      //console.log(JSON.stringify(param));
 
       var checkMsg = false;
 
@@ -505,34 +507,34 @@ export default {
       })
       .then((result) => {
         if(checkMsg === false) {
-          console.log("======= Chat Msg List result ========");
-          console.log(result.data);
+          //console.log("======= Chat Msg List result ========");
+          //console.log(result.data);
           checkMsg = true;
 
           if(Array.isArray(result.data.Items))
           {
             result.data.Items.sort(function(a, b){
               //return (a.ID.substring(a.ID.length,a.ID.length -12) > b.ID.substring(b.ID.length,b.ID.length -12)) ? 1 : -1;
-              return (a.ReqTm> b.ReqTm) ? 1 : -1;
+              return (a.ReqTm > b.ReqTm) ? 1 : -1;
             });
           }
 
           result.data.Items.forEach(element => { 
             
-          var chatMsg = {};
-          chatMsg.from = {'name' : element['ChatFrom']};
-          chatMsg.to = {'name' : element['ChatTo']};
-          chatMsg.Chatid = element['ID'];
-          chatMsg.DocID = this.docId;
-          chatMsg.msg  = element['Message'];
-          chatMsg.reqTm = element['ReqTm'];
-          chatMsg.imgId = element['IMG']; 
-          chatMsg.img = ''; 
-          chatMsg.ChatType = element['ChatType'];
-          chatMsg.RefID = element['RefID'];
-          chatMsg.SaveName = element['SaveName'];
-
-          this.msgDatas = chatMsg;
+            var chatMsg = {};
+            chatMsg.from = {'name' : element['ChatFrom']};
+            chatMsg.to = {'name' : element['ChatTo']};
+            chatMsg.Chatid = element['ID'];
+            chatMsg.DocID = this.docId;
+            chatMsg.msg  = element['Message'];
+            chatMsg.reqTm = element['ReqTm'];
+            chatMsg.imgId = element['IMG']; 
+            chatMsg.img = ''; 
+            chatMsg.ChatType = element['ChatType'];
+            chatMsg.RefID = element['RefID'];
+            chatMsg.SaveName = element['SaveName'];
+            chatMsg.SaveID = element['SaveID'];
+            this.msgDatas = chatMsg;
              
           });
    
@@ -541,8 +543,7 @@ export default {
 
       })
       .then(() =>{
-        this.setImg(this.msgDatas);
-        
+        this.setImg(this.msgDatas);       
       });
     },
     setImg(data)
@@ -807,6 +808,11 @@ export default {
       .then((result) => {
         console.log("======= chat read update  result ========");
         console.log(result.data);
+        this.$sendCommand({
+          command: 'ChatRead',
+          userId: this.UserInfo.BsnID,
+          chatId: docId
+        });
       })
       .catch((error) => {
         console.log(error);

@@ -173,6 +173,11 @@ export default {
           this.UserInfo.Name = result.data.Items[0].NAME;
           this.UserInfo.EntNo = result.data.Items[0].ENTNO;
           this.UserInfo.UserType = result.data.Items[0].TYPE;
+
+          this.$cookies.set('BsnID', result.data.Items[0].CODE, '86400s');
+          this.$cookies.set('UserNM', result.data.Items[0].NAME, '86400s');
+          this.$cookies.set('UserType', result.data.Items[0].TYPE, '86400s');
+
           this.GetSiteInfo();
         }
       });
