@@ -6,7 +6,8 @@
       <v-app-bar dark color="brown darken-2" height="40px">
         <v-card-title>1. 차량번호/ 차대번호 촬영 인식</v-card-title>
       </v-app-bar>
-      <v-card-subtitle class="pb-0">차량 번호판이나 등록증, 차대번호를 촬영하시면 자동 인식 됩니다.</v-card-subtitle>
+      <!--<v-card-subtitle class="pb-0">차량 번호판이나 등록증, 차대번호를 촬영하시면 자동 인식 됩니다.</v-card-subtitle>-->
+      <v-card-text class="pb-0">차량 번호판이나 등록증, 차대번호를 촬영하시면 자동 인식 됩니다.</v-card-text>
       <v-img class="grey lighten-3 mr-4 ml-4" min-height="115" v-bind:height="imgSize" v-bind:src="captureImg" ref="picImg" ></v-img>
 
       <div class="text-right mr-6 mt-n10 mb-4">
@@ -1573,7 +1574,103 @@ export default {
           return false;
         }
      */
+      if(this.CarInfo.VinNo.length === 17 && this.brandSelected === '차종 선택'){
+        let pre = this.CarInfo.VinNo.substring(0,2).toUpperCase();
+        let param = {};
+        param.operation = "list";
+        param.tableName = "BAY4U_BRAND";
+        param.payload = {};
+        param.payload.FilterExpression = "contains(PRE, :pre)";
+        param.payload.ExpressionAttributeValues = {};
+        let key = ":pre";
+        param.payload.ExpressionAttributeValues[key] = pre;
+
+        console.log("======= vin pre request ========");
+        console.log(param);
+
+        axios({
+          method: 'POST',
+          url: Constant.LAMBDA_URL,
+          headers: Constant.JSON_HEADER,
+          data: param
+        })
+        .then((result) => {
+          console.log("======= vin pre result ========");
+          console.log(result.data);
+
+          let vinList = result.data.Items;
+          let index  = -1;
+
+          // VinNo 앞 5자리 체크
+          let vinNo5 = this.CarInfo.VinNo.substring(0,5).toUpperCase();
+          let vinIndex = vinList.findIndex(x => x.PRE === vinNo5);
+          
+          if(vinIndex === -1){
+            // VinNo 앞 5자리 불일치
+            // VinNo 앞 4자리 체크
+            let vinNo4 = this.CarInfo.VinNo.substring(0,4).toUpperCase();
+            vinIndex = vinList.findIndex(x => x.PRE === vinNo4);
+            
+            if(vinIndex === -1){
+              // VinNo 앞 4자리 불일치
+              // VinNo 앞 3자리 체크
+              let vinNo3 = this.CarInfo.VinNo.substring(0,3).toUpperCase();
+              vinIndex = vinList.findIndex(x => x.PRE === vinNo3);
+              
+              if(vinIndex === -1){
+                // VinNo 앞 3자리 불일치
+                // VinNo 앞 2자리 체크
+                let vinNo2 = this.CarInfo.VinNo.substring(0,2).toUpperCase();
+                vinIndex = vinList.findIndex(x => x.PRE === vinNo2);
+                console.log('VinNo 앞 2자리:', vinNo2 +'/'+vinIndex);
+                if(vinIndex === -1){
+                  // VinNo 앞 2자리 불일치
+                  this.brandSelected= '기타';
+                }
+                else{
+                  // VinNo 앞 2자리 일치
+                  index = this.brandList.indexOf(vinList[vinIndex].BRAND);
+                  if(index === -1){ 
+                    this.brandList.push(vinList[vinIndex].BRAND);
+                  }
+                  this.brandSelected = vinList[vinIndex].BRAND;
+                }
+              }
+              else{
+                // VinNo 앞 3자리 일치
+                index = this.brandList.indexOf(vinList[vinIndex].BRAND);
+                if(index === -1){ 
+                  this.brandList.push(vinList[vinIndex].BRAND);
+                }
+                this.brandSelected = vinList[vinIndex].BRAND;
+              }
+            }
+            else{
+              // VinNo 앞 4자리 일치
+              index = this.brandList.indexOf(vinList[vinIndex].BRAND);
+              if(index === -1){ 
+                this.brandList.push(vinList[vinIndex].BRAND);
+              }
+              this.brandSelected = vinList[vinIndex].BRAND;
+            }
+          }
+          else{
+            // VinNo 앞 5자리 일치
+            index = this.brandList.indexOf(vinList[vinIndex].BRAND);
+            if(index === -1){ 
+              this.brandList.push(vinList[vinIndex].BRAND);
+            }
+            this.brandSelected = vinList[vinIndex].BRAND;
+          }
+          this.addNewQTRequest();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+      }
+      else{
         this.addNewQTRequest();
+      }
     },
     closeMsg(path) {     
       this.showAlertMsg = false;

@@ -106,6 +106,9 @@ export default {
           var type = result.data.Items[0].TYPE;
           var siteCode = result.data.Items[0].CODE;
           var entNo = result.data.Items[0].ENTNO;
+          var mode = result.data.Items[0].MODE;
+          var userColor = result.data.Items[0].COLOR;
+          var nickName = result.data.Items[0].NickName;
 
           console.log('ID 체크 : ', id);
 
@@ -156,6 +159,25 @@ export default {
             var option = "width = 500, height = 500, top = 100, left = 200, location = no"
             window.open(url, title, option);
           }
+
+          if(mode !== undefined){
+            if(mode === "VIEW"){
+              // 관전모드 설정
+              localStorage.setItem('LoginMode', 'VIEW');
+            }
+            else{
+              localStorage.setItem('LoginMode', '');
+            }
+          }
+          else{
+            localStorage.setItem('LoginMode', '');
+          }
+
+          let UserInfo2 = {};
+          UserInfo2.Color = userColor;
+          UserInfo2.NickName = nickName;
+          localStorage.setItem('UserInfo' , JSON.stringify(UserInfo2));
+          
         }
       });
     }

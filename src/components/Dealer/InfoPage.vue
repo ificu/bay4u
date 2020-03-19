@@ -944,7 +944,15 @@ export default {
             
             if(headQTData.length > 0)
             {
+              console.log('Agentname :' , headQTData[0].AGENT_NM);
               console.log('webpos 상태 :', (headQTData[0].ESTM_STS));
+
+              this.series = headQTData[0].SERIES;
+              this.angentNm = headQTData[0].AGENT_NM;
+              this.estmStsNm = headQTData[0].ESTM_STS_NM;
+              if(headQTData[0].SERIES !== null){
+                this.qtInfo.CarSeries = headQTData[0].SERIES;
+              }
 
               if(headQTData[0].ESTM_STS !== '1' && rtnQTData['ESTM_DTL'].Length !== 0)
               {
@@ -953,14 +961,17 @@ export default {
                 this.detailQTData = rtnQTData['ESTM_DTL'];
                 this.showSum = !this.showSum; 
 
-                this.sendWebposQtMsg(headQTData[0].ESTM_STS);
-                // 견적완료 상태이면 메시지 전송
+                var viewMode = localStorage.getItem('LoginMode');
+                if(viewMode !== 'VIEW'){
+                  this.sendWebposQtMsg(headQTData[0].ESTM_STS);
+                  // 견적완료 상태이면 메시지 전송
                 /*if(headQTData[0].ESTM_STS === '2' && this.qtInfo.QTSts === "견적요청"){
                   console.log('headQTData[0].ESTM_STS : ',headQTData[0].ESTM_STS);
                   console.log(' this.qtInfo.QTSts : ', this.qtInfo.QTSts);
                   this.sendQTconfirmMsg();
                   this.tabIndex = 1;
                 }*/
+                }
 
                 if(this.qtInfo.QTSts === "견적회신"){
                   this.tabIndex = 1;
@@ -969,10 +980,6 @@ export default {
               /* var qtKeys = Object.keys(rtnQTData );*/
               /*console.log("ESTM_HED : " + this.headQTData );
               console.log("ESTM_DTL : " + this.detailQTData );*/
-              this.series = headQTData[0].SERIES;
-              this.angentNm = headQTData[0].AGENT_NM;
-              this.estmStsNm = headQTData[0].ESTM_STS_NM;
-              this.qtInfo.CarSeries = headQTData[0].SERIES;
             }
           }
       })
@@ -1017,6 +1024,7 @@ export default {
     SetQtInfo(){
       console.log('UserType : ' , this.UserInfo );
       console.log("QT Info 설정" + JSON.stringify(this.qtInfo));  
+      
       this.tabIndex = 0;
       this.vinNoBackColor = "";
       
@@ -1075,6 +1083,9 @@ export default {
     },
     sendQTconfirmMsg()
     {
+      var viewMode = localStorage.getItem('LoginMode');
+      if(viewMode === 'VIEW')return;
+      console.log('viewMode : ' , viewMode);
       if(this.detailQTData.length === 0) return;
 
       if(this.qtInfo.CarVin === '99999999999999999' || this.qtInfo.CarVin === ''){
@@ -1140,6 +1151,12 @@ export default {
       //this.$EventBus.$emit('send-QTConfirm' , qtMsg);
 
       // 견적상태 Update
+      var agentNm = this.angentNm;
+      if(agentNm === null){
+        agentNm = this.UserInfo.Name;
+      }
+      console.log('update agentNmae : ' , agentNm);
+
       var param = {};
       param.operation = "update";
         param.tableName = "BAY4U_QT_LIST";
@@ -1152,7 +1169,7 @@ export default {
                 ":b" : this.qtInfo.CarBrand,
                 ":c" : "견적회신",
                 ":d" : this.qtInfo.CarVin,
-                ":e" : this.UserInfo.Name,
+                ":e" : agentNm,
                 ":f" : this.UserInfo.UserID
           };
         }
@@ -1163,7 +1180,7 @@ export default {
                 ":s" : this.qtInfo.CarSeries,
                 ":c" : "견적회신",
                 ":d" : this.qtInfo.CarVin,
-                ":e" : this.UserInfo.Name,
+                ":e" : agentNm,
                 ":f" : this.UserInfo.UserID
           };
         }
@@ -1184,8 +1201,8 @@ export default {
           let updateData = {};
           updateData.ID = this.qtInfo.ID;
           updateData.Msg = '견적회신';
-          updateData.AgentName = this.UserInfo.Name;
-          if(this.qtInfo.AgentName !== this.UserInfo.Name){
+          updateData.AgentName = agentNm;
+          if(this.qtInfo.AgentName !== agentNm){
             updateData.UpdateRead = 'Y';
           }
           updateData.ChatType = "R";
@@ -2097,7 +2114,7 @@ export default {
         this.qtInfo = qtItem;
         this.SetQtInfo();
         this.GetSiteInfo();
-
+        
         if(this.qtInfo !== undefined && this.qtInfo.QTSts === '바로주문' || this.qtInfo.QTSts === '주문접수'){
           this.tab1Title = '바로 주문 요청';
           this.tab2Title = '바로 주문 회신';
@@ -2110,8 +2127,9 @@ export default {
           this.showBtnQT = true;
           this.showBtnOrder = false;
         }
-
+        
         if(this.UserInfo.UserType !== 'DEALER'){
+          
           if(qtItem.QTSts === "견적요청"){
             this.visibleTab = false;
           }
@@ -2128,7 +2146,7 @@ export default {
           this.GetQtList();
           this.visibleTab = true;
         }
-
+        
         if(this.brandClicked === true){
           document.getElementById('btnBrandSelect').click();
           this.brandClicked = false;

@@ -18,7 +18,7 @@
 				</b-input-group-append>
 			</b-input-group>
 		</div>
-		<div class="reOrderbutton">
+		<div class="reOrderbutton" @click="ResetOrderData">
 			<!-- 재주문 요청-->
 			<QTReOrder :orderData="selectedOrder" :orderCarInfo="carInfoData" :orderDealer="selectedDealer">
 				<div slot="trigger"  slot-scope="slotProps">
@@ -26,11 +26,12 @@
 				</div>
 				<div class="reorder-header" slot="header" slot-scope="slotProps">
 					<v-toolbar flat color="#696565"> 
-						<v-toolbar-title>
-							<h4>총 {{slotProps.dealerCount}}개 대리점에 <br> 주문요청을 보냅니다</h4>
+						<v-toolbar-title >
+							
 						</v-toolbar-title>                 
 						<v-spacer></v-spacer>
-						<v-toolbar-items> 
+						<v-toolbar-items>
+							<h4>총 {{slotProps.dealerCount}}개 대리점에 <br> 주문요청을 보냅니다</h4> 
 						</v-toolbar-items>
 							<v-btn icon dark @click="slotProps.close">
 								<v-icon>mdi-close</v-icon>
@@ -89,15 +90,15 @@
 						<div v-else class="history-detailConts">
 							<ul>
 								<li v-for="(ordItem, dtlIdx) in orderdetail.ordLineItem" v-bind:key="dtlIdx">
-									<div v-if="item.Flag ==='WEBPOS'" class="orderItem">
-										<div class="detailConts-title detailConts-itemCode">{{ordItem.itemCode}}</div>
-										<div class="detailConts-title detailConts-itemName">{{ordItem.itemName}}</div>
-										<div class="detailConts-itemQty">{{ordItem.itemQty}}개</div>
-										<div class="detailConts-amount detailConts-itemAmt">{{ordItem.AMT | localeNum}}원</div>
+									<div v-if="item.Flag ==='WEBPOS'" class="orderItem-webpos">
+										<div class="webpos-title itemCode">{{ordItem.itemCode}}</div>
+										<div class="webpos-title itemName">{{ordItem.itemName}}</div>
+										<div class="itemQty">{{ordItem.itemQty}}개</div>
+										<div class="webpos-amount itemAmt">{{ordItem.AMT | localeNum}}원</div>
 									</div>
 									<div v-else>
 										<b-form-checkbox-group class="pa-0" id="chkOrdGrp" v-model="selectedOrder">
-											<b-form-checkbox :value="ordItem" :id="'chk'+idx+'/'+dtlIdx" @change="AddOrdDealer('chk'+idx+'/'+dtlIdx ,item)">
+											<b-form-checkbox :value="ordItem" :id="'chk'+idx+'/'+dtlIdx" @change="AddOrdDealer('chk'+idx+'/'+dtlIdx ,item, ordItem)">
 												<div class="orderItem">
 													<div class="detailConts-title detailConts-itemCode">{{ordItem.itemCode}}</div>
 													<div class="detailConts-title detailConts-itemName">{{ordItem.itemName}}</div>
@@ -228,6 +229,7 @@
 			}
 		},
 		methods:{
+
 			GetOrderHistory(docId ,orderID, seachText)
 			{
 				this.selectedOrder = [];
@@ -320,7 +322,8 @@
 					this.orderHistory  = result.data.Items;
 					//console.log('userType : ' , this.UserInfo.UserType);
 
-					if(this.UserInfo.UserType === "SITE"){
+					// 과거주문 내역 조회에서 넘어온 경우에만 부품지원센터 내역 조회
+					if(this.UserInfo.UserType === "SITE" && seachText !== ''){
 						this.GetWebposOrderList(docId ,orderID);
 					}
 					else{
@@ -406,7 +409,7 @@
 								webposItem.ReqDt = el.DC_DY_BSN;
 
 								if(dtlData.length > 0){
-									let list = dtlData.filter(x => x.ID_TRN === el.ID_TRN);
+									let list = dtlData.filter(x => x.ID_TRN === el.ID_TRN && x.RO_CD === el.RO_CD ) ;
 									webposItem.LineItem = list;
 								}
 								else{
@@ -487,22 +490,53 @@
 				});
 				return sum;
 			},
-			AddOrdDealer(target, dealer){
+			AddOrdDealer(target, dealer , ordItem){
+				
 				let el = document.getElementById(target);
 				let index = this.selectedDealer.findIndex(x => x.ResDealer === dealer.ResDealer);
-				if(index === -1){
-					if(el.checked === true){
+				
+				if(el.checked === true){
+					if(index === -1){
 						let dealerItem = {};
+						let lineItem = [];
 						dealerItem.ResDealerNm = dealer.ResDealerNm;
 						dealerItem.ResDealer = dealer.ResDealer;
+						lineItem.push(ordItem);
+						dealerItem.OrderItem = lineItem;
 						this.selectedDealer.push(dealerItem);
 					}
 					else{
-						if(index > -1)
-						this.selectedDealer.splice(index, 1);
+						this.selectedDealer[index].OrderItem.push(ordItem);
 					}
 				}
-			}
+				else{
+					if(index > -1){
+						let ordIdx = this.selectedDealer[index].OrderItem.findIndex(y => y.itemCode === ordItem.itemCode);
+						if(ordIdx > -1){
+							this.selectedDealer[index].OrderItem.splice(ordIdx, 1);
+						}
+						if(this.selectedDealer[index].OrderItem.length === 0){
+							this.selectedDealer.splice(index, 1);
+						}
+					}
+				}
+			},
+			ResetOrderData()
+			{
+				for(var i=0;i < this.orderHistory.length; i++ ){
+				
+					let dtlList = JSON.parse(this.orderHistory[i].LineItem);
+					for(var j=0;j < dtlList.length; j++){
+						let el = document.getElementById('chk'+i+'/'+j);
+						if(el.checked === null)return;
+						if(el.checked === true){
+							el.checked = false;
+						}
+					}
+				} 
+
+				this.selectedDealer = [];
+			},
 		}
 	}
 </script>
@@ -640,6 +674,45 @@
   color: #0D47A1;
   font-size: 0.9em;
 }
+.orderItem-webpos{
+	display:flex;
+  width: 100%px;
+}
+.orderItem-webpos .webpos-title {
+  flex: 40%;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+.orderItem-webpos .webpos-amount {
+  flex: 30%;
+  font-size: 0.9rem;
+  font-weight: bold;
+  text-align: right;
+  color: #EA4335;
+}
+.orderItem-webpos .itemCode {
+	color: #0D47A1;
+	flex: 20%;
+}
+.orderItem-webpos .itemName {
+	margin-left: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+	float: left;
+}
+.orderItem-webpos .itemQty {
+	margin-left:2px;
+  text-align: right;
+  font-size: 0.9em;
+}
+.orderItem-webpos .itemAmt
+{
+  color: #0D47A1;
+  font-size: 0.9em;
+	flex: 15%;
+}
+
 .orderlist-footer{
   font-size: 1.25rem;
   line-height: 1.5;
@@ -683,7 +756,7 @@
   border-radius: 3px 3px 3px 3px;
 }
 .reorder-header h4{
-  margin-right: 10px;
+  /*margin-right: 10px;*/
   color: #fcf4df;
   font-weight: bold;
 }
