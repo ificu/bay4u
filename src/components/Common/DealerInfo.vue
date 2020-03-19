@@ -86,7 +86,6 @@
   float: right;
   padding-bottom: 5px;
 }
-
 .modal-enter {
   opacity: 0;
 }
