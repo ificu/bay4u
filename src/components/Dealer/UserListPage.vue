@@ -349,14 +349,15 @@ export default {
         data: param
       })
       .then((result) => {
-        console.log("=======  result ========");
-        console.log(result.data);
+        //console.log("=======  result ========");
+        //console.log(result.data);
 
         let chatList = result.data.Items;
         for(let qt of this.qtReqList)
         {
           //console.log('user :' , qt.AgentName + "/" + this.UserInfo.Name);
-          if(qt.AgentName === undefined || qt.AgentName === this.UserInfo.Name){
+          //if(qt.AgentName === undefined || qt.AgentName === this.UserInfo.Name){
+          if(qt.AgentName === undefined || qt.ResDealer === this.UserInfo.BsnID){
             let newChatState = chatList.filter(x => x.DocID === qt.ID && x.ChatTo === this.UserInfo.BsnID && x.ReadYn === '0' );
             qt.NotChatIDList = newChatState;
             if(flag !== 'C'){
@@ -814,9 +815,8 @@ export default {
       this.UserInfo.UserType = this.$cookies.get('UserType');
 
     this.$socket.on('command', (data) => {
-      
-      if(data.command === 'ChatRead' ){
-        //console.log('ChatRead : ' , data);
+      console.log('command : ' , data);
+      if(data.command === 'ChatRead' ){       
         let docId = data.chatId;
         let idx = this.qtReqList.findIndex(x => x.ID === docId);
         //console.log('read index : ' , this.qtReqList[idx]);

@@ -959,7 +959,7 @@ export default {
                 //console.log('ESTM_DTL :' , JSON.stringify(rtnQTData['ESTM_DTL'])); 
                 
                 this.detailQTData = rtnQTData['ESTM_DTL'];
-                this.showSum = !this.showSum; 
+                this.showSum = true; 
 
                 var viewMode = localStorage.getItem('LoginMode');
                 if(viewMode !== 'VIEW'){
