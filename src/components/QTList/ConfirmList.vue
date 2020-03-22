@@ -105,6 +105,7 @@
 														<span class="history-qtInfo-carNo" v-if="qtReqInfo.CarNo === ''">차량번호 미입력</span>
 														<span class="history-qtInfo-carNo" v-if="qtReqInfo.CarNo !== ''"> {{(qtReqInfo.CarNo === "*empty*")?"미상차량" : qtReqInfo.CarNo }}</span>
 														<span class="history-qtInfo-dealer">{{qtReqInfo.QTData.ResDealerNm}}</span>
+														<span v-if="qtItem.length > 1" class="history-qtInfo-qtCount">{{idx2 + 1}}번째</span>
 													</b-row>
 													<b-row class="request-qtInfo-carType">
 														<span v-if="qtReqInfo.DealerFlag ==='WEBPOS'">
@@ -723,7 +724,7 @@
 					});
 
 					this.qtReqList =  qtGroupList;
-					//console.log('qtReqList' , this.qtReqList );
+					console.log('qtReqList' , this.qtReqList );
 
 					// 채팅에서 넘어왔을 경우
 					if(docId !== ''  && refID !== '')
@@ -1699,6 +1700,10 @@
 }
 .history-qtInfo-dealer{
 	font-size: 0.9rem;
+	margin-left: 15px;
+	margin-top: 5px;
+}
+.history-qtInfo-qtCount{
 	margin-left: 15px;
 	margin-top: 5px;
 }
