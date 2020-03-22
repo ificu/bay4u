@@ -96,6 +96,7 @@ export default {
       itemImage: '',
       dragDropFiles: [],
       dragFileSendCount : 0,
+      lastmessage: '',
     }
   },
   components: {
@@ -137,6 +138,12 @@ export default {
       //$ths.datas.push(data);
       console.log("Chat Data Recv : ", data);
       console.log('chatItem.ID : ' + this.chatItem.ID + ' / ' + 'data.docId : ' + data.docId);
+
+      // 원인은 알 수 없으나 중복으로 Packet이 오는 케이스가 있어 체크 처리
+      if(this.lastmessage === JSON.stringify(data)) 
+        return;
+      else
+        this.lastmessage == JSON.stringify(data);
 
       // 같은 대리점 채팅이 아니면 리턴
       if(data.qtInfo !== undefined)
@@ -202,14 +209,17 @@ export default {
         console.log("ChatMessage Popup : ", this.UserInfo);
         //new Notification('채팅 메시지 (' + data.from.name + ')', options);
         this.$EventBus.$emit('UserListPage.AddNewChat', data);  
-        this.$sendCommand({
-          command: 'NewChats',
-          //userId: data.to.name,   
-          userId: this.UserInfo.UserID,
-          bsnId: this.UserInfo.BsnID,
-          message: data.msg,
-          chatId: data.chatId
-        }); 
+        if(data.from.name !== this.UserInfo.BsnID) {  // 이게 같은 케이스라면 내 대리점의 다른 User가 회신한 케이스 임...
+          this.$sendCommand({
+            command: 'NewChats',
+            //userId: data.to.name,   
+            userId: this.UserInfo.UserID,
+            bsnId: this.UserInfo.BsnID,
+            message: data.msg,
+            chatId: data.chatId
+          }); 
+        }
+
       }
     });
 
@@ -812,8 +822,9 @@ export default {
         console.log(result.data);
         this.$sendCommand({
           command: 'ChatRead',
-          userId: this.UserInfo.BsnID,
-          chatId: docId
+          userId: this.UserInfo.UserID, 
+          bsnId: this.UserInfo.BsnID,  
+          chatId: docId     
         });
       })
       .catch((error) => {

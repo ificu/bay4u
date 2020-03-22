@@ -154,7 +154,7 @@ export default {
             this.UserInfo.Name = name;
             this.UserInfo.UserType = type;
 
-            var url = Constant.LAMBDA_URL.MESSAGE_POPUP + this.UserInfo.UserID;
+            var url = Constant.MESSAGE_POPUP + this.UserInfo.BsnID;
             var title = "메시지 알림 서비스 설치";
             var option = "width = 500, height = 500, top = 100, left = 200, location = no"
             window.open(url, title, option);

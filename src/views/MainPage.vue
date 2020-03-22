@@ -290,7 +290,7 @@ export default {
     },
     openWindow()
     {
-      let newPage=window.open(Constant.LAMBDA_URL.MESSAGE_POPUP + this.UserInfo.UserID);
+      let newPage=window.open(Constant.MESSAGE_POPUP + this.UserInfo.BsnID);
     },
     ShowUserInfo(){
       let info = JSON.parse(localStorage.getItem('UserInfo'));
