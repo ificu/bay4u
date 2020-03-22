@@ -79,7 +79,7 @@ export default {
       param.payload.FilterExpression = "ID = :id";
       param.payload.ExpressionAttributeValues = {};
       var key = ":id";
-      param.payload.ExpressionAttributeValues[key] = this.id;
+      param.payload.ExpressionAttributeValues[key] = this.id.toLowerCase();
 
       if(this.id === '' || this.id === null) {
         this.loginAlertMessage = "아이디 입력 필요";
@@ -143,10 +143,10 @@ export default {
           }
           // 부품 대리점 인 경우
           else {
-            this.$cookies.set('BsnID', siteCode, '86400s');
-            this.$cookies.set('UserID', id, '86400s');
-            this.$cookies.set('UserNM', name, '86400s');
-            this.$cookies.set('UserType', type, '86400s');
+            this.$cookies.set('BsnID', siteCode, '864000s');
+            this.$cookies.set('UserID', id, '864000s');
+            this.$cookies.set('UserNM', name, '864000s');
+            this.$cookies.set('UserType', type, '864000s');
             
             this.$router.push('/MainPage');
             this.UserInfo.UserID = id;
@@ -154,7 +154,7 @@ export default {
             this.UserInfo.Name = name;
             this.UserInfo.UserType = type;
 
-            var url = 'https://bay4u.co.kr/deploy/Bay4u.application?id=' + this.UserInfo.BsnID;
+            var url = Constant.MESSAGE_POPUP + this.UserInfo.BsnID;
             var title = "메시지 알림 서비스 설치";
             var option = "width = 500, height = 500, top = 100, left = 200, location = no"
             window.open(url, title, option);

@@ -34,6 +34,7 @@ const SocketPlugin = {
             socket.emit('command', {
                 command: $payload.command,
                 userId: $payload.userId,
+                bsnId: $payload.bsnId,
                 message: $payload.message,
                 chatId: $payload.chatId,
             });

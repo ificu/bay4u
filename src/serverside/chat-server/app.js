@@ -64,11 +64,13 @@ io.on('connection', function(socket) {
         var now = new Date();
 
         var msg = {
-            command: data.command,
-            userId: data.userId,
-            message: data.message,
-            chatId: data.chatId
+          command: data.command,
+          userId: data.userId,
+          bsnId: data.bsnId,
+          message: data.message,
+          chatId: data.chatId
         };
+
 
         console.log('Command message %s', JSON.stringify(msg));
 
