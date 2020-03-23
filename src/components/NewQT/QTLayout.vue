@@ -853,7 +853,7 @@ export default {
       return;
 
       this.showROHistBtn = false;
-
+      this.CarInfo.VinNo = this.CarInfo.VinNo.toUpperCase();
       if(this.UserInfo.UserType === 'SITE') { // WebPOS일 경우 정비 이력 조회 이후 차대번호 세팅
 
         var param = {};

@@ -45,7 +45,7 @@
       <div class="Chat-list">
         <ul>
          <li v-for="(qtReq, index) in qtReqList" v-bind:key = "index" v-on:click="SetQTInfo(qtReq,index)" >
-           <div class="chat-item flex-direction_row" :class="{selectItem : selectedList(index), noReadItem : qtReq.isRead === false || qtReq.NotReadCnt !== 0}">
+           <div class="chat-item flex-direction_row" :class="{selectItem : selectedList(index), noReadItem : qtReq.NotReadCnt !== 0}">
              <div class="carBrand">
                 <!--<i class="Carcenter-type fas fa-wrench" style="color:#fbc02e;" v-if="qtReq.isRead === true"></i>     
                 <i class="Carcenter-type fas fa-wrench" style="color:red;" v-else-if="qtReq.isRead === false"></i>-->    
