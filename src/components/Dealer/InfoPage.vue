@@ -953,8 +953,7 @@ export default {
               if(headQTData[0].SERIES !== null){
                 this.qtInfo.CarSeries = headQTData[0].SERIES;
               }
-
-              if(headQTData[0].ESTM_STS !== '1' && rtnQTData['ESTM_DTL'].Length !== 0)
+              if(headQTData[0].ESTM_STS !== '1' && rtnQTData['ESTM_DTL'].length > 0)
               {
                 //console.log('ESTM_DTL :' , JSON.stringify(rtnQTData['ESTM_DTL'])); 
                 
@@ -963,7 +962,7 @@ export default {
 
                 var viewMode = localStorage.getItem('LoginMode');
                 if(viewMode !== 'VIEW'){
-                  this.sendWebposQtMsg(headQTData[0].ESTM_STS);
+                  this.sendWebposQtMsg(headQTData);
                   // 견적완료 상태이면 메시지 전송
                 /*if(headQTData[0].ESTM_STS === '2' && this.qtInfo.QTSts === "견적요청"){
                   console.log('headQTData[0].ESTM_STS : ',headQTData[0].ESTM_STS);
@@ -987,7 +986,7 @@ export default {
           console.log(error);
       })   
     },
-    sendWebposQtMsg(estmSts){
+    sendWebposQtMsg(data){
 
       var param = {};
       param.operation = "list";
@@ -996,7 +995,7 @@ export default {
       param.payload.FilterExpression = "ID = :id";
       param.payload.ExpressionAttributeValues = {};
       var key = ":id";   
-      param.payload.ExpressionAttributeValues[key] =  this.qtInfo.ID;
+      param.payload.ExpressionAttributeValues[key] =  data[0].ESTM_ID;
 
       //console.log("======= QT state Request result ========");
       //console.log(param); 
@@ -1012,7 +1011,7 @@ export default {
         console.log("======= QT state result ========");
         console.log(result.data); 
         let qtSts = result.data.Items[0].QTSts;
-        if((estmSts === '2' || estmSts === '4' ) && qtSts === "견적요청"){
+        if((data[0].ESTM_STS === '2' || data[0].ESTM_STS === '4' ) && qtSts === "견적요청"){
           this.sendQTconfirmMsg();
           this.tabIndex = 1;
         }
