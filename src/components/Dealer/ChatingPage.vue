@@ -222,8 +222,8 @@ export default {
             chatId: data.chatId
           }); 
         }
-
       }
+      this.$EventBus.$emit('UserListPage.TopMoveChat', data);  
     });
 
     this.$EventBus.$on('click-qtInfo', chatItem => {  
@@ -243,8 +243,17 @@ export default {
 
     this.$EventBus.$on('send-QTConfirm', qtMsg => {
       
-        console.log('ChatingPage/채팅전달 : ', qtMsg);
-        this.msgDatas = qtMsg;
+      // 원인은 알 수 없으나 중복으로 Packet이 오는 케이스가 있어 체크 처리
+      if(this.msgDatas === JSON.stringify(qtMsg)) 
+      return;
+
+      if(this.lastmessage === JSON.stringify(qtMsg)) 
+        return;
+      else
+        this.lastmessage = JSON.stringify(qtMsg);
+
+      console.log('ChatingPage/채팅전달 : ', qtMsg);
+      this.msgDatas = qtMsg;
      
       /*  this.$sendMessage({
             name: this.UserInfo.BsnID,
@@ -477,6 +486,9 @@ export default {
           sendFlag: "DEALER"
         });
 
+        this.UpdateChatTime(this.chatItem.ID, chatMsg.reqTm);
+        chatMsg.docId = this.chatItem.ID;
+        this.$EventBus.$emit('UserListPage.TopMoveChat', chatMsg);  
       })
       .catch((error) => {
         console.log(error);
@@ -834,6 +846,37 @@ export default {
         console.log(error);
       });
     },
+    UpdateChatTime(docID, chatDtaeTime)
+    {
+      var now = new Date();
+      var reqSeq = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+      var param = {};
+      param.operation = "update";
+      param.tableName = "BAY4U_QT_LIST";
+      param.payload = {};
+      param.payload.Key = {};
+      param.payload.Key.ID = docID;
+      param.payload.UpdateExpression = "Set ReqSeq = :b ";
+      param.payload.ExpressionAttributeValues = {
+        ":b" : chatDtaeTime
+      };
+      //console.log("======= Chat time Update Request ========");
+      //console.log(JSON.stringify(param));
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+        //console.log("======= Chat time Update Request ========");
+        //console.log(result.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    }
   },
   mounted() {
     datePadding();

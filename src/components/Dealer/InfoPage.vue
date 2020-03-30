@@ -794,7 +794,9 @@ export default {
     return {
       selectedBrand: null,
       tabIndex: 0,
+      headQTData: [],
       detailQTData:[],
+      fileQTData:[],
       confirmList:[],
       series:'',
       angentNm:'',
@@ -950,31 +952,34 @@ export default {
           if(this.rtnCode === 0)
           {
             var rtnQTData = JSON.parse(result.data.ReturnDataJSON);
-            var headQTData = rtnQTData['ESTM_HED'];
+            this.headQTData = rtnQTData['ESTM_HED'];
             
-            if(headQTData.length > 0)
+            if(this.headQTData.length > 0)
             {
-              console.log('Agentname :' , headQTData[0].AGENT_NM);
-              console.log('webpos 상태 :', (headQTData[0].ESTM_STS));
+              console.log('Agentname :' , this.headQTData[0].AGENT_NM);
+              console.log('webpos 상태 :', this.headQTData[0].ESTM_STS);
 
-              this.series = headQTData[0].SERIES;
-              this.angentNm = headQTData[0].AGENT_NM;
-              this.estmStsNm = headQTData[0].ESTM_STS_NM;
-              if(headQTData[0].SERIES !== null){
-                this.qtInfo.CarSeries = headQTData[0].SERIES;
+              this.series = this.headQTData[0].SERIES;
+              this.angentNm = this.headQTData[0].AGENT_NM;
+              this.estmStsNm = this.headQTData[0].ESTM_STS_NM;
+
+              if(this.headQTData[0].SERIES !== null){
+                this.qtInfo.CarSeries = this.headQTData[0].SERIES;
               }
 
-              if(headQTData[0].ESTM_STS !== '1' && rtnQTData['ESTM_DTL'].Length !== 0)
+              if(this.headQTData[0].ESTM_STS !== '1' && rtnQTData['ESTM_DTL'].length > 0)
               {
                 //console.log('ESTM_DTL :' , JSON.stringify(rtnQTData['ESTM_DTL'])); 
                 
                 this.detailQTData = rtnQTData['ESTM_DTL'];
+                this.fileQTData = rtnQTData['ESTM_FILE'];
                 this.showSum = true; 
 
                 var viewMode = localStorage.getItem('LoginMode');
                 if(viewMode !== 'VIEW'){
-                  this.sendWebposQtMsg(headQTData[0].ESTM_STS);
-                  // 견적완료 상태이면 메시지 전송
+                  this.sendWebposQtMsg();
+
+                // 견적완료 상태이면 메시지 전송
                 /*if(headQTData[0].ESTM_STS === '2' && this.qtInfo.QTSts === "견적요청"){
                   console.log('headQTData[0].ESTM_STS : ',headQTData[0].ESTM_STS);
                   console.log(' this.qtInfo.QTSts : ', this.qtInfo.QTSts);
@@ -997,7 +1002,7 @@ export default {
           console.log(error);
       })   
     },
-    sendWebposQtMsg(estmSts){
+    sendWebposQtMsg(){
 
       var param = {};
       param.operation = "list";
@@ -1006,7 +1011,7 @@ export default {
       param.payload.FilterExpression = "ID = :id";
       param.payload.ExpressionAttributeValues = {};
       var key = ":id";   
-      param.payload.ExpressionAttributeValues[key] =  this.qtInfo.ID;
+      param.payload.ExpressionAttributeValues[key] =  this.headQTData[0].ESTM_ID;
 
       //console.log("======= QT state Request result ========");
       //console.log(param); 
@@ -1022,7 +1027,7 @@ export default {
         console.log("======= QT state result ========");
         console.log(result.data); 
         let qtSts = result.data.Items[0].QTSts;
-        if((estmSts === '2' || estmSts === '4' ) && qtSts === "견적요청"){
+        if((this.headQTData[0].ESTM_STS === '2' || this.headQTData[0].ESTM_STS === '4' ) && qtSts === "견적요청"){
           this.sendQTconfirmMsg();
           this.tabIndex = 1;
         }
@@ -1152,6 +1157,15 @@ export default {
         msg = ((this.qtInfo.CarNo==='*empty*')?'미상' : this.qtInfo.CarNo) + " 차량에 대한 견적이 완료됐습니다.";
       else
         msg = ((this.qtInfo.CarNo==='*empty*')?'미상' : this.qtInfo.CarNo) + " 차량에 대한 견적이 수정 후 재전송 되었습니다.";      
+      
+      if(this.headQTData[0].AGENT_MEMO !== null && this.headQTData[0].AGENT_MEMO.length > 0){
+        msg = msg + "<br><span style='color:red'>( " + this.headQTData[0].AGENT_MEMO + " ) </span>" ;
+      }
+
+      
+      if(this.fileQTData.length > 0){
+        msg = msg + "<br>#첨부파일 " + this.fileQTData.length  + "개 있습니다.<br>WEBPOS에서 확인 해 주세요." ;
+      }
 
       var qtMsg = {};
       qtMsg.from = {'name' : this.UserInfo.BsnID};
@@ -1221,6 +1235,9 @@ export default {
 
           qtMsg.qtInfo = this.qtInfo;
           this.$EventBus.$emit('send-QTConfirm' , qtMsg);
+
+          qtMsg.docId = this.qtInfo.ID;
+          this.$EventBus.$emit('UserListPage.TopMoveChat', qtMsg); 
 
         })
         .catch((error) => {
@@ -1481,7 +1498,11 @@ export default {
           qtMsg.qtInfo = this.qtInfo;
           qtMsg.SaveName = this.UserInfo.Name;
           qtMsg.SaveID = this.UserInfo.UserID;
+          
           this.$EventBus.$emit('send-QTConfirm' , qtMsg);
+
+          qtMsg.docId = this.qtInfo.ID;
+          this.$EventBus.$emit('UserListPage.TopMoveChat', qtMsg);  
         })
         .catch((error) => {
           console.log(error);
@@ -1555,6 +1576,9 @@ export default {
 
         qtMsg.qtInfo = this.qtInfo;
         this.$EventBus.$emit('send-QTConfirm' , qtMsg);
+
+        qtMsg.docId = this.qtInfo.ID;
+        this.$EventBus.$emit('UserListPage.TopMoveChat', qtMsg); 
 
       })
       .catch((error) => {
