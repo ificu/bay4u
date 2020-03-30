@@ -119,10 +119,11 @@ export default {
           } 
           // 카센터 / 일반카센터 관리자 인 경우
           else if(type === "SITE" || type === "SITE2" || type === "SITEADMIN") {
-            this.$cookies.set('BsnID', siteCode, '86400s');
-            this.$cookies.set('UserNM', name, '86400s');
-            this.$cookies.set('UserType', type, '86400s');
-            this.$cookies.set('UserID', id, '86400s');
+            this.$cookies.set('BsnID', siteCode, '864000s');
+            this.$cookies.set('UserNM', name, '864000s');
+            this.$cookies.set('UserType', type, '864000s');
+            this.$cookies.set('UserID', id, '864000s');
+            this.$cookies.set('EntNo', entNo, '864000s');
             if(type === "SITEADMIN"){
               this.$router.push('/UserInfo');
             }
