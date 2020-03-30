@@ -143,6 +143,7 @@ export default {
       tabIndex: 0,
       qtReqList: [],
       qtItemIndex: -1,
+      selectedId:'',
       searchText:'',
       toggle_exclusive: undefined,
       targetQtId:'',
@@ -236,7 +237,7 @@ export default {
       }
       else if(idx === 4)
       {
-        beforeDate.setDate(beforeDate.getDate() - 7);
+        beforeDate.setDate(beforeDate.getMonth() - 1);
         startDate = beforeDate.getFullYear() + '-' + datePadding(beforeDate.getMonth()+1,2) +'-'+ datePadding(beforeDate.getDate(),2);
         endDate = now.getFullYear() + '-' + datePadding(now.getMonth()+1,2) +'-'+ datePadding(now.getDate(),2);
       }
@@ -380,7 +381,7 @@ export default {
       
       this.$emit('setQtInfo' ,item);
       this.qtItemIndex = idx;
-
+      this.selectedId = item.ID;
       if(viewMode !== "VIEW")
       this.qtReqList[idx].isRead = true;
 
@@ -578,19 +579,24 @@ export default {
       })
       .then((result) => {
         let qtSts = result.data.Items[0].QTSts;
-        if(qtSts === "견적요청"){
+        let now = new Date();
+        let chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+            + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
 
+        if(qtSts === "견적요청"){
+          
           // 견적상태 변경 / 담당자 저장
           param.operation = "update";
           param.tableName = "BAY4U_QT_LIST";
           param.payload = {};
           param.payload.Key = {};
           param.payload.Key.ID = targetQtItem.ID;
-          param.payload.UpdateExpression = "Set AgentName = :b, QTSts = :c, ResUserID = :e" ;
+          param.payload.UpdateExpression = "Set AgentName = :b, QTSts = :c, ResUserID = :e, ReqSeq = :d " ;
           param.payload.ExpressionAttributeValues = {
               ":b" : this.UserInfo.Name,
               ":c" : "견적접수",
-              ":e" : this.UserInfo.UserID
+              ":e" : this.UserInfo.UserID,
+              ":d" : chatTime
           };
                   
           console.log("======= QT Update Request ========");
@@ -612,10 +618,7 @@ export default {
             this.showQTAccept = false;
 
             // 견적접수 메시지 전송
-            let now = new Date();
-            let chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
-                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
-
+            
             let msg = ((targetQtItem.CarNo==='*empty*')?'미상' : targetQtItem.CarNo) + " 차량에 대한 견적이 접수됐습니다.";
             let qtMsg = {};
             qtMsg.from = {'name' : this.UserInfo.BsnID};
@@ -624,6 +627,8 @@ export default {
             qtMsg.ChatType = "A";
             qtMsg.qtInfo = targetQtItem;
             this.SaveAcceptChatMsg(qtMsg);
+            qtMsg.docId = targetQtItem.ID;
+            this.TopMoveChat(qtMsg);
           })
           .catch((error) => {
             console.log(error);
@@ -794,6 +799,23 @@ export default {
         console.log(error);
       });
     },
+    TopMoveChat(data){
+      var findIdx = this.qtReqList.findIndex(x => x.ID === data.docId);
+      console.log('Find Index :',findIdx);
+      console.log('Selected Index :',this.qtItemIndex);
+      if(findIdx > -1){
+        this.qtReqList[findIdx].ReqSeq = data.reqTm;
+
+        if(Array.isArray(this.qtReqList)) {
+          this.qtReqList.sort(function(a, b){
+          return (a.ReqSeq < b.ReqSeq) ? 1 : -1;
+          });
+        }
+        if(this.selectedId === data.docId){
+          this.qtItemIndex = 0;
+        }
+      }
+    }
   },
   updated(){
     if(this.targetQtId !== '')
@@ -847,6 +869,7 @@ export default {
         if(chat.ID === data.docId) {
           console.log('chat:',chat );
           console.log('chat.NotReadCnt:',chat.NotReadCnt );
+          
           chat.isRead = false;
           // 대리점 메시지 일때
           if(data.sendFlag === 'DEALER'){           
@@ -925,12 +948,11 @@ export default {
           newQtData.NotReadCnt  = 1;
           this.qtReqList.push(newQtData);    
           //console.log('qtReqList : ' ,this.qtReqList);
-
-          if(Array.isArray(this.qtReqList)) {
-            this.qtReqList.sort(function(a, b){
+        }
+        if(Array.isArray(this.qtReqList)) {
+          this.qtReqList.sort(function(a, b){
             return (a.ReqSeq < b.ReqSeq) ? 1 : -1;
-            });
-          }
+          });
         }
       }
       //this.$nextTick(function(){
@@ -956,6 +978,11 @@ export default {
           this.saveChatState(this.qtReqList[index]);
         }
       }
+    });
+
+    // 최신채팅 채팅목록 위로 이동 
+    this.$EventBus.$on('UserListPage.TopMoveChat', data => {  
+      this.TopMoveChat(data);
     });
   },    
   computed:{

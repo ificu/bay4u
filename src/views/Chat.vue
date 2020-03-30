@@ -18,7 +18,7 @@
               <img height='25' v-else-if="qtReq.CarBrand === 'CITROEN'" style="align-self:center;" src="@/assets/BRAND-CITROEN.png">
               <img height='18' v-else-if="qtReq.CarBrand === 'DODGE'" style="align-self:center;" src="@/assets/BRAND-DODGE.png">
               <img height='30' v-else-if="qtReq.CarBrand === 'FIAT'" style="align-self:center;" src="@/assets/BRAND-FIAT.png">
-              <img height='17' v-else-if="qtReq.CarBrand === 'FORD'" style="align-self:center;" src="@/assets/BRAND-FORD.png">
+              <img height='17' v-else-if="qtReq.CarBrand === 'FORD'" style="align-self:center;width:36px;" src="@/assets/BRAND-FORD.png">
               <img height='25' v-else-if="qtReq.CarBrand === 'HONDA'" style="align-self:center;" src="@/assets/BRAND-HONDA.png">
               <img height='15' v-else-if="qtReq.CarBrand === 'JEEP'" style="align-self:center;" src="@/assets/BRAND-JEEP.png">
               <img height='17' v-else-if="qtReq.CarBrand === 'LANDROVER'" style="align-self:center;" src="@/assets/BRAND-LANDROVER.png">
@@ -386,6 +386,7 @@ export default {
       }
       else{
         this.selectedQtData = [];
+        this.showQTReqList();
       }
     },
     saveChatMsg(chatMsg, chatType, qtData , imgId) {
@@ -476,6 +477,8 @@ export default {
             sendFlag: "CARCENTER"
           });
         }
+
+        this.UpdateChatTime(this.docId, chatMsg.reqTm);
   
       })
       .catch((error) => {
@@ -772,7 +775,12 @@ export default {
         console.log(result.data.Items);        
 
         this.qtReqList = result.data.Items;
-        this. getChatReadState();
+
+        var maxSeq = this.qtReqList[0].ReqSeq;
+        var minSeq = this.qtReqList[this.qtReqList.length -1].ReqSeq;
+        //console.log('max min :' , maxSeq + '/' + minSeq );
+        
+        this. getChatReadState(minSeq, maxSeq);
         this.getDealerNm();
 
         param.operation = "list";
@@ -812,30 +820,21 @@ export default {
         });
       });
     },
-    getChatReadState()
+    getChatReadState(minDate , maxDate)
     {
       let param = {};
       param.operation = "list";
       param.tableName = "BAY4U_CHAT";
       param.payload = {};
       param.payload.ExpressionAttributeValues = {};
+      param.payload.FilterExpression = "ReqTm between :startDt and :endDt";
+      var key = ":startDt";
+      var key2 = ":endDt";
+      param.payload.ExpressionAttributeValues[key] = minDate;
+      param.payload.ExpressionAttributeValues[key2] = maxDate;
 
-      let filter = "";
-      let idx = 1;
-      for(let item of this.qtReqList)
-      { 
-        if(idx === 1){
-          filter = filter + "DocID = :docID"+idx;
-        }
-        else{
-          filter = filter + " OR DocID = :docID"+idx;
-        }
-        param.payload.ExpressionAttributeValues[":docID"+idx] = item.ID;
-        idx++;
-      }
-      param.payload.FilterExpression = filter;
       //console.log("======= chat state request result ========");
-      //console.log(JSON.stringify(param));
+      //console.log(param);
 
       axios({
         method: 'POST',
@@ -855,7 +854,7 @@ export default {
           qt.NotChatIDList = newChatState;
           qt.NotReadCnt = newChatState.length;
         }
-        console.log('this.qtReqList:', this.qtReqList);
+        console.log('Read Count:', this.qtReqList);
       });
     },
     getDealerNm()
@@ -983,6 +982,36 @@ export default {
       else{
         return "";
       }
+    },
+    UpdateChatTime(docID, chatDtaeTime)
+    {
+      var param = {};
+      param.operation = "update";
+      param.tableName = "BAY4U_QT_LIST";
+      param.payload = {};
+      param.payload.Key = {};
+      param.payload.Key.ID = docID;
+      param.payload.UpdateExpression = "Set ReqSeq = :b ";
+      param.payload.ExpressionAttributeValues = {
+        ":b" : chatDtaeTime
+      };
+
+      //console.log("======= Chat time Update Request ========");
+      //console.log(JSON.stringify(param));
+
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+        //console.log("======= Chat time Update Request ========");
+        //console.log(result.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
     }
   },
   mounted() {
@@ -1080,7 +1109,7 @@ export default {
 
 .Chart-qtinfo .Chart-carInfo {
   font-weight: bold;
-  font-size: 1.4em;
+  font-size: 1.3em;
 }
 .Chart-qtinfo .Chart-carInfo2 {
   font-weight: bold;

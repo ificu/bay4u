@@ -887,7 +887,6 @@
 													}
 												}); 
 											}
-										
 										}
 									}
 								}
@@ -1020,6 +1019,8 @@
 					if(adminYn === "Y"){
 						sendNm = adminName;
 					}
+
+					this.UpdateChatTime(this.orderData.DocID, chatMsg.reqTm);
 
 					this.$sendMessage({
 						name: this.UserInfo.BsnID,
@@ -1506,6 +1507,36 @@
 					}
 				});  
 			},
+			UpdateChatTime(docID, chatDtaeTime)
+			{
+				var param = {};
+				param.operation = "update";
+				param.tableName = "BAY4U_QT_LIST";
+				param.payload = {};
+				param.payload.Key = {};
+				param.payload.Key.ID = docID;
+				param.payload.UpdateExpression = "Set ReqSeq = :b ";
+				param.payload.ExpressionAttributeValues = {
+					":b" : chatDtaeTime
+				};
+
+				//console.log("======= Chat time Update Request ========");
+				//console.log(JSON.stringify(param));
+
+				axios({
+					method: 'POST',
+					url: Constant.LAMBDA_URL,
+					headers: Constant.JSON_HEADER,
+					data: param
+				})
+				.then((result) => {
+					//console.log("======= Chat time Update Request ========");
+					//console.log(result.data);
+				})
+				.catch((error) => {
+					console.log(error);
+				});
+			}
 		},
 	}
 </script>
