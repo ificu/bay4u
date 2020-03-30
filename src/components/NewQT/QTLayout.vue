@@ -91,6 +91,7 @@
             <img height='25' v-if="brandSelected === 'HONDA'" style="align-self:center" src="@/assets/BRAND-HONDA.png">
             <img height='20' v-if="brandSelected === 'JEEP'" style="align-self:center" src="@/assets/BRAND-JEEP.png">
             <img height='25' v-if="brandSelected === 'LANDROVER'" style="align-self:center" src="@/assets/BRAND-LANDROVER.png">
+            <img height='20' v-if="brandSelected === 'JAGUAR'" style="align-self:center" src="@/assets/BRAND-JAGUAR.png">
             <img height='40' v-if="brandSelected === 'LEXUS'" style="align-self:center" src="@/assets/BRAND-LEXUS.png">
             <img height='32' v-if="brandSelected === 'LINCOLN'" style="align-self:center" src="@/assets/BRAND-LINCOLN.png">
             <img height='25' v-if="brandSelected === 'MINI'" style="align-self:center" src="@/assets/BRAND-MINI.png">
@@ -99,6 +100,10 @@
             <img height='30' v-if="brandSelected === 'TOYOTA'" style="align-self:center" src="@/assets/BRAND-TOYOTA.png">
             <img height='35' v-if="brandSelected === 'VOLVO'" style="align-self:center" src="@/assets/BRAND-VOLVO.png">
             <img height='40' v-if="brandSelected === 'VW'" style="align-self:center" src="@/assets/BRAND-VW.png">
+            <img height='40' v-if="brandSelected === 'NISSAN'" style="align-self:center" src="@/assets/BRAND-NISSAN.png">
+            <img height='40' v-if="brandSelected === 'MASERATI'" style="align-self:center" src="@/assets/BRAND-MASERATI.png">
+            <img height='20' v-if="brandSelected === 'INFINITI'" style="align-self:center" src="@/assets/BRAND-INFINITI.png">
+            <img height='25' v-if="brandSelected === 'GM'" style="align-self:center" src="@/assets/BRAND-GM.png">
           </v-col>
         </v-row>
 
@@ -148,9 +153,11 @@
                 <v-card-text class="pa-1">
                   <v-chip v-for="(brand, index) in europeBrand" v-bind:key = "index" class="ma-1" color="#3cadc0" outlined link @click="clickBrandSelect(brand)">
                     <img height='25' class="mr-2" v-if="brand === 'LANDROVER'" src="@/assets/BRAND-LANDROVER.png">
+                    <img height='20' class="mr-2" v-if="brand === 'JAGAUR'" src="@/assets/BRAND-JAGUAR.png">
                     <img height='22' class="mr-2" v-if="brand === 'VOLVO'" src="@/assets/BRAND-VOLVO.png">
                     <img height='25' class="mr-2" v-if="brand === 'PEUGEOT'" src="@/assets/BRAND-PEUGEOT.png">
                     <img height='25' class="mr-2" v-if="brand === 'PORSCHE'" src="@/assets/BRAND-PORSCHE.png">
+                    <img height='25' class="mr-2" v-if="brand === 'MASERATI'" src="@/assets/BRAND-MASERATI.png">
                     {{brand}}
                   </v-chip>
                 </v-card-text>              
@@ -163,6 +170,7 @@
                   <img height='25' class="mr-2" v-if="brand === 'LINCOLN'" src="@/assets/BRAND-LINCOLN.png">
                   <img height='20' class="mr-2" v-if="brand === 'FORD'" src="@/assets/BRAND-FORD.png">
                   <img height='20' class="mr-2" v-if="brand === 'CHRYSLER'" src="@/assets/BRAND-CHRYSLER.png">
+                  <img height='20' class="mr-2" v-if="brand === 'GM'" src="@/assets/BRAND-GM.png">
                 {{brand}}
                 </v-chip>
               </v-card-text>              
@@ -173,6 +181,8 @@
                 <v-chip v-for="(brand, index) in asiaBrand" v-bind:key = "index" class="ma-1" color="#3cadc0" outlined link @click="clickBrandSelect(brand)">
                   <img height='25' class="mr-2" v-if="brand === 'HONDA'" src="@/assets/BRAND-HONDA.png">
                   <img height='22' class="mr-2" v-if="brand === 'TOYOTA'" src="@/assets/BRAND-TOYOTA.png">
+                  <img height='25' class="mr-2" v-if="brand === 'NISSAN'" src="@/assets/BRAND-NISSAN.png">
+                  <img height='20' class="mr-2" v-if="brand === 'INFINITI'" src="@/assets/BRAND-INFINITI.png">
                 {{brand}}
                 </v-chip>
               </v-card-text>              
@@ -545,9 +555,9 @@ export default {
         '', 'BMW', 'BENZ', 'AUDI', 'VW', 'FORD', 'LEXUS', '기타'
       ], 
       favoriteBrand:['BENZ', 'BMW','AUDI','LEXUS','MINI', 'VW'],
-      europeBrand:['LANDROVER','VOLVO', 'JAGUAR', 'PORSCHE','PEUGEOT'],
-      usaBrand:['LINCOLN','JEEP','CHRYSLER','FORD',],
-      asiaBrand:['HONDA','TOYOTA'],  
+      europeBrand:['LANDROVER','VOLVO', 'JAGUAR', 'PORSCHE','PEUGEOT','MASERATI'],
+      usaBrand:['LINCOLN','JEEP','CHRYSLER','FORD','GM'],
+      asiaBrand:['HONDA','TOYOTA','NISSAN','INFINITI'],  
       carBrand:[ 'CADILLAC', 'CITROEN', 'DODGE', 'FIAT',],
       selectedDealer: [],
       showProcessing: false,
@@ -558,6 +568,18 @@ export default {
     }
   },
   props:['NewQTData'],
+  created: function()
+  {
+    if(this.UserInfo.BsnID === '')
+    this.UserInfo.BsnID = this.$cookies.get('BsnID');
+
+    if(this.UserInfo.Name === '')
+    this.UserInfo.Name = this.$cookies.get('UserNM');
+
+    if(this.UserInfo.EntNo === '')
+    this.UserInfo.EntNo = this.$cookies.get('EntNo');
+
+  },  
   methods: {
     showQTCameraModal(showFlag, type){
       this.showQTCamera = showFlag;
@@ -1558,7 +1580,7 @@ export default {
         return false;
       }
 
-      if(this.CarInfo.CarNo.length > 0 && this.CarInfo.VinNo === "99999999999999999")
+      if(this.CarInfo.CarNo !== undefined && this.CarInfo.CarNo.length > 0 && this.CarInfo.VinNo === "99999999999999999")
       {
         this.alertMsg = "차대번호를 확인 해 주세요."
         this.showAlertMsg = !this.showAlertMsg;

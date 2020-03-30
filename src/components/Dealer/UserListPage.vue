@@ -57,10 +57,11 @@
                 <img height='25' v-if="qtReq.CarBrand === 'CITROEN'" style="align-self:center; " src="@/assets/BRAND-CITROEN.png">
                 <img height='18' v-if="qtReq.CarBrand === 'DODGE'" style="align-self:center;width:36px;" src="@/assets/BRAND-DODGE.png">
                 <img height='30' v-if="qtReq.CarBrand === 'FIAT'" style="align-self:center; " src="@/assets/BRAND-FIAT.png">
-                <img height='25' v-if="qtReq.CarBrand === 'FORD'" style="align-self:center;width:36px;" src="@/assets/BRAND-FORD.png">
+                <img height='18' v-if="qtReq.CarBrand === 'FORD'" style="align-self:center;width:36px;" src="@/assets/BRAND-FORD.png">
                 <img height='25' v-if="qtReq.CarBrand === 'HONDA'" style="align-self:center;" src="@/assets/BRAND-HONDA.png">
                 <img height='15' v-if="qtReq.CarBrand === 'JEEP'" style="align-self:center;width:36px;" src="@/assets/BRAND-JEEP.png">
-                <img height='17' v-if="qtReq.CarBrand === 'LANDROVER'" style="align-self:center; " src="@/assets/BRAND-LANDROVER.png">
+                <img height='12' v-if="qtReq.CarBrand === 'LANDROVER'" style="align-self:center; " src="@/assets/BRAND-LANDROVER.png">
+                <img height='17' v-if="qtReq.CarBrand === 'JAGUAR'" style="align-self:center; " src="@/assets/BRAND-JAGUAR.png">
                 <img height='25' v-if="qtReq.CarBrand === 'LEXUS'" style="align-self:center;" src="@/assets/BRAND-LEXUS.png">
                 <img height='30' v-if="qtReq.CarBrand === 'LINCOLN'" style="align-self:center;margin-left:6px;" src="@/assets/BRAND-LINCOLN.png">
                 <img height='18' v-if="qtReq.CarBrand === 'MINI'" style="align-self:center;width:36px;" src="@/assets/BRAND-MINI.png">
@@ -69,6 +70,10 @@
                 <img height='25' v-if="qtReq.CarBrand === 'TOYOTA'" style="align-self:center;width:34px;" src="@/assets/BRAND-TOYOTA.png">
                 <img height='25' v-if="qtReq.CarBrand === 'VOLVO'" style="align-self:center;width:30px;" src="@/assets/BRAND-VOLVO.png">
                 <img height='30' v-if="qtReq.CarBrand === 'VW'" style="align-self:center;" src="@/assets/BRAND-VW.png">
+                <img height='25' v-if="qtReq.CarBrand === 'NISSAN'" style="align-self:center;" src="@/assets/BRAND-NISSAN.png">
+                <img height='27' v-if="qtReq.CarBrand === 'MASERATI'" style="align-self:center;" src="@/assets/BRAND-MASERATI.png">
+                <img height='15' v-if="qtReq.CarBrand === 'INFINITI'" style="align-self:center;" src="@/assets/BRAND-INFINITI.png">
+                <img height='15' v-if="qtReq.CarBrand === 'GM'" style="align-self:center;" src="@/assets/BRAND-GM.png">
                 <i class="Carcenter-type fas fa-wrench" style="color:#fbc02e;" v-if="qtReq.CarBrand === '차종 선택'"></i>  
              </div>
              <div class="chatInfo" :class="{chatInfo2 : checkBrand(qtReq.CarBrand)}">
