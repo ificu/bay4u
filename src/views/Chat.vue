@@ -298,8 +298,8 @@ export default {
         else {
           //console.log('msg : ' , this.msgDatas[0].msgData.DocID);
           //console.log('msg2 : ' , chatMsg.DocID);
-          //let index = this.msgDatas.findIndex(element => element.msgData.reqTm === chatMsg.reqTm && element.msgData.DocID === chatMsg.DocID);
-          let index = this.msgDatas.findIndex(element => element.msgData.reqTm === chatMsg.reqTm);
+          let index = this.msgDatas.findIndex(element => element.msgData.reqTm === chatMsg.reqTm && element.msgData.DocID === chatMsg.DocID);
+          //let index = this.msgDatas.findIndex(element => element.msgData.reqTm === chatMsg.reqTm);
           if(index === -1){
             this.msgDatas = chatMsg;
           }
