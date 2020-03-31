@@ -1178,7 +1178,7 @@ export default {
           // 부품지원센터
           var param = {};
           param.BsnId = this.UserInfo.BsnID;
-          param.UserID = this.UserInfo.UserID;
+          param.UserId = this.UserInfo.UserID;
           param.CarNo = this.CarInfo.CarNo;
           param.VinNo = this.CarInfo.VinNo;
           
