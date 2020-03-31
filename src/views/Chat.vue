@@ -207,7 +207,6 @@ export default {
         this.showchating(item);
       }
       else{
-
         var now = new Date();
         var id = this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                 + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
@@ -223,7 +222,7 @@ export default {
         var chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
                   + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
 
-        console.log('route : ' , this.$route.params.qtInfo);
+        //console.log('route : ' , this.$route.params.qtInfo);
         var chatMsg = {};
         //chatMsg.from = {'name' : '나'};
         chatMsg.from = {'name' : this.UserInfo.BsnID};
@@ -292,6 +291,9 @@ export default {
           }          
         }
         else {
+          //console.log('msg : ' , this.msgDatas[0].msgData.DocID);
+          //console.log('msg2 : ' , chatMsg.DocID);
+          //let index = this.msgDatas.findIndex(element => element.msgData.reqTm === chatMsg.reqTm && element.msgData.DocID === chatMsg.DocID);
           let index = this.msgDatas.findIndex(element => element.msgData.reqTm === chatMsg.reqTm);
           if(index === -1){
             this.msgDatas = chatMsg;
@@ -738,7 +740,7 @@ export default {
       var key = ":id";
       param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
 
-      console.log("chating list pram : " + JSON.stringify(param));
+      //console.log("chating list pram : " + JSON.stringify(param));
 
       axios({
         method: 'POST',
@@ -771,8 +773,8 @@ export default {
           }
         }
 
-        console.log("======= QT List result ========");
-        console.log(result.data.Items);        
+        //console.log("======= QT List result ========");
+        //console.log(result.data.Items);        
 
         this.qtReqList = result.data.Items;
 
@@ -780,7 +782,7 @@ export default {
         var minSeq = this.qtReqList[this.qtReqList.length -1].ReqSeq;
         //console.log('max min :' , maxSeq + '/' + minSeq );
         
-        this. getChatReadState(minSeq, maxSeq);
+        this.getChatReadState(minSeq, maxSeq);
         this.getDealerNm();
 
         param.operation = "list";
@@ -843,8 +845,8 @@ export default {
         data: param
       })
       .then((result) => {
-        console.log("=======  chat state result ========");
-        console.log(result.data);
+        //console.log("=======  chat state result ========");
+        //console.log(result.data);
 
         let chatList = result.data.Items;
         for(let qt of this.qtReqList)
@@ -854,7 +856,7 @@ export default {
           qt.NotChatIDList = newChatState;
           qt.NotReadCnt = newChatState.length;
         }
-        console.log('Read Count:', this.qtReqList);
+        //console.log('Read Count:', this.qtReqList);
       });
     },
     getDealerNm()
@@ -866,10 +868,9 @@ export default {
       param.payload.FilterExpression = "CARCENTER = :id";
       param.payload.ExpressionAttributeValues = {};
       var key = ":id";
-   
       param.payload.ExpressionAttributeValues[key] =  this.UserInfo.BsnID;
 
-      console.log("Carcenter_Dealer pram : " + JSON.stringify(param));
+      //console.log("Carcenter_Dealer pram : " + JSON.stringify(param));
 
       axios({
         method: 'POST',
@@ -878,8 +879,8 @@ export default {
         data: param
       })
       .then((result) => {
-        console.log("======= Carcenter_Dealer result ========");
-        console.log(result.data.Items);
+        //console.log("======= Carcenter_Dealer result ========");
+        //console.log(result.data.Items);
         this.resDealerNm = result.data.Items;
       });
     },
