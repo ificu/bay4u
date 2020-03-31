@@ -22,6 +22,7 @@
               <img height='25' v-else-if="qtReq.CarBrand === 'HONDA'" style="align-self:center;" src="@/assets/BRAND-HONDA.png">
               <img height='15' v-else-if="qtReq.CarBrand === 'JEEP'" style="align-self:center;" src="@/assets/BRAND-JEEP.png">
               <img height='17' v-else-if="qtReq.CarBrand === 'LANDROVER'" style="align-self:center;" src="@/assets/BRAND-LANDROVER.png">
+              <img height='17' v-else-if="qtReq.CarBrand === 'JAGUAR'" style="align-self:center;" src="@/assets/BRAND-JAGUAR.png">
               <img height='25' v-else-if="qtReq.CarBrand === 'LEXUS'" style="align-self:center;" src="@/assets/BRAND-LEXUS.png">
               <img height='30' v-else-if="qtReq.CarBrand === 'LINCOLN'" style="align-self:center;" src="@/assets/BRAND-LINCOLN.png">
               <img height='18' v-else-if="qtReq.CarBrand === 'MINI'" style="align-self:center;" src="@/assets/BRAND-MINI.png">
@@ -30,6 +31,10 @@
               <img height='25' v-else-if="qtReq.CarBrand === 'TOYOTA'" style="align-self:center;" src="@/assets/BRAND-TOYOTA.png">
               <img height='25' v-else-if="qtReq.CarBrand === 'VOLVO'" style="align-self:center;" src="@/assets/BRAND-VOLVO.png">
               <img height='25' v-else-if="qtReq.CarBrand === 'VW'" style="align-self:center;" src="@/assets/BRAND-VW.png">
+              <img height='25' v-else-if="qtReq.CarBrand === 'NISSAN'" style="align-self:center;" src="@/assets/BRAND-NISSAN.png">
+              <img height='25' v-else-if="qtReq.CarBrand === 'MASERATI'" style="align-self:center;" src="@/assets/BRAND-MASERATI.png">
+              <img height='15' v-else-if="qtReq.CarBrand === 'INFINITI'" style="align-self:center;" src="@/assets/BRAND-INFINITI.png">
+              <img height='17' v-else-if="qtReq.CarBrand === 'GM'" style="align-self:center;" src="@/assets/BRAND-GM.png">
               <i v-else class="Dealer-type fas fa-wrench" style="color:#fbc02e;"></i>
               
               <div class="Chart-qtinfo">

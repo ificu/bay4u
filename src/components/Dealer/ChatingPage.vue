@@ -168,6 +168,8 @@ export default {
         chatMsg.RefID = data.refID;
         chatMsg.SaveName = data.sendName;
         chatMsg.SaveID = data.sendId;
+
+        console.log("채팅 메시지 리스트 넣기 : ", chatMsg);
    
         if(data.imgId !== undefined) {   
           chatMsg.img = Constant.IMG_URL + data.imgId;
@@ -215,6 +217,7 @@ export default {
             //userId: data.to.name,   
             userId: this.UserInfo.UserID,
             bsnId: this.UserInfo.BsnID,
+            title: data.sendName + '(' + data.qtInfo.CarNo + ') 메시지 도착',
             message: data.msg,
             chatId: data.chatId
           }); 

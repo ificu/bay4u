@@ -46,6 +46,7 @@
 								<img height='25' v-if="qtItem[0].CarBrand === 'HONDA'" style="align-self:center;margin-left:2px;width:34px;" src="@/assets/BRAND-HONDA.png">
 								<img height='15' v-if="qtItem[0].CarBrand === 'JEEP'" style="align-self:center;margin-left:2px;width:34px;" src="@/assets/BRAND-JEEP.png">
 								<img height='17' v-if="qtItem[0].CarBrand === 'LANDROVER'" style="align-self:center;margin-left:2px;" src="@/assets/BRAND-LANDROVER.png">
+								<img height='17' v-if="qtItem[0].CarBrand === 'JAGUAR'" style="align-self:center;margin-left:2px;" src="@/assets/BRAND-JAGUAR.png">
 								<img height='25' v-if="qtItem[0].CarBrand === 'LEXUS'" style="align-self:center;margin-left:4px;" src="@/assets/BRAND-LEXUS.png">
 								<img height='30' v-if="qtItem[0].CarBrand === 'LINCOLN'" style="align-self:center; margin-left:6px;" src="@/assets/BRAND-LINCOLN.png">
 								<img height='18' v-if="qtItem[0].CarBrand === 'MINI'" style="align-self:center;margin-left:-3px;width:40px;" src="@/assets/BRAND-MINI.png">
@@ -54,6 +55,10 @@
 								<img height='25' v-if="qtItem[0].CarBrand === 'TOYOTA'" style="align-self:center; margin-left:0px;" src="@/assets/BRAND-TOYOTA.png">
 								<img height='25' v-if="qtItem[0].CarBrand === 'VOLVO'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-VOLVO.png">
 								<img height='30' v-if="qtItem[0].CarBrand === 'VW'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-VW.png">
+								<img height='30' v-if="qtItem[0].CarBrand === 'NISSAN'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-NISSAN.png">
+								<img height='30' v-if="qtItem[0].CarBrand === 'MASERATI'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-MASERATI.png">
+								<img height='15' v-if="qtItem[0].CarBrand === 'INFINITI'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-INFINITI.png">
+								<img height='25' v-if="qtItem[0].CarBrand === 'GM'" style="align-self:center; margin-left:5px;" src="@/assets/BRAND-GM.png">
 							</b-col>                    
 							<b-col class="history-date" :class="{ 'history-date2' :(qtItem[0].CarSeries !== undefined && qtItem[0].CarSeries !== '') ? true :false}">{{SetQtDate(qtItem[0].ReqDt)}}</b-col>
 							<b-col class="history-carInfo" :class="{ 'history-car2' :(qtItem[0].CarSeries !== undefined && qtItem[0].CarSeries !== '') ? true :false}">
