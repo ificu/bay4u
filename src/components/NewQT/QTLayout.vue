@@ -878,7 +878,7 @@ export default {
       if(this.CarInfo.VinNo === '' && this.CarInfo.VinNo === null && this.CarInfo.VinNo === undefined)
       this.CarInfo.VinNo = this.CarInfo.VinNo.toUpperCase();
       
-      if(this.UserInfo.UserType === 'SITE') { // WebPOS일 경우 정비 이력 조회 이후 차대번호 세팅
+      if(this.UserInfo.UserType === 'SITE' || this.UserInfo.UserType === 'SITEF') { // WebPOS일 경우 정비 이력 조회 이후 차대번호 세팅
 
         var param = {};
         param.BsnId = this.UserInfo.BsnID;

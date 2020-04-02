@@ -323,7 +323,7 @@
 					//console.log('userType : ' , this.UserInfo.UserType);
 
 					// 과거주문 내역 조회에서 넘어온 경우에만 부품지원센터 내역 조회
-					if(this.UserInfo.UserType === "SITE" && seachText !== ''){
+					if((this.UserInfo.UserType === "SITE" || this.UserInfo.UserType === "SITEF") && seachText !== ''){
 						this.GetWebposOrderList(docId ,orderID);
 					}
 					else{

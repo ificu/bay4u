@@ -118,7 +118,7 @@ export default {
             this.loginAlert = true;   
           } 
           // 카센터 / 일반카센터 관리자 인 경우
-          else if(type === "SITE" || type === "SITE2" || type === "SITEADMIN") {
+          else if(type === "SITE" || type === "SITEN" || type === "SITEF" || type === "SITEADMIN") {
             this.$cookies.set('BsnID', siteCode, '864000s');
             this.$cookies.set('UserNM', name, '864000s');
             this.$cookies.set('UserType', type, '864000s');
@@ -204,7 +204,7 @@ export default {
     if(this.$cookies.get('BsnID') !== "" && this.$cookies.get('BsnID') !== null) {
       var type = this.$cookies.get('UserType');
 
-      if(type === "SITE" || type === "SITE2") {
+      if(type === "SITE" || type === "SITEN" || type === "SITEF") {
         this.$router.push('/NewQT');
       }
       else if(type === "DEALER" || type === "DEALER2") {
