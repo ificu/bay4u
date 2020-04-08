@@ -1273,6 +1273,7 @@ export default {
       param.payload.Item.CarBrand = this.brandSelected;
       param.payload.Item.ReqDt = now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);
       param.payload.Item.ReqSite = convertStringToDynamo(this.UserInfo.BsnID);
+      param.payload.Item.ReqSiteType = convertStringToDynamo(this.UserInfo.UserType);
       param.payload.Item.ReqName = convertStringToDynamo(this.UserInfo.Name);
       param.payload.Item.ReqSeq = reqSeq;
       param.payload.Item.ResDealer = dealer;
@@ -1845,6 +1846,7 @@ export default {
         param.payload.Item.CarBrand = this.brandSelected;
         param.payload.Item.ReqDt = now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);
         param.payload.Item.ReqSite = this.UserInfo.BsnID;
+        param.payload.Item.ReqSiteType = convertStringToDynamo(this.UserInfo.UserType);
         param.payload.Item.ReqName = this.UserInfo.Name;
         param.payload.Item.ReqSeq = reqSeq;
         param.payload.Item.ResDealer = dealer.DEALER;

@@ -1,7 +1,9 @@
 <template>
+  <v-app>
   <div class="UserListPage">
-  <b-tabs class="UserList-Tab"  v-model="tabIndex" content-class="mt-3" fill>
-    <b-tab  class="tabPage1" title="카센터 대화목록" active :title-link-class="linkClass(0)">
+  <!--<b-tabs class="UserList-Tab" v-model="tabIndex" content-class="mt-3" fill>
+    <b-tab class="tabPage1" title="카센터 대화목록" active :title-link-class="linkClass(0)">-->
+  <div class="UserList-title"><span>카센터 대화목록</span></div>
       <!--<div class="Chat-search mdl-textfield mdl-js-textfield mdl-textfield--expandable">
         <label class="mdl-button mdl-js-button mdl-button--icon" for="sample6" v-on:click="showQTReqList()">
           <i class="material-icons">search</i>
@@ -11,7 +13,8 @@
           <label class="mdl-textfield__label" for="sample-expandable">Expandable Input</label>
         </div>
       </div>-->
-     <div class="Chat-search">
+
+    <!-- <div class="Chat-search">
        <v-text-field
           v-model="searchText"
            :append-icon="'fas fa-search'"
@@ -36,12 +39,121 @@
         style="color:#FF8F00"
       >
         <v-chip class="mr-1 pr-2 pl-2" @click="showQTReqList(0)">당일</v-chip>
-        <!--<v-chip class="mr-1 pr-2 pl-2" @click="showQTReqList(1)">어제</v-chip>-->
+        <v-chip class="mr-1 pr-2 pl-2" @click="showQTReqList(1)">어제</v-chip>
         <v-chip class="mr-1 pr-2 pl-2" @click="showQTReqList(2)">일주일</v-chip>
         <v-chip class="mr-1 pr-2 pl-2" @click="showQTReqList(3)">한달</v-chip>
         <v-chip class="mr-1 pr-2 pl-2" @click="showQTReqList(4)">미확인</v-chip>
       </v-chip-group>          
     </v-row>
+    -->
+    <!--검색영역-->
+    <div class="search-form">
+      <div>
+        <v-chip-group
+          column
+          mandatory
+          align="center"
+          style="color:#FF8F00"
+        > 
+          <v-chip small class="mr-1 pr-2 pl-2" >미확인<b-badge pill variant="danger">2</b-badge></v-chip>
+          <v-chip small class="mr-1 pr-2 pl-2" >견적요청</v-chip>
+          <v-chip small class="mr-1 pr-2 pl-2" >견적접수<b-badge pill variant="danger">3</b-badge></v-chip>
+          <v-chip small class="mr-1 pr-2 pl-2" >견적회신</v-chip>
+          <v-chip small class="mr-1 pr-2 pl-2" >주문요청</v-chip>
+          <v-chip small class="mr-1 pr-2 pl-2" >주문확인</v-chip>
+        </v-chip-group>          
+      </div>
+      <div class="search-form-input">
+        <div class="search-form-text">
+       <v-text-field
+          v-model="searchText"
+           :append-icon="'search'"
+            single-line
+            dense
+            filled
+            type="text" 
+            @click:append="showQTReqList"
+            v-on:keypress.enter="showQTReqList"
+          ></v-text-field>
+        </div>
+        <div class="search-form-button" >
+          <b-button squared size="sm" v-b-toggle.collapse-1-inner>상세
+            <i class="fas fa-sort-down"></i>
+          </b-button>
+          <b-button squared size="sm">초기화</b-button>
+        </div>
+      </div>
+      <b-collapse id="collapse-1-inner" class="mt-2">
+      <div class="search-date-form">
+        <div>
+          <div  class="search-date-chips">
+            <v-chip-group
+              column
+              mandatory
+              align="center"
+            > 
+              <v-chip small class="mr-1 pr-2 pl-2" >일주일</v-chip>
+              <v-chip small class="mr-1 pr-2 pl-2" >한달</v-chip>
+            </v-chip-group>   
+            <div class="search-date-button"><b-button small >검색</b-button></div>      
+          </div>
+          <div class="search-date">
+            <v-row class="pt-0 mt-0">
+              <v-col cols="12" md="6" class="pt-0 mt-0">
+                <v-menu
+                  ref="menu1"
+                  v-model="menu"
+                  :close-on-content-click="false"
+                  :nudge-top="70"
+                  transition="scale-transition"
+                  offset-y
+                  min-width="290px"
+                >
+                  <template v-slot:activator="{ on }">
+                    <v-text-field
+                      v-model="date"
+                      prepend-icon="event"
+                      readonly
+                      v-on="on"
+                      class="date-input"
+                      single-line
+                      dense
+                    ></v-text-field>
+                  </template>
+                  <v-date-picker v-model="date" @input="menu = false" no-title locale="ko-KR"></v-date-picker>
+                </v-menu>
+              </v-col>
+              <v-col cols="12" md="6" class="pt-0 mt-0">
+                <v-menu
+                  v-model="menu2"
+                  :close-on-content-click="false"
+                  :nudge-right="20"
+                  :nudge-top="70"
+                  transition="scale-transition"
+                  offset-y
+                  min-width="290px"
+                >
+                  <template v-slot:activator="{ on }">
+                    <v-text-field
+                      v-model="date"
+                      prepend-icon="event"
+                      readonly
+                      v-on="on"
+                      class="date-input"
+                      dense
+                    ></v-text-field>
+                  </template>
+                  <v-date-picker v-model="date" @input="menu2 = false" no-title  locale="ko-KR"></v-date-picker>
+                </v-menu>
+              </v-col>
+              <v-spacer></v-spacer>
+            </v-row>
+          </div>
+        </div>
+        
+      </div>
+      </b-collapse>
+    </div>
       <div class="Chat-list">
         <ul>
          <li v-for="(qtReq, index) in qtReqList" v-bind:key = "index" v-on:click="SetQTInfo(qtReq,index)" >
@@ -78,7 +190,8 @@
              </div>
              <div class="chatInfo" :class="{chatInfo2 : checkBrand(qtReq.CarBrand)}">
                 <div class="carInfo">
-                  <span class="Carcenter-name">{{qtReq.ReqName}} ({{(qtReq.CarNo === "*empty*")?"미상차량" : qtReq.CarNo}})</span>
+                  <span class="Carcenter-name">{{qtReq.ReqName}} ({{(qtReq.CarNo === "*empty*")?"미상차량" : qtReq.CarNo}})</span> 
+                  <span class="Carcenter-reqseq">{{GetUpdateTime(qtReq)}}</span>
                   <span class="Carcenter-reqdt">{{qtReq.ReqDt}}</span><span :class="linkQtSts(qtReq.QTSts)">{{qtReq.QTSts}}</span>
                   <span v-if="qtReq.AgentName !== undefined && qtReq.AgentName !== '*empty*'" class="agent-name" :style="SetColor(qtReq.AgentName)" >{{qtReq.AgentName}}</span>
                   <span class="carSeries">{{qtReq.CarSeries}}</span>
@@ -97,8 +210,9 @@
           </li>
         </ul>        
       </div>
-    </b-tab>
-  </b-tabs>
+
+ <!--   </b-tab>
+  </b-tabs>-->
   <!--견적접수 메시지-->
   <MessageBox v-if="showQTAccept"  @close="CloseAlerPopup('A')">
       <div slot="header"><h5>알림</h5></div>
@@ -129,6 +243,7 @@
       </div>
   </MessageBox>
   </div>   
+  </v-app>
 </template>
 
 <!--<script src="https://unpkg.com/axios/dist/axios.min.js"></script>-->
@@ -156,7 +271,11 @@ export default {
       showOrderAccept:false,
       showAlert: false,
       alertMsg: '',
-      agentList: []
+      agentList: [],
+      date: new Date().toISOString().substr(0, 10),
+      menu: false,
+      modal: false,
+      menu2: false,
     }
   },
   props:['chatInfo', 'showQTId'],
@@ -382,6 +501,7 @@ export default {
     },
     SetQTInfo(item , idx)
     {
+    
       var viewMode = localStorage.getItem('LoginMode');
       
       this.$emit('setQtInfo' ,item);
@@ -820,6 +940,33 @@ export default {
           this.qtItemIndex = 0;
         }
       }
+    },
+    GetUpdateTime(value){
+      var now = new Date();
+      var today = now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);
+      
+      var beforeDate = new Date();
+      beforeDate.setDate(beforeDate.getDate() - 1);
+      var yesterDay = beforeDate.getFullYear() + "-" + datePadding(beforeDate.getMonth()+1,2) + "-" + datePadding(beforeDate.getDate(),2);
+
+
+      if(value.ReqDt === today){
+        // 당일이면 시간 리턴
+        var vStr = value.ReqSeq.substr(8,2) < 12 ? '오전 ' : '오후 ';
+        var vHour = value.ReqSeq.substr(8,2);
+        if (vHour !== 12) {
+          vHour = vHour%12;
+        } 
+        var vMinute = value.ReqSeq.substr(10,2);
+        return vStr + vHour + ":" + vMinute; 
+      }
+      else if(yesterDay === value.ReqDt){
+        // 어제
+        return '어제';
+      }
+      else{
+        return value.ReqDt;
+      }
     }
   },
   updated(){
@@ -834,6 +981,7 @@ export default {
   },
   created : function() {
     this.targetQtId = this.showQTId;
+    
     if(this.UserInfo.BsnID === '')
       this.UserInfo.BsnID = this.$cookies.get('BsnID');
     if(this.UserInfo.Name === '')
@@ -895,6 +1043,7 @@ export default {
                 chat.AgentName = data.sendName;
               }
             }
+
           }
           else{
             // 정비소 메시지 일때
@@ -995,6 +1144,11 @@ export default {
         get() { return this.$store.getters.UserInfo },
         set(value) { this.$store.dispatch('UpdateUserInfo',value) }
     }
+  },
+  beforeDestroy(){
+    this.$EventBus.$off('UserListPage.AddNewChat');
+    this.$EventBus.$off('update-Sts');
+    this.$EventBus.$off('UserListPage.TopMoveChat');
   }
 }
 </script>
@@ -1009,12 +1163,23 @@ export default {
 #acd3ce : 옅은 녹색
 #967d5f : 옅은 브라운
 */
+.UserList-title{
+  background-color: #6c757d;
+  color: 	#f6c107;
+  text-align:center;
+  line-height: 40px;
+  height: 40px;
+  border-radius: 3px 3px 0px 0px;
+  position: relative;
+  font-size: 0.9em;
+  margin-top: 5px;
+}
 
 .UserListPage{
   width: 100%;
   height: 100%;
+  padding: 5px;
 }
-
 .UserList-Tab {
   margin: 10px;
   height: 98%;
@@ -1026,6 +1191,46 @@ export default {
   position:absolute;
   right: 0;
   left:0;
+  top:42px;
+}
+.search-form-input{
+  display: flex;
+  height: 44px;
+  /*
+  margin-left: 2px;
+  padding-right: 2px;
+  border:1px solid #616161;
+  border-radius: 5px 5px 5px 5px;*/
+}
+.search-form-text{
+  margin-left: 3px;
+  margin-right: 0px;
+  flex:60%;
+}
+.search-form-button{
+  margin-top: 1px;
+}
+.search-form-button button{
+  height: 40px;
+  padding: 3px;
+  background-color: #616161;
+  border-left: 1px solid white;
+}
+.search-date-form{
+  margin: 0px;
+}
+.search-date{
+  height: 35px;
+}
+.date-input{
+  font-size: 0.8em;
+  height:30px;
+}
+.search-date-chips{
+  display: flex;
+}
+.search-date-button{
+  margin-left: 150px;
 }
 /*
 .Chat-search {
@@ -1143,6 +1348,16 @@ export default {
 .Carcenter-name {
   position: absolute;
   line-height: 20px;
+}
+.Carcenter-reqseq{
+  font-size: 0.6em;
+  line-height: 10px;
+  position: absolute;
+  color: #263238;
+  margin-right: 5px;
+  margin-top: 2px;
+  top:0;
+  right: 0;
 }
 .Carcenter-reqdt{
   font-size: 0.85em;

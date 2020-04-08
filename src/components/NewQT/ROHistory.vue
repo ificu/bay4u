@@ -243,7 +243,10 @@ export default {
           get() { return this.$store.getters.UserInfo },
           set(value) { this.$store.dispatch('UpdateUserInfo',value) }
       },      
-    }
+		},
+		beforeDestroy(){
+			this.$EventBus.$off('ROHistory.SetROInfo');
+		}
 }
 </script>
 <style scoped>

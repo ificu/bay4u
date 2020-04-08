@@ -237,7 +237,7 @@
 										<b-card-footer>
 											<div class="qtlist-footer">
 												<div class="TotalInfo">
-													<v-btn color="#4E342E" dark depressed class="mr-3" @click="ShowQTOrderPopup(confrimInfo)" v-if="confrimInfo.QTSts !== '주문확정' && UserInfo.UserType === 'SITEF'">주문하기</v-btn>
+													<v-btn color="#4E342E" dark depressed class="mr-3" @click="ShowQTOrderPopup(confrimInfo)" v-if="confrimInfo.QTSts !== '주문확정' && UserInfo.UserType === 'SITEF'">주문요청</v-btn>
 													<span class="TotalInfo-Title">합계</span>
 													<span v-if="total === 0" class="TotalInfo-Text" style="margin-left:30px;">{{ total}} 원</span>
 													<span v-if="total !== 0" class="TotalInfo-Text">{{ total | localeNum}} 원</span><br>
@@ -318,7 +318,7 @@
 											<b-card-footer>
 												<div class="qtlist-footer">
 													<div class="TotalInfo">
-														<v-btn color="#4E342E" dark depressed class="mr-3" @click="ShowQTOrderPopup(confrimInfo)" v-if="confrimInfo.QTSts !== '주문확정'">주문하기</v-btn>
+														<v-btn color="#4E342E" dark depressed class="mr-3" @click="ShowQTOrderPopup(confrimInfo)" v-if="confrimInfo.QTSts !== '주문확정'">주문요청</v-btn>
 														<span class="TotalInfo-Title">합계</span>
 														<span v-if="total2 === 0" class="TotalInfo-Text">{{total2 | localeNum}}원</span>
 														<span v-if="total2 !== 0" class="TotalInfo-Text">{{total2 | localeNum}}원</span>
@@ -590,6 +590,8 @@
 					}
 				}
 
+				filter = filter + " and Flag <> :flag ";
+
 				var param = {};
 				param.operation = "list";
 				param.tableName = "BAY4U_QT_LIST";
@@ -627,6 +629,8 @@
 							break;
 					}
 				}
+
+				param.payload.ExpressionAttributeValues[":flag"] = "ORDER";
 
 				console.log("======= QT Request result ========");
 				console.log(JSON.stringify(param));
@@ -1372,21 +1376,24 @@
 				} 
 			},
 			ShowQTOrderPopup(item){
+				this.orderList = [];
 				this.orderData = item;
 				this.showQTOrder = !this.showQTOrder;
 				this.orderDealerName = item.DealerName;
 				
-				if(this.UserInfo.UserType === "SITEF"){
-					let ordIdx = this.orderList.findIndex(x => x.itemCode === item.ResDetail[0].CONFIRM_ITM);
-					if(ordIdx === -1){
-						let orderItem = {}
-						orderItem.itemName = item.ResDetail[0].NM_ITM;
-						orderItem.itemCode = item.ResDetail[0].CONFIRM_ITM;
-						orderItem.itemQty = item.ResDetail[0].ORDER_QTY;
-						orderItem.itemPrice = item.ResDetail[0].PRC_PRICE;
-						orderItem.AMT =  item.ResDetail[0].AMT_PRC;
-						this.orderList.push(orderItem);
-					}				
+				if(this.UserInfo.UserType === "SITEF" && item.DealerCode === "PARTS"){
+					item.ResDetail.forEach(i => {
+						let ordIdx = this.orderList.findIndex(x => x.itemCode === i.CONFIRM_ITM);
+						if(ordIdx === -1){
+							let orderItem = {}
+							orderItem.itemName = i.NM_ITM;
+							orderItem.itemCode = i.CONFIRM_ITM;
+							orderItem.itemQty = i.ORDER_QTY;
+							orderItem.itemPrice = i.PRC_PRICE;
+							orderItem.AMT =  i.AMT_PRC;
+							this.orderList.push(orderItem);
+						}		
+					});		
 				}
 				else{
 					this.orderList = JSON.parse(convertDynamoToArrayString(JSON.stringify(item.ResDetail)));

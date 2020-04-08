@@ -50,6 +50,7 @@
               <span type="button" class="Chat-detail">
                 <i class="fas fa-angle-double-right"></i>
               </span>
+              <div class="Chat-reqseq">{{GetUpdateTime(qtReq)}}</div>
             </div>
 
             <div class="Chat-DivIndent" v-if="qtReq.Kbn==='list-indent'">
@@ -58,12 +59,14 @@
               </div>
               <div class="dealer-DivIndent">
                 <div class="Dealer-name">{{qtReq.ResDealerNm}}</div>
-                <div class="Dealer-agent">{{qtReq.AgentName}}</div>
+                <div class="Dealer-agent" v-if="qtReq.NickName === undefined || qtReq.NickName ==='*empty*' ">{{qtReq.AgentName}}</div>
+                <div class="Dealer-agent" v-else>{{qtReq.NickName}}</div>
               </div>
               <div class="Chat-readCount"><b-badge v-if="qtReq.NotReadCnt !== 0" variant="warning" pill class="Chat-readbadge">{{qtReq.NotReadCnt}}</b-badge></div>
               <span type="button" class="Chat-detail">
                 <i class="fas fa-angle-double-right"></i>
               </span>
+              <div class="Chat-reqseq">{{GetUpdateTime(qtReq)}}</div>
             </div>
           </li>
         </ul>
@@ -763,7 +766,8 @@ export default {
         
         var agentLsit = [];
         for(var i = 0; i<result.data.Items.length; i++) {      
-          if(i > 0 && (result.data.Items[i].ReqSeq === result.data.Items[i-1].ReqSeq)) {
+          //if(i > 0 && (result.data.Items[i].ReqSeq === result.data.Items[i-1].ReqSeq)) {
+          if(i > 0 && (result.data.Items[i].CarNo === result.data.Items[i-1].CarNo && result.data.Items[i].ReqDt === result.data.Items[i-1].ReqDt)) {
             result.data.Items[i].Kbn = "list-indent";
           }
           else {
@@ -1018,6 +1022,32 @@ export default {
       .catch((error) => {
         console.log(error);
       });
+    },
+    GetUpdateTime(value){
+      var now = new Date();
+      var today = now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);
+
+      var beforeDate = new Date();
+      beforeDate.setDate(beforeDate.getDate() - 1);
+      var yesterDay = beforeDate.getFullYear() + "-" + datePadding(beforeDate.getMonth()+1,2) + "-" + datePadding(beforeDate.getDate(),2);
+
+      if(value.ReqDt === today){
+        // 당일이면 시간 리턴
+        var vStr = value.ReqSeq.substr(8,2) < 12 ? '오전 ' : '오후 ';
+        var vHour = value.ReqSeq.substr(8,2);
+        if (vHour !== 12) {
+          vHour = vHour%12;
+        } 
+        var vMinute = value.ReqSeq.substr(10,2);
+        return vStr + vHour + ":" + vMinute; 
+      }
+      else if(yesterDay === value.ReqDt){
+        // 어제
+        return '어제';
+      }
+      else{
+        return value.ReqDt;
+      }
     }
   },
   mounted() {
@@ -1137,7 +1167,17 @@ export default {
 }
 .Chat-readCount{
   position:absolute;
-  right:10px;
+  right:0;
+  margin-top: 14px;
+}
+.Chat-reqseq{
+  position:absolute;
+  font-size: 0.5em;
+  color: #263238;
+  margin-right: 6px;
+  margin-top: 2px;
+  right:0;
+  line-height: 10px;
 }
 .Chat-readbadge{
   position:absolute;
