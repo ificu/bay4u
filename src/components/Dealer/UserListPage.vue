@@ -54,14 +54,16 @@
           mandatory
           align="center"
           style="color:#FF8F00"
-        > 
-          <v-chip small class="mr-1 pr-2 pl-2" >미확인<b-badge pill variant="danger">2</b-badge></v-chip>
-          <v-chip small class="mr-1 pr-2 pl-2" >견적요청</v-chip>
-          <v-chip small class="mr-1 pr-2 pl-2" >견적접수<b-badge pill variant="danger">3</b-badge></v-chip>
-          <v-chip small class="mr-1 pr-2 pl-2" >견적회신</v-chip>
-          <v-chip small class="mr-1 pr-2 pl-2" >주문요청</v-chip>
-          <v-chip small class="mr-1 pr-2 pl-2" >주문확인</v-chip>
-        </v-chip-group>          
+          multiple
+          v-model="searchStsList"
+        >
+          <v-chip small class="mr-1 pr-2 pl-2" text-color="#D50000" @click="SelectedStatus">미확인<b-badge pill variant="danger">2</b-badge></v-chip>
+          <v-chip small class="mr-1 pr-2 pl-2" text-color="#3F51B5" @click="SelectedStatus">견적요청<b-badge pill variant="danger">2</b-badge></v-chip>
+          <v-chip small class="mr-1 pr-2 pl-2" text-color="#7B0099" @click="SelectedStatus">견적접수<b-badge pill variant="danger">3</b-badge></v-chip>
+          <v-chip small class="mr-1 pr-2 pl-2" text-color="#1B5E20" @click="SelectedStatus">견적회신</v-chip>
+          <v-chip small class="mr-1 pr-2 pl-2" text-color="#E53935" @click="SelectedStatus">주문요청</v-chip>
+          <v-chip small class="mr-1 pr-2 pl-2" text-color="#FF6D00" @click="SelectedStatus">주문확인</v-chip>
+       </v-chip-group>          
       </div>
       <div class="search-form-input">
         <div class="search-form-text">
@@ -77,23 +79,25 @@
           ></v-text-field>
         </div>
         <div class="search-form-button" >
-          <b-button squared size="sm" v-b-toggle.collapse-1-inner>상세
+          <b-button squared size="sm" @click="showDetail = !showDetail">상세
             <i class="fas fa-sort-down"></i>
           </b-button>
-          <b-button squared size="sm">초기화</b-button>
+          <b-button size="sm" @click="SetInitData">초기화</b-button>
         </div>
       </div>
-      <b-collapse id="collapse-1-inner" class="mt-2">
+      <b-collapse id="collapse-1-inner" class="mt-2" :visible="showDetail">
       <div class="search-date-form">
         <div>
-          <div  class="search-date-chips">
+          <div class="search-date-chips">
             <v-chip-group
               column
               mandatory
               align="center"
+              style="color:#FF8F00"
+              class="search-date-chip"
             > 
-              <v-chip small class="mr-1 pr-2 pl-2" >일주일</v-chip>
-              <v-chip small class="mr-1 pr-2 pl-2" >한달</v-chip>
+              <v-chip small class="mr-1 pr-2 pl-2">일주일</v-chip>
+              <v-chip small class="mr-1 pr-2 pl-2">한달</v-chip>
             </v-chip-group>   
             <div class="search-date-button"><b-button small >검색</b-button></div>      
           </div>
@@ -111,7 +115,7 @@
                 >
                   <template v-slot:activator="{ on }">
                     <v-text-field
-                      v-model="date"
+                      v-model="fromDate"
                       prepend-icon="event"
                       readonly
                       v-on="on"
@@ -120,7 +124,7 @@
                       dense
                     ></v-text-field>
                   </template>
-                  <v-date-picker v-model="date" @input="menu = false" no-title locale="ko-KR"></v-date-picker>
+                  <v-date-picker v-model="fromDate" @input="menu = false" no-title locale="ko-KR"></v-date-picker>
                 </v-menu>
               </v-col>
               <v-col cols="12" md="6" class="pt-0 mt-0">
@@ -135,7 +139,7 @@
                 >
                   <template v-slot:activator="{ on }">
                     <v-text-field
-                      v-model="date"
+                      v-model="toDate"
                       prepend-icon="event"
                       readonly
                       v-on="on"
@@ -143,7 +147,7 @@
                       dense
                     ></v-text-field>
                   </template>
-                  <v-date-picker v-model="date" @input="menu2 = false" no-title  locale="ko-KR"></v-date-picker>
+                  <v-date-picker v-model="toDate" @input="menu2 = false" no-title  locale="ko-KR"></v-date-picker>
                 </v-menu>
               </v-col>
               <v-spacer></v-spacer>
@@ -272,10 +276,12 @@ export default {
       showAlert: false,
       alertMsg: '',
       agentList: [],
-      date: new Date().toISOString().substr(0, 10),
+      fromDate: new Date().toISOString().substr(0, 10),
+      toDate : new Date().toISOString().substr(0, 10),
       menu: false,
-      modal: false,
       menu2: false,
+      showDetail: false,
+      searchStsList: [],
     }
   },
   props:['chatInfo', 'showQTId'],
@@ -333,9 +339,16 @@ export default {
         return 'color:#fff;background-color:#37474F';
       }
     },
+    SelectedStatus(){
+      this.$nextTick(function(){
+        this.showQTReqList();
+      });
+    },
     showQTReqList(idx) {
+      console.log('searchStsList2 :', this.searchStsList);
+      
       this.initQTData();
-
+      
       var now = new Date();
       var beforeDate = new Date();
       var startDate, endDate;
@@ -464,8 +477,8 @@ export default {
         idx++;
       }
       param.payload.FilterExpression = filter;
-      //console.log("======= chat state request result ========");
-      //console.log(JSON.stringify(param));
+      console.log("======= chat state request result ========");
+      console.log(JSON.stringify(param));
 
       axios({
         method: 'POST',
@@ -478,6 +491,7 @@ export default {
         //console.log(result.data);
 
         let chatList = result.data.Items;
+        
         for(let qt of this.qtReqList)
         {
           //console.log('user :' , qt.AgentName + "/" + this.UserInfo.Name);
@@ -967,6 +981,13 @@ export default {
       else{
         return value.ReqDt;
       }
+    },
+    SetInitData(){
+      // 검색조건 초기화
+      this.searchStsList = [];
+      
+      if(this.showDetail === true)
+        this.showDetail = false;
     }
   },
   updated(){
@@ -1213,8 +1234,12 @@ export default {
 .search-form-button button{
   height: 40px;
   padding: 3px;
-  background-color: #616161;
-  border-left: 1px solid white;
+  background-color: #4E342E;
+  border-left: 0px solid #4E342E;
+}
+.search-form-button :nth-child(2){
+  background-color:#6D4C41;
+  border-radius: 0px 3px 3px 0px;
 }
 .search-date-form{
   margin: 0px;
@@ -1229,8 +1254,11 @@ export default {
 .search-date-chips{
   display: flex;
 }
+.search-date-chip{
+  flex: 80%;
+}
 .search-date-button{
-  margin-left: 150px;
+  flex:auto;
 }
 /*
 .Chat-search {

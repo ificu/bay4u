@@ -878,11 +878,14 @@ export default {
       });
     },
     SetChatTitleStyle(){
-      if(this.chatItem.ReqSiteType === 'SITEF'){
-        return 'Chating-Title-sitef';
-      }
-      else if(this.chatItem.ReqSiteType === 'SITE'){
-        return 'Chating-Title-site';
+      if(this.UserInfo.UserType === "DEALER"){
+        if(this.chatItem.ReqSiteType === 'SITEF'){
+          return 'Chating-Title-sitef';
+        }
+        else{
+          // (this.chatItem.ReqSiteType === 'SITE'
+          return 'Chating-Title-site';
+        }
       }
       else{
         return 'Chating-Title';
