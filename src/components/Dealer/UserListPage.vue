@@ -62,7 +62,7 @@
           <v-chip small class="mr-1 pr-2 pl-2" text-color="#7B0099" @click="SelectedStatus">견적접수<b-badge pill variant="danger">3</b-badge></v-chip>
           <v-chip small class="mr-1 pr-2 pl-2" text-color="#1B5E20" @click="SelectedStatus">견적회신</v-chip>
           <v-chip small class="mr-1 pr-2 pl-2" text-color="#E53935" @click="SelectedStatus">주문요청</v-chip>
-          <v-chip small class="mr-1 pr-2 pl-2" text-color="#FF6D00" @click="SelectedStatus">주문확인</v-chip>
+          <v-chip small class="mr-1 pr-2 pl-2" text-color="#FF6D00" @click="SelectedStatus">주문확정</v-chip>
        </v-chip-group>          
       </div>
       <div class="search-form-input">
@@ -345,7 +345,6 @@ export default {
       });
     },
     showQTReqList(idx) {
-      console.log('searchStsList2 :', this.searchStsList);
       
       this.initQTData();
       
@@ -397,8 +396,52 @@ export default {
       param.operation = "list";
       param.tableName = "BAY4U_QT_LIST";
       param.payload = {};
-      param.payload.FilterExpression = filter;
       param.payload.ExpressionAttributeValues = {};
+
+      var stsFilter = [];  
+      var selectedStsCount = this.searchStsList.length;
+      if(this.searchStsList.length > 0 ){
+        for( var i=0; i < this.searchStsList.length; i++){
+          var strSts = this.searchStsList[i]; 
+          
+          switch (strSts) {
+            case 1: // 견적요청
+              stsFilter.push("(QTSts = :sts1)");
+              param.payload.ExpressionAttributeValues[":sts1"] = "견적요청";
+              break;
+            case 2: // 견적접수
+              stsFilter.push("(QTSts = :sts2)");
+              param.payload.ExpressionAttributeValues[":sts2"] = "견적접수";
+              break;
+            case 3: // 견적회신
+              stsFilter.push("(QTSts = :sts3)");
+              param.payload.ExpressionAttributeValues[":sts3"] = "견적회신";
+              break;
+            case 4: // 주문요청
+              stsFilter.push("(QTSts = :sts4)");
+              param.payload.ExpressionAttributeValues[":sts4"] = "주문요청";
+              break;
+            case 5: // 주문확정
+              stsFilter.push("(QTSts = :sts5)");
+              param.payload.ExpressionAttributeValues[":sts5"] = "주문확정";
+              break;
+            case 0:
+              selectedStsCount = selectedStsCount -1;
+              break;
+          }
+        }
+      }
+      
+      // 상태조회 조건 체크      
+      if(stsFilter.length > 0){
+        if(stsFilter.length === 1)
+          filter = filter + " and " + stsFilter[0] ;
+        else
+          filter = filter + " and (" + stsFilter.join(" or ") + ")";
+      }
+
+      param.payload.FilterExpression = filter;
+      
       var key = ":id";
       param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
       
@@ -985,9 +1028,10 @@ export default {
     SetInitData(){
       // 검색조건 초기화
       this.searchStsList = [];
-      
       if(this.showDetail === true)
         this.showDetail = false;
+
+      this.showQTReqList();
     }
   },
   updated(){
