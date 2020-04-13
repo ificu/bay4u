@@ -96,10 +96,10 @@
               style="color:#FF8F00"
               class="search-date-chip"
             > 
-              <v-chip small class="mr-1 pr-2 pl-2">일주일</v-chip>
-              <v-chip small class="mr-1 pr-2 pl-2">한달</v-chip>
+              <v-chip small class="mr-1 pr-2 pl-2" @click="SetSearchDate(7)">일주일</v-chip>
+              <v-chip small class="mr-1 pr-2 pl-2" @click="SetSearchDate(30)">한달</v-chip>
             </v-chip-group>   
-            <div class="search-date-button"><b-button small >검색</b-button></div>      
+            <div class="search-date-button"><b-button small @click="showQTReqList(5)">검색</b-button></div>      
           </div>
           <div class="search-date">
             <v-row class="pt-0 mt-0">
@@ -352,6 +352,7 @@ export default {
       var beforeDate = new Date();
       var startDate, endDate;
 
+      /*
       if(idx === 0) {
         startDate = now.getFullYear() + '-' + datePadding(now.getMonth()+1,2) +'-'+ datePadding(now.getDate(),2);
         endDate = startDate;
@@ -381,7 +382,10 @@ export default {
         beforeDate.setDate(beforeDate.getDate() - 7);
         startDate = beforeDate.getFullYear() + '-' + datePadding(beforeDate.getMonth()+1,2) +'-'+ datePadding(beforeDate.getDate(),2);
         endDate = now.getFullYear() + '-' + datePadding(now.getMonth()+1,2) +'-'+ datePadding(now.getDate(),2);
-      }
+      }*/
+
+      startDate = this.fromDate;
+      endDate = this.toDate;
 
       var filter = "ResDealer = :id";
       if(this.searchText === '')
@@ -389,7 +393,13 @@ export default {
         filter = "ResDealer = :id and ReqDt between :startDt and :endDt";
       }
       else{
-        filter = "ResDealer = :id and ( contains(CarNo, :searchText) or contains(ReqName, :searchText) or contains(ReqDt, :searchText) )";
+        if(idx === 5){
+          // 상세 검색버튼 클릭 시
+          filter = "ResDealer = :id and ReqDt between :startDt and :endDt  and ( contains(CarNo, :searchText) or contains(ReqName, :searchText) or contains(ReqDt, :searchText) )";
+        }
+        else{
+          filter = "ResDealer = :id and ( contains(CarNo, :searchText) or contains(ReqName, :searchText) or contains(ReqDt, :searchText) )";
+        }
       }
 
       var param = {};
@@ -399,7 +409,7 @@ export default {
       param.payload.ExpressionAttributeValues = {};
 
       var stsFilter = [];  
-      var selectedStsCount = this.searchStsList.length;
+      var isNotRead = false;
       if(this.searchStsList.length > 0 ){
         for( var i=0; i < this.searchStsList.length; i++){
           var strSts = this.searchStsList[i]; 
@@ -425,28 +435,36 @@ export default {
               stsFilter.push("(QTSts = :sts5)");
               param.payload.ExpressionAttributeValues[":sts5"] = "주문확정";
               break;
-            case 0:
-              selectedStsCount = selectedStsCount -1;
+            case 0: // 미확인
+              isNotRead = true;
               break;
           }
         }
       }
       
-      // 상태조회 조건 체크      
-      if(stsFilter.length > 0){
+      // 상태조회 조건 체크 (미확인 미포함 상태 조회 일때)
+      if(stsFilter.length > 0 && isNotRead === false){
         if(stsFilter.length === 1)
           filter = filter + " and " + stsFilter[0] ;
         else
           filter = filter + " and (" + stsFilter.join(" or ") + ")";
       }
-
       param.payload.FilterExpression = filter;
+
+      if(isNotRead){
+        // 미확인 조회 일때는 한달 
+        beforeDate.setDate(beforeDate.getMonth() - 1);
+        startDate = beforeDate.toISOString().substr(0, 10);
+        endDate =  now.toISOString().substr(0, 10);
+
+        this.fromDate = startDate;
+        this.toDate = endDate;
+      }
       
       var key = ":id";
       param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
       
-      if(this.searchText === '')
-      {
+      if(this.searchText === ''){
         var key2 = ":startDt";
         var key3 = ":endDt";
         param.payload.ExpressionAttributeValues[key2] = startDate;
@@ -455,6 +473,14 @@ export default {
       else{
         var key2 = ":searchText";
         param.payload.ExpressionAttributeValues[key2] = this.searchText;
+        
+        if(idx === 5){
+          // 상세 검색버튼 클릭 시
+          var key3 = ":startDt";
+          var key4 = ":endDt";
+          param.payload.ExpressionAttributeValues[key3] = startDate;
+          param.payload.ExpressionAttributeValues[key4] = endDate;
+        }
       }
 
       console.log("======= QT Request result ========");
@@ -507,7 +533,11 @@ export default {
       if(filterRead !== undefined && filterRead === true){
         docIdList = data;
       }
-
+      
+      var minSeq = Math.min(...docIdList.map(o=>o.ReqSeq));
+      //console.log('min :' , minSeq);
+      
+      /*
       for(let item of docIdList)
       { 
         if(idx === 1){
@@ -518,8 +548,15 @@ export default {
         }
         param.payload.ExpressionAttributeValues[":docID"+idx] = item.ID;
         idx++;
-      }
+      }*/
+        
+      
+      filter = filter + "ChatTo = :bsnID and ReqTm >= :reqtm";
       param.payload.FilterExpression = filter;
+    
+      param.payload.ExpressionAttributeValues[":bsnID"] = this.UserInfo.BsnID;
+      param.payload.ExpressionAttributeValues[":reqtm"] = minSeq;
+
       console.log("======= chat state request result ========");
       console.log(JSON.stringify(param));
 
@@ -530,8 +567,8 @@ export default {
         data: param
       })
       .then((result) => {
-        //console.log("=======  result ========");
-        //console.log(result.data);
+        console.log("=======  result ========");
+        console.log(result.data);
 
         let chatList = result.data.Items;
         
@@ -1027,11 +1064,37 @@ export default {
     },
     SetInitData(){
       // 검색조건 초기화
-      this.searchStsList = [];
       if(this.showDetail === true)
         this.showDetail = false;
 
+      var now = new Date();
+      var beforeDate = new Date();
+      beforeDate.setDate(beforeDate.getDate() - 7);
+      this.fromDate = beforeDate.toISOString().substr(0, 10);
+      this.toDate = now.toISOString().substr(0, 10);
+
+      this.searchText="";
+      if(this.searchStsList.length > 0){
+        this.searchStsList = [];
+      }
+      
       this.showQTReqList();
+    },
+    SetSearchDate(days){
+      var now = new Date();
+      var beforeDate = new Date();
+          
+      // 일주일
+      if(days === 7){
+        beforeDate.setDate(beforeDate.getDate() - 7);
+      }
+      // 한달
+      if(days === 30){
+        beforeDate.setMonth(beforeDate.getMonth() - 1);
+      }
+
+      this.fromDate = beforeDate.toISOString().substr(0, 10);
+      this.toDate = now.toISOString().substr(0, 10);
     }
   },
   updated(){
@@ -1045,6 +1108,13 @@ export default {
     this.showQTReqList();
   },
   created : function() {
+
+    var now = new Date();
+    var beforeDate = new Date();
+    beforeDate.setDate(beforeDate.getDate() - 7);
+    this.fromDate = beforeDate.toISOString().substr(0, 10);
+    this.toDate = now.toISOString().substr(0, 10);
+
     this.targetQtId = this.showQTId;
     
     if(this.UserInfo.BsnID === '')
