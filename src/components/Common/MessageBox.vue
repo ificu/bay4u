@@ -43,7 +43,7 @@
   vertical-align: middle;
 }
 .msg-modal-container {
-    width: 280px;
+    width: 300px;
     margin: 0px auto;
     /*padding: 20px 30px;*/
     background-color: #4E342E;
