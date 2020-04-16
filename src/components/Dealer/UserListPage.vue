@@ -6,9 +6,11 @@
   <div class="UserList-title">
     <div class="UserList-title-text" ><span>카센터 대화목록</span></div>
     <div class="UserList-title-agentList">
-     <select v-model="selected" class="agent-select">
-        <option v-for="(item, index) in agentList"  v-bind:key="index">{{ item.NAME }}</option>
+    <!-- <select v-model="selectedAgent" class="agent-select">
+        <option v-for="(item, index) in agentItems"  v-bind:key="index">{{ item.NAME }}</option>
     </select>
+    -->
+     <b-form-select v-model="selectedAgent" :options="agentItems" class="agent-select" @change="showQTReqList()"></b-form-select>
     </div>
   </div>
       <!--<div class="Chat-search mdl-textfield mdl-js-textfield mdl-textfield--expandable">
@@ -304,6 +306,8 @@ export default {
       showQTHistory: false,
       alertMsg: '',
       agentList: [],
+      agentItems: [],
+      selectedAgent :"",
       fromDate: new Date().toISOString().substr(0, 10),
       toDate : new Date().toISOString().substr(0, 10),
       menu: false,
@@ -316,8 +320,6 @@ export default {
       resCnt: 0,    // 견적회신 수
       ordReqCnt:0,  // 주문요청 수
       ordResCnt:0,   // 주문회신 수
-      items: ['Foo', 'Bar', 'Fizz', 'Buzz'],
-      selected :'',
     }
   },
   props:['chatInfo', 'showQTId'],
@@ -358,6 +360,19 @@ export default {
       })
       .then((result) => {
         this.agentList = result.data.Items;
+        var allItem = {};
+        allItem.text = "전체";
+        allItem.value = "";
+        this.agentItems.push(allItem); 
+
+        this.agentList.forEach(x => {
+          if(x.MODE !== "VIEW"){
+            var agentItem = {};
+            agentItem.text = x.NAME;
+            agentItem.value = x;
+            this.agentItems.push(agentItem); 
+          }
+        });
         //console.log('agentList : ', this.agentList) ; 
       });
     },
@@ -381,9 +396,7 @@ export default {
       });
     },
     showQTReqList(idx) {
-      
       this.initQTData();
-      
       var now = new Date();
       var beforeDate = new Date();
       var startDate, endDate;
@@ -484,7 +497,7 @@ export default {
           }
         }
       }
-      
+
       // 상태조회 조건 체크
       if(isNotRead === false){
         if(stsFilter.length > 0){
@@ -497,8 +510,20 @@ export default {
       else{
         param.payload.ExpressionAttributeValues = {};
       }
-      param.payload.FilterExpression = filter;
 
+      // 담당자 필터 설정이면
+      if(this.selectedAgent !==''){
+        if(this.searchStsList.length > 0){
+          filter = filter + " and AgentName = :agentName ";
+          param.payload.ExpressionAttributeValues[":agentName"] = this.selectedAgent.NAME;
+        }
+        else{
+          filter = filter + " and (AgentName = :agentName or QTSts = :sts)";
+          param.payload.ExpressionAttributeValues[":agentName"] = this.selectedAgent.NAME;
+          param.payload.ExpressionAttributeValues[":sts"] = "견적요청";
+        }
+      }
+      param.payload.FilterExpression = filter;
       /*
       if(isNotRead){   
         // 미확인 조회 일때는 한달 
@@ -1563,15 +1588,16 @@ export default {
   border-radius: 3px 3px 0px 0px;
   position: relative;
   display: flex;
-  font-size: 0.9em;
-  padding-top: 10px;
+  padding-top: 3px;
   /* color: 	#f6c107;
   text-align:center;
   */
 }
 .UserList-title-text{
   color: 	#f6c107;
-  margin-left: 10px;
+  padding-top: 3px;
+  margin-left: 12px;
+  font-size: 1.1em;
 }
 .UserList-title-agentList{
   position: absolute;
@@ -1579,9 +1605,10 @@ export default {
   height: 40px;
 }
 .agent-select{
-  width: 60px;
+  width: 100px;
+  height: 35px;
   background-color: white;
-  border: 1px solid #CCC;
+  border: 1px solid black;
 }
 .UserListPage{
   width: 100%;
