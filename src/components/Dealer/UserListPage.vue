@@ -3,7 +3,14 @@
   <div class="UserListPage">
   <!--<b-tabs class="UserList-Tab" v-model="tabIndex" content-class="mt-3" fill>
     <b-tab class="tabPage1" title="카센터 대화목록" active :title-link-class="linkClass(0)">-->
-  <div class="UserList-title"><span>카센터 대화목록</span></div>
+  <div class="UserList-title">
+    <div class="UserList-title-text" ><span>카센터 대화목록</span></div>
+    <div class="UserList-title-agentList">
+     <select v-model="selected" class="agent-select">
+        <option v-for="(item, index) in agentList"  v-bind:key="index">{{ item.NAME }}</option>
+    </select>
+    </div>
+  </div>
       <!--<div class="Chat-search mdl-textfield mdl-js-textfield mdl-textfield--expandable">
         <label class="mdl-button mdl-js-button mdl-button--icon" for="sample6" v-on:click="showQTReqList()">
           <i class="material-icons">search</i>
@@ -308,7 +315,9 @@ export default {
       actCnt: 0,    // 견적접수 수
       resCnt: 0,    // 견적회신 수
       ordReqCnt:0,  // 주문요청 수
-      ordResCnt:0   // 주문회신 수
+      ordResCnt:0,   // 주문회신 수
+      items: ['Foo', 'Bar', 'Fizz', 'Buzz'],
+      selected :'',
     }
   },
   props:['chatInfo', 'showQTId'],
@@ -414,13 +423,20 @@ export default {
       startDate = this.fromDate;
       endDate = this.toDate;
 
+      // 과거 견적내역 조회
+      if(idx === 6){
+        beforeDate.setFullYear(beforeDate.getFullYear() - 3);
+        startDate =  beforeDate.toISOString().substr(0, 10);
+        endDate = now.toISOString().substr(0, 10);
+      }
+
       var filter = "ResDealer = :id";
       if(this.searchText === '')
       {
         filter = "ResDealer = :id and ReqDt between :startDt and :endDt";
       }
       else{
-        if(idx === 5){
+        if(idx === 5 || idx === 6){
           // 상세 검색버튼 클릭 시
           filter = "ResDealer = :id and ReqDt between :startDt and :endDt  and ( contains(CarNo, :searchText) or contains(ReqName, :searchText) or contains(ReqDt, :searchText) )";
         }
@@ -506,7 +522,7 @@ export default {
         var key2 = ":searchText";
         param.payload.ExpressionAttributeValues[key2] = this.searchText;
         
-        if(idx === 5){
+        if(idx === 5 || idx === 6){
           // 상세 검색버튼 클릭 시
           var key3 = ":startDt";
           var key4 = ":endDt";
@@ -673,7 +689,6 @@ export default {
       });
     },
     SetStatus(){
-      console.log('상태');
       var startDate = this.fromDate;
       var endDate = this.toDate;
       var param = {};
@@ -682,6 +697,9 @@ export default {
       param.payload = {};
       
       var filter = "ResDealer = :id and ReqDt between :startDt and :endDt";
+      if(this.searchText !== ""){
+        filter = filter + " and ( contains(CarNo, :searchText) or contains(ReqName, :searchText) or contains(ReqDt, :searchText) )";
+      }
       param.payload.FilterExpression = filter;
 
       param.payload.ExpressionAttributeValues = {};
@@ -692,6 +710,9 @@ export default {
       param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
       param.payload.ExpressionAttributeValues[key2] = startDate;
       param.payload.ExpressionAttributeValues[key3] = endDate;
+      if(this.searchText !== ""){
+        param.payload.ExpressionAttributeValues[":searchText"] = this.searchText;
+      }
        
       axios({
         method: 'POST',
@@ -1043,14 +1064,25 @@ export default {
       })
     },
     GetCarNoQTHistory(carno){
+      
+      var now = new Date();
+      var beforeDate = new Date();
+      var startDate , endDate;0
+      beforeDate.setFullYear(beforeDate.getFullYear() - 3);
+      startDate =  beforeDate.toISOString().substr(0, 10);
+      endDate = now.toISOString().substr(0, 10);
+
       var param = {};
       param.operation = "list";
       param.tableName = "BAY4U_QT_LIST";
       param.payload = {};
-      param.payload.FilterExpression = "ResDealer = :id and CarNo = :carno";
+      param.payload.FilterExpression = "ResDealer = :id and CarNo = :carno and ReqDt between :startDt and :endDt";
       param.payload.ExpressionAttributeValues = {};
       param.payload.ExpressionAttributeValues[":id"] = this.UserInfo.BsnID;
       param.payload.ExpressionAttributeValues[":carno"] = carno;
+      param.payload.ExpressionAttributeValues[":startDt"] = startDate;
+      param.payload.ExpressionAttributeValues[":endDt"] = endDate;
+
       axios({
         method: 'POST',
         url: Constant.LAMBDA_URL,
@@ -1059,7 +1091,7 @@ export default {
       })
       .then((result) => {
         if(result.data.Items.length > 0){
-          this.alertMsg = "해당 차량의 과거 견적/주문 내역이 있습니다.<br>조회화면으로 이동하시겠습니까?";
+          this.alertMsg = "해당 차량의 과거 견적/주문 내역이 있습니다.<br>과거 내역을 조회하시겠습니까?";
           this.showQTHistory = true;
         }
       })
@@ -1071,9 +1103,26 @@ export default {
     {
       let targetQtItem = this.qtReqList[this.qtItemIndex];
       this.searchText = targetQtItem.CarNo;
+
+      var now = new Date();
+      var beforeDate = new Date();
+      var startDate , endDate;0
+      beforeDate.setFullYear(beforeDate.getFullYear() - 3);
+      startDate =  beforeDate.toISOString().substr(0, 10);
+      endDate = now.toISOString().substr(0, 10);
+
+      this.fromDate = startDate;
+      this.toDate = endDate;
+
       this.showQTHistory = false;
       this.alertMsg = "";
-      this.showQTReqList();
+      this.searchStsList = [];
+
+      this.showQTReqList(6);
+      
+      this.$nextTick(()=>{
+        this.showQtInfo(targetQtItem.ID);
+      });
     },
     SaveOrderAccept()
     {
@@ -1510,16 +1559,30 @@ export default {
 */
 .UserList-title{
   background-color: #6c757d;
-  color: 	#f6c107;
-  text-align:center;
-  line-height: 40px;
   height: 40px;
   border-radius: 3px 3px 0px 0px;
   position: relative;
+  display: flex;
   font-size: 0.9em;
-  margin-top: 5px;
+  padding-top: 10px;
+  /* color: 	#f6c107;
+  text-align:center;
+  */
 }
-
+.UserList-title-text{
+  color: 	#f6c107;
+  margin-left: 10px;
+}
+.UserList-title-agentList{
+  position: absolute;
+  right:5px;
+  height: 40px;
+}
+.agent-select{
+  width: 60px;
+  background-color: white;
+  border: 1px solid #CCC;
+}
 .UserListPage{
   width: 100%;
   height: 100%;
