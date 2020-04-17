@@ -2229,6 +2229,10 @@ export default {
         this.qtInfo = [];
         this.SetQtInfo();
         this.siteInfo = [];
+        this.qtItems = [];
+        this.confirmList = [];
+        this.detailQTData = [];
+        this.orderHistory = [];
         this.showSiteInfo = false;
         if(this.brandClicked === true){
           document.getElementById('btnBrandSelect').click();

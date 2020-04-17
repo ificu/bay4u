@@ -74,14 +74,14 @@
           <v-chip small class="mr-1 pr-2 pl-2" text-color="#7B0099" @click="SelectedStatus">견적접수
             <b-badge class="ml-1"  pill variant="danger" v-if="actCnt !==  0">{{actCnt}}</b-badge>
           </v-chip>
-          <v-chip small class="mr-1 pr-2 pl-2" text-color="#1B5E20" @click="SelectedStatus">견적회신
-            <b-badge class="ml-1"  pill variant="danger" v-if="resCnt !== 0">{{resCnt}}</b-badge>
-          </v-chip>
           <v-chip small class="mr-1 pr-2 pl-2" text-color="#E53935" @click="SelectedStatus">주문요청
             <b-badge class="ml-1"  pill variant="danger" v-if="ordReqCnt !== 0">{{ordReqCnt}}</b-badge>
           </v-chip>
+          <v-chip small class="mr-1 pr-2 pl-2" text-color="#1B5E20" @click="SelectedStatus">견적회신
+            <b-badge class="ml-1"  pill variant="secondary" v-if="resCnt !== 0">{{resCnt}}</b-badge>
+          </v-chip>
           <v-chip small class="mr-1 pr-2 pl-2" text-color="#FF6D00" @click="SelectedStatus">주문확정
-            <b-badge class="ml-1"  pill variant="danger" v-if="ordResCnt !== 0">{{ordResCnt}}</b-badge>
+            <b-badge class="ml-1"  pill variant="secondary" v-if="ordResCnt !== 0">{{ordResCnt}}</b-badge>
           </v-chip>
        </v-chip-group>          
       </div>
@@ -172,8 +172,7 @@
               <v-spacer></v-spacer>
             </v-row>
           </div>
-        </div>
-        
+        </div>      
       </div>
       </b-collapse>
     </div>
@@ -479,13 +478,13 @@ export default {
               stsFilter.push("(QTSts = :sts2)");
               param.payload.ExpressionAttributeValues[":sts2"] = "견적접수";
               break;
-            case 3: // 견적회신
-              stsFilter.push("(QTSts = :sts3)");
-              param.payload.ExpressionAttributeValues[":sts3"] = "견적회신";
-              break;
-            case 4: // 주문요청
+            case 3: // 주문요청
               stsFilter.push("(QTSts = :sts4)");
               param.payload.ExpressionAttributeValues[":sts4"] = "주문요청";
+              break;
+            case 4: // 견적회신
+              stsFilter.push("(QTSts = :sts3)");
+              param.payload.ExpressionAttributeValues[":sts3"] = "견적회신";
               break;
             case 5: // 주문확정
               stsFilter.push("(QTSts = :sts5)");
@@ -512,10 +511,13 @@ export default {
       }
 
       // 담당자 필터 설정이면
-      if(this.selectedAgent !==''){
+      if(this.selectedAgent !== ''){
         if(this.searchStsList.length > 0){
-          filter = filter + " and AgentName = :agentName ";
-          param.payload.ExpressionAttributeValues[":agentName"] = this.selectedAgent.NAME;
+          if(this.searchStsList.includes(1) !== true && isNotRead === false){
+            // 견적요청이 선택되어 있지 않을 때
+            filter = filter + " and AgentName = :agentName ";
+            param.payload.ExpressionAttributeValues[":agentName"] = this.selectedAgent.NAME;
+          }
         }
         else{
           filter = filter + " and (AgentName = :agentName or QTSts = :sts)";
@@ -680,13 +682,13 @@ export default {
                     let sts2 = docIdList.filter(x => x.QTSts === "견적접수");
                     stsList = stsList.concat(sts2);
                     break;
-                  case 3: // 견적회신
-                    let sts3 = docIdList.filter(x => x.QTSts === "견적회신");
-                    stsList = stsList.concat(sts3);
-                    break;
-                  case 4: // 주문요청
+                  case 3: // 주문요청
                     let sts4 = docIdList.filter(x => x.QTSts === "주문요청");
                     stsList = stsList.concat(sts4);
+                    break;
+                  case 4: // 견적회신
+                    let sts3 = docIdList.filter(x => x.QTSts === "견적회신");
+                    stsList = stsList.concat(sts3);
                     break;
                   case 5: // 주문확정
                     let sts5 = docIdList.filter(x => x.QTSts === "주문확정");
@@ -698,10 +700,42 @@ export default {
             stsList.forEach(z =>{
               var vIdx = this.qtReqList.findIndex(w => w.ID === z.ID);
               if(vIdx === -1){
-                this.qtReqList.push(z);
+                if(this.selectedAgent !== ""){
+                  
+                  if(z.QTSts === "견적요청"){
+                    this.qtReqList.push(z);  
+                  }
+                  else{
+                    
+                    if(z.AgentName === this.selectedAgent.NAME){
+                      this.qtReqList.push(z);
+                    }
+                  }
+                }
+                else{
+                  this.qtReqList.push(z);
+                }
               }
             });
 
+            if(this.selectedAgent !== ""){
+              var delIndex = [];
+              
+              this.qtReqList.forEach(x => {
+                if(x.QTSts !== "견적요청" && x.AgentName !== this.selectedAgent.NAME){
+                  delIndex.push(x.ID);
+                }
+              });
+
+              delIndex.forEach(y => {
+                var findIdx = this.qtReqList.findIndex(z=>z.ID === y);
+                console.log('findIdx :' ,findIdx );
+                if(findIdx > -1){
+                  this.qtReqList.splice(findIdx,1);
+                }
+              });
+            }
+            
             if(Array.isArray(this.qtReqList)) {
               this.qtReqList.sort(function(a, b){
                 return (a.ReqSeq < b.ReqSeq) ? 1 : -1;
@@ -725,8 +759,6 @@ export default {
       if(this.searchText !== ""){
         filter = filter + " and ( contains(CarNo, :searchText) or contains(ReqName, :searchText) or contains(ReqDt, :searchText) )";
       }
-      param.payload.FilterExpression = filter;
-
       param.payload.ExpressionAttributeValues = {};
 
       var key = ":id";
@@ -735,10 +767,19 @@ export default {
       param.payload.ExpressionAttributeValues[key] = this.UserInfo.BsnID;
       param.payload.ExpressionAttributeValues[key2] = startDate;
       param.payload.ExpressionAttributeValues[key3] = endDate;
+      
       if(this.searchText !== ""){
         param.payload.ExpressionAttributeValues[":searchText"] = this.searchText;
       }
-       
+
+      if(this.selectedAgent !== ""){
+        filter = filter + " and (AgentName = :agentName or QTSts = :sts)";
+        param.payload.ExpressionAttributeValues[":agentName"] = this.selectedAgent.NAME;
+        param.payload.ExpressionAttributeValues[":sts"] = "견적요청";
+      }
+
+      param.payload.FilterExpression = filter;
+
       axios({
         method: 'POST',
         url: Constant.LAMBDA_URL,
@@ -911,7 +952,7 @@ export default {
     initQTData()
     {
       this.$EventBus.$emit('init-qtInfo', null)
-       this.qtItemIndex = -1
+      this.qtItemIndex = -1
     },
     searchQTList(){
 
@@ -1068,9 +1109,9 @@ export default {
             this.TopMoveChat(qtMsg);
             
             // 과거견적 내역 조회
-            this.$nextTick(()=>{
+            /*this.$nextTick(()=>{
               this.GetCarNoQTHistory(targetQtItem.CarNo);
-            });
+            });*/
           })
           .catch((error) => {
             console.log(error);
@@ -1314,9 +1355,17 @@ export default {
           return (a.ReqSeq < b.ReqSeq) ? 1 : -1;
           });
         }
-        if(this.selectedId === data.docId){
+        if(findIdx === this.qtItemIndex){
           this.qtItemIndex = 0;
         }
+        else{
+          if(this.qtItemIndex < findIdx){
+            this.qtItemIndex = this.qtItemIndex + 1;
+          }
+        }
+        /*if(this.selectedId === data.docId){
+          this.qtItemIndex = 0;
+        }*/
       }
       this.SetStatus();
     },
@@ -1379,6 +1428,8 @@ export default {
 
       this.fromDate = beforeDate.toISOString().substr(0, 10);
       this.toDate = now.toISOString().substr(0, 10);
+
+      this.showQTReqList(5);
     }
   },
   updated(){
@@ -1428,9 +1479,11 @@ export default {
 
     this.$EventBus.$on('UserListPage.AddNewChat', data => {  
       console.log('docId : ' , data);
+      console.log('QTLIST:' , this.qtReqList);
       var flag = '';
       var checkExist = false;
-      
+      var index = 0;
+      var delIndex = [];
       for (var chat of this.qtReqList) {
         // 중복체크
         if(chat.NotChatIDList !== undefined && chat.NotChatIDList.length > 0){
@@ -1464,7 +1517,7 @@ export default {
             }
           }
           else{
-            // 정비소 메시지 일때
+            // 카센터 메시지 일때
             if(chat.NotReadCnt === undefined){
               chat.NotReadCnt = 1;
             }
@@ -1493,11 +1546,26 @@ export default {
           if(data.qtInfo !== undefined && data.chatType !== undefined && data.chatType !== "D"){
             chat.QTSts = data.qtInfo.QTSts; 
           }
+
+          // 담당자 선택 조회 중 일때  
+          if(data.sendFlag === 'DEALER' && this.selectedAgent !== "" && this.selectedAgent.ID !== data.qtInfo.ReqUserID){
+            console.log('대리점 메시지 담당자 다름! - ',index) ;
+            delIndex.push(index);
+          }
+        }
+        index++;
+      }
+
+      if(delIndex.length > 0){
+        for(var i of delIndex){
+          this.qtReqList.splice(i,1);
+          this.initQTData();
         }
       }
       console.log('checkExist:',  checkExist);
       // 값이 true가 아니면 현재 리스트에 없다는 의미으로 다시 조회해 와서 표시 하자.
       if(checkExist === false) {
+
         flag = 'C';
         //console.log('docId.qtInfo : ' , docId.qtInfo);
         if(data.qtInfo !== undefined){
@@ -1518,9 +1586,30 @@ export default {
           newQtData.QTSts  = data.qtInfo.QTSts;
           newQtData.isRead  = false;
           newQtData.NotReadCnt  = 1;
-          this.qtReqList.push(newQtData);    
-          //console.log('qtReqList : ' ,this.qtReqList);
+        
+          // 전송된 채팅 견적상태가 상태 조회값에 있으면 채팅 추가 
+          if(this.searchStsList.length > 0 && this.searchStsList.includes(data.qtInfo.QTSts) === true){
+            console.log('상태조회 값 있음!!');
+            this.qtReqList.push(newQtData);    
+          }
+          else{
+            console.log('상태조회 값 없음!!');
+            if(data.qtInfo.QTSts === "견적요청"){
+              this.qtReqList.push(newQtData);
+            }
+            else{
+              if(this.selectedAgent === ""){
+                console.log('담당자 전체 조회');
+                this.qtReqList.push(newQtData);
+              }
+              else if(this.selectedAgent.ID === data.qtInfo.ReqUserID){
+                console.log('담당자 조회 : ' , data.qtInfo.ReqUserID);
+                this.qtReqList.push(newQtData);
+              }
+            }
+          }
         }
+
         if(Array.isArray(this.qtReqList)) {
           this.qtReqList.sort(function(a, b){
             return (a.ReqSeq < b.ReqSeq) ? 1 : -1;
@@ -1549,7 +1638,27 @@ export default {
         if(updateData.UpdateRead !== undefined && updateData.UpdateRead === "Y"){
           this.saveChatState(this.qtReqList[index]);
         }
-        this.SetStatus();
+        
+        // 견적상태 조회 필터 설정 체크
+        if(this.searchStsList.length > 0){
+          if(this.searchStsList.includes(updateData.Msg) !== true){
+             // 견적상태 조회 필터에 Update 견적상태와 다르면 채팅목록에서 삭제
+             this.qtReqList.splice(index,1);
+             // 선택 한 채팅인데 목록에서 빠지면 상세 초기화 
+             if(this.qtItemIndex === index){
+               this.initQTData();
+             }
+          }
+          this.SetStatus();
+        }
+        else{
+          this.SetStatus();
+        }
+
+        if(this.qtReqList.length === 0){
+          // 상세내역 초기화
+          this.initQTData();
+        }
       }
     });
 
@@ -1588,16 +1697,15 @@ export default {
   border-radius: 3px 3px 0px 0px;
   position: relative;
   display: flex;
-  padding-top: 3px;
+  padding-top: 6px;
   /* color: 	#f6c107;
   text-align:center;
   */
 }
 .UserList-title-text{
   color: 	#f6c107;
-  padding-top: 3px;
   margin-left: 12px;
-  font-size: 1.1em;
+  font-size: 0.95em;
 }
 .UserList-title-agentList{
   position: absolute;
@@ -1606,9 +1714,12 @@ export default {
 }
 .agent-select{
   width: 100px;
-  height: 35px;
+  height: 25px;
+  padding:1px 5px;
+  font-size: 0.9em;
   background-color: white;
-  border: 1px solid black;
+  border: 1px solid #E0E0E0;
+  border-radius: 0px;
 }
 .UserListPage{
   width: 100%;
@@ -1657,6 +1768,10 @@ export default {
 }
 .search-date-form{
   margin: 0px;
+  padding:5px;
+  border-radius: 3px 3px 3px 3px;
+  border: 1px solid #BCAAA4;
+  background-color:#EFEBE9;
 }
 .search-date{
   height: 35px;
