@@ -442,7 +442,6 @@ export default {
 			}
 			
 			this.orderItems.forEach(dealer => {
-
 				this.saveCount++;
 	
 				now = new Date();
@@ -465,12 +464,21 @@ export default {
 				param.payload.Item.CarBrand = this.reOrderBrand;
 				param.payload.Item.ReqDt = now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);
 				param.payload.Item.ReqSite = this.UserInfo.BsnID;
+				param.payload.Item.ReqSiteType = this.UserInfo.UserType;
 				param.payload.Item.ReqName = this.UserInfo.Name;
 				param.payload.Item.ReqSeq = reqSeq;
 				param.payload.Item.ResDealer = dealer.ResDealer;
 				param.payload.Item.ResDealerNm = dealer.ResDealerNm;
 				param.payload.Item.Memo = this.reOrderMemo;
-				param.payload.Item.QTSts = "바로주문";
+
+				if(dealer.ResDealer === "PARTS"){
+					param.payload.Item.QTSts = "주문요청";
+					param.payload.Item.Flag = 'ORDER';
+				}
+				else{
+					param.payload.Item.QTSts = "바로주문";
+				}
+
 				if(this.reOrderCaptureBlobImg !== '')
 					param.payload.Item.IMG = imgKey + ".png";
 				else
@@ -497,7 +505,7 @@ export default {
 				{
 					this.sendDocId =  docId;
 					this.sendDealer = dealer.ResDealer;
-					this.sendDealerNm =dealer.ResDealerNm;
+					this.sendDealerNm = dealer.ResDealerNm;
 					this.sendqtInfoData = this.qtInfoData;
 					this.sendOrdData = dealer;
 				}
@@ -518,8 +526,15 @@ export default {
 					//this.saveReQTConfirm(docId , dealer);
 				
 					var chatDocId = param.payload.Item.ID;
-					var paramData =  param.payload.Item;
-					this.saveChating(chatDocId , dealer, ' ',paramData);
+					var paramData = param.payload.Item;
+					
+					if(dealer.ResDealer === "PARTS"){
+						// 부품지원센터이면 주문Data 생성
+						this.SaveOrder(paramData , dealer);
+					}
+					else{
+						this.saveChating(chatDocId , dealer, ' ', paramData);
+					}
 					
 					if(this.reOrderCaptureBlobImg !== '') {
 						param = {};
@@ -730,7 +745,11 @@ export default {
 		saveChating(docId , dealer ,val, paramData)
     {
 			let saveSeq = docId.substring(docId.length - 1);
-      let msg =  ((this.reOrderCarNo === "*empty*") ? "미상차량" : this.reOrderCarNo) + " 차량 부품 바로주문 요청 완료!!";
+			let msg =  ((this.reOrderCarNo === "*empty*") ? "미상차량" : this.reOrderCarNo) + " 차량 부품 바로주문 요청 완료!!";
+			if(dealer.ResDealer === "PARTS"){
+				msg =  ((this.reOrderCarNo === "*empty*") ? "미상차량" : this.reOrderCarNo) + " 차량 부품 바로주문 완료!!";
+			}
+
       let now = new Date();
       let chatTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
           + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
@@ -832,6 +851,51 @@ export default {
 				this.showProcessing = false;
 				this.saveCount = 0;
       });
+		},
+		SaveOrder(saveData, dealer){
+
+			// 신규주문 
+			var now = new Date();
+			var ReqTm = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+															+ datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+
+			var id =  this.UserInfo.BsnID + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
+						+ datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+			
+			var param = {};
+			param.operation = "create";
+			param.tableName = "BAY4U_ORDER_LIST";
+			param.payload = {};
+			param.payload.Item = {};
+			param.payload.Item.ID = id;
+			param.payload.Item.DocID = saveData.ID
+			param.payload.Item.CarNo = saveData.CarNo;
+			param.payload.Item.ReqSite =  this.UserInfo.BsnID;
+			param.payload.Item.ReqSiteNm = this.UserInfo.Name;
+			param.payload.Item.ResDealer = saveData.ResDealer;
+			param.payload.Item.ResDealerNm = saveData.ResDealerNm;
+			param.payload.Item.LineItem = convertArrayToDynamo(JSON.stringify(dealer.OrderItem)); 
+			param.payload.Item.ReqDt = now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);
+			param.payload.Item.ReqTm = ReqTm;
+				
+			console.log("======= Order Request ========");
+			console.log(JSON.stringify(param));
+
+			axios({
+					method: 'POST',
+					url: Constant.LAMBDA_URL,
+					headers: Constant.JSON_HEADER,
+					data: param
+			})
+			.then((result) => {
+				console.log("======= Order result ========");
+				console.log(result.data);
+
+				this.saveChating(saveData.ID , dealer, id, saveData);
+			})
+			.catch((error) => {
+				console.log(error);
+			});
 		},
 		goQTRequest()
 		{ 

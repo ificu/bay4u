@@ -223,7 +223,7 @@
       </b-card>
       <b-card no-body class="QT-Detail">
         <b-tabs v-model="tabIndex" card active-nav-item-class="font-weight-bold" >
-        <b-tab :title="tab1Title" :title-link-class="linkClass(0)">
+        <b-tab :title="tab1Title" :title-link-class="linkClass(0)" v-if="visibleQTTab">
           <b-card-text> 
             <div class="QTReq-List">
               <v-icon x-small class="qt-icon">fas fa-angle-down</v-icon>견적요청 상세    
@@ -264,7 +264,7 @@
             </div>      
           </b-card-text>
         </b-tab>
-        <b-tab :title="tab2Title" :title-link-class="linkClass(1)" v-if="visibleTab">
+        <b-tab :title="tab2Title" :title-link-class="linkClass(1)" v-if="visibleTab && visibleQTTab">
           <b-card-text>
             <div class="QTRes-List">
               <div class="QTRes-Title">
@@ -546,7 +546,7 @@
             </div>
           </b-card-text>
         </b-tab>
-        <b-tab title="주문 내역" :title-link-class="linkClass(2)"  v-if="UserInfo.UserType !== 'DEALER' && visibleTab">
+        <b-tab title="주문 내역" :title-link-class="linkClass(2)"  v-if="(UserInfo.UserType !== 'DEALER' && visibleTab && visibleQTTab) || (qtInfo.ReqSiteType === 'SITEF')">
           <b-card-text>
             <div class="QTRes-List">
               <div class="QTRes-Title">
@@ -899,6 +899,7 @@ export default {
       tab1Title: '견적 요청',
       tab2Title: '견적 회신',
       visibleTab : false,
+      visibleQTTab : true,
       showBtnQT: true,
       showBtnOrder: false,
       roList: [],
@@ -926,6 +927,11 @@ export default {
       }
     },
     GetQtList(){
+      // 초기화
+      this.headQTData = [];
+      this.detailQTData = [];
+      this.fileQTData = [];
+
       var param = {};
       param.BsnId = this.qtInfo.ReqSite;
       param.CarNo = this.qtInfo.CarNo;
@@ -991,6 +997,13 @@ export default {
                 if(this.qtInfo.QTSts === "견적회신"){
                   this.tabIndex = 1;
                 }
+                else if(this.qtInfo.QTSts === "주문요청"){
+                  this.GetOrderHistory();
+                }
+                else if(this.qtInfo.QTSts === "주문확정"){
+                  this.tabIndex = 2;
+                }
+
               }
               /* var qtKeys = Object.keys(rtnQTData );*/
               /*console.log("ESTM_HED : " + this.headQTData );
@@ -2144,10 +2157,18 @@ export default {
   created: function(){
 
     this.$EventBus.$on('click-qtInfo', qtItem => {   
+      
       console.log('click Item:' , qtItem);
         this.qtInfo = qtItem;
         this.SetQtInfo();
         this.GetSiteInfo();
+
+        if(qtItem.Flag !== undefined && qtItem.Flag === "ORDER"){
+          this.visibleQTTab = false;
+        }
+        else{
+          this.visibleQTTab = true;
+        }
         
         if(this.qtInfo !== undefined && this.qtInfo.QTSts === '바로주문' || this.qtInfo.QTSts === '주문접수'){
           this.tab1Title = '바로 주문 요청';
@@ -2177,7 +2198,13 @@ export default {
         // 부품지원센터 일때
         if(this.UserInfo.UserType === 'DEALER')
         {
-          this.GetQtList();
+          if(this.qtInfo !== undefined && this.qtInfo.QTSts === '주문요청'){
+            this.GetOrderHistory();
+          }
+          else{
+            this.GetQtList();
+          }
+
           this.visibleTab = true;
         }
         
@@ -2202,6 +2229,10 @@ export default {
         this.qtInfo = [];
         this.SetQtInfo();
         this.siteInfo = [];
+        this.qtItems = [];
+        this.confirmList = [];
+        this.detailQTData = [];
+        this.orderHistory = [];
         this.showSiteInfo = false;
         if(this.brandClicked === true){
           document.getElementById('btnBrandSelect').click();
@@ -2261,12 +2292,18 @@ export default {
         btnAdd.setAttribute("disabled", "true");
       }
     }
-},
-   watch: {
+  },
+  beforeDestroy(){
+    this.$EventBus.$off('click-qtInfo');
+    this.$EventBus.$off('init-qtInfo')
+    this.$EventBus.$off('get-orderList')
+    this.$EventBus.$off('click-showImage')
+  },
+  watch: {
       dialog (val) {
         val || this.close()
       },
-    },
+  },
 }
 </script>
 

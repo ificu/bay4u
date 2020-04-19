@@ -51,6 +51,17 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
     transition: all .3s ease;
 }
+/*PC인 경우*/
+@media all and (min-width:800px) {
+  .msg-modal-container {
+    width: 300px;
+    margin: 0px auto;
+    background-color: #4E342E;
+    border-radius: 5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
+    transition: all .3s ease;
+  }
+}
 .msg-modal-header{
     padding: 5px 10px;
     border-radius: 5px 5px 0px 0px;
