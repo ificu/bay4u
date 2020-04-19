@@ -132,7 +132,16 @@ export default {
       }
     }
 
-    //const $ths = this;
+    
+    this.$socket.on('check', (data) => { 
+      // 채팅 리스트에 로그인 체크 하기 (PC알림 Sync 용도)
+      this.$sendJoin({
+                  userId: this.UserInfo.UserID,
+                  bsnId: this.UserInfo.BsnID,      
+                });          
+    });
+
+
     this.$socket.on('chat', (data) => {
       //this.pushMsgData(data);
       //$ths.datas.push(data);
@@ -219,7 +228,8 @@ export default {
             bsnId: this.UserInfo.BsnID,
             title: data.sendName + '(' + data.qtInfo.CarNo + ') 메시지 도착',
             message: data.msg,
-            chatId: data.chatId
+            chatId: data.chatId,
+            docId: data.docId
           }); 
         }
       }
