@@ -4,7 +4,7 @@
       <b-card no-body>
         <!--<b-tabs v-model="tabIndex" card>
           <b-tab title="대화 목록" :title-link-class="linkClass(0)" active >-->
-            <div class="Chating-Title">{{chatItem.ReqName}}<span class="Chating-Title-Sub">({{chatItem.ReqSite}})</span> {{ (chatItem.CarNo==='*empty*') ?'미상차량': chatItem.CarNo}} </div>
+            <div :class="SetChatTitleStyle()">{{chatItem.ReqName}}<span class="Chating-Title-Sub">({{chatItem.ReqSite}})</span> {{ (chatItem.CarNo==='*empty*') ?'미상차량': chatItem.CarNo}} </div>
               <b-card-text>
                  <div v-if="showChatArea" >
                    <div class="Chating-page">
@@ -886,6 +886,20 @@ export default {
       .catch((error) => {
         console.log(error);
       });
+    },
+    SetChatTitleStyle(){
+      if(this.UserInfo.UserType === "DEALER"){
+        if(this.chatItem.ReqSiteType === 'SITEF'){
+          return 'Chating-Title-sitef';
+        }
+        else{
+          // (this.chatItem.ReqSiteType === 'SITE'
+          return 'Chating-Title-site';
+        }
+      }
+      else{
+        return 'Chating-Title';
+      }
     }
   },
   mounted() {
@@ -930,6 +944,12 @@ export default {
         self.uploadFiles(files);
       });
   },
+  beforeDestroy(){
+    this.$EventBus.$off('click-qtInfo');
+    this.$EventBus.$off('init-qtInfo');
+    this.$EventBus.$off('send-QTConfirm');
+    this.$EventBus.$off('paste-Image');
+  }
 }
 </script>
 
@@ -979,6 +999,28 @@ export default {
 {
   z-index: 1;
   background-color: rgb(52,58,62);
+  height: 48px;
+  color:white;
+  font-weight: bold;
+  padding: 10px 15px;
+  border-top-left-radius: 5px 3px;
+  border-top-right-radius: 5px 3px;
+}
+.Chating-Title-site
+{
+  z-index: 1;
+  background-color: red;
+  height: 48px;
+  color:white;
+  font-weight: bold;
+  padding: 10px 15px;
+  border-top-left-radius: 5px 3px;
+  border-top-right-radius: 5px 3px;
+}
+.Chating-Title-sitef
+{
+  z-index: 1;
+  background-color: #1A237E;
   height: 48px;
   color:white;
   font-weight: bold;

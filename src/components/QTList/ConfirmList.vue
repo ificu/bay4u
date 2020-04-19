@@ -23,10 +23,12 @@
 			<span style="margin-right:6px;font-size:0.85em;">견적진행중</span>
 			<v-icon color="#5d4038" style="margin-right:3px;font-size:1.1em;">mobile_friendly</v-icon>
 			<span style="margin-right:6px;font-size:0.85em;">견적회신완료</span>
-			<!--<v-icon color="#5d4038" style="margin-right:3px;font-size:1.1em;">shopping_cart</v-icon>
-			<span style="margin-right:6px;font-size:0.85em;">주문요청</span>
-			<v-icon color="#5d4038" style="margin-right:3px;font-size:1.1em;">local_shipping</v-icon>
-			<span style="font-size:0.85em;">주문확정</span>-->
+			<span v-if="UserInfo.UserType ==='SITEF'">
+				<v-icon color="#5d4038" style="margin-right:3px;font-size:1.1em;">shopping_cart</v-icon>
+				<span style="margin-right:6px;font-size:0.85em;">주문요청</span>
+				<v-icon color="#5d4038" style="margin-right:3px;font-size:1.1em;">local_shipping</v-icon>
+				<span style="font-size:0.85em;">주문확정</span>
+			</span>
 		</div>
 		<div class="qtlist-history">
 			<b-card no-body class="mb-1" v-for="(qtItem , idx) in qtReqList" v-bind:key="idx" >
@@ -235,6 +237,7 @@
 										<b-card-footer>
 											<div class="qtlist-footer">
 												<div class="TotalInfo">
+													<v-btn color="#4E342E" dark depressed class="mr-3" @click="ShowQTOrderPopup(confrimInfo)" v-if="confrimInfo.QTSts !== '주문확정' && UserInfo.UserType === 'SITEF'">주문요청</v-btn>
 													<span class="TotalInfo-Title">합계</span>
 													<span v-if="total === 0" class="TotalInfo-Text" style="margin-left:30px;">{{ total}} 원</span>
 													<span v-if="total !== 0" class="TotalInfo-Text">{{ total | localeNum}} 원</span><br>
@@ -315,10 +318,10 @@
 											<b-card-footer>
 												<div class="qtlist-footer">
 													<div class="TotalInfo">
-															<v-btn color="#4E342E" dark depressed class="mr-3" @click="ShowQTOrderPopup(confrimInfo)" v-if="confrimInfo.QTSts !== '주문확정'">주문하기</v-btn>
-															<span class="TotalInfo-Title">합계</span>
-															<span v-if="total2 === 0" class="TotalInfo-Text">{{total2 | localeNum}}원</span>
-															<span v-if="total2 !== 0" class="TotalInfo-Text">{{total2 | localeNum}}원</span>
+														<v-btn color="#4E342E" dark depressed class="mr-3" @click="ShowQTOrderPopup(confrimInfo)" v-if="confrimInfo.QTSts !== '주문확정'">주문요청</v-btn>
+														<span class="TotalInfo-Title">합계</span>
+														<span v-if="total2 === 0" class="TotalInfo-Text">{{total2 | localeNum}}원</span>
+														<span v-if="total2 !== 0" class="TotalInfo-Text">{{total2 | localeNum}}원</span>
 													</div>
 												</div>
 											</b-card-footer>
@@ -336,12 +339,12 @@
       <span slot="header">{{orderData.DealerName}} 대리점에 <br> 주문요청을 보냅니다</span>
       <span slot="orderlist">
         <div class="order-itemList" v-for="(item, index) in orderList" v-bind:key="index">
-          <span class="order-itemCode">{{item.itemCode}}</span> / <span class="order-itemName"> {{item.itemName}}</span>
-          <input v-model="item.itemQty" type="number" class="order-itemqty" @change="CalculatorAMT(item)" @focus="$event.target.select()"/>
-          <!--<span >{{item.AMT }}개</span>-->
-          <span v-if="item.itemPrice === 0" class="order-itemPrice">{{ item.itemPrice | localeNum}}원</span>
-          <span v-if="item.itemPrice !== 0" class="order-itemPrice">{{ item.itemPrice | localeNum}}원</span>
-          <i class="order-item-btn fas fa-times-circle"  @click="RemoveItem(item)"></i>
+					<span class="order-itemCode">{{item.itemCode}}</span> / <span class="order-itemName"> {{item.itemName}}</span>
+					<input v-model="item.itemQty" type="number" class="order-itemqty" @change="CalculatorAMT(item)" @focus="$event.target.select()"/>
+					<!--<span >{{item.AMT }}개</span>-->
+					<span v-if="item.itemPrice === 0" class="order-itemPrice">{{ item.itemPrice | localeNum}}원</span>
+					<span v-if="item.itemPrice !== 0" class="order-itemPrice">{{ item.itemPrice | localeNum}}원</span>
+					<i class="order-item-btn fas fa-times-circle"  @click="RemoveItem(item)"></i>
         </div>
         <div class="qtlist-footer">
           <div class="TotalInfo">
@@ -401,6 +404,16 @@
         <v-icon large color="orange darken-2">fas fa-sync-alt fa-spin</v-icon>
       </span>
     </MessageBox>
+		
+		<!-- 확인 메시지 -->
+		<MessageBox v-if="showAlert"  @close="showAlert=false">
+			<div slot="header"><h5>알림</h5></div>
+			<span slot="body" @click="showAlert=false"><pre>{{alertMsg}}</pre>
+			</span>
+			<div slot="footer">
+				<v-btn depressed small color="#967d5f" dark @click="showAlert=false">확인</v-btn>
+			</div>
+		</MessageBox>
 	</v-app>
 	</div>
 </template>
@@ -445,6 +458,8 @@
 				itemImage:'',
 				ordAmtSum:0,
 				orderList:[],
+				showAlert: false,
+				alertMsg: ''
 			}
 		},
 		components: {
@@ -575,6 +590,8 @@
 					}
 				}
 
+				filter = filter + " and Flag <> :flag ";
+
 				var param = {};
 				param.operation = "list";
 				param.tableName = "BAY4U_QT_LIST";
@@ -612,6 +629,8 @@
 							break;
 					}
 				}
+
+				param.payload.ExpressionAttributeValues[":flag"] = "ORDER";
 
 				console.log("======= QT Request result ========");
 				console.log(JSON.stringify(param));
@@ -1357,10 +1376,28 @@
 				} 
 			},
 			ShowQTOrderPopup(item){
+				this.orderList = [];
 				this.orderData = item;
 				this.showQTOrder = !this.showQTOrder;
 				this.orderDealerName = item.DealerName;
-				this.orderList = JSON.parse(convertDynamoToArrayString(JSON.stringify(item.ResDetail)));
+				
+				if(this.UserInfo.UserType === "SITEF" && item.DealerCode === "PARTS"){
+					item.ResDetail.forEach(i => {
+						let ordIdx = this.orderList.findIndex(x => x.itemCode === i.CONFIRM_ITM);
+						if(ordIdx === -1){
+							let orderItem = {}
+							orderItem.itemName = i.NM_ITM;
+							orderItem.itemCode = i.CONFIRM_ITM;
+							orderItem.itemQty = i.ORDER_QTY;
+							orderItem.itemPrice = i.PRC_PRICE;
+							orderItem.AMT =  i.AMT_PRC;
+							this.orderList.push(orderItem);
+						}		
+					});		
+				}
+				else{
+					this.orderList = JSON.parse(convertDynamoToArrayString(JSON.stringify(item.ResDetail)));
+				}
 			},
 			ShowResmemoPopup(item){
 				this.showResMemo = !this.showResMemo;
@@ -1380,6 +1417,11 @@
 				}
 			},
 			SaveOrder(){
+				if(this.orderList.length === 0 ){
+					this.showAlert = true;
+					this.alertMsg = "주문 부품이 없습니다.";
+					return;
+				}
 				var now = new Date();
 				var ReqTm = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
 															+ datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);

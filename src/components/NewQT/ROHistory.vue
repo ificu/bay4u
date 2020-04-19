@@ -147,7 +147,7 @@ export default {
     {
         GetRoItem(item)
         {
-            if(this.UserInfo.UserType === 'SITE' || this.UserInfo.UserType === 'DEALER' ) {
+            if(this.UserInfo.UserType === 'SITE' || this.UserInfo.UserType === 'SITEF' || this.UserInfo.UserType === 'DEALER' ) {
                 var param = {};
                 param.RequestDataJSON = "ID_TRN:" + item.ID_TRN + ","+"RO_CD:" + item.RO_CD;
                 
@@ -243,7 +243,10 @@ export default {
           get() { return this.$store.getters.UserInfo },
           set(value) { this.$store.dispatch('UpdateUserInfo',value) }
       },      
-    }
+		},
+		beforeDestroy(){
+			this.$EventBus.$off('ROHistory.SetROInfo');
+		}
 }
 </script>
 <style scoped>

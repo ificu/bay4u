@@ -878,7 +878,7 @@ export default {
       if(this.CarInfo.VinNo === '' && this.CarInfo.VinNo === null && this.CarInfo.VinNo === undefined)
       this.CarInfo.VinNo = this.CarInfo.VinNo.toUpperCase();
       
-      if(this.UserInfo.UserType === 'SITE') { // WebPOS일 경우 정비 이력 조회 이후 차대번호 세팅
+      if(this.UserInfo.UserType === 'SITE' || this.UserInfo.UserType === 'SITEF') { // WebPOS일 경우 정비 이력 조회 이후 차대번호 세팅
 
         var param = {};
         param.BsnId = this.UserInfo.BsnID;
@@ -1178,7 +1178,7 @@ export default {
           // 부품지원센터
           var param = {};
           param.BsnId = this.UserInfo.BsnID;
-          param.UserID = this.UserInfo.UserID;
+          param.UserId = this.UserInfo.UserID;
           param.CarNo = this.CarInfo.CarNo;
           param.VinNo = this.CarInfo.VinNo;
           
@@ -1273,6 +1273,7 @@ export default {
       param.payload.Item.CarBrand = this.brandSelected;
       param.payload.Item.ReqDt = now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);
       param.payload.Item.ReqSite = convertStringToDynamo(this.UserInfo.BsnID);
+      param.payload.Item.ReqSiteType = convertStringToDynamo(this.UserInfo.UserType);
       param.payload.Item.ReqName = convertStringToDynamo(this.UserInfo.Name);
       param.payload.Item.ReqSeq = reqSeq;
       param.payload.Item.ResDealer = dealer;
@@ -1845,6 +1846,7 @@ export default {
         param.payload.Item.CarBrand = this.brandSelected;
         param.payload.Item.ReqDt = now.getFullYear() + "-" + datePadding(now.getMonth()+1,2) + "-" + datePadding(now.getDate(),2);
         param.payload.Item.ReqSite = this.UserInfo.BsnID;
+        param.payload.Item.ReqSiteType = convertStringToDynamo(this.UserInfo.UserType);
         param.payload.Item.ReqName = this.UserInfo.Name;
         param.payload.Item.ReqSeq = reqSeq;
         param.payload.Item.ResDealer = dealer.DEALER;
