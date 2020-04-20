@@ -272,6 +272,11 @@ export default {
       {
         this.$cookies.remove(cookiesList[i]);
       }
+
+      this.$sendDetach({
+            userId: this.UserInfo.UserID,
+            bsnId: this.UserInfo.BsnID,      
+          });        
     
       this.UserInfo.UserID = "";
       this.UserInfo.BsnID = "";
@@ -290,7 +295,7 @@ export default {
     },
     openWindow()
     {
-      let newPage=window.open(Constant.MESSAGE_POPUP + this.UserInfo.BsnID);
+      let newPage=window.open(Constant.MESSAGE_POPUP + "bsnId=" + this.UserInfo.BsnID + "&userId=" + this.UserInfo.UserID);
     },
     ShowUserInfo(){
       let info = JSON.parse(localStorage.getItem('UserInfo'));
@@ -366,6 +371,12 @@ export default {
       // router 초기화
       this.$router.replace({'query': null});
     }
+
+    // 채팅 리스트에 로그인 체크 하기 (PC알림 Sync 용도)
+    this.$sendJoin({
+                userId: this.UserInfo.UserID,
+                bsnId: this.UserInfo.BsnID,      
+              });    
   }
 }
 </script>

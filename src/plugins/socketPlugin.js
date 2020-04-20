@@ -27,7 +27,6 @@ const SocketPlugin = {
                 sendName: $payload.sendName,
                 sendFlag: $payload.sendFlag,
             });
-            //console.log('aaa:', $payload);
         };
 
         vue.prototype.$sendCommand = ($payload) => {
@@ -38,6 +37,21 @@ const SocketPlugin = {
                 title: $payload.title,
                 message: $payload.message,
                 chatId: $payload.chatId,
+                docId: $payload.docId,
+            });
+        };
+
+        vue.prototype.$sendJoin = ($payload) => {
+            socket.emit('join', {
+                userId: $payload.userId,
+                bsnId: $payload.bsnId,
+            });
+        };
+
+        vue.prototype.$sendDetach = ($payload) => {
+            socket.emit('detach', {
+                userId: $payload.userId,
+                bsnId: $payload.bsnId,
             });
         };
 

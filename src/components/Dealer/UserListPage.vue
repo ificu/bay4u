@@ -1515,6 +1515,11 @@ export default {
                 chat.AgentName = data.sendName;
               }
             }
+
+            if(data.autoYn !== undefined && data.autoYn === "auto") {
+              chat.isRead = true;
+              chat.NotReadCnt = 0;
+            }
           }
           else{
             // 카센터 메시지 일때
