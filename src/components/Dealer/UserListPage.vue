@@ -1477,6 +1477,7 @@ export default {
           // 일반 메시지가 아니면 상태 변경
           if(data.qtInfo !== undefined && data.chatType !== undefined && data.chatType !== "D"){
             chat.QTSts = data.qtInfo.QTSts; 
+            chat.CarSeries = data.qtInfo.CarSeries; 
           }
 
           // 담당자 선택 조회 중 일때  
@@ -1506,6 +1507,7 @@ export default {
           newQtData.CarBrand = data.qtInfo.CarBrand;
           newQtData.CarNo = data.qtInfo.CarNo;
           newQtData.CarVin = data.qtInfo.CarVin;
+          newQtData.CarSeries = data.qtInfo.CarSeries; 
           newQtData.ID  = data.qtInfo.ID;
           newQtData.IMG  = data.qtInfo.IMG;
           newQtData.LineItem  = data.qtInfo.LineItem;

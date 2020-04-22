@@ -25,9 +25,9 @@ AWS.config.update({
 
 var docClient = new AWS.DynamoDB.DocumentClient();
 
-var connectionMap = new Map();  // 'login id' vs 'connect'/'disconnect'
-var socketMap = new Map();      // 'socket id' vs 'login id'
-var bsnIdMap = new Map();      // 'login id' vs 'BSN ID'
+var connectionMap = new Map(); // 'login id' vs 'connect'/'disconnect'
+var socketMap = new Map(); // 'socket id' vs 'login id'
+var bsnIdMap = new Map(); // 'login id' vs 'BSN ID'
 
 const sockets = [];
 
@@ -56,89 +56,90 @@ app.post('/QTConfirm', function(req, res) {
     var qtInfo = {};
     qtInfo.CarNo = req.body.CarNo;
     qtInfo.ResDealer = "PARTS";
-    qtInfo.QTsts = status;
+    qtInfo.QTSts = status;
+    qtInfo.CarSeries = carSeries;
 
     console.log("QTConfirm Receive : ", JSON.stringify(req.body));
 
-    if(req.body.Memo !== null && req.body.Memo !== undefined && req.body.Memo !== '' ) {
+    if (req.body.Memo !== null && req.body.Memo !== undefined && req.body.Memo !== '') {
         chatMsg = chatMsg + "<br><span style='color:red'>( " + req.body.Memo + " ) </span>";
     }
-    if(req.body.FileCount !== null && req.body.FileCount !== undefined && req.body.FileCount !== ''  && req.body.FileCount !== '0') {
-        chatMsg = chatMsg + "<br>#첨부파일 " + req.body.FileCount + "개 있습니다.<br>WEBPOS에서 확인 해 주세요." ;
+    if (req.body.FileCount !== null && req.body.FileCount !== undefined && req.body.FileCount !== '' && req.body.FileCount !== '0') {
+        chatMsg = chatMsg + "<br>#첨부파일 " + req.body.FileCount + "개 있습니다.<br>WEBPOS에서 확인 해 주세요.";
     }
 
     console.log("ChatMessage : ", chatMsg);
 
     var now = new Date();
-    var nowTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
-                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
-    var chatId =  sendTo + now.getFullYear()%100 + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
-                + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
+    var nowTime = now.getFullYear() + datePadding(now.getMonth() + 1, 2) + datePadding(now.getDate(), 2) +
+        datePadding(now.getHours(), 2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(), 2);
+    var chatId = sendTo + now.getFullYear() % 100 + datePadding(now.getMonth() + 1, 2) + datePadding(now.getDate(), 2) +
+        datePadding(now.getHours(), 2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(), 2);
 
     var params = {};
 
-    if(carSeries === undefined || carSeries === '') {
+    if (carSeries === undefined || carSeries === '') {
         params = {
-            TableName : QT_TABLE,
+            TableName: QT_TABLE,
             Key: {
                 ID: docId
             },
             UpdateExpression: 'Set QTSts = :c, CarVin = :d, AgentName = :e, ResUserID = :f, ReqSeq = :g',
             ExpressionAttributeValues: {
-                ":c" : status,
-                ":d" : carVin,
-                ":e" : sendName,
-                ":f" : sendId,
-                ":g" : nowTime
-          },
-          ReturnValues: "UPDATED_NEW"
+                ":c": status,
+                ":d": carVin,
+                ":e": sendName,
+                ":f": sendId,
+                ":g": nowTime
+            },
+            ReturnValues: "UPDATED_NEW"
         };
     } else {
         params = {
-            TableName : QT_TABLE,
+            TableName: QT_TABLE,
             Key: {
                 ID: docId
             },
             UpdateExpression: 'Set CarSeries = :s, QTSts = :c, CarVin = :d, AgentName = :e, ResUserID = :f, ReqSeq = :g',
             ExpressionAttributeValues: {
-                ":s" : carSeries,
-                ":c" : status,
-                ":d" : carVin,
-                ":e" : sendName,
-                ":f" : sendId,
-                ":g" : nowTime
-          },
-          ReturnValues: "UPDATED_NEW"
+                ":s": carSeries,
+                ":c": status,
+                ":d": carVin,
+                ":e": sendName,
+                ":f": sendId,
+                ":g": nowTime
+            },
+            ReturnValues: "UPDATED_NEW"
         };
     }
 
     // 1. 우선 견적 상태 업데이트
     docClient.update(params, function(err, data) {
-        if(err) {
+        if (err) {
             console.error(nowTime + " / QT_LIST update error : ", JSON.stringify(err, null, 2));
         } else {
             console.log(nowTime + " / QT_LIST update OK : ", chatId);
             // 2. 정상 리턴이면 채팅 메시지 저장
             params = {
-                TableName : CHAT_TABLE,
-                Item : {
-                    ID : chatId,
-                    DocID : docId,
-                    ChatFrom : chatFrom,
-                    ChatTo : sendTo,
-                    Message : chatMsg,
-                    ReadYn : '0',
-                    ReqTm : nowTime,
-                    ChatType : 'R',
-                    SaveName : sendName,
-                    SaveID : sendId
-              }
+                TableName: CHAT_TABLE,
+                Item: {
+                    ID: chatId,
+                    DocID: docId,
+                    ChatFrom: chatFrom,
+                    ChatTo: sendTo,
+                    Message: chatMsg,
+                    ReadYn: '0',
+                    ReqTm: nowTime,
+                    ChatType: 'R',
+                    SaveName: sendName,
+                    SaveID: sendId
+                }
             };
 
-            docClient.put(params, function(err, data){
-                nowTime = now.getFullYear() + datePadding(now.getMonth()+1,2) + datePadding(now.getDate(),2) 
-                               + datePadding(now.getHours(),2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(),2);
-                if(err) {
+            docClient.put(params, function(err, data) {
+                nowTime = now.getFullYear() + datePadding(now.getMonth() + 1, 2) + datePadding(now.getDate(), 2) +
+                    datePadding(now.getHours(), 2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(), 2);
+                if (err) {
                     console.error(nowTime + " / CHAT insert error : ", JSON.stringify(err, null, 2));
                 } else {
                     console.log(nowTime + " / CHAT insert OK : ", chatId);
@@ -161,7 +162,7 @@ app.post('/QTConfirm', function(req, res) {
                         sendFlag: 'DEALER',
                         autoYn: 'auto'
                     };
-                
+
                     io.sockets.emit('chat', msg);
                 }
             });
@@ -182,13 +183,13 @@ io.on('connection', function(socket) {
         var now = new Date();
 
         var connChk = connectionMap.get(data.sendId);
-        if(connChk !== 'connect') {
+        if (connChk !== 'connect') {
             connectionMap.set(data.sendId, 'connect');
             socketMap.set(socket.id, data.sendId);
         }
-        for (let [key, value] of connectionMap) {console.log('connectionMap check : ' + key + ' = ' + value);}
-        for (let [key, value] of socketMap) {console.log('socketMap check : ' + key + ' = ' + value);}
-        for (let [key, value] of bsnIdMap) {console.log('bsnIdMap check : ' + key + ' = ' + value);}
+        for (let [key, value] of connectionMap) { console.log('connectionMap check : ' + key + ' = ' + value); }
+        for (let [key, value] of socketMap) { console.log('socketMap check : ' + key + ' = ' + value); }
+        for (let [key, value] of bsnIdMap) { console.log('bsnIdMap check : ' + key + ' = ' + value); }
 
         var msg = {
             from: {
@@ -217,14 +218,13 @@ io.on('connection', function(socket) {
 
         // 만일 받아야 할 대상이 disconnect면 command를 날림
         for (let [key, value] of bsnIdMap) {
-            if(value === data.recv) {   //  메시지를 받을 대상 대리점이고
-                if(connectionMap.get(key) === 'disconnect') { //  해당 아이디가 미 접속 상태이면
+            if (value === data.recv) { //  메시지를 받을 대상 대리점이고
+                if (connectionMap.get(key) === 'disconnect') { //  해당 아이디가 미 접속 상태이면
 
                     var msgTitle = '';
-                    if(data.qtInfo === undefined || data.qtInfo === null) {
+                    if (data.qtInfo === undefined || data.qtInfo === null) {
                         msgTitle = data.sendName + ' 메시지 도착';
-                    }
-                    else {
+                    } else {
                         msgTitle = data.sendName + '(' + data.qtInfo.CarNo + ') 메시지 도착';
                     }
 
@@ -236,8 +236,8 @@ io.on('connection', function(socket) {
                         message: data.msg,
                         chatId: data.chatId,
                         docId: data.docId
-                    };       
-                    
+                    };
+
                     console.log('NewChatMessage Create %s: %s', key, JSON.stringify(msg));
 
                     socket.broadcast.emit('command', msg);
@@ -259,19 +259,19 @@ io.on('connection', function(socket) {
         var now = new Date();
 
         var connChk = connectionMap.get(data.userId);
-        if(connChk !== 'connect') {
+        if (connChk !== 'connect') {
             connectionMap.set(data.userId, 'connect');
             socketMap.set(socket.id, data.userId);
         }
 
         var msg = {
-          command: data.command,
-          userId: data.userId,
-          bsnId: data.bsnId,
-          title: data.title,
-          message: data.message,
-          chatId: data.chatId,
-          docId: data.docId
+            command: data.command,
+            userId: data.userId,
+            bsnId: data.bsnId,
+            title: data.title,
+            message: data.message,
+            chatId: data.chatId,
+            docId: data.docId
         };
 
 
@@ -338,5 +338,4 @@ server.listen(8083);
 const QT_TABLE = "TEST_BAY4U_QT_LIST";
 const CHAT_TABLE = "TEST_BAY4U_CHAT";
 server.listen(8084);
- /*  개발 */
-
+/*  개발 */
