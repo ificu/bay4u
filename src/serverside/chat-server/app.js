@@ -1,8 +1,8 @@
 var fs = require('fs');
 var app = require('express')();
 var https = require('https');
-var server = require('http').createServer(app);
-var server2 = https.createServer({
+//var server = require('http').createServer(app);
+var server = https.createServer({
     key: fs.readFileSync('./private.key'),
     cert: fs.readFileSync('./certificate.crt'),
     ca: fs.readFileSync('./ca_bundle.crt'),
@@ -164,6 +164,7 @@ app.post('/QTConfirm', function(req, res) {
                     };
 
                     io.sockets.emit('chat', msg);
+                    console.log('msg : ', msg);
                 }
             });
         }

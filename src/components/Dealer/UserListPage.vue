@@ -1357,7 +1357,75 @@ export default {
       this.toDate = now.toISOString().substr(0, 10);
 
       this.showQTReqList(5);
-    }
+    },
+    saveReadYn(docId)
+    {
+
+      var param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_CHAT";
+      param.payload = {};
+      param.payload.FilterExpression = "DocID = :id and ChatTo = :c and ReadYn = :r";
+      param.payload.ExpressionAttributeValues = {};
+      var key = ":id";     
+      param.payload.ExpressionAttributeValues[key] = docId;
+      var key2 = ":c";     
+      param.payload.ExpressionAttributeValues[key2] = this.UserInfo.BsnID;
+      var key3 = ":r";     
+      param.payload.ExpressionAttributeValues[key3] = "0";
+
+      //console.log("======= Chat Msg List param ========");
+      //console.log(JSON.stringify(param));
+
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+
+        console.log("======= Chat Msg List result ========");
+        console.log(param);
+        var chatList = result.data.Items;
+        if(chatList.length > 0){
+          chatList.forEach(x =>{
+            param.operation = "update";
+            param.tableName = "BAY4U_CHAT";
+            param.payload = {};
+            param.payload.Key = {};
+            param.payload.Key.ID = x.ID;
+            param.payload.Key.DocID = x.DocID;
+            param.payload.UpdateExpression = "Set ReadYn = :a";
+            param.payload.ConditionExpression = "ChatTo = :p",
+            param.payload.ExpressionAttributeValues = {
+              ":a" : "1",
+              ":p" : this.UserInfo.BsnID,
+            };
+
+            //console.log("======= chat read update Request ========");
+            //console.log(param);
+
+            axios({
+              method: 'POST',
+              url: Constant.LAMBDA_URL,
+              headers: Constant.JSON_HEADER,
+              data: param
+            })
+            .then((result) => {
+              //console.log("======= chat read update  result ========");
+              //console.log(result.data);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+          });
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    },
   },
   updated(){
     if(this.targetQtId !== '')
@@ -1446,6 +1514,7 @@ export default {
             if(data.autoYn !== undefined && data.autoYn === "auto") {
               chat.isRead = true;
               chat.NotReadCnt = 0;
+              this.saveReadYn(data.docId);
             }
           }
           else{
