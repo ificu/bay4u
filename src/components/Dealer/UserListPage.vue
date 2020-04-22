@@ -255,16 +255,6 @@
       <v-btn depressed small color="blue-grey lighten-2"  @click="CloseAlerPopup('O')">취소</v-btn>
     </div>
   </MessageBox>
-  <!--과거내역 조회 메시지-->
-  <MessageBox v-if="showQTHistory" @close="CloseAlerPopup('H')">
-    <div slot="header"><h5>알림</h5></div>
-    <span slot="body" @click="CloseAlerPopup('H')"><span class="msgBigBody" v-html="alertMsg"></span>
-    </span>
-    <div slot="footer">
-      <v-btn depressed small color="#967d5f" dark @click="GetCarNoQTList()">확인</v-btn>
-      <v-btn depressed small color="blue-grey lighten-2"  @click="CloseAlerPopup('H')">취소</v-btn>
-    </div>
-  </MessageBox>
   <!--확인 메시지-->
   <MessageBox v-if="showAlert"  @close="CloseAlerPopup()">
     <div slot="header"><h5>알림</h5></div>
@@ -302,7 +292,6 @@ export default {
       showQTAccept: false,
       showOrderAccept:false,
       showAlert: false,
-      showQTHistory: false,
       alertMsg: '',
       agentList: [],
       agentItems: [],
@@ -436,11 +425,11 @@ export default {
       endDate = this.toDate;
 
       // 과거 견적내역 조회
-      if(idx === 6){
+      /*if(idx === 6){
         beforeDate.setFullYear(beforeDate.getFullYear() - 3);
         startDate =  beforeDate.toISOString().substr(0, 10);
         endDate = now.toISOString().substr(0, 10);
-      }
+      }*/
 
       var filter = "ResDealer = :id";
       if(this.searchText === '')
@@ -448,7 +437,7 @@ export default {
         filter = "ResDealer = :id and ReqDt between :startDt and :endDt";
       }
       else{
-        if(idx === 5 || idx === 6){
+        if(idx === 5){
           // 상세 검색버튼 클릭 시
           filter = "ResDealer = :id and ReqDt between :startDt and :endDt  and ( contains(CarNo, :searchText) or contains(ReqName, :searchText) or contains(ReqDt, :searchText) )";
         }
@@ -549,7 +538,7 @@ export default {
         var key2 = ":searchText";
         param.payload.ExpressionAttributeValues[key2] = this.searchText;
         
-        if(idx === 5 || idx === 6){
+        if(idx === 5){
           // 상세 검색버튼 클릭 시
           var key3 = ":startDt";
           var key4 = ":endDt";
@@ -557,7 +546,6 @@ export default {
           param.payload.ExpressionAttributeValues[key4] = endDate;
         }
       }
-
       console.log("======= QT Request result ========");
       console.log(JSON.stringify(param));
 
@@ -879,8 +867,7 @@ export default {
         else{
           //console.log('AgentName :',item.AgentName + "/" + this.UserInfo.Name);
           this.$EventBus.$emit('click-qtInfo' , item);
-          if(item.AgentName === this.UserInfo.Name)
-          {
+          if(item.AgentName === this.UserInfo.Name){
             // 담당자 일때 읽음 처리
             this.saveChatState(item);
           }
@@ -1023,9 +1010,9 @@ export default {
         return false;
       }
     },
-    showQtInfo(ID)
+    showQtInfo(id, showYn)
     {
-      let index = this.qtReqList.findIndex(i => i.ID === ID);
+      let index = this.qtReqList.findIndex(i => i.ID === id);
       this.SetQTInfo(this.qtReqList[index], index);
       this.targetQtId = '';
     },
@@ -1033,7 +1020,6 @@ export default {
       this.showQTAccept = false;
       this.showOrderAccept = false;
       this.showAlert = false;
-      this.showQTHistory = false;
       if(Flag !== undefined && (Flag === 'A' || Flag === 'O') ){
         this.$EventBus.$emit('click-qtInfo' , this.qtReqList[this.qtItemIndex])
       }
@@ -1108,9 +1094,10 @@ export default {
             qtMsg.docId = targetQtItem.ID;
             this.TopMoveChat(qtMsg);
             
-            // 과거견적 내역 조회
+            // 과거 주문내역 조회
             /*this.$nextTick(()=>{
-              this.GetCarNoQTHistory(targetQtItem.CarNo);
+              if(this.UserInfo.UserType !== "DEALER")
+              this.GetCarNoOrdHistory(targetQtItem.CarNo);
             });*/
           })
           .catch((error) => {
@@ -1128,67 +1115,6 @@ export default {
       .catch((error) => {
         console.log(error);
       })
-    },
-    GetCarNoQTHistory(carno){
-      
-      var now = new Date();
-      var beforeDate = new Date();
-      var startDate , endDate;0
-      beforeDate.setFullYear(beforeDate.getFullYear() - 3);
-      startDate =  beforeDate.toISOString().substr(0, 10);
-      endDate = now.toISOString().substr(0, 10);
-
-      var param = {};
-      param.operation = "list";
-      param.tableName = "BAY4U_QT_LIST";
-      param.payload = {};
-      param.payload.FilterExpression = "ResDealer = :id and CarNo = :carno and ReqDt between :startDt and :endDt";
-      param.payload.ExpressionAttributeValues = {};
-      param.payload.ExpressionAttributeValues[":id"] = this.UserInfo.BsnID;
-      param.payload.ExpressionAttributeValues[":carno"] = carno;
-      param.payload.ExpressionAttributeValues[":startDt"] = startDate;
-      param.payload.ExpressionAttributeValues[":endDt"] = endDate;
-
-      axios({
-        method: 'POST',
-        url: Constant.LAMBDA_URL,
-        headers: Constant.JSON_HEADER,
-        data: param
-      })
-      .then((result) => {
-        if(result.data.Items.length > 0){
-          this.alertMsg = "해당 차량의 과거 견적/주문 내역이 있습니다.<br>과거 내역을 조회하시겠습니까?";
-          this.showQTHistory = true;
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-    },
-    GetCarNoQTList()
-    {
-      let targetQtItem = this.qtReqList[this.qtItemIndex];
-      this.searchText = targetQtItem.CarNo;
-
-      var now = new Date();
-      var beforeDate = new Date();
-      var startDate , endDate;0
-      beforeDate.setFullYear(beforeDate.getFullYear() - 3);
-      startDate =  beforeDate.toISOString().substr(0, 10);
-      endDate = now.toISOString().substr(0, 10);
-
-      this.fromDate = startDate;
-      this.toDate = endDate;
-
-      this.showQTHistory = false;
-      this.alertMsg = "";
-      this.searchStsList = [];
-
-      this.showQTReqList(6);
-      
-      this.$nextTick(()=>{
-        this.showQtInfo(targetQtItem.ID);
-      });
     },
     SaveOrderAccept()
     {
@@ -1319,7 +1245,8 @@ export default {
       .then((result) => {
         console.log("======= Chat Save result ========");
         console.log(result.data);
-
+        
+        chatMsg.qtInfo.SaveFlag = "ACCEPT";
         this.$EventBus.$emit('click-qtInfo' , chatMsg.qtInfo);
         this.saveChatState(chatMsg.qtInfo);
 
@@ -1430,7 +1357,75 @@ export default {
       this.toDate = now.toISOString().substr(0, 10);
 
       this.showQTReqList(5);
-    }
+    },
+    saveReadYn(docId)
+    {
+
+      var param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_CHAT";
+      param.payload = {};
+      param.payload.FilterExpression = "DocID = :id and ChatTo = :c and ReadYn = :r";
+      param.payload.ExpressionAttributeValues = {};
+      var key = ":id";     
+      param.payload.ExpressionAttributeValues[key] = docId;
+      var key2 = ":c";     
+      param.payload.ExpressionAttributeValues[key2] = this.UserInfo.BsnID;
+      var key3 = ":r";     
+      param.payload.ExpressionAttributeValues[key3] = "0";
+
+      //console.log("======= Chat Msg List param ========");
+      //console.log(JSON.stringify(param));
+
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+
+        console.log("======= Chat Msg List result ========");
+        console.log(param);
+        var chatList = result.data.Items;
+        if(chatList.length > 0){
+          chatList.forEach(x =>{
+            param.operation = "update";
+            param.tableName = "BAY4U_CHAT";
+            param.payload = {};
+            param.payload.Key = {};
+            param.payload.Key.ID = x.ID;
+            param.payload.Key.DocID = x.DocID;
+            param.payload.UpdateExpression = "Set ReadYn = :a";
+            param.payload.ConditionExpression = "ChatTo = :p",
+            param.payload.ExpressionAttributeValues = {
+              ":a" : "1",
+              ":p" : this.UserInfo.BsnID,
+            };
+
+            //console.log("======= chat read update Request ========");
+            //console.log(param);
+
+            axios({
+              method: 'POST',
+              url: Constant.LAMBDA_URL,
+              headers: Constant.JSON_HEADER,
+              data: param
+            })
+            .then((result) => {
+              //console.log("======= chat read update  result ========");
+              //console.log(result.data);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+          });
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    },
   },
   updated(){
     if(this.targetQtId !== '')
@@ -1519,6 +1514,7 @@ export default {
             if(data.autoYn !== undefined && data.autoYn === "auto") {
               chat.isRead = true;
               chat.NotReadCnt = 0;
+              this.saveReadYn(data.docId);
             }
           }
           else{
@@ -1550,6 +1546,7 @@ export default {
           // 일반 메시지가 아니면 상태 변경
           if(data.qtInfo !== undefined && data.chatType !== undefined && data.chatType !== "D"){
             chat.QTSts = data.qtInfo.QTSts; 
+            chat.CarSeries = data.qtInfo.CarSeries; 
           }
 
           // 담당자 선택 조회 중 일때  
@@ -1579,6 +1576,7 @@ export default {
           newQtData.CarBrand = data.qtInfo.CarBrand;
           newQtData.CarNo = data.qtInfo.CarNo;
           newQtData.CarVin = data.qtInfo.CarVin;
+          newQtData.CarSeries = data.qtInfo.CarSeries; 
           newQtData.ID  = data.qtInfo.ID;
           newQtData.IMG  = data.qtInfo.IMG;
           newQtData.LineItem  = data.qtInfo.LineItem;

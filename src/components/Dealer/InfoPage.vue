@@ -32,6 +32,7 @@
           차량 정보
           <b-button v-if="UserInfo.UserType === 'DEALER'" class="pa-0 btnRoHistory" @click="getRoHistory">정비이력 확인</b-button>
           <b-button class="pa-0 btnRoHistory" @click="saveCarInfo">차량정보 수정</b-button>
+          <b-button v-if="showBtnHisOrd" class="pa-0 btnOrdHistory" variant="warning" @click="ShowPopupOrdHistory">과거 주문내역 확인</b-button>
         </template>
         <b-card-text>
           <div class="Car-Info">
@@ -730,31 +731,56 @@
         </v-card>
       </v-dialog>  
 
-      <!--과거정비 이력 조회-->
-      <v-dialog v-model="showROHistDialog" width="400px" max-height="100%">
-        <v-card>
-            <v-toolbar dark color="primary"> 
-              <v-toolbar-title>
-                <v-icon medium>fas fa-edit</v-icon>
-                과거 정비이력  <span class="roCarNo">{{qtInfo.CarNo}}</span>
-              </v-toolbar-title>                 
-              <v-spacer></v-spacer>
-              <v-toolbar-items>
-              </v-toolbar-items>
-              <v-btn icon dark @click="closeRoHistory">
-                <v-icon>mdi-close</v-icon>
-              </v-btn>
-            </v-toolbar>
-            <v-card-text>
-              <v-container class="mx-n2 pe-0">
-                <ROHistory :RoHistoryData="roList"></ROHistory>
-              </v-container>
-            </v-card-text>    
-            <v-card-actions>
+    <!--과거정비 이력 조회-->
+    <v-dialog v-model="showROHistDialog" width="400px" max-height="100%">
+      <v-card>
+          <v-toolbar dark color="primary"> 
+            <v-toolbar-title>
+              <v-icon medium>fas fa-edit</v-icon>
+              과거 정비이력  <span class="roCarNo">{{qtInfo.CarNo}}</span>
+            </v-toolbar-title>                 
+            <v-spacer></v-spacer>
+            <v-toolbar-items>
+            </v-toolbar-items>
+            <v-btn icon dark @click="closeRoHistory">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </v-toolbar>
+          <v-card-text>
+            <v-container class="mx-n2 pe-0">
+              <ROHistory :RoHistoryData="roList"></ROHistory>
+            </v-container>
+          </v-card-text>    
+          <v-card-actions>
 
-            </v-card-actions>     
-            </v-card>
-      </v-dialog>
+          </v-card-actions>     
+          </v-card>
+    </v-dialog>
+    
+    <!--과거 주문이력 조회-->
+    <v-dialog v-model="showOrdHistDialog"  width="710px">
+      <v-card>
+        <v-toolbar dark color="primary"> 
+          <v-toolbar-title>
+            <v-icon medium>fas fa-edit</v-icon>
+            과거 주문이력  <span class="roCarNo">{{qtInfo.CarNo}}</span>
+          </v-toolbar-title>                 
+          <v-spacer></v-spacer>
+          <v-toolbar-items>
+          </v-toolbar-items>
+          <v-btn icon dark @click="closeOrderHistory">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-toolbar>
+        <v-card-text class="pa-0 ma-n1">
+          <v-container class="pa-2" >
+            <OrderHistory :OrderData="ordHistroyList" :SERIES="this.qtInfo.CarSeries"  :VINNO="qtInfo.CarVin"></OrderHistory>
+          </v-container>
+        </v-card-text>    
+        <v-card-actions>
+        </v-card-actions>     
+      </v-card>
+    </v-dialog>
 
     <!-- 프로세싱 메시지 -->
     <MessageBox v-if="showProcessing">
@@ -774,9 +800,17 @@
         <v-btn depressed small color="#967d5f" dark @click="showAlertMsg=!showAlertMsg"> 확인</v-btn>
       </div>
     </MessageBox>
-
-    </div>
-  
+    <!--과거내역 조회 메시지-->
+    <MessageBox v-if="showOrdHistory" @close="CloseAlerPopup()">
+      <div slot="header"><h5>알림</h5></div>
+      <span slot="body" @click="CloseAlerPopup()"><span class="msgBigBody" v-html="alertMsg"></span>
+      </span>
+      <div slot="footer">
+        <v-btn depressed small color="#967d5f" dark @click="ShowPopupOrdHistory()">확인</v-btn>
+        <v-btn depressed small color="blue-grey lighten-2"  @click="CloseAlerPopup()">취소</v-btn>
+      </div>
+    </MessageBox>
+    </div> 
   </v-app>
 </template>
 <!--<script src="https://unpkg.com/axios/dist/axios.min.js"></script>-->
@@ -786,6 +820,7 @@ import {datePadding, convertDynamoToString , convertDynamoToArrayString, convert
 import Constant from '@/Constant';
 import ROHistory from '@/components/NewQT/ROHistory.vue'
 import MessageBox from '@/components/Common/MessageBox.vue'
+import OrderHistory from '@/components/Dealer/OrderHistory.vue'
 
 const axios = require('axios').default;
 export default {
@@ -909,11 +944,16 @@ export default {
       vinNoBackColor: '',
       showAlertMsg: false,
       alertMsg: "",
+      showOrdHistory:false,
+      showBtnHisOrd:false,
+      ordHistroyList:[],
+      showOrdHistDialog: false, 
     }
   },
 	components: {
     ROHistory,
-    MessageBox
+    MessageBox,
+    OrderHistory
 	},
   methods: {
     onCalculatorAMT(){
@@ -2120,6 +2160,80 @@ export default {
         console.log(error);
       });
     },
+    GetCarNoOrdHistory(item){
+      this.ordHistroyList = [];
+      var now = new Date();
+      var beforeDate = new Date();
+      var startDate , endDate;0
+      beforeDate.setFullYear(beforeDate.getFullYear() - 3);
+      startDate =  beforeDate.toISOString().substr(0, 10);
+      endDate = now.toISOString().substr(0, 10);
+
+      var param = {};
+      param.operation = "list";
+      param.tableName = "BAY4U_ORDER_LIST";
+      param.payload = {};
+      param.payload.FilterExpression = "ResDealer = :id and CarNo = :carno and ReqDt between :startDt and :endDt";
+      param.payload.ExpressionAttributeValues = {};
+      param.payload.ExpressionAttributeValues[":id"] = this.UserInfo.BsnID;
+      param.payload.ExpressionAttributeValues[":carno"] = item.CarNo;
+      param.payload.ExpressionAttributeValues[":startDt"] = startDate;
+      param.payload.ExpressionAttributeValues[":endDt"] = endDate;
+
+      axios({
+        method: 'POST',
+        url: Constant.LAMBDA_URL,
+        headers: Constant.JSON_HEADER,
+        data: param
+      })
+      .then((result) => {
+
+        if(Array.isArray(result.data.Items)) {
+          result.data.Items.sort(function(a, b){
+            return (a.ReqTm < b.ReqTm) ? 1 : -1;
+          });
+        }
+
+        this.ordHistroyList = result.data.Items; 
+        if(this.ordHistroyList.length > 0 ){
+          if(item.SaveFlag !== undefined && item.SaveFlag === "ACCEPT"){
+            this.alertMsg = "해당 차량의 과거 견적/주문 내역이 있습니다.<br>과거 내역을 조회하시겠습니까?";
+            this.showOrdHistory = true;  
+          }
+          if(item.QTSts === "견적접수" || item.QTSts === "견적회신" || item.QTSts === "주문확정" || item.QTSts === 주문접0수){
+            this.showBtnHisOrd = true;
+          }
+          else{
+            this.showBtnHisOrd = false;
+          }
+        }
+        else{
+          this.showBtnHisOrd = false;
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    },
+    CloseAlerPopup(){
+      this.showOrdHistory = false;
+    },
+    ShowPopupOrdHistory(){
+      this.showOrdHistory = false;
+
+      var orderInfoData = {};
+      orderInfoData.OrderData = this.ordHistroyList;
+      orderInfoData.SERIES = this.qtInfo.CarSeries;
+      orderInfoData.VINNO = this.qtInfo.CarVin;
+      
+      this.showOrdHistDialog = true;
+      this.$EventBus.$emit('OrderHistory.SetOrderInfo',orderInfoData);
+      
+    },
+    closeOrderHistory()
+    {
+      this.showOrdHistDialog = false;
+    },
   },
   computed:{
       CarInfo: {
@@ -2206,6 +2320,9 @@ export default {
           }
 
           this.visibleTab = true;
+        }
+        else{
+          this.GetCarNoOrdHistory(qtItem)
         }
         
         if(this.brandClicked === true){
@@ -2579,6 +2696,14 @@ td.text-center{
   width: 110px;
   height: 30px;
   margin-right: 6px;
+}
+.btnOrdHistory{
+  float: right;
+  width: 135px;
+  height: 30px;
+  margin-right: 6px;
+  font-weight: bold;
+  color: #3E2723;
 }
 .showProcessing
 {
