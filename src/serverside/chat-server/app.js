@@ -61,6 +61,31 @@ app.post('/QTConfirm', function(req, res) {
 
     console.log("QTConfirm Receive : ", JSON.stringify(req.body));
 
+    var now = new Date();
+    var nowTime = now.getFullYear() + datePadding(now.getMonth() + 1, 2) + datePadding(now.getDate(), 2) +
+        datePadding(now.getHours(), 2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(), 2);
+    var chatId = sendTo + now.getFullYear() % 100 + datePadding(now.getMonth() + 1, 2) + datePadding(now.getDate(), 2) +
+        datePadding(now.getHours(), 2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(), 2);
+
+    var params = {};
+
+    // 0. 견적 재회신 건인지 체크
+    params = {
+        TableName: QT_TABLE,
+        Key: { 'ID': docId }
+    };
+
+    docClient.get(params, function(err, data) {
+        if (err) {
+            console.error(nowTime + " / QT Status Check : ", JSON.stringify(err, null, 2));
+        } else {
+            console.log("QT Status Check :", data.Item.QTSts);
+            if (data.Item.QTSts === '견적회신') {
+                chatMsg = carNo + " 차량에 대한 견적이 수정 후 재전송 되었습니다.";
+            }
+        }
+    });
+
     if (req.body.Memo !== null && req.body.Memo !== undefined && req.body.Memo !== '') {
         chatMsg = chatMsg + "<br><span style='color:red'>( " + req.body.Memo + " ) </span>";
     }
@@ -69,14 +94,6 @@ app.post('/QTConfirm', function(req, res) {
     }
 
     console.log("ChatMessage : ", chatMsg);
-
-    var now = new Date();
-    var nowTime = now.getFullYear() + datePadding(now.getMonth() + 1, 2) + datePadding(now.getDate(), 2) +
-        datePadding(now.getHours(), 2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(), 2);
-    var chatId = sendTo + now.getFullYear() % 100 + datePadding(now.getMonth() + 1, 2) + datePadding(now.getDate(), 2) +
-        datePadding(now.getHours(), 2) + datePadding(now.getMinutes(), 2) + datePadding(now.getSeconds(), 2);
-
-    var params = {};
 
     if (carSeries === undefined || carSeries === '') {
         params = {
