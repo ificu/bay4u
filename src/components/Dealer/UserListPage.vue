@@ -1277,11 +1277,6 @@ export default {
       if(findIdx > -1){
         this.qtReqList[findIdx].ReqSeq = data.reqTm;
 
-        if(Array.isArray(this.qtReqList)) {
-          this.qtReqList.sort(function(a, b){
-          return (a.ReqSeq < b.ReqSeq) ? 1 : -1;
-          });
-        }
         if(findIdx === this.qtItemIndex){
           this.qtItemIndex = 0;
         }
@@ -1290,6 +1285,13 @@ export default {
             this.qtItemIndex = this.qtItemIndex + 1;
           }
         }
+
+        if(Array.isArray(this.qtReqList)) {
+          this.qtReqList.sort(function(a, b){
+          return (a.ReqSeq < b.ReqSeq) ? 1 : -1;
+          });
+        }
+
         /*if(this.selectedId === data.docId){
           this.qtItemIndex = 0;
         }*/
@@ -1303,9 +1305,17 @@ export default {
       var beforeDate = new Date();
       beforeDate.setDate(beforeDate.getDate() - 1);
       var yesterDay = beforeDate.getFullYear() + "-" + datePadding(beforeDate.getMonth()+1,2) + "-" + datePadding(beforeDate.getDate(),2);
-
-
-      if(value.ReqDt === today){
+      
+      if(value.ReqSeq.substr(0,8) === today.replace(/-/gi, "")){
+        var vStr = value.ReqSeq.substr(8,2) < 12 ? '오전 ' : '오후 ';
+        var vHour = value.ReqSeq.substr(8,2);
+        if (vHour !== 12) {
+          vHour = vHour%12;
+        } 
+        var vMinute = value.ReqSeq.substr(10,2);
+        return vStr + vHour + ":" + vMinute; 
+      }
+      else if(value.ReqDt === today){
         // 당일이면 시간 리턴
         var vStr = value.ReqSeq.substr(8,2) < 12 ? '오전 ' : '오후 ';
         var vHour = value.ReqSeq.substr(8,2);
@@ -1489,7 +1499,7 @@ export default {
         if(chat.ID === data.docId) {
           console.log('chat:',chat );
           console.log('chat.NotReadCnt:',chat.NotReadCnt );
-          
+          chat.ReqSeq = data.reqTm;
           chat.isRead = false;
           // 대리점 메시지 일때
           if(data.sendFlag === 'DEALER'){           
@@ -1612,13 +1622,16 @@ export default {
             }
           }
         }
-
-        if(Array.isArray(this.qtReqList)) {
-          this.qtReqList.sort(function(a, b){
-            return (a.ReqSeq < b.ReqSeq) ? 1 : -1;
-          });
-        }
       }
+
+      this.TopMoveChat(data);
+
+      if(Array.isArray(this.qtReqList)) {
+        this.qtReqList.sort(function(a, b){
+          return (a.ReqSeq < b.ReqSeq) ? 1 : -1;
+        });
+      }
+
       //this.$nextTick(function(){
         this.getChatReadState(flag);
       //});
