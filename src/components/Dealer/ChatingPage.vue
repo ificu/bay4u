@@ -212,6 +212,7 @@ export default {
           if(data.sendName === this.UserInfo.Name)
           this.saveChatState(data.docId , data.chatId);
         }
+        this.$EventBus.$emit('UserListPage.TopMoveChat', data); 
       }
       else {
         var options = {
@@ -233,7 +234,7 @@ export default {
           }); 
         }
       }
-      this.$EventBus.$emit('UserListPage.TopMoveChat', data);  
+      //this.$EventBus.$emit('UserListPage.TopMoveChat', data);  
     });
 
     this.$EventBus.$on('click-qtInfo', chatItem => {  
