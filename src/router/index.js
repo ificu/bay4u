@@ -11,6 +11,8 @@ import UserInfo from '@/views/UserInfo'
 import MainPage from '@/views/MainPage'
 import NewQTList from '@/views/NewQTList'
 
+import RMI from '@/views/RMI'
+
 Vue.use(VueRouter)
 
 const routes = [{
@@ -18,6 +20,11 @@ const routes = [{
         name: 'Login',
         component: Login
     },
+    {
+        path: '/RMI',
+        name: 'RMI',
+        component: RMI
+    },    
     {
         path: '/NewQTOld',
         name: 'NewQTOld',
