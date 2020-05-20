@@ -140,7 +140,7 @@
 				this.subGroupId = '';
 				this.itemMpId = '';
 
-				if(this.carTypeId !== undefined) {
+				if(this.carTypeId !== undefined && this.carTypeId !== '' ) {
 					
 					let languageCode = 'en',
 						countryCode = 'kr',
@@ -163,11 +163,6 @@
 					if(xmlHttp.status == 200) {
 						console.log('changeMainGroup 리턴 : ', JSON.parse(xmlHttp.responseText));
 						this.mainGroupLists = JSON.parse(xmlHttp.responseText);
-
-						//this.mainGroupLists = this.adjustDataList.reduce(function (pre, value) {
-						//	return [...pre, {MainGroupId: value.MainGroupId, MainGroupName: value.MainGroupName}];
-						//}, []);
-
 					}
 
 				}       

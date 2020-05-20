@@ -160,7 +160,7 @@
 				this.itemMpId = '';
 				this.manualId = '';
 
-				if(this.carTypeId !== undefined) {
+				if(this.carTypeId !== undefined && this.carTypeId !== '' ) {
 					
 					let languageCode = 'en',
 						countryCode = 'kr',
