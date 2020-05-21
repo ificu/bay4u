@@ -92,6 +92,7 @@
       <RMIADJUST v-if="checkShowPage('ADJUST')" ></RMIADJUST>
       <RMIMANUALS v-if="checkShowPage('MANUALS')" ></RMIMANUALS>
       <RMIGRAPHIC v-if="checkShowPage('GRAPHIC')" ></RMIGRAPHIC>
+      <RMIWIRING v-if="checkShowPage('WIRING')" ></RMIWIRING>
 
   </v-app>
 </template>
@@ -100,6 +101,7 @@
   import RMIADJUST from '@/components/RMI/RMI-ADJUST.vue'
   import RMIMANUALS from '@/components/RMI/RMI-MANUALS.vue'
   import RMIGRAPHIC from '@/components/RMI/RMI-GRAPHIC.vue'
+  import RMIWIRING from '@/components/RMI/RMI-WIRING.vue'
 
   const axios = require('axios').default;
   const url = "https://rmi-services.tecalliance.net";
@@ -110,7 +112,7 @@
     },
     data: () => ({
       drawer: null,
-      subPageList: ['ADJUST', 'MANUALS', 'GRAPHIC'],
+      subPageList: ['ADJUST', 'MANUALS', 'GRAPHIC','WIRING'],
       showPageList: [],
       jsonHeader: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'Origin':'https://rmi-services.tecalliance.net', 'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36', 'Authorization': 'TecRMI {{AuthToken}}' },
       menuItems: [
@@ -136,7 +138,8 @@
     components: {
         RMIADJUST,
         RMIMANUALS,
-        RMIGRAPHIC
+        RMIGRAPHIC,
+        RMIWIRING
     },    
     created () {
       this.$vuetify.theme.dark = true;
