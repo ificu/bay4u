@@ -9,12 +9,12 @@
                         tile
                     >
 					<v-icon class="mx-4" style="color:#fddca9; font-size:18px;" >  mdi-arrange-send-backward </v-icon>
-					<span class="font-weight-bold" style="color:#fddca9; font-size:15px;" >Fueses & Relay</span>
+					<span class="font-weight-bold" style="color:#fddca9; font-size:15px;" >표준 공임 시간</span>
                     </v-card>
                 </v-col>
             </v-row>  			
             <v-row>
-                <v-col cols="12" sm="3" >
+                <v-col cols="12" sm="4" >
 					<v-card>
 							<v-select
 								class="pa-4 pb-0 pt-6 adjustSelect"
@@ -30,7 +30,7 @@
 							</v-select>
 					</v-card>
                 </v-col>
-                <v-col cols="12" sm="3" >
+                <v-col cols="12" sm="4" >
 					<v-card>
 							<v-select
 								class="pa-4 pb-0 pt-6 adjustSelect"
@@ -46,7 +46,7 @@
 							</v-select>
 					</v-card>
                 </v-col>
-                <v-col cols="12" sm="3" >
+                <v-col cols="12" sm="4" >
 					<v-card>
 							<v-select
 								class="pa-4 pb-0 pt-6 adjustSelect"
@@ -61,23 +61,7 @@
 								>
 							</v-select>
 					</v-card>
-                </v-col>
-                <v-col cols="12" sm="3" >
-					<v-card>
-							<v-select
-								class="pa-4 pb-0 pt-6 adjustSelect"
-								v-model="boxConfigurationId"
-								:items="qualColLists"
-								item-text="QualColText"
-								item-value="BoxConfigurationId"	
-								label="매뉴얼 구분"
-								outlined
-								dense
-								@change="changeManualId"
-								>
-							</v-select>
-					</v-card>
-                </v-col>					
+                </v-col>							
             </v-row>
             <v-row>
                 <v-col
@@ -90,6 +74,12 @@
                         tile
 						id = "RMIContents"
                     >
+                    <v-treeview
+    dense
+    :items="itemMpLists"
+    item-text="ItemMpText"
+    item-key = "ItemMpId"
+  ></v-treeview>
                     </v-card>
                 </v-col>
             </v-row>            
@@ -100,21 +90,18 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script>
 //	const axios = require('axios').default;
-	const url = "https://rmi-services.tecalliance.net/rest/RelaysFuses";
+	const url = "https://rmi-services.tecalliance.net/rest/Times";
 		
 	export default {
-		name: 'RMI-RELAYSFUSES',
+		name: 'RMI-TIMES',
 		data(){
 			return{
 				mainGroupLists: [],
 				subGroupLists: [],
 				itemMpLists: [],
-				qualColLists: [],
 				mainGroupId: '',
 				subGroupId: '',
 				itemMpId: '',
-                manualId: '',
-                boxConfigurationId:'',
 				rmiAuthKey: '',	
 				carTypeId: '',			
 			}
@@ -122,12 +109,11 @@
 		components: {
 		},
 		created () {
-			this.$EventBus.$on('RMI-RELAYSFUSES.InitData', param => {  
+			this.$EventBus.$on('RMI-TIMES.InitData', param => {  
 				this.rmiAuthKey = param.rmiAuthKey;
 				this.carTypeId = param.carTypeId; 
 				this.initAuthKey();
 				this.setMainGroup();
-				//this.getBoxOverviewHtml();
 			});
 		},	
 		methods: {
@@ -155,12 +141,10 @@
 				this.mainGroupLists = [];
 				this.subGroupLists = [];
 				this.itemMpLists = [];
-				this.qualColLists = [];
 
 				this.mainGroupId = '';
 				this.subGroupId = '';
 				this.itemMpId = '';
-				this.manualId = '';
 
 				if(this.carTypeId !== undefined && this.carTypeId !== '' ) {
 					
@@ -175,7 +159,7 @@
 					
 					// Send HTTP request
 					let xmlHttp = new XMLHttpRequest();
-					xmlHttp.open( 'GET', url + '/BoxConfigurations' + query, false );
+					xmlHttp.open( 'GET', url + '/WorkList' + query, false );
 					xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
 					xmlHttp.setRequestHeader( 'Accept', 'application/json' );
 					xmlHttp.setRequestHeader( 'Authorization', this.rmiAuthKey );
@@ -183,7 +167,7 @@
 					
 					// Handle HTTP response
 					if(xmlHttp.status == 200) {
-						console.log('changeMainGroup 리턴 : ', JSON.parse(xmlHttp.responseText));
+						console.log('setMainGroup 리턴 : ', JSON.parse(xmlHttp.responseText));
 						this.mainGroupLists = JSON.parse(xmlHttp.responseText);
 					}
 
@@ -192,10 +176,7 @@
 			changeMainGroup() {
 				var selected = this.mainGroupId;
 				this.itemMpLists = [];
-				this.qualColLists = [];
-
 				this.itemMpId = '';
-				this.manualId = '';
 
 				this.subGroupLists = this.mainGroupLists.reduce(function (pre, value) {
 					if(value.MainGroupId === selected) {
@@ -204,13 +185,12 @@
 					else {
 						return pre;
 					}
-				}, []);	
+                }, []);	
+                
+                console.log('changeMainGroup 리턴 : ', this.subGroupLists);
 			},
 			changeSubGroup() {
 				var selected = this.subGroupId;
-				this.qualColLists = [];
-
-				this.manualId = '';				
 
 				this.itemMpLists = this.subGroupLists.reduce(function (pre, value) {
 					if(value.SubGroupId === selected) {
@@ -219,48 +199,42 @@
 					else {
 						return pre;
 					}
-				}, []);	
+                }, []);	
+                
+                console.log('changeSubGroup 리턴 : ', this.itemMpLists);
 			},
 			changeItemMp() {
-                var selected = this.itemMpId;
                 
-                this.qualColLists = this.itemMpLists.reduce(function (pre, value) {
+                var selected = this.itemMpId;
+        
+                let itemMp = this.itemMpLists.reduce(function (pre, value) {
 					if(value.ItemMpId === selected) {
-						return [...pre, ...value.BoxConfigurations];
+						return value;
 					}
 					else {
 						return pre;
 					}
-                }, []);	
-                
-                console.log('changeItemMp 리턴 : ', this.qualColLists);
-			},
-			changeManualId() {
+				}, []);	
 
-                console.log('changeManualId 리턴 : ', this.qualColLists);
-
-				let languageCode = 'en',
+                let bodyQualColId = 0,
+                    korId = itemMp.KorId,
+                    languageCode = 'en',
 					countryCode = 'kr',
-					printView = true,
-					linkUrl = '.',
-                    boxConfigurationMappingId = this.boxConfigurationId,
-                    buildPeriodQualColId = 0,
-                    typeId = this.carTypeId,
-                    componentTypeId =0;		
-					
+					itemMpId = this.itemMpId,
+					typeId = this.carTypeId;		
+                    
+                console.log('typeId : ', this.carTypeId);
 				// Build url query string
-                let query = '?languageCode=' + languageCode
-                    + '&componentTypeId=' + componentTypeId
+                let query = '?bodyQualColId='+ bodyQualColId
+                    + '&korId=' + korId
+                    + '&languageCode=' + languageCode
 					+ '&countryCode=' + countryCode
 					+ '&typeId=' + typeId	
-                    + '&boxConfigurationMappingId=' + boxConfigurationMappingId
-                    + '&buildPeriodQualColId=' + buildPeriodQualColId	
-					+ '&printView=' + printView	
-					+ '&linkUrl=' + linkUrl	
-                
+					+ '&itemMpId=' + itemMpId	
+					
 				// Send HTTP request
 				let xmlHttp = new XMLHttpRequest();
-				xmlHttp.open( 'GET', url + '/BoxDetailHtml' + query, false );
+				xmlHttp.open( 'GET', url + '/WorkSteps' + query, false );
 				xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
 				xmlHttp.setRequestHeader( 'Accept', 'application/json' );
 				xmlHttp.setRequestHeader( 'Authorization', this.rmiAuthKey );
@@ -268,85 +242,13 @@
 				// Handle HTTP response
 				if(xmlHttp.status == 200) {
                     //console.log(xmlHttp.responseText);
-                    //const paragraph = xmlHttp.responseText;
-                    //const regex = "<img[^>]*src=[\"']?([^>\"']+)[\"']?[^>]*>";
-                    //const found = paragraph.match(regex)[0];
-                    //let page = xmlHttp.responseText.replace(found, '');
-                    //console.log(page); 
-                    //$("#RMIContents").html(JSON.parse(page));
-                    $("#RMIContents").html(JSON.parse(xmlHttp.responseText));    
-                    /*var table = document.getElementsByTagName('table')[0];
-                    table.style.display = "none";
+                    
+                    console.log('리턴 : ', JSON.parse(xmlHttp.responseText));
 
-                    var hr = document.getElementsByTagName('hr')[0];
-                    hr.style.display = "none";*/
-				}
-            },
-            
-            getBoxOverviewHtml()
-            {
-                let languageCode = 'en',
-					countryCode = 'kr',
-					componentTypeId = 0,
-					linkUrl = '.',
-					typeId = this.carTypeId;		
-					
-				// Build url query string
-                let query = '?componentTypeId='+componentTypeId
-                    + '&languageCode=' + languageCode
-					+ '&countryCode=' + countryCode
-					+ '&typeId=' + typeId	
-					+ '&linkUrl=' + linkUrl	
-		
-				
-				// Send HTTP request
-				let xmlHttp = new XMLHttpRequest();
-				xmlHttp.open( 'GET', url + '/BoxOverviewHtml' + query, false );
-				xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
-				xmlHttp.setRequestHeader( 'Accept', 'application/json' );
-				xmlHttp.setRequestHeader( 'Authorization', this.rmiAuthKey );
-				xmlHttp.send( null );
-				// Handle HTTP response
-				if(xmlHttp.status == 200) {
-					console.log(xmlHttp.responseText);
 					let page = xmlHttp.responseText.replace('<img src=\"https://rmi-cdn.tecalliance.net/services/Logo.png\" height=\"60px\" border=\"0\" alt=\"\"/>\r\n', '');
 					$("#RMIContents").html(JSON.parse(page));
-				}
-            },
-            getBoxDetailHtml(){
-                let languageCode = 'en',
-					countryCode = 'kr',
-					componentTypeId = 0,
-					linkUrl = '.',
-                    typeId = this.carTypeId,
-                    printView = false,
-                    boxConfigurationMappingId = 3652,
-                    buildPeriodQualColId = 0;
-					
-				// Build url query string
-                let query = '?componentTypeId='+componentTypeId
-                    + '&languageCode=' + languageCode
-					+ '&countryCode=' + countryCode
-					+ '&typeId=' + typeId	
-                    + '&linkUrl=' + linkUrl	
-                    + '&printView=' + printView	
-                    + '&boxConfigurationMappingId=' + boxConfigurationMappingId
-                    + '&buildPeriodQualColId=' + buildPeriodQualColId
-				
-				// Send HTTP request
-				let xmlHttp = new XMLHttpRequest();
-				xmlHttp.open( 'GET', url + '/BoxOverviewHtml' + query, false );
-				xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
-				xmlHttp.setRequestHeader( 'Accept', 'application/json' );
-				xmlHttp.setRequestHeader( 'Authorization', this.rmiAuthKey );
-				xmlHttp.send( null );
-				// Handle HTTP response
-				if(xmlHttp.status == 200) {
-					console.log(xmlHttp.responseText);
-					let page = xmlHttp.responseText.replace('<img src=\"https://rmi-cdn.tecalliance.net/services/Logo.png\" height=\"60px\" border=\"0\" alt=\"\"/>\r\n', '');
-					$("#RMIContents").html(JSON.parse(page));
-				}
-            }
+				}				
+			}
 		},   		
 	}
 </script>
@@ -377,3 +279,4 @@
 }
 
 </style>
+
