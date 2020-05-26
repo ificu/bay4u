@@ -116,7 +116,8 @@
                 manualId: '',
                 boxConfigurationId:'',
 				rmiAuthKey: '',	
-				carTypeId: '',			
+				carTypeId: '',
+				componentTypeId: 0,		
 			}
 		},
 		components: {
@@ -126,6 +127,7 @@
 				this.rmiAuthKey = param.rmiAuthKey;
 				this.carTypeId = param.carTypeId; 
 				this.initAuthKey();
+				this.initComponentsForType();
 				this.setMainGroup();
 				//this.getBoxOverviewHtml();
 			});
@@ -151,6 +153,36 @@
 					this.rmiAuthKey = 'TecRMI ' + xmlHttp.getResponseHeader( 'X-AuthToken' );
 				}
 			},
+			initComponentsForType()
+            {
+                if(this.carTypeId !== undefined && this.carTypeId !== '' ) {
+					
+					let languageCode = 'en',
+						countryCode = 'kr',
+						typeId = this.carTypeId;		
+						
+					// Build url query string
+					let query = '?languageCode=' + languageCode
+						+ '&countryCode=' + countryCode
+						+ '&typeId=' + typeId	
+					
+					// Send HTTP request
+					let xmlHttp = new XMLHttpRequest();
+					xmlHttp.open( 'GET', url + '/ComponentsForType' + query, false );
+					xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
+					xmlHttp.setRequestHeader( 'Accept', 'application/json' );
+					xmlHttp.setRequestHeader( 'Authorization', this.rmiAuthKey );
+					xmlHttp.send( null );
+					
+					// Handle HTTP response
+					if(xmlHttp.status == 200) {
+						//console.log('initComponentsForType 리턴 : ', JSON.parse(xmlHttp.responseText));
+                        var result = JSON.parse(xmlHttp.responseText);
+                        this.componentTypeId = result[0].ComponentTypeId;
+                        console.log('initComponentsForType 리턴 : ', this.componentTypeId);
+					}
+				} 
+            },
 			setMainGroup() {
 				this.mainGroupLists = [];
 				this.subGroupLists = [];
@@ -246,7 +278,7 @@
                     boxConfigurationMappingId = this.boxConfigurationId,
                     buildPeriodQualColId = 0,
                     typeId = this.carTypeId,
-                    componentTypeId =0;		
+                    componentTypeId = this.componentTypeId;		
 					
 				// Build url query string
                 let query = '?languageCode=' + languageCode
@@ -275,11 +307,12 @@
                     //console.log(page); 
                     //$("#RMIContents").html(JSON.parse(page));
                     $("#RMIContents").html(JSON.parse(xmlHttp.responseText));    
-                    /*var table = document.getElementsByTagName('table')[0];
-                    table.style.display = "none";
+					
+					var table = document.getElementsByTagName('table');
+                    table[table.length -1].style.display = "none";
 
-                    var hr = document.getElementsByTagName('hr')[0];
-                    hr.style.display = "none";*/
+                    var hr = document.getElementsByTagName('hr');
+                    hr[hr.length -1].style.display = "none";
 				}
             },
             

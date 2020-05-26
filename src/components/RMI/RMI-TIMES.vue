@@ -45,23 +45,7 @@
 								>
 							</v-select>
 					</v-card>
-                </v-col>
-                <v-col cols="12" sm="4" >
-					<v-card>
-							<v-select
-								class="pa-4 pb-0 pt-6 adjustSelect"
-								v-model="itemMpId"
-								:items="itemMpLists"
-								item-text="ItemMpText"
-								item-value="ItemMpId"	
-								label="상세 항목"
-								outlined
-								dense
-								@change="changeItemMp"
-								>
-							</v-select>
-					</v-card>
-                </v-col>							
+                </v-col>				
             </v-row>
             <v-row>
                 <v-col
@@ -74,12 +58,12 @@
                         tile
 						id = "RMIContents"
                     >
-                    <v-treeview
-    dense
-    :items="itemMpLists"
-    item-text="ItemMpText"
-    item-key = "ItemMpId"
-  ></v-treeview>
+                        <v-treeview
+                            dense
+                            light
+                            :items="itemMpLists"
+                            class="tree-contents"
+                        ></v-treeview>
                     </v-card>
                 </v-col>
             </v-row>            
@@ -89,6 +73,7 @@
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script>
+    import {arrayGroupBy, groupBy} from '@/utils/common.js'
 //	const axios = require('axios').default;
 	const url = "https://rmi-services.tecalliance.net/rest/Times";
 		
@@ -103,7 +88,8 @@
 				subGroupId: '',
 				itemMpId: '',
 				rmiAuthKey: '',	
-				carTypeId: '',			
+                carTypeId: '',	
+                groupList:[],
 			}
 		},
 		components: {
@@ -190,65 +176,57 @@
                 console.log('changeMainGroup 리턴 : ', this.subGroupLists);
 			},
 			changeSubGroup() {
-				var selected = this.subGroupId;
-
-				this.itemMpLists = this.subGroupLists.reduce(function (pre, value) {
-					if(value.SubGroupId === selected) {
-						return [...pre, ...value.ItemMps];
-					}
-					else {
-						return pre;
-					}
-                }, []);	
-                
-                console.log('changeSubGroup 리턴 : ', this.itemMpLists);
-			},
-			changeItemMp() {
-                
-                var selected = this.itemMpId;
-        
-                let itemMp = this.itemMpLists.reduce(function (pre, value) {
-					if(value.ItemMpId === selected) {
-						return value;
-					}
-					else {
-						return pre;
-					}
-				}, []);	
 
                 let bodyQualColId = 0,
-                    korId = itemMp.KorId,
-                    languageCode = 'en',
-					countryCode = 'kr',
-					itemMpId = this.itemMpId,
-					typeId = this.carTypeId;		
+                    countryCode = 'kr',
+					languageCode = 'en',
+					typeId = this.carTypeId,
+                    subGroupId = this.subGroupId;
                     
-                console.log('typeId : ', this.carTypeId);
-				// Build url query string
+                // Build url query string
                 let query = '?bodyQualColId='+ bodyQualColId
-                    + '&korId=' + korId
-                    + '&languageCode=' + languageCode
-					+ '&countryCode=' + countryCode
+                    + '&countryCode=' + countryCode
+					+ '&languageCode=' + languageCode
 					+ '&typeId=' + typeId	
-					+ '&itemMpId=' + itemMpId	
+					+ '&subGroupId=' +subGroupId	
 					
 				// Send HTTP request
 				let xmlHttp = new XMLHttpRequest();
-				xmlHttp.open( 'GET', url + '/WorkSteps' + query, false );
+				xmlHttp.open( 'GET', url + '/WorkStepsForSubgroup' + query, false );
 				xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
 				xmlHttp.setRequestHeader( 'Accept', 'application/json' );
 				xmlHttp.setRequestHeader( 'Authorization', this.rmiAuthKey );
 				xmlHttp.send( null );
 				// Handle HTTP response
 				if(xmlHttp.status == 200) {
-                    //console.log(xmlHttp.responseText);
-                    
-                    console.log('리턴 : ', JSON.parse(xmlHttp.responseText));
+                    //console.log('리턴 : ', JSON.parse(xmlHttp.responseText));
 
-					let page = xmlHttp.responseText.replace('<img src=\"https://rmi-cdn.tecalliance.net/services/Logo.png\" height=\"60px\" border=\"0\" alt=\"\"/>\r\n', '');
-					$("#RMIContents").html(JSON.parse(page));
-				}				
-			}
+                    var list = JSON.parse(xmlHttp.responseText);
+                    this.itemMpLists = Object.values(groupBy(list, 'ItemMpId', 'ItemMpText')).map(function(obj){
+                    var rObj = {};
+                    rObj.id = obj.id;
+                    rObj.name = obj.name;
+                    //rObj.children = obj;
+                    rObj.children = Object.values(groupBy(obj, 'KorId', 'KorText')).map(function(subObj){
+                        var subItem = {};
+                        subItem.id = subObj.id;
+                        subItem.name = subObj.name;
+                        subItem.children = subObj.map(function(subObj2){
+
+                            var subItem2 = {};
+                            subItem2.id = subObj2.WorkId;
+                            subItem2.name = subObj2.WorkText + ' [' +subObj2.QualColText+']';
+                            return subItem2;
+                        });
+                        //subItem.children = subObj;
+                        return subItem;
+                    });
+                    return rObj;
+                });
+                //console.log('리턴 : ', this.itemMpLists);
+
+				} 
+			},
 		},   		
 	}
 </script>
@@ -267,6 +245,12 @@
 
 .contents .border {
   border: 2px dashed orange;
+}
+
+.contents .tree-contents{
+    background-color: white;
+    color: black;
+    font-size: 1.25em
 }
 
 #RMIContents {

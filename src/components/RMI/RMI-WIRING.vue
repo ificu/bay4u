@@ -122,12 +122,13 @@
 		},
 		created () {
 			this.$EventBus.$on('RMI-WIRING.InitData', param => {  
+				console.log('param :',param);
 				this.rmiAuthKey = param.rmiAuthKey;
 				this.carTypeId = param.carTypeId; 
 				this.initAuthKey();
 				this.setMainGroup();
 			});
-		},	
+		},
 		methods: {
 			initAuthKey() {
 				let url = 'https://rmi-services.tecalliance.net/auth/login';
@@ -184,8 +185,7 @@
 						console.log('changeMainGroup 리턴 : ', JSON.parse(xmlHttp.responseText));
 						this.mainGroupLists = JSON.parse(xmlHttp.responseText);
 					}
-
-				}       
+				}
 			},
 			changeMainGroup() {
 				var selected = this.mainGroupId;
@@ -259,6 +259,12 @@
 					console.log(xmlHttp.responseText);
 					let page = xmlHttp.responseText.replace('<img src=\"https://rmi-cdn.tecalliance.net/services/Logo.png\" height=\"60px\" border=\"0\" alt=\"\"/>\r\n', '');
 					$("#RMIContents").html(JSON.parse(page));
+
+					var table = document.getElementsByTagName('table');
+                    table[table.length -1].style.display = "none";
+
+                    var hr = document.getElementsByTagName('hr');
+                    hr[hr.length -1].style.display = "none";
 				}	
 			}
 		},   		

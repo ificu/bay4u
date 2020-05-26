@@ -158,8 +158,12 @@
     methods: {
       clickMenu(page) {
         if(this.subPageList.includes(page) === true) {
+          var param = {
+              rmiAuthKey: this.rmiAuthKey,
+              carTypeId: this.carTypeId
+          }
           this.setShowPage(page);
-          this.$EventBus.$emit('RMI-'+page+'.InitData', {});  
+          this.$EventBus.$emit('RMI-'+page+'.InitData', param);  
         }
       },
       checkShowPage(page) {

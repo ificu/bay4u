@@ -14,7 +14,7 @@
                 </v-col>
             </v-row>  			
             <v-row>
-                <v-col cols="12" sm="4" >
+                <v-col cols="12" sm="3" >
 					<v-card>
 							<v-select
 								class="pa-4 pb-0 pt-6 adjustSelect"
@@ -30,7 +30,7 @@
 							</v-select>
 					</v-card>
                 </v-col>
-                <v-col cols="12" sm="4" >
+                <v-col cols="12" sm="3" >
 					<v-card>
 							<v-select
 								class="pa-4 pb-0 pt-6 adjustSelect"
@@ -46,7 +46,7 @@
 							</v-select>
 					</v-card>
                 </v-col>
-                <v-col cols="12" sm="4" >
+                <v-col cols="12" sm="3" >
 					<v-card>
 							<v-select
 								class="pa-4 pb-0 pt-6 adjustSelect"
@@ -61,7 +61,23 @@
 								>
 							</v-select>
 					</v-card>
-                </v-col>							
+                </v-col>
+                <v-col cols="12" sm="3" >
+					<v-card>
+							<v-select
+								class="pa-4 pb-0 pt-6 adjustSelect"
+								v-model="manualId"
+								:items="qualColLists"
+								item-text="QualColText"
+								item-value="ManualId"	
+								label="매뉴얼 구분"
+								outlined
+								dense
+								@change="changeManualId"
+								>
+							</v-select>
+					</v-card>
+                </v-col>					
             </v-row>
             <v-row>
                 <v-col
@@ -87,17 +103,20 @@
 	const url = "https://rmi-services.tecalliance.net/rest/Diagnostics";
 		
 	export default {
-		name: 'DAIGNOSTICVALUES',
+		name: 'RMI-DAIGNOSTICVALUES',
 		data(){
 			return{
 				mainGroupLists: [],
 				subGroupLists: [],
 				itemMpLists: [],
+				qualColLists: [],
 				mainGroupId: '',
 				subGroupId: '',
 				itemMpId: '',
+				manualId: '',
 				rmiAuthKey: '',	
-				carTypeId: '',			
+                carTypeId: '',
+                componentTypeId: 0,		
 			}
 		},
 		components: {
@@ -106,7 +125,8 @@
 			this.$EventBus.$on('RMI-DAIGNOSTICVALUES.InitData', param => {  
 				this.rmiAuthKey = param.rmiAuthKey;
 				this.carTypeId = param.carTypeId; 
-				this.initAuthKey();
+                this.initAuthKey();
+                this.initComponentsForType();
 				this.setMainGroup();
 			});
 		},	
@@ -130,17 +150,10 @@
 				if(xmlHttp.status == 200) {
 					this.rmiAuthKey = 'TecRMI ' + xmlHttp.getResponseHeader( 'X-AuthToken' );
 				}
-			},
-			setMainGroup() {
-				this.mainGroupLists = [];
-				this.subGroupLists = [];
-				this.itemMpLists = [];
-
-				this.mainGroupId = '';
-				this.subGroupId = '';
-				this.itemMpId = '';
-
-				if(this.carTypeId !== undefined && this.carTypeId !== '' ) {
+            },
+            initComponentsForType()
+            {
+                if(this.carTypeId !== undefined && this.carTypeId !== '' ) {
 					
 					let languageCode = 'en',
 						countryCode = 'kr',
@@ -150,6 +163,47 @@
 					let query = '?languageCode=' + languageCode
 						+ '&countryCode=' + countryCode
 						+ '&typeId=' + typeId	
+					
+					// Send HTTP request
+					let xmlHttp = new XMLHttpRequest();
+					xmlHttp.open( 'GET', url + '/ComponentsForType' + query, false );
+					xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
+					xmlHttp.setRequestHeader( 'Accept', 'application/json' );
+					xmlHttp.setRequestHeader( 'Authorization', this.rmiAuthKey );
+					xmlHttp.send( null );
+					
+					// Handle HTTP response
+					if(xmlHttp.status == 200) {
+						//console.log('initComponentsForType 리턴 : ', JSON.parse(xmlHttp.responseText));
+                        var result = JSON.parse(xmlHttp.responseText);
+                        this.componentTypeId = result[0].ComponentTypeId;
+                        console.log('initComponentsForType 리턴 : ', this.componentTypeId);
+					}
+				} 
+            },
+			setMainGroup() {
+				this.mainGroupLists = [];
+				this.subGroupLists = [];
+				this.itemMpLists = [];
+				this.qualColLists = [];
+
+				this.mainGroupId = '';
+				this.subGroupId = '';
+				this.itemMpId = '';
+				this.manualId = '';
+
+				if(this.carTypeId !== undefined && this.carTypeId !== '' ) {
+					
+					let languageCode = 'en',
+						countryCode = 'kr',
+                        typeId = this.carTypeId,
+                        componentTypeId = this.componentTypeId;			
+						
+					// Build url query string
+					let query = '?languageCode=' + languageCode
+						+ '&countryCode=' + countryCode
+                        + '&typeId=' + typeId
+                        + '&componentTypeId=' + componentTypeId
 					
 					// Send HTTP request
 					let xmlHttp = new XMLHttpRequest();
@@ -170,7 +224,10 @@
 			changeMainGroup() {
 				var selected = this.mainGroupId;
 				this.itemMpLists = [];
+				this.qualColLists = [];
+
 				this.itemMpId = '';
+				this.manualId = '';
 
 				this.subGroupLists = this.mainGroupLists.reduce(function (pre, value) {
 					if(value.MainGroupId === selected) {
@@ -183,6 +240,9 @@
 			},
 			changeSubGroup() {
 				var selected = this.subGroupId;
+				this.qualColLists = [];
+
+				this.manualId = '';				
 
 				this.itemMpLists = this.subGroupLists.reduce(function (pre, value) {
 					if(value.SubGroupId === selected) {
@@ -194,21 +254,42 @@
 				}, []);	
 			},
 			changeItemMp() {
-				let languageCode = 'en',
-					countryCode = 'kr',
-					printView = true,
+				var selected = this.itemMpId;
+
+				this.qualColLists = this.itemMpLists.reduce(function (pre, value) {
+					if(value.ItemMpId === selected) {
+						return [...pre, ...value.Manuals];
+					}
+					else {
+						return pre;
+					}
+				}, []);	
+			},
+			changeManualId() {
+
+                let typeId = this.carTypeId,
+                    countryCode = 'kr',
+                    languageCode = 'en',
+                    systemQualColId = this.qualColLists[0].SystemQualColId,
+                    qualColId = this.manualId,
+                    printView = true,
+                    componentTypeId = this.componentTypeId,
 					linkUrl = '.',
-					itemMpId = this.itemMpId,
-					typeId = this.carTypeId;		
+					itemMpId = this.itemMpId;		
 					
 				// Build url query string
-				let query = '?languageCode=' + languageCode
-					+ '&countryCode=' + countryCode
-					+ '&typeId=' + typeId	
-					+ '&itemMpId=' + itemMpId	
-					+ '&printView=' + printView	
-					+ '&linkUrl=' + linkUrl	
-				
+                let query = '?typeId=' + typeId
+                    + '&countryCode=' + countryCode
+                    + '&languageCode=' + languageCode
+                    + '&systemQualColId=' + systemQualColId
+					+ '&qualColId=' + qualColId	
+                    + '&printView=' + printView	
+                    + '&componentTypeId=' +componentTypeId
+                    + '&linkUrl=' + linkUrl	
+                    + '&itemMpId=' + itemMpId
+                
+                console.log('query : ', query);
+                
 				// Send HTTP request
 				let xmlHttp = new XMLHttpRequest();
 				xmlHttp.open( 'GET', url + '/ManualHtml' + query, false );
@@ -220,14 +301,14 @@
 				if(xmlHttp.status == 200) {
 					console.log(xmlHttp.responseText);
 					let page = xmlHttp.responseText.replace('<img src=\"https://rmi-cdn.tecalliance.net/services/Logo.png\" height=\"60px\" border=\"0\" alt=\"\"/>\r\n', '');
-					$("#RMIContents").html(JSON.parse(page));
-                }
-                
-                var table = document.getElementsByTagName('table')[0];
-                    table.style.display = "none";
+                    $("#RMIContents").html(JSON.parse(page));
+                    
+                    var table = document.getElementsByTagName('table');
+                    table[table.length -1].style.display = "none";
 
-                    var hr = document.getElementsByTagName('hr')[0];
-                    hr.style.display = "none";
+                    var hr = document.getElementsByTagName('hr');
+                    hr[hr.length -1].style.display = "none";
+				}	
 			}
 		},   		
 	}
@@ -259,4 +340,3 @@
 }
 
 </style>
-

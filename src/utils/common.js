@@ -79,6 +79,19 @@ export function arrayGroupBy(array, f) {
     })
 }
 
+export function groupBy(objectArray, keyId, KeyText) {
+    return objectArray.reduce(function(acc, obj) {
+        var key = obj[keyId];
+        if (!acc[key]) {
+            acc[key] = [];
+        }
+        acc[key].push(obj);
+        acc[key].id = key;
+        acc[key].name = obj[KeyText];
+        return acc;
+    }, {});
+}
+
 export function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
