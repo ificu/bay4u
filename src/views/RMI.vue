@@ -97,6 +97,7 @@
       <RMIDAIGNOSTICVALUES v-if="checkShowPage('DAIGNOSTICVALUES')" ></RMIDAIGNOSTICVALUES>
       <RMIRELAYSFUSES v-if="checkShowPage('RELAYSFUSES')" ></RMIRELAYSFUSES>
       <RMIWIRING v-if="checkShowPage('WIRING')" ></RMIWIRING>
+      <RMIWARNING v-if="checkShowPage('WARNING')" ></RMIWARNING>
 
   </v-app>
 </template>
@@ -110,6 +111,7 @@
   import RMIDAIGNOSTICVALUES from '@/components/RMI/RMI-DAIGNOSTICVALUES.vue'
   import RMIRELAYSFUSES from '@/components/RMI/RMI-RELAYSFUSES.vue'
   import RMIWIRING from '@/components/RMI/RMI-WIRING.vue'
+  import RMIWARNING from '@/components/RMI/RMI-WARNING.vue'
 
   const axios = require('axios').default;
   const url = "https://rmi-services.tecalliance.net";
@@ -120,9 +122,10 @@
     },
     data: () => ({
       drawer: null,
-      subPageList: ['ADJUST', 'MANUALS', 'GRAPHIC','MAINTENANCE','TIMES','DAIGNOSTICVALUES','RELAYSFUSES','WIRING'],
+      subPageList: ['ADJUST', 'MANUALS', 'GRAPHIC','MAINTENANCE','TIMES','DAIGNOSTICVALUES','RELAYSFUSES','WIRING', 'WARNING'],
       showPageList: [],
-      jsonHeader: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'Origin':'https://rmi-services.tecalliance.net', 'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36', 'Authorization': 'TecRMI {{AuthToken}}' },
+      //jsonHeader: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'Origin':'https://rmi-services.tecalliance.net', 'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36', 'Authorization': 'TecRMI {{AuthToken}}' },
+      jsonHeader: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'Authorization': 'TecRMI {{AuthToken}}' },
       menuItems: [
         { icon: 'mdi-cube-scan', text: 'OverView', rmi: 'OVERVIEW' },
         { icon: 'mdi-car-info', text: '정비 참고 정보', rmi: 'ADJUST' },
@@ -132,7 +135,7 @@
         { icon: 'mdi-history', text: '표준 공임 시간', rmi: 'TIMES' },
         { icon: 'mdi-laptop-chromebook', text: '차량 진단 데이터', rmi: 'DAIGNOSTICVALUES' },
         { icon: 'mdi-currency-sign', text: 'Fueses & Relay', rmi: 'RELAYSFUSES' },
-        { icon: 'mdi-car-brake-abs', text: '경보등 정보', rmi: 'LIGHT' },
+        { icon: 'mdi-car-brake-abs', text: '경보등 정보', rmi: 'WARNING' },
         { icon: 'mdi-car-shift-pattern', text: '배선 정보', rmi: 'WIRING' },
       ],
       carMakerLists: [],
@@ -141,6 +144,7 @@
       carMakerId: '',
       carRangeId: '',
       carTypeId: '',
+      carVin: '',
       rmiAuthKey: '',
     }),
     components: {
@@ -151,21 +155,25 @@
         RMITIMES,
         RMIDAIGNOSTICVALUES,
         RMIRELAYSFUSES,
-        RMIWIRING
+        RMIWIRING,
+        RMIWARNING
     },    
     created () {
       this.$vuetify.theme.dark = true;
+      this.$vuetify.theme.themes.dark.primary = '#aaa'
       this.getAuthKey();
-      this.setShowPage('ADJUST');
+      this.setShowPage('WARNING');
+      this.carVin = this.$route.query.VIN;
     },
     methods: {
       clickMenu(page) {
         if(this.subPageList.includes(page) === true) {
+          this.setShowPage(page);
           var param = {
               rmiAuthKey: this.rmiAuthKey,
               carTypeId: this.carTypeId
-          }
-          this.setShowPage(page);
+          }          
+          console.log('InitData param : ', param);
           this.$EventBus.$emit('RMI-'+page+'.InitData', param);  
         }
       },

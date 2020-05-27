@@ -2,15 +2,45 @@
     <v-content class="contents">
         <v-container>
             <v-row>
-                <v-col cols="12" sm="12" >
+                <v-col cols="12" sm="10" >
                     <v-card
-                        class="pa-2"
+                        class="pa-2 pb-12"
                         outlined
                         tile
                     >
-					<v-icon class="mx-4" style="color:#fddca9; font-size:18px;" >  mdi-arrange-send-backward </v-icon>
-					<span class="font-weight-bold" style="color:#fddca9; font-size:15px;" >차량 도면</span>
+						<v-icon class="mx-4" style="color:#fddca9; font-size:18px;" >  mdi-arrange-send-backward </v-icon>
+						<span class="font-weight-bold" style="color:#fddca9; font-size:15px;" >차량 도면</span>				
                     </v-card>
+                </v-col>
+                <!--<v-col cols="12" sm="2" >			
+						<v-autocomplete
+							id="carBody"
+							v-model="subGroupId"
+							:items="subGroupLists"
+							item-text="SubGroupName"
+							item-value="SubGroupId"	
+							label="Body 상세 선택"
+							outlined
+							dense
+							item-color="red"
+							>
+						</v-autocomplete>					
+                </v-col>	-->
+                <v-col cols="12" sm="2">
+					<v-card>
+							<v-select
+								class="pa-4 pb-0 pt-6 adjustSelect"
+								v-model="mainGroupId"
+								:items="mainGroupLists"
+								item-text="MainGroupName"
+								item-value="MainGroupId"								
+								label="Body 상세"
+								outlined
+								dense
+								@change="changeMainGroup"
+								>
+							</v-select>
+					</v-card>
                 </v-col>
             </v-row>  			
             <v-row>
@@ -305,6 +335,14 @@
 	border-width: thick;
 	border-color: #fddca9;
 }
+
+
+#carBody {
+  background-color:red;
+  color: black;
+  font-size: 12px;
+}
+
 
 </style>
 
