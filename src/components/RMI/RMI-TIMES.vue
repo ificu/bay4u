@@ -81,6 +81,7 @@
 		name: 'RMI-TIMES',
 		data(){
 			return{
+                qualColId: '',
 				mainGroupLists: [],
 				subGroupLists: [],
 				itemMpLists: [],
@@ -98,7 +99,8 @@
 			this.$EventBus.$on('RMI-TIMES.InitData', param => {  
 				this.rmiAuthKey = param.rmiAuthKey;
 				this.carTypeId = param.carTypeId; 
-				this.initAuthKey();
+                this.initAuthKey();
+                this.initBodiesForTimes();
 				this.setMainGroup();
 			});
 		},	
@@ -122,7 +124,36 @@
 				if(xmlHttp.status == 200) {
 					this.rmiAuthKey = 'TecRMI ' + xmlHttp.getResponseHeader( 'X-AuthToken' );
 				}
-			},
+            },
+            initBodiesForTimes()
+            {
+                if(this.carTypeId !== undefined && this.carTypeId !== '' ) {
+					
+					let languageCode = 'en',
+						countryCode = 'kr',
+						typeId = this.carTypeId;		
+						
+					// Build url query string
+					let query = '?languageCode=' + languageCode
+						+ '&countryCode=' + countryCode
+						+ '&typeId=' + typeId	
+					
+					// Send HTTP request
+					let xmlHttp = new XMLHttpRequest();
+					xmlHttp.open( 'GET', url + '/BodiesForTimes' + query, false );
+					xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
+					xmlHttp.setRequestHeader( 'Accept', 'application/json' );
+					xmlHttp.setRequestHeader( 'Authorization', this.rmiAuthKey );
+					xmlHttp.send( null );
+					
+					// Handle HTTP response
+					if(xmlHttp.status == 200) {
+						var result = JSON.parse(xmlHttp.responseText);
+                        this.qualColId = result[0].QualColId;
+                        console.log('initBodiesForTimes 리턴 : ', this.qualColId);
+					}
+				} 
+            },
 			setMainGroup() {
 				this.mainGroupLists = [];
 				this.subGroupLists = [];
@@ -177,7 +208,7 @@
 			},
 			changeSubGroup() {
 
-                let bodyQualColId = 0,
+                let bodyQualColId = this.qualColId,
                     countryCode = 'kr',
 					languageCode = 'en',
 					typeId = this.carTypeId,
