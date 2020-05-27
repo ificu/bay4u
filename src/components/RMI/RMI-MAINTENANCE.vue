@@ -30,6 +30,7 @@
                             light
                             :items="itemMainLists"
                             class="tree-contents"
+                            open-on-click
                         ></v-treeview>
                     </v-card>
                 </v-col>
@@ -51,6 +52,7 @@
                             light
                             :items="itemAddLists"
                             class="tree-contents"
+                            open-on-click
                         ></v-treeview>
                     </v-card>
                 </v-col>

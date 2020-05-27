@@ -63,6 +63,7 @@
                             light
                             :items="itemMpLists"
                             class="tree-contents"
+                            open-on-click
                         ></v-treeview>
                     </v-card>
                 </v-col>
