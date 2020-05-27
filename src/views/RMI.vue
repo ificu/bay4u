@@ -174,6 +174,7 @@
               carTypeId: this.carTypeId
           }          
           console.log('InitData param : ', param);
+          console.log('InitData page : ', page);
           this.$EventBus.$emit('RMI-'+page+'.InitData', param);  
         }
       },
