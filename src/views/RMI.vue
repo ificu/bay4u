@@ -169,13 +169,14 @@
       clickMenu(page) {
         if(this.subPageList.includes(page) === true) {
           this.setShowPage(page);
-          var param = {
+          this.$nextTick(function(){
+            var param = {
               rmiAuthKey: this.rmiAuthKey,
               carTypeId: this.carTypeId
-          }          
-          console.log('InitData param : ', param);
-          console.log('InitData page : ', page);
-          this.$EventBus.$emit('RMI-'+page+'.InitData', param);  
+            }          
+            console.log('InitData param : ', param);
+            this.$EventBus.$emit('RMI-'+page+'.InitData', param);  
+          });
         }
       },
       checkShowPage(page) {
