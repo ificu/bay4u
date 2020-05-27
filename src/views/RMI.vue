@@ -92,6 +92,11 @@
       <RMIADJUST v-if="checkShowPage('ADJUST')" ></RMIADJUST>
       <RMIMANUALS v-if="checkShowPage('MANUALS')" ></RMIMANUALS>
       <RMIGRAPHIC v-if="checkShowPage('GRAPHIC')" ></RMIGRAPHIC>
+      <RMIMAINTENANCE  v-if="checkShowPage('MAINTENANCE')"></RMIMAINTENANCE>
+      <RMITIMES v-if="checkShowPage('TIMES')" ></RMITIMES>
+      <RMIDAIGNOSTICVALUES v-if="checkShowPage('DAIGNOSTICVALUES')" ></RMIDAIGNOSTICVALUES>
+      <RMIRELAYSFUSES v-if="checkShowPage('RELAYSFUSES')" ></RMIRELAYSFUSES>
+      <RMIWIRING v-if="checkShowPage('WIRING')" ></RMIWIRING>
       <RMIWARNING v-if="checkShowPage('WARNING')" ></RMIWARNING>
 
   </v-app>
@@ -101,6 +106,11 @@
   import RMIADJUST from '@/components/RMI/RMI-ADJUST.vue'
   import RMIMANUALS from '@/components/RMI/RMI-MANUALS.vue'
   import RMIGRAPHIC from '@/components/RMI/RMI-GRAPHIC.vue'
+  import RMIMAINTENANCE from '@/components/RMI/RMI-MAINTENANCE.vue'
+  import RMITIMES from '@/components/RMI/RMI-TIMES.vue'
+  import RMIDAIGNOSTICVALUES from '@/components/RMI/RMI-DAIGNOSTICVALUES.vue'
+  import RMIRELAYSFUSES from '@/components/RMI/RMI-RELAYSFUSES.vue'
+  import RMIWIRING from '@/components/RMI/RMI-WIRING.vue'
   import RMIWARNING from '@/components/RMI/RMI-WARNING.vue'
 
   const axios = require('axios').default;
@@ -112,7 +122,7 @@
     },
     data: () => ({
       drawer: null,
-      subPageList: ['ADJUST', 'MANUALS', 'GRAPHIC', 'WARNING'],
+      subPageList: ['ADJUST', 'MANUALS', 'GRAPHIC','MAINTENANCE','TIMES','DAIGNOSTICVALUES','RELAYSFUSES','WIRING', 'WARNING'],
       showPageList: [],
       //jsonHeader: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'Origin':'https://rmi-services.tecalliance.net', 'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36', 'Authorization': 'TecRMI {{AuthToken}}' },
       jsonHeader: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'Authorization': 'TecRMI {{AuthToken}}' },
@@ -141,6 +151,11 @@
         RMIADJUST,
         RMIMANUALS,
         RMIGRAPHIC,
+        RMIMAINTENANCE,
+        RMITIMES,
+        RMIDAIGNOSTICVALUES,
+        RMIRELAYSFUSES,
+        RMIWIRING,
         RMIWARNING
     },    
     created () {
