@@ -122,7 +122,6 @@
 		},
 		created () {
 			this.$EventBus.$on('RMI-WIRING.InitData', param => {  
-				console.log('param :',param);
 				this.rmiAuthKey = param.rmiAuthKey;
 				this.carTypeId = param.carTypeId; 
 				this.initAuthKey();
@@ -151,6 +150,7 @@
 				}
 			},
 			setMainGroup() {
+				
 				this.mainGroupLists = [];
 				this.subGroupLists = [];
 				this.itemMpLists = [];
@@ -183,7 +183,8 @@
 					// Handle HTTP response
 					if(xmlHttp.status == 200) {
 						console.log('changeMainGroup 리턴 : ', JSON.parse(xmlHttp.responseText));
-						this.mainGroupLists = JSON.parse(xmlHttp.responseText);
+						var result = JSON.parse(xmlHttp.responseText);
+						this.mainGroupLists = result;
 					}
 				}
 			},
@@ -267,7 +268,7 @@
                     hr[hr.length -1].style.display = "none";
 				}	
 			}
-		},   		
+		},
 	}
 </script>
 
