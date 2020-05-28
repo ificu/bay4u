@@ -94,11 +94,13 @@
                 </v-col>
             </v-row>            
         </v-container>
+		<BackToTop></BackToTop>
     </v-content>
 </template>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script>
+	import BackToTop from '@/components/Common/BackToTop.vue'
 //	const axios = require('axios').default;
 	const url = "https://rmi-services.tecalliance.net/rest/Manuals";
 		
@@ -119,6 +121,7 @@
 			}
 		},
 		components: {
+			BackToTop
 		},
 		created () {
 			this.$EventBus.$on('RMI-MANUALS.InitData', param => {  
@@ -160,6 +163,8 @@
 				this.itemMpId = '';
 				this.manualId = '';
 
+				$("#RMIContents").html('');
+
 				if(this.carTypeId !== undefined && this.carTypeId !== '' ) {
 					
 					let languageCode = 'en',
@@ -182,25 +187,6 @@
 					// Handle HTTP response
 					if(xmlHttp.status == 200) {
 						console.log('changeMainGroup 리턴 : ', JSON.parse(xmlHttp.responseText));
-						/////////////////////////////////////
-						this.mainGroupId = 119;
-						this.$nextTick(function(){
-							this.changeMainGroup();
-							this.subGroupId = 477;
-							this.$nextTick(function(){
-								this.changeSubGroup();
-								this.itemMpId = 15002;
-								this.$nextTick(function(){
-									this.changeItemMp();
-									this.manualId = 114736;
-									this.$nextTick(function(){
-										this.changeManualId();
-									});
-								});
-							});
-						});
-						/////////////////////////////////////
-
 						this.mainGroupLists = JSON.parse(xmlHttp.responseText);
 					}
 
@@ -213,6 +199,8 @@
 
 				this.itemMpId = '';
 				this.manualId = '';
+
+				$("#RMIContents").html('');
 
 				this.subGroupLists = this.mainGroupLists.reduce(function (pre, value) {
 					if(value.MainGroupId === selected) {
@@ -227,7 +215,9 @@
 				var selected = this.subGroupId;
 				this.qualColLists = [];
 
-				this.manualId = '';				
+				this.manualId = '';		
+				
+				$("#RMIContents").html('');
 
 				this.itemMpLists = this.subGroupLists.reduce(function (pre, value) {
 					if(value.SubGroupId === selected) {
@@ -240,6 +230,8 @@
 			},
 			changeItemMp() {
 				var selected = this.itemMpId;
+
+				$("#RMIContents").html('');
 
 				this.qualColLists = this.itemMpLists.reduce(function (pre, value) {
 					if(value.ItemMpId === selected) {

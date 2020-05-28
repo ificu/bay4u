@@ -78,11 +78,13 @@
                 </v-col>
             </v-row>            
         </v-container>
+		<BackToTop></BackToTop>
     </v-content>
 </template>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script>
+	import BackToTop from '@/components/Common/BackToTop.vue'
 //	const axios = require('axios').default;
 	const url = "https://rmi-services.tecalliance.net/rest/Adjust";
 		
@@ -101,6 +103,7 @@
 			}
 		},
 		components: {
+			BackToTop
 		},
 		created () {
 			this.$EventBus.$on('RMI-ADJUST.InitData', param => {  
@@ -140,6 +143,8 @@
 				this.subGroupId = '';
 				this.itemMpId = '';
 
+				$("#RMIContents").html('');
+
 				if(this.carTypeId !== undefined && this.carTypeId !== '' ) {
 					
 					let languageCode = 'en',
@@ -172,6 +177,8 @@
 				this.itemMpLists = [];
 				this.itemMpId = '';
 
+				$("#RMIContents").html('');
+
 				this.subGroupLists = this.mainGroupLists.reduce(function (pre, value) {
 					if(value.MainGroupId === selected) {
 						return [...pre, ...value.SubGroups];
@@ -183,6 +190,8 @@
 			},
 			changeSubGroup() {
 				var selected = this.subGroupId;
+
+				$("#RMIContents").html('');
 
 				this.itemMpLists = this.subGroupLists.reduce(function (pre, value) {
 					if(value.SubGroupId === selected) {

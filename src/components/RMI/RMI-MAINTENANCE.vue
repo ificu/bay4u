@@ -58,11 +58,13 @@
                 </v-col>
             </v-row>            
         </v-container>
+        <BackToTop></BackToTop>
     </v-content>
 </template>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script>
+    import BackToTop from '@/components/Common/BackToTop.vue'
 //	const axios = require('axios').default;
 	const url = "https://rmi-services.tecalliance.net/rest/Maintenance";
 		
@@ -78,6 +80,7 @@
 			}
 		},
 		components: {
+            BackToTop
 		},
 		created () {
 			this.$EventBus.$on('RMI-MAINTENANCE.InitData', param => {  
@@ -132,13 +135,22 @@
 					
 					// Handle HTTP response
 					if(xmlHttp.status == 200) {
-						var result = JSON.parse(xmlHttp.responseText);
-                        this.qualColId = result[0].QualColId;
-                        console.log('initBodiesForMaintenance 리턴 : ', this.qualColId);
+                        var result = JSON.parse(xmlHttp.responseText);
+                        if(result.length > 0){
+                            this.qualColId = result[0].QualColId;
+                            console.log('initBodiesForMaintenance 리턴 : ', this.qualColId);
+                        }
+                        else{
+                            this.itemMainLists = [];
+                            this.itemAddLists = [];
+                        }
 					}
 				} 
             },
 			setWorks() {
+
+                this.itemMainLists = [];
+                this.itemAddLists = [];
 
                 let bodyQualColId = this.qualColId,
                     countryCode = 'kr',
