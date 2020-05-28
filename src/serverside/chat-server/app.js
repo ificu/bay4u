@@ -1,19 +1,23 @@
 var fs = require('fs');
 var app = require('express')();
 var https = require('https');
-//var server = require('http').createServer(app);
+
+var server = require('http').createServer(app);
+/*
 var server = https.createServer({
     key: fs.readFileSync('./private.key'),
     cert: fs.readFileSync('./certificate.crt'),
     ca: fs.readFileSync('./ca_bundle.crt'),
     requestCert: false,
     rejectUnauthorized: false
-}, app);
+}, app);*/
 var io = require('socket.io')(server, {
     pingTimeout: 1000,
 });
 var bodyParser = require('body-parser');
 var AWS = require('aws-sdk');
+
+var request = require('request');
 
 app.use(bodyParser.json());
 
@@ -181,6 +185,21 @@ app.post('/QTConfirm', function(req, res) {
                     };
 
                     io.sockets.emit('chat', msg);
+
+                    // 4. 마지막으로 capet에 그대로 한번 더 날리기
+                    request({
+                        headers: {
+                          'Content-Type': 'application/json'
+                        },
+                        //uri: 'https://www.thecar-pet.co.kr/api/QTConfirm',
+                        uri: 'http://1.235.32.173:9060/api/QTConfirm',
+                        body: req.body,
+                        json: true,
+                        method: 'POST'
+                      }, function (err, resp, body) {
+                        console.log("return data : ", body);
+                        console.log("error data : ", err);
+                      });
                     console.log('msg : ', msg);
                 }
             });
