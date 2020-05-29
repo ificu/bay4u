@@ -12,12 +12,11 @@
 					<span class="font-weight-bold" style="color:#fddca9; font-size:15px;" >정기 점검 항목</span>
                     </v-card>
                 </v-col>
-            </v-row>  			
-            <v-row>
-                <v-col
-                    cols="12"
-                    sm="12"
-                >
+            </v-row>
+            <v-row 
+                class="pa-2 mt-4 ml-0 mr-0 mainform"
+            >
+                <v-col>
                     <v-card
                         class="pa-2"
                         outlined
@@ -31,20 +30,16 @@
                             :items="itemMainLists"
                             class="tree-contents"
                             open-on-click
+                            selectable
+                            selected-color="red"
+                            v-model="mainJobs"
                         ></v-treeview>
                     </v-card>
-                </v-col>
-            </v-row>
-            <v-row>
-                <v-col
-                    cols="12"
-                    sm="12"
-                >
                     <v-card
                         class="pa-2"
                         outlined
                         tile
-						id = "RMIContents"
+                        id = "RMIContents"
                     >   
                         <v-card-title  class="pa-2 card-title">Additional service jobs</v-card-title>
                         <v-treeview
@@ -53,10 +48,44 @@
                             :items="itemAddLists"
                             class="tree-contents"
                             open-on-click
+                            selectable
+                            selected-color="red"
+                            v-model="addJobs"
                         ></v-treeview>
                     </v-card>
                 </v-col>
-            </v-row>            
+                <v-divider vertical light></v-divider>
+                <v-col
+                    cols="4"
+                    sm="4"
+                >
+                    <template >
+                    main jobs : {{mainJobs}} 
+                    add jobs : {{addJobs}}
+
+                        <v-card
+                            class="pa-2"
+                            outlined
+                            tile
+                            id = "RMIContents"
+                        >
+                            <v-card-title  class="pa-2 card-title">Parts</v-card-title>
+                            <v-list dense light>
+                                <v-list-item
+                                    v-for="(item, i) in parts"
+                                    :key="i"
+                                >
+                                <v-list-item-content>
+                                    <v-list-item-title>
+                                        {{ item.ItemMpText }}
+                                    </v-list-item-title>
+                                </v-list-item-content>
+                                </v-list-item>
+                            </v-list>
+                        </v-card>
+                    </template>
+                </v-col>
+            </v-row>    
         </v-container>
         <BackToTop></BackToTop>
     </v-content>
@@ -67,7 +96,8 @@
     import BackToTop from '@/components/Common/BackToTop.vue'
 //	const axios = require('axios').default;
 	const url = "https://rmi-services.tecalliance.net/rest/Maintenance";
-		
+    const partsUrl = "https://rmi-services.tecalliance.net/rest/Prices";
+    
 	export default {
 		name: 'RMI-MAINTENANCE',
 		data(){
@@ -76,7 +106,10 @@
                 itemMainLists:[],
                 itemAddLists:[],
 				rmiAuthKey: '',	
-                carTypeId: '',	
+                carTypeId: '',
+                mainJobs: [],
+                addJobs:[],
+                parts:[]
 			}
 		},
 		components: {
@@ -90,7 +123,36 @@
                 this.initBodiesForMaintenance();
 				this.setWorks();
 			});
-		},	
+        },	
+        updated(){
+            var mainJogRoot = document.getElementsByClassName('v-treeview-node__root');
+            mainJogRoot.forEach(element => {
+                if(element.childNodes.length > 2){
+                    element.childNodes[1].style.display = "none";
+                }
+            });
+            
+            /*if(this.mainJobs.length > 0){
+                console.log('mainJobs : ',this.mainJobs);
+                this.getItemMpId();
+            }*/
+        },
+        mounted() {
+
+            /*var self = this;     
+            window.addEventListener("scroll", function (e) {
+                var scrolled = document.scrollingElement.scrollTop;
+            // console.log(scrolled);
+                self.initToTopButton(scrolled);
+            });
+             */
+            
+            /*var mainTree = document.getElementById('mainjob-tree');
+            console.log('mainTree: ',mainTree)
+            mainTree.addEventListener("click", function (e) {
+                 console.log('click event : ', e);
+             });*/
+        },
 		methods: {
 			initAuthKey() {
 				let url = 'https://rmi-services.tecalliance.net/auth/login';
@@ -152,6 +214,8 @@
                 this.itemMainLists = [];
                 this.itemAddLists = [];
 
+                this.mainJobs = [];
+
                 let bodyQualColId = this.qualColId,
                     countryCode = 'kr',
 					languageCode = 'en',
@@ -181,28 +245,64 @@
                     console.log('serviceList : ', serviceList);
                     console.log('additionalWorksList : ', additionalWorksList);
 
-                    this.itemMainLists = serviceList.map(function(obj){
-                        var mainObj = {};
-                        mainObj.id = obj.ItemMpId;
-                        mainObj.name = obj.ItemMpText;
-                        mainObj.children = obj.WorkSteps.map( s => ({id:s.WorkId , name:s.WorkText}) );;
-                        return mainObj;
-                    });
+                    this.$nextTick(function(){
+                        this.itemMainLists = serviceList.map(function(obj){
+                            var mainObj = {};
+                            mainObj.id = obj.ItemMpId;
+                            mainObj.name = obj.ItemMpText;
+                            mainObj.children = obj.WorkSteps.map( s => ({id:s.WorkId , name:s.WorkText}) );;
+                            return mainObj;
+                        });
 
-                    this.itemAddLists = additionalWorksList.map(function(obj){
-                        var mainObj = {};
-                        mainObj.id = obj.ItemMpId;
-                        
-                        if(obj.AddText.length !== 0)
-                            mainObj.name = obj.ItemMpText +  " ["+ obj.AddText+"]";
-                        else 
-                        mainObj.name = obj.ItemMpText;
+                        this.itemAddLists = additionalWorksList.map(function(obj){
+                            var mainObj = {};
+                            mainObj.id = obj.ItemMpId;
+                            
+                            if(obj.AddText.length !== 0)
+                                mainObj.name = obj.ItemMpText +  " ["+ obj.AddText+"]";
+                            else 
+                            mainObj.name = obj.ItemMpText;
 
-                        mainObj.children = obj.WorkSteps.map( s => ({id:s.WorkId , name:s.WorkText}) );;
-                        return mainObj;
+                            mainObj.children = obj.WorkSteps.map( s => ({id:s.WorkId , name:s.WorkText}) );;
+                            return mainObj;
+                        });
                     });
 				} 
-			},
+            },
+            getItemMpId()
+            {
+                let languageCode = 'en',
+                    countryCode = 'kr',
+                    typeId = this.carTypeId;		
+                    
+                // Build url query string
+                let query = '?languageCode=' + languageCode
+                    + '&countryCode=' + countryCode
+                    + '&typeId=' + typeId
+                
+                let params = {
+					SelectedWorkIds: this.mainJobs,
+                    CountryCode: "kr",
+                    LanguageCode: "en",
+                    TypeId: this.carTypeId,
+                    ShowPaint: false
+				};
+                
+                // Send HTTP request
+                let xmlHttp = new XMLHttpRequest();
+                xmlHttp.open( 'POST', partsUrl + '/PartsForWorks', false );
+                xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
+				xmlHttp.setRequestHeader( 'Accept', 'application/json' );
+				xmlHttp.setRequestHeader( 'Authorization', this.rmiAuthKey );
+                xmlHttp.send( JSON.stringify( params ) );
+
+                // Handle HTTP response
+                if(xmlHttp.status == 200) {
+                    var result = JSON.parse(xmlHttp.responseText);
+                    console.log('리턴 : ', result);
+                    this.parts = result;
+                }
+            }
 		},   		
 	}
 </script>
@@ -217,13 +317,11 @@
     background-color: #37474F;
     color:white;
 }
-.contents .adjustSelect {
-  background-color: #666;
-  font-size: 12px;
-}
-
 .contents .border {
   border: 2px dashed orange;
+}
+.contents .mainform {
+  border: 5px solid #fddca9;;
 }
 
 .contents .tree-contents{
@@ -235,10 +333,11 @@
 #RMIContents {
 	background-color: white; 
 	color: black;
-	border-style: solid;
+    border-radius: 5px;
+	/*border-style: solid;
 	border-radius: 5px;
 	border-width: thick;
-	border-color: #fddca9;
+	border-color: #fddca9;*/
 }
 
 </style>
