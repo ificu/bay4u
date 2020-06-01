@@ -8,106 +8,56 @@
                         outlined
                         tile
                     >
-						<v-icon class="mx-4" style="color:#fddca9; font-size:18px;" >  mdi-arrange-send-backward </v-icon>
-						<span class="font-weight-bold" style="color:#fddca9; font-size:15px;" >차량 도면</span>				
+						<v-icon id="titleIcon" class="mx-4" style="color:#fddca9; font-size:18px;" >  mdi-arrange-send-backward </v-icon>
+						<span id="titleText" class="font-weight-bold" style="color:#fddca9; font-size:15px;" @click="clearManual">차량 도면</span>				
                     </v-card>
                 </v-col>
-                <!--<v-col cols="12" sm="2" >			
-						<v-autocomplete
-							id="carBody"
-							v-model="subGroupId"
-							:items="subGroupLists"
-							item-text="SubGroupName"
-							item-value="SubGroupId"	
-							label="Body 상세 선택"
-							outlined
-							dense
-							item-color="red"
-							>
-						</v-autocomplete>					
-                </v-col>	-->
                 <v-col cols="12" sm="2">
 					<v-card>
 							<v-select
 								class="pa-4 pb-0 pt-6 adjustSelect"
-								v-model="mainGroupId"
-								:items="mainGroupLists"
-								item-text="MainGroupName"
-								item-value="MainGroupId"								
-								label="Body 상세"
-								outlined
-								dense
-								@change="changeMainGroup"
-								>
-							</v-select>
-					</v-card>
-                </v-col>
-            </v-row>  			
-            <v-row>
-                <v-col cols="12" sm="3" >
-					<v-card>
-							<v-select
-								class="pa-4 pb-0 pt-6 adjustSelect"
-								v-model="mainGroupId"
-								:items="mainGroupLists"
-								item-text="MainGroupName"
-								item-value="MainGroupId"								
-								label="Main 그룹"
-								outlined
-								dense
-								@change="changeMainGroup"
-								>
-							</v-select>
-					</v-card>
-                </v-col>
-                <v-col cols="12" sm="3" >
-					<v-card>
-							<v-select
-								class="pa-4 pb-0 pt-6 adjustSelect"
-								v-model="subGroupId"
-								:items="subGroupLists"
-								item-text="SubGroupName"
-								item-value="SubGroupId"	
-								label="Sub 그룹"
-								outlined
-								dense
-								@change="changeSubGroup"
-								>
-							</v-select>
-					</v-card>
-                </v-col>
-                <v-col cols="12" sm="3" >
-					<v-card>
-							<v-select
-								class="pa-4 pb-0 pt-6 adjustSelect"
-								v-model="itemMpId"
-								:items="itemMpLists"
-								item-text="ItemMpText"
-								item-value="ItemMpId"	
-								label="상세 항목"
-								outlined
-								dense
-								@change="changeItemMp"
-								>
-							</v-select>
-					</v-card>
-                </v-col>
-                <v-col cols="12" sm="3" >
-					<v-card>
-							<v-select
-								class="pa-4 pb-0 pt-6 adjustSelect"
-								v-model="manualId"
+								v-model="qualColId"
 								:items="qualColLists"
 								item-text="QualColText"
-								item-value="ManualId"	
-								label="매뉴얼 구분"
+								item-value="QualColId"								
+								label="Body 상세"
 								outlined
 								dense
 								@change="changeManualId"
 								>
 							</v-select>
 					</v-card>
-                </v-col>					
+					<v-btn id='btnFuncMaingroupDelegate' @click="selectMaingroup" style="display:none;">JSMaingroupDelegate</v-btn>
+					<v-btn id='btnFuncSubgroupDelegate' @click="selectSubgroup" style="display:none;">JSSubgroupDelegate</v-btn>
+                </v-col>
+            </v-row>  			
+            <v-row>
+                <v-col
+                    cols="12"
+                    sm="12"
+                >
+                    <v-card
+                        class="pa-2"
+                        outlined
+                        tile
+						id = "RMIVehicleContents"
+                    >
+                    </v-card>
+                </v-col>
+            </v-row>  
+            <v-row>
+                <v-col
+                    cols="12"
+                    sm="12"
+                >
+                    <v-card
+                        class="pa-2"
+                        outlined
+                        tile
+						id = "RMIMaingroupContents"
+                    >
+                    </v-card>
+                </v-col>
             </v-row>
             <v-row>
                 <v-col
@@ -118,11 +68,11 @@
                         class="pa-2"
                         outlined
                         tile
-						id = "RMIContents"
+						id = "RMISubgroupContents"
                     >
                     </v-card>
                 </v-col>
-            </v-row>            
+            </v-row>
         </v-container>
     </v-content>
 </template>
@@ -144,6 +94,7 @@
 				subGroupId: '',
 				itemMpId: '',
 				manualId: '',
+				qualColId: '',
 				rmiAuthKey: '',	
 				carTypeId: '',			
 			}
@@ -154,12 +105,25 @@
 			this.$EventBus.$on('RMI-GRAPHIC.InitData', param => {  
 				this.rmiAuthKey = param.rmiAuthKey;
 				this.carTypeId = param.carTypeId; 
-				this.initAuthKey();
-				this.selectBodies();
-				//this.setMainGroup();
+
+				this.qualColLists = [];
+				this.clearManual();
+
+				this.$nextTick(function() {
+					this.initAuthKey();
+					this.selectBodies();
+					//this.setMainGroup();
+				});
 			});
 		},	
 		methods: {
+			clearManual() {
+				console.log('clearManual.......');				
+				this.qualColId = '';
+				$("#RMIVehicleContents").html('');
+				$("#RMIMaingroupContents").html('');
+				$("#RMISubgroupContents").html('');
+			},
 			initAuthKey() {
 				let url = 'https://rmi-services.tecalliance.net/auth/login';
 				let params = {
@@ -201,112 +165,142 @@
 				// Handle HTTP response
 				if(xmlHttp.status == 200) {
 					console.log('selectBodies 리턴 : ', JSON.parse(xmlHttp.responseText));
+					this.qualColLists = JSON.parse(xmlHttp.responseText);
 				}
-			},
-			setMainGroup() {
-				this.mainGroupLists = [];
-				this.subGroupLists = [];
-				this.itemMpLists = [];
-
-				this.mainGroupId = '';
-				this.subGroupId = '';
-				this.itemMpId = '';
-
-				if(this.carTypeId !== undefined && this.carTypeId !== '' ) {
-					
-					let languageCode = 'en',
-						countryCode = 'kr',
-						typeId = this.carTypeId;		
-						
-					// Build url query string
-					let query = '?languageCode=' + languageCode
-						+ '&countryCode=' + countryCode
-						+ '&typeId=' + typeId	
-					
-					// Send HTTP request
-					let xmlHttp = new XMLHttpRequest();
-					xmlHttp.open( 'GET', url + '/ManualList' + query, false );
-					xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
-					xmlHttp.setRequestHeader( 'Accept', 'application/json' );
-					xmlHttp.setRequestHeader( 'Authorization', this.rmiAuthKey );
-					xmlHttp.send( null );
-					
-					// Handle HTTP response
-					if(xmlHttp.status == 200) {
-						console.log('changeMainGroup 리턴 : ', JSON.parse(xmlHttp.responseText));
-						this.mainGroupLists = JSON.parse(xmlHttp.responseText);
-					}
-
-				}       
-			},
-			changeMainGroup() {
-				var selected = this.mainGroupId;
-				this.itemMpLists = [];
-				this.itemMpId = '';
-
-				this.subGroupLists = this.mainGroupLists.reduce(function (pre, value) {
-					if(value.MainGroupId === selected) {
-						return [...pre, ...value.SubGroups];
-					}
-					else {
-						return pre;
-					}
-				}, []);	
-			},
-			changeSubGroup() {
-				var selected = this.subGroupId;
-
-				this.itemMpLists = this.subGroupLists.reduce(function (pre, value) {
-					if(value.SubGroupId === selected) {
-						return [...pre, ...value.ItemMps];
-					}
-					else {
-						return pre;
-					}
-				}, []);	
-			},
-			changeItemMp() {
-				var selected = this.itemMpId;
-
-				this.qualColLists = this.itemMpLists.reduce(function (pre, value) {
-					if(value.ItemMpId === selected) {
-						return [...pre, ...value.Manuals];
-					}
-					else {
-						return pre;
-					}
-				}, []);	
 			},
 			changeManualId() {
 				let languageCode = 'en',
 					countryCode = 'kr',
 					printView = true,
 					linkUrl = '.',
-					manualId = this.manualId,
+					bodyQualColId = this.qualColId,
 					typeId = this.carTypeId;		
 					
 				// Build url query string
 				let query = '?languageCode=' + languageCode
 					+ '&countryCode=' + countryCode
 					+ '&typeId=' + typeId	
-					+ '&manualId=' + manualId	
+					+ '&bodyQualColId=' + bodyQualColId	
 					+ '&printView=' + printView	
 					+ '&linkUrl=' + linkUrl	
+
+				$("#RMIVehicleContents").html('');
+				$("#RMIMaingroupContents").html('');
+				$("#RMISubgroupContents").html('');
 				
 				// Send HTTP request
 				let xmlHttp = new XMLHttpRequest();
-				xmlHttp.open( 'GET', url + '/ManualHtml' + query, false );
+				xmlHttp.open( 'GET', url + '/VehicleHtml' + query, false );
 				xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
 				xmlHttp.setRequestHeader( 'Accept', 'application/json' );
 				xmlHttp.setRequestHeader( 'Authorization', this.rmiAuthKey );
 				xmlHttp.send( null );
 				// Handle HTTP response
 				if(xmlHttp.status == 200) {
-					console.log(xmlHttp.responseText);
-					let page = xmlHttp.responseText.replace('<img src=\"https://rmi-cdn.tecalliance.net/services/Logo.png\" height=\"60px\" border=\"0\" alt=\"\"/>\r\n', '');
-					$("#RMIContents").html(JSON.parse(page));
+					const regexClick = /clickOnElement/gi;
+					const substClick = `clickOnVehicleElement`;
+					const regexHref = /href=\\".Þ(..|...)Þ\\"/gi;
+					const substHref = `onclick=\\\"clickOnVehicleElement(this.id.substring(1));\\\"`;
+					//console.log(xmlHttp.responseText);
+					let page = xmlHttp.responseText.replace('document.location.href=\'.Þ\'+id+\'Þ\'', 'document.getElementById(\'btnFuncMaingroupDelegate\').value=id;document.getElementById(\'btnFuncMaingroupDelegate\').click();')
+													.replace(regexClick, substClick)
+													.replace(regexHref, substHref)
+													.replace('x + \'px\';', '(x - 250) + \'px\';')
+													.replace('y + \'px\';', '(y - 200) + \'px\';');
+					//console.log(page);
+					$("#RMIVehicleContents").html(JSON.parse(page));
 				}	
-			}
+			},
+			selectMaingroup() {
+				console.log('selectMaingroup............. : ', document.getElementById('btnFuncMaingroupDelegate').value);
+				this.mainGroupId = document.getElementById('btnFuncMaingroupDelegate').value.substring(1);
+				let languageCode = 'en',
+					countryCode = 'kr',
+					printView = true,
+					linkUrl = '.',
+					bodyQualColId = this.qualColId,
+					typeId = this.carTypeId;
+					
+				// Build url query string
+				let query = '?languageCode=' + languageCode
+					+ '&countryCode=' + countryCode
+					+ '&typeId=' + typeId	
+					+ '&bodyQualColId=' + bodyQualColId	
+					+ '&printView=' + printView	
+					+ '&linkUrl=' + linkUrl	
+					+ '&mainGroupId=' + this.mainGroupId;
+
+				$("#RMIMaingroupContents").html('');
+				$("#RMISubgroupContents").html('');
+				
+				// Send HTTP request
+				let xmlHttp = new XMLHttpRequest();
+				xmlHttp.open( 'GET', url + '/MaingroupHtml' + query, false );
+				xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
+				xmlHttp.setRequestHeader( 'Accept', 'application/json' );
+				xmlHttp.setRequestHeader( 'Authorization', this.rmiAuthKey );
+				xmlHttp.send( null );
+				// Handle HTTP response
+				if(xmlHttp.status == 200) {
+					const regexClick = /clickOnElement/gi;
+					const substClick = `clickOnMaingroupElement`;
+					const regexHref = /href=\\".Þ(..|...)Þ\\"/gi;
+					const substHref = `onclick=\\\"clickOnMaingroupElement(this.id.substring(1));\\\"`;					
+					//console.log(xmlHttp.responseText);
+					let page = xmlHttp.responseText.replace('document.location.href=\'.Þ\'+id+\'Þ\'', 'document.getElementById(\'btnFuncSubgroupDelegate\').value=id;document.getElementById(\'btnFuncSubgroupDelegate\').click();')
+													.replace(regexClick, substClick)
+													.replace(regexHref, substHref)
+													.replace('x + \'px\';', '(x - 250) + \'px\';')
+													.replace('y + \'px\';', '(y - 200) + \'px\';');
+					//console.log(page);
+					$("#RMIMaingroupContents").html(JSON.parse(page));
+				}					
+			},
+			selectSubgroup() {
+				console.log('selectSubgroup............. : ', document.getElementById('btnFuncSubgroupDelegate').value);
+				this.subGroupId = document.getElementById('btnFuncSubgroupDelegate').value.substring(1);
+				let languageCode = 'en',
+					countryCode = 'kr',
+					printView = true,
+					linkUrl = '.',
+					bodyQualColId = this.qualColId,
+					typeId = this.carTypeId;
+					
+				// Build url query string
+				let query = '?languageCode=' + languageCode
+					+ '&countryCode=' + countryCode
+					+ '&typeId=' + typeId	
+					+ '&bodyQualColId=' + bodyQualColId	
+					+ '&subGroupQualCol=' + '0'	
+					+ '&printView=' + printView	
+					+ '&linkUrl=' + linkUrl	
+					+ '&subGroupId=' + this.subGroupId;
+
+				$("#RMISubgroupContents").html('');					
+				
+				// Send HTTP request
+				let xmlHttp = new XMLHttpRequest();
+				xmlHttp.open( 'GET', url + '/SubgroupHtml' + query, false );
+				xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
+				xmlHttp.setRequestHeader( 'Accept', 'application/json' );
+				xmlHttp.setRequestHeader( 'Authorization', this.rmiAuthKey );
+				xmlHttp.send( null );
+				// Handle HTTP response
+				if(xmlHttp.status == 200) {
+					const regexClick = /clickOnElement/gi;
+					const substClick = `clickOnSubgroupElement`;
+					const regexHref = /href=\\".Þ(..|...)Þ\\"/gi;
+					const substHref = `onclick=\\\"clickOnSubgroupElement(this.id.substring(1));\\\"`;								
+					//console.log(xmlHttp.responseText);
+					let page = xmlHttp.responseText.replace('document.location.href=\'.Þ\'+id+\'Þ\'', 'document.getElementById(\'btnFuncDelegate\').value=id;document.getElementById(\'btnFuncDelegate\').click();')
+													.replace(regexClick, substClick)
+													.replace(regexHref, substHref)
+													.replace('x + \'px\';', '(x - 250) + \'px\';')
+													.replace('y + \'px\';', '(y - 200) + \'px\';');
+					//console.log(page);
+					$("#RMISubgroupContents").html(JSON.parse(page));
+				}									
+			},
 		},   		
 	}
 </script>
@@ -327,7 +321,7 @@
   border: 2px dashed orange;
 }
 
-#RMIContents {
+#RMIVehicleContents, #RMIMaingroupContents, #RMISubgroupContents {
 	background-color: white; 
 	color: black;
 	border-style: solid;
