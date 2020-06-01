@@ -69,12 +69,15 @@
                 </v-col>
             </v-row>            
         </v-container>
+        <BackToTop></BackToTop>
     </v-content>
 </template>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script>
-    import {arrayGroupBy, groupBy} from '@/utils/common.js'
+    import {groupBy} from '@/utils/common.js'
+    import BackToTop from '@/components/Common/BackToTop.vue'
+
 //	const axios = require('axios').default;
 	const url = "https://rmi-services.tecalliance.net/rest/Times";
 		
@@ -95,6 +98,7 @@
 			}
 		},
 		components: {
+            BackToTop
 		},
 		created () {
 			this.$EventBus.$on('RMI-TIMES.InitData', param => {  
@@ -150,8 +154,15 @@
 					// Handle HTTP response
 					if(xmlHttp.status == 200) {
 						var result = JSON.parse(xmlHttp.responseText);
-                        this.qualColId = result[0].QualColId;
-                        console.log('initBodiesForTimes 리턴 : ', this.qualColId);
+						if(result.length > 0){
+                            this.qualColId = result[0].QualColId;
+                            console.log('initBodiesForTimes 리턴 : ', this.qualColId);
+                        }
+                        else{
+                            this.mainGroupLists = [];
+							this.subGroupLists = [];
+							this.itemMpLists = [];
+                        }
 					}
 				} 
             },
@@ -235,28 +246,24 @@
 
                     var list = JSON.parse(xmlHttp.responseText);
                     this.itemMpLists = Object.values(groupBy(list, 'ItemMpId', 'ItemMpText')).map(function(obj){
-                    var rObj = {};
-                    rObj.id = obj.id;
-                    rObj.name = obj.name;
-                    //rObj.children = obj;
-                    rObj.children = Object.values(groupBy(obj, 'KorId', 'KorText')).map(function(subObj){
-                        var subItem = {};
-                        subItem.id = subObj.id;
-                        subItem.name = subObj.name;
-                        subItem.children = subObj.map(function(subObj2){
+						var rObj = {};
+						rObj.id = obj.id;
+						rObj.name = obj.name;
+						rObj.children = Object.values(groupBy(obj, 'KorId', 'KorText')).map(function(subObj){
+							var subItem = {};
+							subItem.id = subObj.id;
+							subItem.name = subObj.name;
+							subItem.children = subObj.map(function(subObj2){
 
-                            var subItem2 = {};
-                            subItem2.id = subObj2.WorkId;
-                            subItem2.name = subObj2.WorkText + ' [' +subObj2.QualColText+']';
-                            return subItem2;
-                        });
-                        //subItem.children = subObj;
-                        return subItem;
-                    });
-                    return rObj;
-                });
-                //console.log('리턴 : ', this.itemMpLists);
-
+								var subItem2 = {};
+								subItem2.id = subObj2.WorkId;
+								subItem2.name = subObj2.WorkText + ' [' +subObj2.QualColText+']';
+								return subItem2;
+							});
+							return subItem;
+						});
+						return rObj;
+					});
 				} 
 			},
 		},   		

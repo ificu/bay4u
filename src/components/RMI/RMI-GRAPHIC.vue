@@ -74,11 +74,13 @@
                 </v-col>
             </v-row>
         </v-container>
+		<BackToTop></BackToTop>
     </v-content>
 </template>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script>
+	import BackToTop from '@/components/Common/BackToTop.vue'
 //	const axios = require('axios').default;
 	const url = "https://rmi-services.tecalliance.net/rest/Graphics";
 		
@@ -100,6 +102,7 @@
 			}
 		},
 		components: {
+			BackToTop
 		},
 		created () {
 			this.$EventBus.$on('RMI-GRAPHIC.InitData', param => {  

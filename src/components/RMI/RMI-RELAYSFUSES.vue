@@ -94,11 +94,13 @@
                 </v-col>
             </v-row>            
         </v-container>
+		<BackToTop></BackToTop>
     </v-content>
 </template>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script>
+	import BackToTop from '@/components/Common/BackToTop.vue'
 //	const axios = require('axios').default;
 	const url = "https://rmi-services.tecalliance.net/rest/RelaysFuses";
 		
@@ -121,6 +123,7 @@
 			}
 		},
 		components: {
+			BackToTop
 		},
 		created () {
 			this.$EventBus.$on('RMI-RELAYSFUSES.InitData', param => {  
@@ -194,6 +197,8 @@
 				this.itemMpId = '';
 				this.manualId = '';
 
+				$("#RMIContents").html('');
+
 				if(this.carTypeId !== undefined && this.carTypeId !== '' ) {
 					
 					let languageCode = 'en',
@@ -229,6 +234,8 @@
 				this.itemMpId = '';
 				this.manualId = '';
 
+				$("#RMIContents").html('');
+
 				this.subGroupLists = this.mainGroupLists.reduce(function (pre, value) {
 					if(value.MainGroupId === selected) {
 						return [...pre, ...value.SubGroups];
@@ -242,7 +249,9 @@
 				var selected = this.subGroupId;
 				this.qualColLists = [];
 
-				this.manualId = '';				
+				this.manualId = '';	
+				
+				$("#RMIContents").html('');
 
 				this.itemMpLists = this.subGroupLists.reduce(function (pre, value) {
 					if(value.SubGroupId === selected) {
@@ -255,7 +264,9 @@
 			},
 			changeItemMp() {
                 var selected = this.itemMpId;
-                
+				
+				$("#RMIContents").html('');
+
                 this.qualColLists = this.itemMpLists.reduce(function (pre, value) {
 					if(value.ItemMpId === selected) {
 						return [...pre, ...value.BoxConfigurations];
@@ -315,7 +326,6 @@
                     hr[hr.length -1].style.display = "none";
 				}
             },
-            
             getBoxOverviewHtml()
             {
                 let languageCode = 'en',

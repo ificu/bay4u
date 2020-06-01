@@ -7,23 +7,32 @@
       clipped
     >
       <v-list dense>
-        <v-list-item
-          v-for="item in menuItems"
-          :key="item.text"
-          link
-          @click="clickMenu(item.rmi)"
+        <v-list-item-group
+          v-model="selectedMenu"
+          color="#ECEFF1"
         >
-          <v-list-item-action v-if="!item.divider">
-            <v-icon>{{ item.icon }}</v-icon>
-          </v-list-item-action>
-          <v-list-item-content v-if="!item.divider">
-            <v-list-item-title>
-              {{ item.text }}
-            </v-list-item-title>
-          </v-list-item-content>
-          <v-divider v-if="item.divider"></v-divider>
-        </v-list-item>
-      </v-list>
+          <template v-for="(item, index) in menuItems">
+            <v-list-item :key="item.text" 
+              v-if="!item.divider" 
+              link
+              @click="clickMenu(item.rmi)"
+            >
+              <v-list-item-action>
+                <v-icon>{{ item.icon }}</v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title>
+                  {{ item.text }}
+                </v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+            <v-divider
+              v-if="menuItems[index].divider"
+              :key="index"
+            ></v-divider>
+          </template>
+        </v-list-item-group>
+    </v-list>
     </v-navigation-drawer>
 
 <!--상단 Title-->
@@ -57,7 +66,7 @@
             label="제조사"
             small-chips
             clearable
-            style="max-width: 250px; font-size:10px;"
+            style="max-width: 200px; font-size:10px;"
             @change="changeMakeName"
             >
         </v-autocomplete>
@@ -70,7 +79,7 @@
             label="차량 종류"
             small-chips
             clearable
-            style="max-width: 350px; font-size:10px;"
+            style="max-width: 300px; font-size:10px;"
             @change="changeRangeName"
             >
         </v-autocomplete>   
@@ -83,7 +92,7 @@
             label="차량 타입"
             small-chips
             clearable
-            style="max-width: 250px; font-size:10px;"
+            style="max-width: 350px; font-size:10px;"
             @change="changeTypeName"
             >
         </v-autocomplete>         
@@ -99,7 +108,6 @@
       <RMIRELAYSFUSES v-if="checkShowPage('RELAYSFUSES')" ></RMIRELAYSFUSES>
       <RMIWIRING v-if="checkShowPage('WIRING')" ></RMIWIRING>
       <RMIWARNING v-if="checkShowPage('WARNING')" ></RMIWARNING>
-
   </v-app>
 </template>
 
@@ -123,6 +131,7 @@
     },
     data: () => ({
       drawer: null,
+      selectedMenu:0,
       subPageList: ['ADJUST', 'MANUALS', 'GRAPHIC','MAINTENANCE','TIMES','DAIGNOSTICVALUES','RELAYSFUSES','WIRING', 'WARNING'],
       showPageList: [],
       //jsonHeader: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'Origin':'https://rmi-services.tecalliance.net', 'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36', 'Authorization': 'TecRMI {{AuthToken}}' },
@@ -167,7 +176,8 @@
       this.$vuetify.theme.dark = true;
       this.$vuetify.theme.themes.dark.primary = '#aaa'
       this.getAuthKey();
-      this.setShowPage('GRAPHIC');
+      this.setShowPage('MANUALS');
+      this.selectedMenu = 2;
       this.carVin = this.$route.query.VIN;
       this.carEngine = this.$route.query.ENGINE;
     },
@@ -238,6 +248,7 @@
               .then((result) => {
                   console.log('Maker List 조회 : ', result);
                   this.carMakerLists = result.data;
+
                   /////////////////////////////////////////////////////////////////
                   /*
                   this.carMakerId = 6;
@@ -327,6 +338,35 @@
               })
               .then((result) => {
                   console.log('TypeList 조회 : ', result);
+
+                  // 차량 상세 정보를 추가로 넣어 줌. (엔진코드, 연식 등)
+                  this.carTypeLists = result.data.map(obj=>{
+                    var carTypeItem = {};
+                    carTypeItem.TypeId = obj.TypeId;
+
+                    var beginDate = obj.TypeDetails.filter(x => x.AddInfoKeyId === 3)[0].AddInfoKeyValue;
+                    beginDate = beginDate.substring(0,4) +'-'+ beginDate.substring(4);
+                    
+                    var endDateList = obj.TypeDetails.filter(x => x.AddInfoKeyId === 4);
+                    var endDate = '';
+                    if(endDateList.length === 1){
+                      endDate = endDateList[0].AddInfoKeyValue;
+                      endDate = endDate.substring(0,4) +'-'+ endDate.substring(4);
+                    }
+                    
+                    var enginCodeList = obj.TypeDetails.filter(x => x.AddInfoKeyId === -4);
+                    var engineCode = '';
+                    if(enginCodeList.length === 1){
+                      engineCode = ' ( ' + enginCodeList[0].AddInfoKeyValue +' ) ';
+                    }
+                    
+                    carTypeItem.TypeName = obj.TypeName +  engineCode  + ' [ ' + beginDate + '~' + endDate + ' ]';
+                    
+                    return carTypeItem;
+
+                  });
+                  
+                  // 조회 조건에 특정 엔진 코드가 있는 경우 해당하는 코드로 필터링 처리
                   if(this.carEngine !== undefined && this.carEngine !== "") {
                     let findKey = this.carEngine;
                     let engineFilter = result.data.reduce(function (pre, value){
