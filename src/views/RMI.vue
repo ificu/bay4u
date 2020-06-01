@@ -158,6 +158,7 @@
       carRangeId: '',
       carTypeId: '',
       carVin: '',
+      carEngine: '',
       rmiAuthKey: '',
     }),
     components: {
@@ -178,6 +179,7 @@
       this.setShowPage('MANUALS');
       this.selectedMenu = 2;
       this.carVin = this.$route.query.VIN;
+      this.carEngine = this.$route.query.ENGINE;
     },
     methods: {
       clickMenu(page) {
@@ -230,6 +232,10 @@
               param.CountryCode = "kr";
               param.LanguageCode = "en";
 
+              if(this.carVin !== undefined && this.carVin !== "") {
+                param.AddInfoKeyFilter = [{"AddInfoKeyId":-8, "AddInfoKeyFilterValue": this.carVin }];
+              }
+
               this.jsonHeader.Authorization = "TecRMI " + this.rmiAuthKey;
               console.log('rmiAuthKey : ', this.rmiAuthKey);
 
@@ -243,8 +249,24 @@
                   console.log('Maker List 조회 : ', result);
                   this.carMakerLists = result.data;
 
+                  /////////////////////////////////////////////////////////////////
+                  /*
+                  this.carMakerId = 6;
+                  this.carRangeId = 8733;
+                  this.carTypeId = 90363;
+
+                  this.$nextTick(function(){
+                    var param = {
+                      rmiAuthKey: this.rmiAuthKey,
+                      carTypeId: this.carTypeId
+                    }          
+                    console.log('InitData param : ', param);
+                    this.$EventBus.$emit('RMI-MANUALS.InitData', param);  
+                  });*/
+                  /////////////////////////////////////////////////////////////////
+
                   if(result.data.length == 1) {
-                      this.carMakeId = result.data[0].MakeId;
+                      this.carMakerId = result.data[0].MakeId;
                       this.changeMakeName();
                   }                        
               });    
@@ -266,6 +288,10 @@
               param.CountryCode = "kr";
               param.LanguageCode = "en";
 
+              if(this.carVin !== undefined && this.carVin !== "") {
+                param.AddInfoKeyFilter = [{"AddInfoKeyId":-8, "AddInfoKeyFilterValue": this.carVin }];
+              }              
+
               this.jsonHeader.Authorization = "TecRMI " + this.rmiAuthKey;
 
               axios({
@@ -276,7 +302,6 @@
               })
               .then((result) => {
                   console.log('RangeList 조회 : ', result);
-                  console.log('RangeList 조회 : ', JSON.stringify(result.data));
                   this.carRangeLists = result.data;
 
                   if(result.data.length == 1) {
@@ -299,6 +324,10 @@
               param.CountryCode = "kr";
               param.LanguageCode = "en";
 
+              if(this.carVin !== undefined && this.carVin !== "") {
+                param.AddInfoKeyFilter = [{"AddInfoKeyId":-8, "AddInfoKeyFilterValue": this.carVin }];
+              }                  
+
               this.jsonHeader.Authorization = "TecRMI " + this.rmiAuthKey;
 
               axios({
@@ -309,9 +338,9 @@
               })
               .then((result) => {
                   console.log('TypeList 조회 : ', result);
-                  console.log('TypeList 조회 : ', JSON.stringify(result.data));
-                  this.carTypeLists = result.data.map(obj=>{
 
+                  // 차량 상세 정보를 추가로 넣어 줌. (엔진코드, 연식 등)
+                  this.carTypeLists = result.data.map(obj=>{
                     var carTypeItem = {};
                     carTypeItem.TypeId = obj.TypeId;
 
@@ -336,9 +365,32 @@
                     return carTypeItem;
 
                   });
+                  
+                  // 조회 조건에 특정 엔진 코드가 있는 경우 해당하는 코드로 필터링 처리
+                  if(this.carEngine !== undefined && this.carEngine !== "") {
+                    let findKey = this.carEngine;
+                    let engineFilter = result.data.reduce(function (pre, value){
+                      let findEngine = value.TypeDetails.find(function(detail){                  
+                        return (detail.AddInfoKeyId === -4 && detail.AddInfoKeyValue.replace(/ /gi, "") === findKey);
+                      });
 
-                  if(result.data.length == 1) {
-                      this.carTypeId = result.data[0].TypeId;
+                      if(findEngine !== undefined) {
+                        pre.push(value);
+                      }
+                      return pre;
+                    },[]);
+
+                    if(engineFilter.length === 0)
+                      this.carTypeLists = result.data;
+                    else 
+                      this.carTypeLists = engineFilter;
+
+                  }
+                  else
+                    this.carTypeLists = result.data;
+
+                  if(this.carTypeLists.length == 1) {
+                      this.carTypeId = this.carTypeLists[0].TypeId;
                       this.changeTypeName();
                   }
               });      
