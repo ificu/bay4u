@@ -183,6 +183,7 @@
 					if(xmlHttp.status == 200) {
 						console.log('changeMainGroup 리턴 : ', JSON.parse(xmlHttp.responseText));
 						/////////////////////////////////////
+						/*
 						this.mainGroupId = 119;
 						this.$nextTick(function(){
 							this.changeMainGroup();
@@ -198,7 +199,7 @@
 									});
 								});
 							});
-						});
+						});*/
 						/////////////////////////////////////
 
 						this.mainGroupLists = JSON.parse(xmlHttp.responseText);
