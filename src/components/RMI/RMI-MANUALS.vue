@@ -187,6 +187,27 @@
 					// Handle HTTP response
 					if(xmlHttp.status == 200) {
 						console.log('changeMainGroup 리턴 : ', JSON.parse(xmlHttp.responseText));
+
+						/////////////////////////////////////
+						/*
+						this.mainGroupId = 119;
+						this.$nextTick(function(){
+							this.changeMainGroup();
+							this.subGroupId = 477;
+							this.$nextTick(function(){
+								this.changeSubGroup();
+								this.itemMpId = 15002;
+								this.$nextTick(function(){
+									this.changeItemMp();
+									this.manualId = 114736;
+									this.$nextTick(function(){
+										this.changeManualId();
+									});
+								});
+							});
+						});*/
+						/////////////////////////////////////
+
 						this.mainGroupLists = JSON.parse(xmlHttp.responseText);
 					}
 
