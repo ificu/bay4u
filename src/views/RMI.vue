@@ -190,10 +190,12 @@
           this.$nextTick(function(){
             var param = {
               rmiAuthKey: this.rmiAuthKey,
-              carTypeId: this.carTypeId
+              carTypeId: JSON.parse(this.carTypeId).TypeId,
+              carTcdTypeId: JSON.parse(this.carTypeId).TcdTypeId
             }          
             console.log('InitData param : ', param);
             this.$EventBus.$emit('RMI-'+page+'.InitData', param);  
+        
           });
         }
       },
@@ -367,7 +369,8 @@
                   // 차량 상세 정보를 추가로 넣어 줌. (엔진코드, 연식 등)
                   this.carTypeLists = this.carTypeLists.map(obj=>{
                     var carTypeItem = {};
-                    carTypeItem.TypeId = {"TypeId" : obj.TypeId, "TcdTypeId" : obj.TcdTypeId};
+                    var carTypeId = {"TypeId" : obj.TypeId, "TcdTypeId" : obj.TcdTypeId};
+                    carTypeItem.TypeId = JSON.stringify(carTypeId);
 
                     var beginDate = obj.TypeDetails.filter(x => x.AddInfoKeyId === 3)[0].AddInfoKeyValue;
                     beginDate = beginDate.substring(0,4) +'-'+ beginDate.substring(4);
@@ -402,8 +405,8 @@
           console.log('changeTypeName : ', this.carTypeId);
           var param = {
               rmiAuthKey: this.rmiAuthKey,
-              carTypeId: this.carTypeId.TypeId,
-              carTcdTypeId: this.carTypeId.TcdTypeId
+              carTypeId: JSON.parse(this.carTypeId).TypeId,
+              carTcdTypeId: JSON.parse(this.carTypeId).TcdTypeId
           }
 
           this.$EventBus.$emit('RMI-'+this.getShowPage()+'.InitData', param);  
