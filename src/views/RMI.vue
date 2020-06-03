@@ -99,19 +99,21 @@
       </v-row>
     </v-app-bar>
 <!--들어갈 내용....-->
-      <RMIADJUST v-if="checkShowPage('ADJUST')" ></RMIADJUST>
-      <RMIMANUALS v-if="checkShowPage('MANUALS')" ></RMIMANUALS>
-      <RMIGRAPHIC v-if="checkShowPage('GRAPHIC')" ></RMIGRAPHIC>
-      <RMIMAINTENANCE  v-if="checkShowPage('MAINTENANCE')"></RMIMAINTENANCE>
-      <RMITIMES v-if="checkShowPage('TIMES')" ></RMITIMES>
-      <RMIDAIGNOSTICVALUES v-if="checkShowPage('DAIGNOSTICVALUES')" ></RMIDAIGNOSTICVALUES>
-      <RMIRELAYSFUSES v-if="checkShowPage('RELAYSFUSES')" ></RMIRELAYSFUSES>
-      <RMIWIRING v-if="checkShowPage('WIRING')" ></RMIWIRING>
-      <RMIWARNING v-if="checkShowPage('WARNING')" ></RMIWARNING>
+    <RMIOVERVIEW v-if="checkShowPage('OVERVIEW')" ></RMIOVERVIEW>
+    <RMIADJUST v-if="checkShowPage('ADJUST')" ></RMIADJUST>
+    <RMIMANUALS v-if="checkShowPage('MANUALS')" ></RMIMANUALS>
+    <RMIGRAPHIC v-if="checkShowPage('GRAPHIC')" ></RMIGRAPHIC>
+    <RMIMAINTENANCE  v-if="checkShowPage('MAINTENANCE')"></RMIMAINTENANCE>
+    <RMITIMES v-if="checkShowPage('TIMES')" ></RMITIMES>
+    <RMIDAIGNOSTICVALUES v-if="checkShowPage('DAIGNOSTICVALUES')" ></RMIDAIGNOSTICVALUES>
+    <RMIRELAYSFUSES v-if="checkShowPage('RELAYSFUSES')" ></RMIRELAYSFUSES>
+    <RMIWIRING v-if="checkShowPage('WIRING')" ></RMIWIRING>
+    <RMIWARNING v-if="checkShowPage('WARNING')" ></RMIWARNING>
   </v-app>
 </template>
 
 <script>
+  import RMIOVERVIEW from '@/components/RMI/RMI-OVERVIEW.vue'
   import RMIADJUST from '@/components/RMI/RMI-ADJUST.vue'
   import RMIMANUALS from '@/components/RMI/RMI-MANUALS.vue'
   import RMIGRAPHIC from '@/components/RMI/RMI-GRAPHIC.vue'
@@ -132,9 +134,8 @@
     data: () => ({
       drawer: null,
       selectedMenu:0,
-      subPageList: ['ADJUST', 'MANUALS', 'GRAPHIC','MAINTENANCE','TIMES','DAIGNOSTICVALUES','RELAYSFUSES','WIRING', 'WARNING'],
+      subPageList: ['OVERVIEW', 'ADJUST', 'MANUALS', 'GRAPHIC','MAINTENANCE','TIMES','DAIGNOSTICVALUES','RELAYSFUSES','WIRING', 'WARNING'],
       showPageList: [],
-      //jsonHeader: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'Origin':'https://rmi-services.tecalliance.net', 'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36', 'Authorization': 'TecRMI {{AuthToken}}' },
       jsonHeader: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'Authorization': 'TecRMI {{AuthToken}}' },
       menuItems: [
         { icon: 'mdi-cube-scan', text: 'OverView', rmi: 'OVERVIEW', divider: false },
@@ -162,21 +163,22 @@
       rmiAuthKey: '',
     }),
     components: {
-        RMIADJUST,
-        RMIMANUALS,
-        RMIGRAPHIC,
-        RMIMAINTENANCE,
-        RMITIMES,
-        RMIDAIGNOSTICVALUES,
-        RMIRELAYSFUSES,
-        RMIWIRING,
-        RMIWARNING
+      RMIOVERVIEW,
+      RMIADJUST,
+      RMIMANUALS,
+      RMIGRAPHIC,
+      RMIMAINTENANCE,
+      RMITIMES,
+      RMIDAIGNOSTICVALUES,
+      RMIRELAYSFUSES,
+      RMIWIRING,
+      RMIWARNING
     },    
     created () {
       this.$vuetify.theme.dark = true;
       this.$vuetify.theme.themes.dark.primary = '#aaa'
       this.getAuthKey();
-      this.setShowPage('MANUALS');
+      this.setShowPage('GRAPHIC');
       this.selectedMenu = 2;
       this.carVin = this.$route.query.VIN;
       this.carEngine = this.$route.query.ENGINE;
@@ -188,10 +190,12 @@
           this.$nextTick(function(){
             var param = {
               rmiAuthKey: this.rmiAuthKey,
-              carTypeId: this.carTypeId
+              carTypeId: JSON.parse(this.carTypeId).TypeId,
+              carTcdTypeId: JSON.parse(this.carTypeId).TcdTypeId
             }          
             console.log('InitData param : ', param);
             this.$EventBus.$emit('RMI-'+page+'.InitData', param);  
+        
           });
         }
       },
@@ -307,7 +311,7 @@
                   if(result.data.length == 1) {
                       this.carRangeId = result.data[0].RangeId;
                       this.changeRangeName();
-                  }                    
+                  }
               });       
           }      
       },
@@ -332,39 +336,12 @@
 
               axios({
                   method: 'POST',
-                  url: url + "/rest/VehicleTree/TypeList",
+                  url: url + "/rest/VehicleTree/TypeListTcd",
                   headers: this.jsonHeader,
                   data: param
               })
               .then((result) => {
                   console.log('TypeList 조회 : ', result);
-
-                  // 차량 상세 정보를 추가로 넣어 줌. (엔진코드, 연식 등)
-                  this.carTypeLists = result.data.map(obj=>{
-                    var carTypeItem = {};
-                    carTypeItem.TypeId = obj.TypeId;
-
-                    var beginDate = obj.TypeDetails.filter(x => x.AddInfoKeyId === 3)[0].AddInfoKeyValue;
-                    beginDate = beginDate.substring(0,4) +'-'+ beginDate.substring(4);
-                    
-                    var endDateList = obj.TypeDetails.filter(x => x.AddInfoKeyId === 4);
-                    var endDate = '';
-                    if(endDateList.length === 1){
-                      endDate = endDateList[0].AddInfoKeyValue;
-                      endDate = endDate.substring(0,4) +'-'+ endDate.substring(4);
-                    }
-                    
-                    var enginCodeList = obj.TypeDetails.filter(x => x.AddInfoKeyId === -4);
-                    var engineCode = '';
-                    if(enginCodeList.length === 1){
-                      engineCode = ' ( ' + enginCodeList[0].AddInfoKeyValue +' ) ';
-                    }
-                    
-                    carTypeItem.TypeName = obj.TypeName +  engineCode  + ' [ ' + beginDate + '~' + endDate + ' ]';
-                    
-                    return carTypeItem;
-
-                  });
                   
                   // 조회 조건에 특정 엔진 코드가 있는 경우 해당하는 코드로 필터링 처리
                   if(this.carEngine !== undefined && this.carEngine !== "") {
@@ -389,6 +366,34 @@
                   else
                     this.carTypeLists = result.data;
 
+                  // 차량 상세 정보를 추가로 넣어 줌. (엔진코드, 연식 등)
+                  this.carTypeLists = this.carTypeLists.map(obj=>{
+                    var carTypeItem = {};
+                    var carTypeId = {"TypeId" : obj.TypeId, "TcdTypeId" : obj.TcdTypeId};
+                    carTypeItem.TypeId = JSON.stringify(carTypeId);
+
+                    var beginDate = obj.TypeDetails.filter(x => x.AddInfoKeyId === 3)[0].AddInfoKeyValue;
+                    beginDate = beginDate.substring(0,4) +'-'+ beginDate.substring(4);
+                    
+                    var endDateList = obj.TypeDetails.filter(x => x.AddInfoKeyId === 4);
+                    var endDate = '';
+                    if(endDateList.length === 1){
+                      endDate = endDateList[0].AddInfoKeyValue;
+                      endDate = endDate.substring(0,4) +'-'+ endDate.substring(4);
+                    }
+                    
+                    var enginCodeList = obj.TypeDetails.filter(x => x.AddInfoKeyId === -4);
+                    var engineCode = '';
+                    if(enginCodeList.length === 1){
+                      engineCode = ' ( ' + enginCodeList[0].AddInfoKeyValue +' ) ';
+                    }
+                    
+                    carTypeItem.TypeName = obj.TypeName +  engineCode  + ' [ ' + beginDate + '~' + endDate + ' ]';
+                    
+                    return carTypeItem;
+
+                  });                    
+
                   if(this.carTypeLists.length == 1) {
                       this.carTypeId = this.carTypeLists[0].TypeId;
                       this.changeTypeName();
@@ -400,8 +405,10 @@
           console.log('changeTypeName : ', this.carTypeId);
           var param = {
               rmiAuthKey: this.rmiAuthKey,
-              carTypeId: this.carTypeId
+              carTypeId: JSON.parse(this.carTypeId).TypeId,
+              carTcdTypeId: JSON.parse(this.carTypeId).TcdTypeId
           }
+
           this.$EventBus.$emit('RMI-'+this.getShowPage()+'.InitData', param);  
       }
     },    
