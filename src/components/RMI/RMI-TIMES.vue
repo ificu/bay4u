@@ -94,6 +94,7 @@
 				itemMpId: '',
 				rmiAuthKey: '',	
                 carTypeId: '',	
+				carTcdTypeId: '',
                 groupList:[],
 			}
 		},
@@ -104,6 +105,7 @@
 			this.$EventBus.$on('RMI-TIMES.InitData', param => {  
 				this.rmiAuthKey = param.rmiAuthKey;
 				this.carTypeId = param.carTypeId; 
+				this.carTcdTypeId = param.carTcdTypeId; 
                 this.initAuthKey();
                 this.initBodiesForTimes();
 				this.setMainGroup();

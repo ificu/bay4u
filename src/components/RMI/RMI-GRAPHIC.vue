@@ -98,7 +98,8 @@
 				manualId: '',
 				qualColId: '',
 				rmiAuthKey: '',	
-				carTypeId: '',			
+				carTypeId: '',	
+				carTcdTypeId: '',
 			}
 		},
 		components: {
@@ -108,6 +109,7 @@
 			this.$EventBus.$on('RMI-GRAPHIC.InitData', param => {  
 				this.rmiAuthKey = param.rmiAuthKey;
 				this.carTypeId = param.carTypeId; 
+				this.carTcdTypeId = param.carTcdTypeId; 
 
 				this.qualColLists = [];
 				this.clearManual();
@@ -169,6 +171,11 @@
 				if(xmlHttp.status == 200) {
 					console.log('selectBodies 리턴 : ', JSON.parse(xmlHttp.responseText));
 					this.qualColLists = JSON.parse(xmlHttp.responseText);
+
+					if(this.qualColLists.length == 1) {
+						this.qualColId = this.qualColLists[0].QualColId;
+						this.changeManualId();
+					}  					
 				}
 			},
 			changeManualId() {

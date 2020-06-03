@@ -107,6 +107,7 @@
                 itemAddLists:[],
 				rmiAuthKey: '',	
                 carTypeId: '',
+				carTcdTypeId: '',
                 mainJobs: [],
                 addJobs:[],
                 parts:[]
@@ -119,6 +120,7 @@
 			this.$EventBus.$on('RMI-MAINTENANCE.InitData', param => {  
 				this.rmiAuthKey = param.rmiAuthKey;
 				this.carTypeId = param.carTypeId; 
+				this.carTcdTypeId = param.carTcdTypeId; 
                 this.initAuthKey();
                 this.initBodiesForMaintenance();
 				this.setWorks();
