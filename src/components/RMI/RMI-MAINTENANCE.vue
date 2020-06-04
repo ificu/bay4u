@@ -84,6 +84,16 @@
                                             :key="i">
                                             <div class="brand-name">{{ part.brandName }}</div>
                                             <div class="item-code">{{ part.articleNo }}</div>
+                                            <div class="item-detail">
+                                                <v-btn icon x-small @click="getPartsImage(part)">
+                                                    <v-icon>far fa-image</v-icon>
+                                                </v-btn>
+                                            </div>
+                                            <div class="item-detail">
+                                                <v-btn icon x-small @click="getPartsDetail(part)">
+                                                    <v-icon>fas fa-info-circle</v-icon>
+                                                </v-btn>
+                                            </div>
                                         </li>
                                     </ul>
                                 </v-expansion-panel-content>
@@ -95,6 +105,111 @@
             </v-row>    
         </v-container>
         <BackToTop></BackToTop>
+        <!--부품이미지-->
+        <v-dialog v-model="imgDialog"  width="600px">
+            <v-card light>
+                <v-card-title class="headline grey lighten-2">
+                    <span style="font-size:0.8em">{{pickArtinf}}</span>
+                </v-card-title>           
+                <v-card-text class="mt-2">
+                    <img :src="imgUrl" class="parts-image">
+                </v-card-text>
+                <v-divider></v-divider>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                    color="primary"
+                    text
+                    @click="imgDialog = false"
+                    >
+                    close
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+        <!--부품상세 정보-->
+        <v-dialog v-model="dialog"  width="600px">
+            <v-card light>
+            <v-card-title
+                class="headline grey lighten-2"
+            >
+            <span>Article information</span><span style="font-size:0.75em;margin-left:5px"> - {{pickArtinf}}</span>
+            </v-card-title>
+           
+            <v-card-text class="mt-2">
+                <div class="parts-info" v-for="(item, index) in partsDetail" :key="index">
+                    <h5 class="info-title" v-if="item !== ''">{{index}}</h5>
+                    <div class="assigned-art" v-if="index === 'oenNumbers'">
+                        <span class="attr-text">{{setArrayJoin(item.array)}}</span>
+                    </div>
+                    <div class="assigned-art" v-else-if="index ==='assignedArticle'">
+                        <span class="attr-name">{{item.articleName}}</span>
+                        <span class="attr-text">{{item.articleNo}}</span>
+                    </div>
+                    <div v-else>
+                        <ul v-for="(item2, index2) in item.array" :key="index2">                        
+                            <li v-if="index === 'articleAttributes'">
+                                <div style="display:flex;">
+                                    <div class="attr-name">{{item2.attrName}}</div>
+                                    <div class="attr-text">{{item2.attrValue}} {{item2.attrUnit}}</div>                                
+                                </div>                            
+                            </li>
+                            <li v-else-if="index === 'articleDocuments'">
+                                <div class="attr-text">{{item2.docFileName}}</div>
+                            </li>
+                            <li v-else-if="index === 'articleInfo'">
+                                <div style="display:flex;">
+                                    <div class="attr-name" >{{item2.infoTypeName}}</div>
+                                    <div class="attr-text" v-html="item2.infoText"></div>
+                                </div>
+                            </li>
+                            <li v-else-if="index === 'articleThumbnails'">
+                                <div class="attr-text">{{item2.thumbFileName}}</div>
+                            </li>
+                            <li v-else-if="index === 'eanNumber'">
+                                <div class="attr-text">{{item2.eanNumber}}</div>
+                            </li>
+                            <li v-else-if="index === 'immediateAttributs'">
+                                <div style="display:flex;">
+                                    <div class="attr-name">{{item2.attrName}}</div>
+                                    <div class="attr-text">{{item2.attrValue}} {{item2.attrUnit}}</div>                             
+                                </div> 
+                            </li>
+                            <li v-else-if="index === 'immediateInfo'">
+                                <div class="attr-text">{{item2.infoText}}</div>
+                            </li>
+                            <li v-else-if="index === 'mainArticle'">
+                                <div style="display:flex;">
+                                    <div class="attr-name">{{item2.articleName}}</div>
+                                    <div class="attr-text">{{item2.articleNumber}}</div>                             
+                                </div> 
+                            </li>                        
+                            <li v-else-if="index === 'usageNumbers2'">
+                                <div class="attr-text">{{item2.usageNumber}}</div>
+                            </li>
+                            <li v-else>
+                                <div class="attr-text">{{item2.oeNumber}}</div>
+                                <div class="attr-text">{{item2.replaceNumber}}</div>                                
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </v-card-text>
+
+            <v-divider></v-divider>
+
+            <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+            color="primary"
+            text
+            @click="dialog = false"
+            >
+            close
+            </v-btn>
+            </v-card-actions>
+            </v-card>
+        </v-dialog>
     </v-content>
 </template>
 
@@ -102,10 +217,12 @@
 <script>
     import {arrayGroupBy} from '@/utils/common.js'
     import BackToTop from '@/components/Common/BackToTop.vue'
-//	const axios = require('axios').default;
-	const url = "https://rmi-services.tecalliance.net/rest/Maintenance";
+
+    const url = "https://rmi-services.tecalliance.net/rest/Maintenance";
     const basketUrl = "https://rmi-services.tecalliance.net/rest/Prices";
     const tecdocUrl = "https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLB.jsonEndpoint?js";
+    const tecApiKey = '2BeBXg6CxtgP7fnQvXr45SzqpEVDcDTGSJd1viDM6VHGJ7bxjDy5';
+    const tecProvider = 22261;
     
 	export default {
 		name: 'RMI-MAINTENANCE',
@@ -118,9 +235,14 @@
                 carTypeId: '',
 				carTcdTypeId: '',
                 mainJobs: [],
-                addJobs:[],
-                genArtNoList:[],
-                parts:[]
+                addJobs: [],
+                genArtNoList: [],
+                parts: [],
+                partsDetail: [],
+                imgDialog: false,
+                imgUrl: '',
+                dialog: false,
+                pickArtinf: '',
 			}
 		},
 		components: {
@@ -128,7 +250,7 @@
 		},
 		created () {
 			this.$EventBus.$on('RMI-MAINTENANCE.InitData', param => {  
-				this.rmiAuthKey = param.rmiAuthKey;
+                this.rmiAuthKey = param.rmiAuthKey;
 				this.carTypeId = param.carTypeId; 
 				this.carTcdTypeId = param.carTcdTypeId; 
                 this.initAuthKey();
@@ -214,7 +336,7 @@
                     countryCode = 'kr',
 					languageCode = 'en',
 					typeId = this.carTypeId;
-                    
+                
                 // Build url query string
                 let query = '?bodyQualColId='+ bodyQualColId
                     + '&countryCode=' + countryCode
@@ -340,9 +462,9 @@
                 return itemList;
             },
             getParts(){
-                console.log('main jobs : ' ,this.mainJobs);
-                console.log('sub jobs : ' ,this.addJobs);
-                
+                //console.log('main jobs : ' ,this.mainJobs);
+                //console.log('sub jobs : ' ,this.addJobs);
+                this.parts = [];
                 /// Main service jobs GenArtNo
                 let mainWorks = this.mainJobs;
                 let mainWorkGenArt = this.genArtNoList.filter(function(item){   
@@ -392,55 +514,151 @@
                         "array": selctedGenArts
                         },
                         lang: "en",
-                        linkingTargetId: 10314,
+                        linkingTargetId: this.carTcdTypeId,
                         linkingTargetType: "P",
-                        provider: 22261
+                        provider: tecProvider
                     },
                     "sort": 2
 				};
 
-                console.log('params :' ,params);
+                //console.log('params :' ,params);
                 // Send HTTP request
-                let api_key = '2BeBXg6CxtgP7fnQvXr45SzqpEVDcDTGSJd1viDM6VHGJ7bxjDy5'
-				let xmlHttp = new XMLHttpRequest();
+                let xmlHttp = new XMLHttpRequest();
 				xmlHttp.open( 'POST', tecdocUrl, false );
 				xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
                 xmlHttp.setRequestHeader( 'Accept', 'application/json' );
-                xmlHttp.setRequestHeader( 'x-api-key', api_key);
+                xmlHttp.setRequestHeader( 'x-api-key', tecApiKey);
 				xmlHttp.send( JSON.stringify( params ) );
 
 				// Handle HTTP response
 				if(xmlHttp.status == 200) {
-                    console.log('result :', JSON.parse(xmlHttp.responseText));
+                    console.log('result2 :', JSON.parse(xmlHttp.responseText));
                     var result = JSON.parse(xmlHttp.responseText);
-
-                    this.parts = arrayGroupBy(result.data.array, function(item)
-					{
-						return [item.genericArticleId];
-                    });
-                    
-                     console.log('parts : ',  this.parts);
+                    if(result.data !== ""){
+                        this.parts = arrayGroupBy(result.data.array, function(item){
+                            return [item.genericArticleId];
+                        });
+                    }
+                    console.log('parts : ',  this.parts);
 				}
             },
+            getPartsImage(value){
+                console.log('img:', value);
+                this.imgUrl = '';
+                this.pickArtinf = value.brandName + " / " + value.articleNo;
+                let params = {
+                    "getArticles": {
+                        "articleCountry": "kr",
+                        "provider": tecProvider,
+                        "dataSupplierIds": value.brandNo,
+                        "genericArticleIds": value.genericArticleId,
+                        "linkageTargetId": this.carTcdTypeId,
+                        "linkageTargetType": "P",
+                        "lang": "en",
+                        "includeImages": true
+                    }
+                };
+
+                console.log('params :' ,params);
+                // Send HTTP request
+                let xmlHttp = new XMLHttpRequest();
+				xmlHttp.open( 'POST', tecdocUrl, false );
+				xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
+                xmlHttp.setRequestHeader( 'Accept', 'application/json' );
+                xmlHttp.setRequestHeader( 'x-api-key', tecApiKey);
+				xmlHttp.send( JSON.stringify( params ) );
+
+				// Handle HTTP response
+				if(xmlHttp.status == 200) {
+                    console.log('image :',JSON.parse(xmlHttp.responseText));
+                    var result = JSON.parse(xmlHttp.responseText).articles[0];
+                    if(result.images.length > 0){
+                        this.imgDialog = true;
+                        this.imgUrl = result.images[0].imageURL800;
+                    }
+                    else{
+                        alert('상세 이미지가 없습니다.')
+                    }
+				}
+            },
+            getPartsDetail(value){
+                this.partsDetail = [];
+                this.pickArtinf = value.brandName + " / " + value.articleNo;
+                let params = {
+                    "getAssignedArticlesByIds6": {
+                        "articleCountry": "kr",
+                        "articleIdPairs": {
+                        "array": [
+                            {
+                            "articleId": value.articleId,
+                            "articleLinkId": value.articleLinkId
+                            }
+                        ]
+                        },
+                        "attributs": true,
+                        "basicData": true,
+                        "documents": true,
+                        "eanNumbers": true,
+                        "immediateAttributs": true,
+                        "immediateInfo": true,
+                        "info": true,
+                        "lang": "en",
+                        "linkingTargetId": this.carTcdTypeId,
+                        "linkingTargetType": "P",
+                        "mainArticles": true,
+                        "manuId": 0,
+                        "modId": 0,
+                        "normalAustauschPrice": true,
+                        "oeNumbers": true,
+                        "provider": tecProvider,
+                        "replacedByNumbers": true,
+                        "replacedNumbers": true,
+                        "thumbnails": true,
+                        "usageNumbers": true
+                    }
+                };
+
+                console.log('params :' ,params);
+                // Send HTTP request
+                let xmlHttp = new XMLHttpRequest();
+				xmlHttp.open( 'POST', tecdocUrl, false );
+				xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
+                xmlHttp.setRequestHeader( 'Accept', 'application/json' );
+                xmlHttp.setRequestHeader( 'x-api-key', tecApiKey);
+				xmlHttp.send( JSON.stringify( params ) );
+
+				// Handle HTTP response
+				if(xmlHttp.status == 200) {
+                    this.dialog = true;
+                    this.partsDetail = JSON.parse(xmlHttp.responseText).data.array[0];
+                    console.log('result :',this.partsDetail);
+				}
+            },
+            setArrayJoin(value)
+            {   
+                var list = value.map(x=> x.oeNumber).join(', ');
+                return list;
+                console.log('array :', list);
+            }
 		},   		
 	}
 </script>
 
 <style scoped>
 .contents {
-  background-color: #f9f9f9;
-  color: black;
-  font-size: 12px;
+    background-color: #f9f9f9;
+    color: black;
+    font-size: 12px;
 }
 .contents .card-title{
     background-color: #37474F;
     color:white;
 }
 .contents .border {
-  border: 2px dashed orange;
+    border: 2px dashed orange;
 }
 .contents .mainform {
-  border: 5px solid #fddca9;;
+    border: 5px solid #fddca9;;
 }
 .contents .tree-contents{
     background-color: white;
@@ -448,13 +666,12 @@
     font-size: 1.25em
 }
 .contents  ul {
-  list-style-type: none;
+    list-style-type: none;
 }
 .contents  li {
-  display: flex;
-  align-items:center;
-  margin-bottom: 8px;
-  font-weight: bold;
+    display: flex;
+    align-items:center;
+    margin-bottom: 8px;
 }
 .contents .brand-name{
     margin-right: 10px;
@@ -463,15 +680,47 @@
 .contents .item-code{
     color: #01579B;
 }
-
+.contents .item-detail{
+    margin-left: 10px;
+    font-size: 0.3em;
+}
+.parts-image{
+    width: auto; height: auto;
+    max-width: 500px;
+    max-height: 500px;
+    display:block;
+    margin-left: auto;
+    margin-right: auto;
+}
+.info-title
+{
+    padding-top: 5px;
+    color: #616161;
+}
+.parts-info ul{
+    list-style-type: none;
+    margin: 2px;
+}
+.parts-info li{
+    display: flex;
+    border-bottom: #EEEEEE 1px solid;
+}
+.parts-info .attr-name{
+    margin-right:20px;
+    font-size: 0.9em;
+    font-weight:500;
+    color: #424242;
+}
+.parts-info .attr-text{
+    font-size: 0.85em;
+    color: #616161;
+}
+.parts-info .assigned-art{
+    margin-left: 25px;
+}
 #RMIContents {
 	background-color: white; 
 	color: black;
     border-radius: 5px;
-	/*border-style: solid;
-	border-radius: 5px;
-	border-width: thick;
-	border-color: #fddca9;*/
 }
-
 </style>
