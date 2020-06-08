@@ -73,6 +73,37 @@
                     </v-card>
                 </v-col>
             </v-row>
+            <v-row>
+                <v-col
+                    cols="12"
+                    sm="12"
+                >
+					<v-card>
+						<v-tabs
+							v-model="tab"
+							id = "RMITabsContents"
+							color = "#fddca9"
+						>
+							<v-tab
+								v-for="constens in tabContentsLists"
+								:key="constens.tab"
+							>
+								{{ constens.tab }}
+							</v-tab>
+						</v-tabs>
+						<v-tabs-items v-model="tab">
+							<v-tab-item
+								v-for="constens in tabContentsLists"
+								:key="constens.tab"
+							>
+								<v-card flat>
+									<v-card-text>{{ constens.content }}</v-card-text>
+								</v-card>
+							</v-tab-item>
+						</v-tabs-items>
+					</v-card>
+                </v-col>
+            </v-row>			
         </v-container>
 		<BackToTop></BackToTop>
     </v-content>
@@ -92,6 +123,12 @@
 				subGroupLists: [],
 				itemMpLists: [],
 				qualColLists: [],
+				tabContentsLists: [
+					{ tab: '정비 매뉴얼', content: 'TechinicalManual Content' },
+					{ tab: '정비 참고 데이터', content: 'AdjustmentData Content' },
+					{ tab: '참고 작업', content: 'WorkPosition Content' },
+					{ tab: '관련 부품', content: 'LinkedParts Content' },
+				],
 				mainGroupId: '',
 				subGroupId: '',
 				itemMpId: '',
@@ -100,6 +137,7 @@
 				rmiAuthKey: '',	
 				carTypeId: '',	
 				carTcdTypeId: '',
+				tab: null,
 			}
 		},
 		components: {
@@ -338,6 +376,11 @@
 	border-radius: 5px;
 	border-width: thick;
 	border-color: #fddca9;
+}
+
+#RMITabsContents {
+	background-color: white; 
+	color: black;
 }
 
 

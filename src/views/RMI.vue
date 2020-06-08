@@ -54,8 +54,8 @@
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <v-row
-        align="center"
-        style="max-width: 850px"
+        align="right"
+        style="min-width: 900px; max-width:800px;"
       >
         <v-autocomplete
             class="pt-8 pr-4"
@@ -103,8 +103,9 @@
     <RMIADJUST v-if="checkShowPage('ADJUST')" ></RMIADJUST>
     <RMIMANUALS v-if="checkShowPage('MANUALS')" ></RMIMANUALS>
     <RMIGRAPHIC v-if="checkShowPage('GRAPHIC')" ></RMIGRAPHIC>
-    <RMIMAINTENANCE  v-if="checkShowPage('MAINTENANCE')"></RMIMAINTENANCE>
+    <RMIMAINTENANCE v-if="checkShowPage('MAINTENANCE')"></RMIMAINTENANCE>
     <RMITIMES v-if="checkShowPage('TIMES')" ></RMITIMES>
+    <RMICATEGORY v-if="checkShowPage('CATEGORY')" ></RMICATEGORY>
     <RMIDAIGNOSTICVALUES v-if="checkShowPage('DAIGNOSTICVALUES')" ></RMIDAIGNOSTICVALUES>
     <RMIRELAYSFUSES v-if="checkShowPage('RELAYSFUSES')" ></RMIRELAYSFUSES>
     <RMIWIRING v-if="checkShowPage('WIRING')" ></RMIWIRING>
@@ -119,6 +120,7 @@
   import RMIGRAPHIC from '@/components/RMI/RMI-GRAPHIC.vue'
   import RMIMAINTENANCE from '@/components/RMI/RMI-MAINTENANCE.vue'
   import RMITIMES from '@/components/RMI/RMI-TIMES.vue'
+  import RMICATEGORY from '@/components/RMI/RMI-CATEGORY.vue'
   import RMIDAIGNOSTICVALUES from '@/components/RMI/RMI-DAIGNOSTICVALUES.vue'
   import RMIRELAYSFUSES from '@/components/RMI/RMI-RELAYSFUSES.vue'
   import RMIWIRING from '@/components/RMI/RMI-WIRING.vue'
@@ -134,7 +136,7 @@
     data: () => ({
       drawer: null,
       selectedMenu:0,
-      subPageList: ['OVERVIEW', 'ADJUST', 'MANUALS', 'GRAPHIC','MAINTENANCE','TIMES','DAIGNOSTICVALUES','RELAYSFUSES','WIRING', 'WARNING'],
+      subPageList: ['OVERVIEW', 'ADJUST', 'MANUALS', 'GRAPHIC','MAINTENANCE','TIMES','DAIGNOSTICVALUES', 'CATEGORY', 'RELAYSFUSES','WIRING', 'WARNING'],
       showPageList: [],
       jsonHeader: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'Authorization': 'TecRMI {{AuthToken}}' },
       menuItems: [
@@ -146,6 +148,7 @@
         { icon: 'mdi-floor-plan', text: '차량 분해 도면', rmi: 'GRAPHIC', divider: false },
         { icon: 'mdi-playlist-play', text: '정기 점검 항목', rmi: 'MAINTENANCE', divider: false },
         { icon: 'mdi-history', text: '표준 공임 시간', rmi: 'TIMES', divider: false },
+        { icon: 'mdi-file-tree-outline', text: '부품 카테고리', rmi: 'CATEGORY', divider: false },
         { divider: true },
         { icon: 'mdi-laptop-chromebook', text: '차량 진단 데이터', rmi: 'DAIGNOSTICVALUES', divider: false },
         { icon: 'mdi-currency-sign', text: 'Fueses & Relay', rmi: 'RELAYSFUSES', divider: false },
@@ -169,6 +172,7 @@
       RMIGRAPHIC,
       RMIMAINTENANCE,
       RMITIMES,
+      RMICATEGORY,
       RMIDAIGNOSTICVALUES,
       RMIRELAYSFUSES,
       RMIWIRING,
@@ -178,8 +182,8 @@
       this.$vuetify.theme.dark = true;
       this.$vuetify.theme.themes.dark.primary = '#aaa'
       this.getAuthKey();
-      this.setShowPage('GRAPHIC');
-      this.selectedMenu = 2;
+      this.setShowPage('OVERVIEW');
+      this.selectedMenu = 0;
       this.carVin = this.$route.query.VIN;
       this.carEngine = this.$route.query.ENGINE;
     },
@@ -384,8 +388,15 @@
                     
                     var enginCodeList = obj.TypeDetails.filter(x => x.AddInfoKeyId === -4);
                     var engineCode = '';
-                    if(enginCodeList.length === 1){
-                      engineCode = ' ( ' + enginCodeList[0].AddInfoKeyValue +' ) ';
+                    if (enginCodeList.length > 0) {
+                      engineCode = ' ( ';
+
+                      for(let i=0; i<enginCodeList.length; i++) {
+                        engineCode = engineCode + enginCodeList[i].AddInfoKeyValue;
+                        if(i !== enginCodeList.length-1) engineCode += ', ';
+                      }
+
+                      engineCode += ' ) ';
                     }
                     
                     carTypeItem.TypeName = obj.TypeName +  engineCode  + ' [ ' + beginDate + '~' + endDate + ' ]';

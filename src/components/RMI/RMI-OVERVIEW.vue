@@ -31,7 +31,7 @@
 					<v-simple-table id="OverviewSubTable1">
 						<template v-slot:default>
 							<tbody>
-								<tr v-for="item in engineAdjustList" :key="item.QualCol">
+								<tr v-for="item in engineAdjustList" :key="item.ID">
 									<td>{{ item.Classfication }}</td>
 									<td>{{ item.QualCol }}</td>
 									<td>{{ item.Value }}</td>								
@@ -59,7 +59,7 @@
 					<v-simple-table id="OverviewSubTable2">
 						<template v-slot:default>
 							<tbody>
-								<tr v-for="item in changeIntervalAdjustList" :key="item.QualCol">
+								<tr v-for="item in changeIntervalAdjustList" :key="item.ID">
 									<td>{{ item.Classfication }}</td>
 									<td>{{ item.QualCol }}</td>
 									<td>{{ item.Value }}</td>								
@@ -77,6 +77,7 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script>
 	import BackToTop from '@/components/Common/BackToTop.vue'
+	const axios = require('axios').default;
 	const url = "https://rmi-services.tecalliance.net/rest/Adjust";
 		
 	export default {
@@ -84,29 +85,14 @@
 		data(){
 			return{
 				manualLists: [],
-				desserts: [
-					{
-					name: 'Frozen Yogurt',
-					calories: 159,
-					},
-					{
-					name: 'Ice cream sandwich',
-					calories: 237,
-					},
-					{
-					name: 'Eclair',
-					calories: 262,
-					},
-					{
-					name: 'Cupcake',
-					calories: 305,
-					},
-				],
 				engineAdjustList: [],
 				changeIntervalAdjustList: [],
 				manualId: '',
 				rmiAuthKey: '',	
-				carTypeId: '',			
+				carTypeId: '',	
+				jsonHeader: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'Authorization': 'TecRMI {{AuthToken}}' },		
+				engineAdjustReq: 0,
+				changeIntervalAdjustReq: 0,
 			}
 		},
 		components: {
@@ -142,7 +128,7 @@
 					this.rmiAuthKey = 'TecRMI ' + xmlHttp.getResponseHeader( 'X-AuthToken' );
 				}
 			},
-			addListView(viewList, itemMpId, classfication) {
+			addListView(type, viewList, itemMpId, classfication, reqCount) {
 				let languageCode = 'en',
 					countryCode = 'kr',
 					typeId = this.carTypeId;		
@@ -152,62 +138,89 @@
 					+ '&typeId=' + typeId	
 					+ '&itemMpId=' + itemMpId
 
-				let xmlHttp = new XMLHttpRequest();
-				xmlHttp.open( 'GET', url + '/ItemMpData' + query, false );
-				xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
-				xmlHttp.setRequestHeader( 'Accept', 'application/json' );
-				xmlHttp.setRequestHeader( 'Authorization', this.rmiAuthKey );
-				xmlHttp.send( null );
-				
-				if(xmlHttp.status == 200) {
-					viewList = JSON.parse(xmlHttp.responseText).Values.reduce(function (pre, value) {
+				this.jsonHeader.Authorization = this.rmiAuthKey;		
+
+				axios({
+                  method: 'GET',
+                  url: url + '/ItemMpData' + query,
+                  headers: this.jsonHeader
+				})
+				.then((result) => {
+					console.log('addListView : ', result.data);
+
+					let count = 0;
+					if(type === "EngineAdjust") {
+						this.engineAdjustReq = this.engineAdjustReq -1;
+						count = this.engineAdjustReq;
+					}
+					else if(type === "ChangeIntervalAdjust") {
+						this.changeIntervalAdjustReq = this.changeIntervalAdjustReq -1;
+						count = this.changeIntervalAdjustReq;
+					}							
+
+					result.data.Values.forEach(value => {
 						let tempText = value.ValueText;
 						if(value.QuantityText === "litres") tempText = value.ValueText.replace(",", ".") + " " + value.QuantityText;
 						if(value.AdditionalText !== "") tempText = tempText + " (" + value.AdditionalText + ")";
-						pre.push({
-							"Classfication" : classfication,
-							"QualCol" : value.QualColText,
-							"Value" : tempText
-						});
-						return pre;
-					}, viewList);
-				}
+
+						let item = {
+								"Classfication" : classfication,
+								"QualCol" : value.QualColText,
+								"Value" : tempText,
+								"ID" : classfication + value.QualColText + tempText
+							};
+
+						viewList.push(item);
+					});
+
+					console.log('Check......... ', type, ' | ', classfication, ' | ', count);
+
+					if(count === 0) {
+						viewList.sort(function(a, b){
+							return (a.ID > b.ID) ? 1 : -1;
+						});					
+					}
+				
+				});
+
 			},
 			setEngineAdjustList() {
 				this.engineAdjustList = [];
 
 				if(this.carTypeId !== undefined && this.carTypeId !== '' ) {
+					this.engineAdjustReq = 4;
 					///////////////// 1. Engine oil with filter 조회 /////////////////
-					this.addListView(this.engineAdjustList, 2645, "1) 엔진오일량");
+					this.addListView("EngineAdjust", this.engineAdjustList, 2645, "1) 엔진오일량");
 
 					///////////////// 2. Engine oil specification 조회 /////////////////
-					this.addListView(this.engineAdjustList, 2646, "2) 엔진오일 사양");
+					this.addListView("EngineAdjust", this.engineAdjustList, 2646, "2) 엔진오일 사양");
 
 					///////////////// 3. Engine oil viscosity 조회 /////////////////
-					this.addListView(this.engineAdjustList, 15887, "3) 엔진오일 점도");
+					this.addListView("EngineAdjust", this.engineAdjustList, 15887, "3) 엔진오일 점도");
 
 					///////////////// 4. Coolant 조회 /////////////////
-					this.addListView(this.engineAdjustList, 2659, "4) 엔진 냉각수");
+					this.addListView("EngineAdjust", this.engineAdjustList, 2659, "4) 엔진 냉각수");
 				}       
 			},
 			setChangeIntervalAdjustList() {
 				this.changeIntervalAdjustList = [];
 
 				if(this.carTypeId !== undefined && this.carTypeId !== '' ) {
+					this.changeIntervalAdjustReq = 5;
 					///////////////// 1. Air filter change interval 조회 /////////////////
-					this.addListView(this.changeIntervalAdjustList, 2691, "1) 에어필터 교환 주기");
+					this.addListView("ChangeIntervalAdjust", this.changeIntervalAdjustList, 2691, "1) 에어필터 교환 주기");
 
 					///////////////// 2. Fuel filter change interval 조회 /////////////////
-					this.addListView(this.changeIntervalAdjustList, 2692, "2) 연료필터 교환 주기");
+					this.addListView("ChangeIntervalAdjust", this.changeIntervalAdjustList, 2692, "2) 연료필터 교환 주기");
 
 					///////////////// 3. Brake fluid change interval 조회 /////////////////
-					this.addListView(this.changeIntervalAdjustList, 2693, "3) 브레이크액 교환 주기");
+					this.addListView("ChangeIntervalAdjust", this.changeIntervalAdjustList, 2693, "3) 브레이크액 교환 주기");
 
 					///////////////// 4. Engine oil and filter change interval 조회 /////////////////
-					this.addListView(this.changeIntervalAdjustList, 2700, "4) 엔진오일/필터 교환 주기");
+					this.addListView("ChangeIntervalAdjust", this.changeIntervalAdjustList, 2700, "4) 엔진오일/필터 교환 주기");
 
 					///////////////// 5. Interior filter change interval 조회 /////////////////
-					this.addListView(this.changeIntervalAdjustList, 2707, "5) 에어컨필터 교환 주기");
+					this.addListView("ChangeIntervalAdjust", this.changeIntervalAdjustList, 2707, "5) 에어컨필터 교환 주기");
 				}    
 			}
 		},   		
