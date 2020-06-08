@@ -1,8 +1,7 @@
 <template>
     <div>
-        
         <div class="parts-info" v-for="(item, index) in ParsInfoData" :key="index">
-            <h5 class="info-title" v-if="item !== ''">{{index}}</h5>
+            <h5 class="info-title" v-if="showTitle(item, index)">{{index}}</h5>
             <div class="assigned-art" v-if="index === 'oenNumbers'">
                 <span class="attr-text">{{setArrayJoin(item.array)}}</span>
             </div>
@@ -18,15 +17,15 @@
                             <div class="attr-text">{{item2.attrValue}} {{item2.attrUnit}}</div>                                
                         </div>                            
                     </li>
-                    <li v-else-if="index === 'articleDocuments'">
+                    <li v-else-if="index === 'articleDocuments' && item2.docFileTypeName ==='URL'">
                         <div class="attr-text" v-if="item2.docFileTypeName ==='URL'" >
                             <a :href="item2.docUrl" target="_blank">{{item2.docTypeName}}</a>
                         </div>
-                        <div class="attr-text" v-else>{{item2.docFileName}}</div>
+                        <!--<div class="attr-text" v-else>{{item2.docFileName}}</div>-->
                     </li>
                     <li v-else-if="index === 'articleInfo'">
                         <div style="display:flex;">
-                            <div class="attr-name" >{{item2.infoTypeName}}</div>
+                            <!--<div class="attr-name" >{{item2.infoTypeName}}</div>-->
                             <div class="attr-text" v-html="item2.infoText"></div>
                         </div>
                     </li>
@@ -54,10 +53,14 @@
                     <li v-else-if="index === 'usageNumbers2'">
                         <div class="attr-text">{{item2.usageNumber}}</div>
                     </li>
-                    <li v-else>
-                        <div class="attr-text">{{item2.oeNumber}}</div>
-                        <div class="attr-text">{{item2.replaceNumber}}</div>                                
+                    <li v-else-if="index === 'oenNumbers'">
+                       <div class="attr-text">{{item2.oeNumber}}</div>
                     </li>
+                    <li v-else-if="index === 'replacedNumber'">
+                       <div class="attr-text">{{item2.replaceNumber}}</div>
+                    </li>
+                    <!--<li v-else>                            
+                    </li>-->
                 </ul>
             </div>
         </div>
@@ -76,10 +79,35 @@
         },
         props:['ParsInfoData'],
         methods:{
+            showTitle(value,text)
+            {
+                if(value !== ''){
+                    if(text === 'articleDocuments'){
+                        var urlCount =  value.array.filter(x => x.docFileTypeName ==='URL').length;
+                        if(urlCount > 0){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                    else{
+                        return true;
+                    }
+                }
+                else{
+                    return false;
+                }
+            },
             setArrayJoin(value)
             {   
-                var list = value.map(x=> x.oeNumber).join(', ');
-                return list;
+                if(value !== undefined){
+                    var list = Array.from(new Set(value.map(x=> x.oeNumber))).join(', ');
+                    return list;
+                }
+                else{
+                    return '';
+                }
             }
         }
     }

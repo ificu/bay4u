@@ -78,7 +78,11 @@
 										selected-color="red"
 										v-model="repairItem"
 										@update:open="openNode"
-									></v-treeview>
+									>
+									<template slot="label" slot-scope="{ item }">
+										{{ item.name }} <v-icon large color="green darken-2">mdi-domain</v-icon>
+									</template>
+									</v-treeview>
 								</div>
 							</v-card-text>								
 							</v-card>					
@@ -112,7 +116,7 @@
 				rmiAuthKey: '',	
                 carTypeId: '',	
 				carTcdTypeId: '',
-                groupList:[],
+				groupList:[],
 			}
 		},
 		components: {
@@ -137,41 +141,23 @@
             });
         },	
 		methods: {
-			openNode(){
-				var openNode = document.getElementsByClassName('v-treeview-node__children');
-				if(openNode.length === 0)
-				{
-					this.$nextTick(function(){
-						if(openNode.length === 1){							
-							openNode.forEach(element => {
-								var nodeList = element.childNodes;
-								nodeList.forEach(node => {
-									if(node.childNodes.length == 1){
-										if(node.childNodes[0].childNodes.length > 2){
-											node.childNodes[0].childNodes[1].style.display = "none";
-										}
-									}									
-								});							
-							});
-						}
-					});
-				}
-				else{
-					console.log('openNode :',openNode);
-					if(openNode.length > 1){							
-							openNode.forEach(element => {
-								var nodeList = element.childNodes;
-								console.log('nodeList:',nodeList);
-								nodeList.forEach(node => {
-									if(node.childNodes.length == 1){
-										if(node.childNodes[0].childNodes.length > 2){
-											node.childNodes[0].childNodes[1].style.display = "none";
-										}
-									}									
-								});													
-							});
-						}
-				}
+			openNode(items){
+				//console.log('openNode.length :',items);
+				items.forEach(element => {
+					var index =	this.itemMpLists.findIndex(x => x.id === element);
+					//console.log('index :',index);
+					if(index !== -1){
+						var treeNodes = document.getElementsByClassName('v-treeview')[0];
+						var rootNode = treeNodes.children[index].getElementsByClassName('v-treeview-node__root');
+						//console.log('rootNode : ',  rootNode);
+						rootNode.forEach(element => {
+							if(element.childNodes.length > 2){
+								element.childNodes[1].style.display = "none";
+							}
+						});
+						this.$forceUpdate();
+					}
+				});
 			},
 			initAuthKey() {
 				let url = 'https://rmi-services.tecalliance.net/auth/login';
@@ -312,10 +298,9 @@
 						rObj.name = obj.name;
 						rObj.children = Object.values(groupBy(obj, 'KorId', 'KorText')).map(function(subObj){
 							var subItem = {};
-							subItem.id = subObj.id;
+							subItem.id = obj.id +'/'+ subObj.id;
 							subItem.name = subObj.name;
 							subItem.children = subObj.map(function(subObj2){
-
 								var subItem2 = {};
 								subItem2.id = subObj2.WorkId;
 								subItem2.name = subObj2.WorkText + ' [' +subObj2.QualColText+']';
