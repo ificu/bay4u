@@ -58,13 +58,30 @@
                         tile
 						id = "RMIContents"
                     >
-                        <v-treeview
-                            dense
-                            light
-                            :items="itemMpLists"
-                            class="tree-contents"
-                            open-on-click
-                        ></v-treeview>
+						<v-card
+								class="pa-2"
+								tile
+								light
+								outlined
+								id="RMISubContents"							
+							>
+							<v-card-title class="pa-2 card-title">Repair Items</v-card-title>
+							<v-card-text>
+								<div class="pa-0 repair-tree">
+									<v-treeview
+										dense
+										light
+										:items="itemMpLists"
+										class="tree-contents"
+										open-on-click
+										selectable
+										selected-color="red"
+										v-model="repairItem"
+										@update:open="openNode"
+									></v-treeview>
+								</div>
+							</v-card-text>								
+							</v-card>					
                     </v-card>
                 </v-col>
             </v-row>            
@@ -91,7 +108,7 @@
 				itemMpLists: [],
 				mainGroupId: '',
 				subGroupId: '',
-				itemMpId: '',
+				repairItem:[],
 				rmiAuthKey: '',	
                 carTypeId: '',	
 				carTcdTypeId: '',
@@ -111,7 +128,51 @@
 				this.setMainGroup();
 			});
 		},	
+        updated(){
+            var rootNode = document.getElementsByClassName('v-treeview-node__root');
+            rootNode.forEach(element => {
+				if(element.childNodes.length > 2){
+                    element.childNodes[1].style.display = "none";
+                }
+            });
+        },	
 		methods: {
+			openNode(){
+				var openNode = document.getElementsByClassName('v-treeview-node__children');
+				if(openNode.length === 0)
+				{
+					this.$nextTick(function(){
+						if(openNode.length === 1){							
+							openNode.forEach(element => {
+								var nodeList = element.childNodes;
+								nodeList.forEach(node => {
+									if(node.childNodes.length == 1){
+										if(node.childNodes[0].childNodes.length > 2){
+											node.childNodes[0].childNodes[1].style.display = "none";
+										}
+									}									
+								});							
+							});
+						}
+					});
+				}
+				else{
+					console.log('openNode :',openNode);
+					if(openNode.length > 1){							
+							openNode.forEach(element => {
+								var nodeList = element.childNodes;
+								console.log('nodeList:',nodeList);
+								nodeList.forEach(node => {
+									if(node.childNodes.length == 1){
+										if(node.childNodes[0].childNodes.length > 2){
+											node.childNodes[0].childNodes[1].style.display = "none";
+										}
+									}									
+								});													
+							});
+						}
+				}
+			},
 			initAuthKey() {
 				let url = 'https://rmi-services.tecalliance.net/auth/login';
 				let params = {
@@ -175,8 +236,7 @@
 
 				this.mainGroupId = '';
 				this.subGroupId = '';
-				this.itemMpId = '';
-
+				
 				if(this.carTypeId !== undefined && this.carTypeId !== '' ) {
 					
 					let languageCode = 'en',
@@ -207,8 +267,7 @@
 			changeMainGroup() {
 				var selected = this.mainGroupId;
 				this.itemMpLists = [];
-				this.itemMpId = '';
-
+				
 				this.subGroupLists = this.mainGroupLists.reduce(function (pre, value) {
 					if(value.MainGroupId === selected) {
 						return [...pre, ...value.SubGroups];
@@ -278,7 +337,10 @@
   color: black;
   font-size: 12px;
 }
-
+.contents .card-title{
+    background-color: #37474F;
+    color:white;
+}
 .contents .adjustSelect {
   background-color: #666;
   font-size: 12px;
@@ -302,6 +364,16 @@
 	border-width: thick;
 	border-color: #fddca9;
 }
-
+#RMISubContents{
+	background-color: white; 
+	color: black;
+    border-radius: 5px;
+	border: 0px;
+}
+#RMISubContents .repair-tree{
+	height: 400px;
+	overflow:auto;
+	overflow-x:hidden;
+}
 </style>
 
