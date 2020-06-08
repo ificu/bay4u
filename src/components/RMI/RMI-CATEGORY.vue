@@ -9,76 +9,15 @@
                         tile
                     >
 					<v-icon class="mx-4" style="color:#fddca9; font-size:18px;" >  mdi-arrange-send-backward </v-icon>
-					<span class="font-weight-bold" style="color:#fddca9; font-size:15px;" >정비 참고 매뉴얼</span>
+					<span class="font-weight-bold" style="color:#fddca9; font-size:15px;" >부품 카테고리</span>
                     </v-card>
                 </v-col>
-            </v-row>  			
-            <v-row>
-                <v-col cols="12" sm="3" >
-					<v-card>
-							<v-select
-								class="pa-4 pb-0 pt-6 adjustSelect"
-								v-model="mainGroupId"
-								:items="mainGroupLists"
-								item-text="MainGroupName"
-								item-value="MainGroupId"								
-								label="Main 그룹"
-								outlined
-								dense
-								@change="changeMainGroup"
-								>
-							</v-select>
-					</v-card>
-                </v-col>
-                <v-col cols="12" sm="3" >
-					<v-card>
-							<v-select
-								class="pa-4 pb-0 pt-6 adjustSelect"
-								v-model="subGroupId"
-								:items="subGroupLists"
-								item-text="SubGroupName"
-								item-value="SubGroupId"	
-								label="Sub 그룹"
-								outlined
-								dense
-								@change="changeSubGroup"
-								>
-							</v-select>
-					</v-card>
-                </v-col>
-                <v-col cols="12" sm="3" >
-					<v-card>
-							<v-select
-								class="pa-4 pb-0 pt-6 adjustSelect"
-								v-model="itemMpId"
-								:items="itemMpLists"
-								item-text="ItemMpText"
-								item-value="ItemMpId"	
-								label="상세 항목"
-								outlined
-								dense
-								@change="changeItemMp"
-								>
-							</v-select>
-					</v-card>
-                </v-col>
-                <v-col cols="12" sm="3" >
-					<v-card>
-							<v-select
-								class="pa-4 pb-0 pt-6 adjustSelect"
-								v-model="manualId"
-								:items="qualColLists"
-								item-text="QualColText"
-								item-value="ManualId"	
-								label="매뉴얼 구분"
-								outlined
-								dense
-								@change="changeManualId"
-								>
-							</v-select>
-					</v-card>
-                </v-col>					
-            </v-row>
+            </v-row> 
+			<v-row class="pl-8 pr-8">
+				<v-chip class="pa-4 ma-2" v-for="(category, index) in categoryLists" v-bind:key = "index" v-bind:color="colorList[index]" outlined link>
+					{{category.shortCutName}}
+				</v-chip>
+			</v-row>
             <v-row>
                 <v-col
                     cols="12"
@@ -102,20 +41,90 @@
 <script>
 	import BackToTop from '@/components/Common/BackToTop.vue'
 //	const axios = require('axios').default;
-	const url = "https://rmi-services.tecalliance.net/rest/Manuals";
+	const url = "https://rmi-services.tecalliance.net/rest/Adjust";
 		
 	export default {
-		name: 'RMI-MANUALS',
+		name: 'RMI-CATEGORY',
 		data(){
 			return{
+				colorList: ['red', 'pink', 'purple', 'indigo', 'blue', 'cyan', 'teal', 'green', 'orange', 'deep-orange', 'brown', 'blue-grey', 
+							'red accent-4', 'pink accent-4', 'purple accent-4', 'indigo accent-4', 'blue accent-4', 'cyan accent-4', 'teal accent-4', 'green accent-4', 'orange accent-4', 'deep-orange accent-4', 'brown accent-4', 'blue-grey accent-4'],
+				categoryLists: [
+					{
+						"shortCutId": 2,
+						"shortCutName": "Body"
+					},
+					{
+						"shortCutId": 3,
+						"shortCutName": "Engine"
+					},
+					{
+						"shortCutId": 4,
+						"shortCutName": "Drive Train"
+					},
+					{
+						"shortCutId": 5,
+						"shortCutName": "Filter"
+					},
+					{
+						"shortCutId": 6,
+						"shortCutName": "Windows/Window Cleaning"
+					},
+					{
+						"shortCutId": 7,
+						"shortCutName": "Fuel Mixture Formation"
+					},
+					{
+						"shortCutId": 8,
+						"shortCutName": "Suspension"
+					},
+					{
+						"shortCutId": 9,
+						"shortCutName": "Brakes"
+					},
+					{
+						"shortCutId": 10,
+						"shortCutName": "Exhaust System"
+					},
+					{
+						"shortCutId": 11,
+						"shortCutName": "Cooling/Air Conditioning"
+					},
+					{
+						"shortCutId": 12,
+						"shortCutName": "Steering"
+					},
+					{
+						"shortCutId": 13,
+						"shortCutName": "Interior Equipment"
+					},
+					{
+						"shortCutId": 14,
+						"shortCutName": "Lights"
+					},
+					{
+						"shortCutId": 15,
+						"shortCutName": "Electrics"
+					},
+					{
+						"shortCutId": 16,
+						"shortCutName": "Spark/Glow Ignition"
+					},
+					{
+						"shortCutId": 17,
+						"shortCutName": "Accessories"
+					},
+					{
+						"shortCutId": 18,
+						"shortCutName": "Service"
+					}
+				],
 				mainGroupLists: [],
 				subGroupLists: [],
 				itemMpLists: [],
-				qualColLists: [],
 				mainGroupId: '',
 				subGroupId: '',
 				itemMpId: '',
-				manualId: '',
 				rmiAuthKey: '',	
 				carTypeId: '',			
 			}
@@ -124,18 +133,11 @@
 			BackToTop
 		},
 		created () {
-			this.$EventBus.$on('RMI-MANUALS.InitData', param => {  
+			this.$EventBus.$on('RMI-CATEGORY.InitData', param => {  
 				this.rmiAuthKey = param.rmiAuthKey;
 				this.carTypeId = param.carTypeId; 
 				this.initAuthKey();
 				this.setMainGroup();
-			});
-
-			document.addEventListener('mousedown', function(){
-				if ((event.button == 2) || (event.which == 3)) {
-					//event.preventDefault();
-					console.log('우클릭 : ', document.getSelection().toString());
-				}
 			});
 		},	
 		methods: {
@@ -163,12 +165,10 @@
 				this.mainGroupLists = [];
 				this.subGroupLists = [];
 				this.itemMpLists = [];
-				this.qualColLists = [];
 
 				this.mainGroupId = '';
 				this.subGroupId = '';
 				this.itemMpId = '';
-				this.manualId = '';
 
 				$("#RMIContents").html('');
 
@@ -185,7 +185,7 @@
 					
 					// Send HTTP request
 					let xmlHttp = new XMLHttpRequest();
-					xmlHttp.open( 'GET', url + '/ManualList' + query, false );
+					xmlHttp.open( 'GET', url + '/List' + query, false );
 					xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
 					xmlHttp.setRequestHeader( 'Accept', 'application/json' );
 					xmlHttp.setRequestHeader( 'Authorization', this.rmiAuthKey );
@@ -194,27 +194,6 @@
 					// Handle HTTP response
 					if(xmlHttp.status == 200) {
 						console.log('changeMainGroup 리턴 : ', JSON.parse(xmlHttp.responseText));
-
-						/////////////////////////////////////
-						/*
-						this.mainGroupId = 119;
-						this.$nextTick(function(){
-							this.changeMainGroup();
-							this.subGroupId = 477;
-							this.$nextTick(function(){
-								this.changeSubGroup();
-								this.itemMpId = 15002;
-								this.$nextTick(function(){
-									this.changeItemMp();
-									this.manualId = 114736;
-									this.$nextTick(function(){
-										this.changeManualId();
-									});
-								});
-							});
-						});*/
-						/////////////////////////////////////
-
 						this.mainGroupLists = JSON.parse(xmlHttp.responseText);
 					}
 
@@ -223,10 +202,7 @@
 			changeMainGroup() {
 				var selected = this.mainGroupId;
 				this.itemMpLists = [];
-				this.qualColLists = [];
-
 				this.itemMpId = '';
-				this.manualId = '';
 
 				$("#RMIContents").html('');
 
@@ -241,10 +217,7 @@
 			},
 			changeSubGroup() {
 				var selected = this.subGroupId;
-				this.qualColLists = [];
 
-				this.manualId = '';		
-				
 				$("#RMIContents").html('');
 
 				this.itemMpLists = this.subGroupLists.reduce(function (pre, value) {
@@ -257,38 +230,24 @@
 				}, []);	
 			},
 			changeItemMp() {
-				var selected = this.itemMpId;
-
-				$("#RMIContents").html('');
-
-				this.qualColLists = this.itemMpLists.reduce(function (pre, value) {
-					if(value.ItemMpId === selected) {
-						return [...pre, ...value.Manuals];
-					}
-					else {
-						return pre;
-					}
-				}, []);	
-			},
-			changeManualId() {
 				let languageCode = 'en',
 					countryCode = 'kr',
 					printView = true,
 					linkUrl = '.',
-					manualId = this.manualId,
+					itemMpId = this.itemMpId,
 					typeId = this.carTypeId;		
 					
 				// Build url query string
 				let query = '?languageCode=' + languageCode
 					+ '&countryCode=' + countryCode
 					+ '&typeId=' + typeId	
-					+ '&manualId=' + manualId	
+					+ '&itemMpId=' + itemMpId	
 					+ '&printView=' + printView	
 					+ '&linkUrl=' + linkUrl	
 				
 				// Send HTTP request
 				let xmlHttp = new XMLHttpRequest();
-				xmlHttp.open( 'GET', url + '/ManualHtml' + query, false );
+				xmlHttp.open( 'GET', url + '/ItemHtml' + query, false );
 				xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
 				xmlHttp.setRequestHeader( 'Accept', 'application/json' );
 				xmlHttp.setRequestHeader( 'Authorization', this.rmiAuthKey );
@@ -298,7 +257,7 @@
 					console.log(xmlHttp.responseText);
 					let page = xmlHttp.responseText.replace('<img src=\"https://rmi-cdn.tecalliance.net/services/Logo.png\" height=\"60px\" border=\"0\" alt=\"\"/>\r\n', '');
 					$("#RMIContents").html(JSON.parse(page));
-				}	
+				}				
 			}
 		},   		
 	}
