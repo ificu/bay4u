@@ -38,7 +38,7 @@
                         >
                         <template slot="label" slot-scope="{ item }">
                             {{ item.name }} 
-                            <v-btn icon x-small class="ml-2" v-if="item.children !== undefined" @click="getCheckList(item)">
+                            <v-btn icon x-small class="ml-2" v-if="item.children !== undefined" @click="showCheckList(item)">
                                 <v-icon>mdi-wrench</v-icon>
                             </v-btn>
                         </template>
@@ -64,7 +64,7 @@
                         >
                         <template slot="label" slot-scope="{ item }">
                             {{ item.name }} 
-                            <v-btn icon x-small class="ml-2" v-if="item.children !== undefined"  @click="getCheckList(item)">
+                            <v-btn icon x-small class="ml-2" v-if="item.children !== undefined"  @click="showCheckList(item)">
                                 <v-icon>mdi-wrench</v-icon>
                             </v-btn>
                         </template>
@@ -120,7 +120,7 @@
         </v-container>
         <BackToTop></BackToTop>
         <!--부품이미지-->
-        <v-dialog v-model="imgDialog"  width="600px">
+        <v-dialog v-model="imgDialog"  width="650px">
             <v-card light>
                 <v-card-title class="headline grey lighten-2">
                     <span style="font-size:0.8em">{{pickArtInfo}}</span>
@@ -166,27 +166,13 @@
             </v-card>
         </v-dialog>
         <!-- 체크리스트-->
-        <v-dialog v-model="checkDialog"  width="700px">            
-           <v-card light>
-                <v-card-title
-                    class="headline grey lighten-2"
-                >
-                <span>Check List</span><span style="font-size:0.75em;margin-left:5px"></span>
-                </v-card-title>           
-                <v-card-title class="pt-4 font-weight-black" v-html="htmlContents" >    
-                </v-card-title>
-                <v-divider></v-divider>
-                <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn
-                        color="primary"
-                        text
-                        @click="checkDialog = false"
-                    >
-                    close
-                    </v-btn>
-                </v-card-actions>
-            </v-card>
+        <v-dialog v-model="checkDialog"  width="750px">
+            <CheckList 
+                :RmiAuthKey="rmiAuthKey" 
+                :TypeID="carTypeId"
+                :ManualID="manualId"
+                @close="checkDialog=false"
+            ></CheckList>      
         </v-dialog>
     </v-content>
 </template>
@@ -196,9 +182,9 @@
     import {arrayGroupBy} from '@/utils/common.js'
     import BackToTop from '@/components/Common/BackToTop.vue'
     import PartsInfo from '@/components/RMI/TEC-PARTSINFO.vue'
+    import CheckList from '@/components/RMI/RMI-CHECKLIST.vue'
 
     const url = "https://rmi-services.tecalliance.net/rest/Maintenance";
-    const sosUrl = "https://rmi-services.tecalliance.net/rest/Bulletins";
     const basketUrl = "https://rmi-services.tecalliance.net/rest/Prices";
     const tecdocUrl = "https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLB.jsonEndpoint?js";
     const tecApiKey = '2BeBXg6CxtgP7fnQvXr45SzqpEVDcDTGSJd1viDM6VHGJ7bxjDy5';
@@ -224,12 +210,13 @@
                 dialog: false,
                 pickArtInfo: '',
                 checkDialog: false,
-                htmlContents:''
+                manualId:''
 			}
 		},
 		components: {
             BackToTop,
-            PartsInfo
+            PartsInfo,
+            CheckList
 		},
 		created () {
 			this.$EventBus.$on('RMI-MAINTENANCE.InitData', param => {  
@@ -413,7 +400,9 @@
                     LanguageCode: "en",
                     TypeId: this.carTypeId,
                     ShowPaint: false
-				};
+                };
+                
+                console.log('params : ', params);
                 
                 // Send HTTP request
                 var xmlHttp = new XMLHttpRequest();
@@ -617,41 +606,12 @@
                     console.log('result :',this.partsDetail);
 				}
             },
-            getCheckList(value)
+            showCheckList(value)
             {
-                console.log('check list :', value);
-
-                let languageCode = 'en',
-                    countryCode = 'kr',
-                    kindOfWorkTime = 0,
-					printView = true,
-					linkUrl = '.',
-					manualId = value.id,
-					typeId = this.carTypeId;		
-					
-				// Build url query string
-				let query = '?languageCode=' + languageCode
-					+ '&countryCode=' + countryCode
-					+ '&typeId=' + typeId	
-					+ '&manualId=' + manualId	
-                    + '&printView=' + printView
-                    + '&kindOfWorkTime=' + kindOfWorkTime	
-					+ '&linkUrl=' + linkUrl	
-				
-				// Send HTTP request
-				let xmlHttp = new XMLHttpRequest();
-				xmlHttp.open( 'GET', sosUrl + '/ManualHtml' + query, false );
-				xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
-				xmlHttp.setRequestHeader( 'Accept', 'application/json' );
-				xmlHttp.setRequestHeader( 'Authorization', this.rmiAuthKey );
-				xmlHttp.send( null );
-				// Handle HTTP response
-				if(xmlHttp.status == 200) {
-                    console.log(xmlHttp.responseText);
-                    this.htmlContents = JSON.parse(xmlHttp.responseText);
-					//$("#RMIContents").html(JSON.parse(page));
-				}	
+                //console.log('check list :', value);
+                this.manualId = value.id;
                 this.checkDialog = true;
+                this.$EventBus.$emit('RMI-CHECKLIST.InitData',null);
             }        
 		},   		
 	}
@@ -683,7 +643,7 @@
 }
 .contents  li {
     display: flex;
-    align-items:center;
+  /*  align-items:center;*/
     margin-bottom: 8px;
 }
 .contents .brand-name{

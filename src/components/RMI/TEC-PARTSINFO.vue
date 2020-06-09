@@ -3,7 +3,10 @@
         <div class="parts-info" v-for="(item, index) in ParsInfoData" :key="index">
             <h5 class="info-title" v-if="showTitle(item, index)">{{index}}</h5>
             <div class="assigned-art" v-if="index === 'oenNumbers'">
-                <span class="attr-text">{{setArrayJoin(item.array)}}</span>
+                <span class="attr-text">{{setArrayJoin(item.array,index)}}</span>
+            </div>
+            <div class="assigned-art" v-else-if="index === 'usageNumbers2'">
+                <span class="attr-text">{{setArrayJoin(item.array,index)}}</span>
             </div>
             <div class="assigned-art" v-else-if="index ==='assignedArticle'">
                 <span class="attr-name">{{item.articleName}}</span>
@@ -99,10 +102,21 @@
                     return false;
                 }
             },
-            setArrayJoin(value)
+            setArrayJoin(value ,target)
             {   
                 if(value !== undefined){
-                    var list = Array.from(new Set(value.map(x=> x.oeNumber))).join(', ');
+                    var list = ''; 
+
+                    switch (target) {
+                        case 'oenNumbers':
+                            list = Array.from(new Set(value.map(x=> x.oeNumber))).join(', ');
+                            break;
+                        case 'usageNumbers2':
+                            list = Array.from(new Set(value.map(x=> x.usageNumber))).join(', ');
+                            break;
+                        default:
+                            break;
+                    }
                     return list;
                 }
                 else{
