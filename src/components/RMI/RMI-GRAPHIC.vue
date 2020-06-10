@@ -29,6 +29,7 @@
 					</v-card>
 					<v-btn id='btnFuncMaingroupDelegate' @click="selectMaingroup" style="display:none;">JSMaingroupDelegate</v-btn>
 					<v-btn id='btnFuncSubgroupDelegate' @click="selectSubgroup" style="display:none;">JSSubgroupDelegate</v-btn>
+					<v-btn id='btnFuncDelegate' @click="selectDelegate" style="display:none;">JSDelegate</v-btn>
                 </v-col>
             </v-row>  			
             <v-row>
@@ -349,6 +350,10 @@
 					$("#RMISubgroupContents").html(JSON.parse(page));
 				}									
 			},
+			selectDelegate()
+			{
+				console.log('selectDelegate............. : ', document.getElementById('btnFuncDelegate').value);
+			}
 		},   		
 	}
 </script>

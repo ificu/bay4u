@@ -40,27 +40,27 @@ export default {
     created(){
 
         this.$EventBus.$on('RMI-CHECKLIST.InitData', data => {
-            this.InitData();
+            this.InitData(data);
         });	
     },
     mounted(){
-        this.InitData();
+        this.rmiAuthKey = this.RmiAuthKey;
+        this.typeId = this.TypeID;
+        this.manualId = this.ManualID;
+        this.getCheckList();
     },
     methods: {
-        InitData(){
-            this.rmiAuthKey = this.RmiAuthKey;
-            this.typeId = this.TypeID;
-            this.manualId = this.ManualID;
+        InitData(data){
+            this.rmiAuthKey = data.RmiAuthKey;
+            this.typeId = data.TypeID;
+            this.manualId = data.ManualID;
             this.getCheckList();
-
-            console.log('InitData....');
-            console.log('typeId :', this.typeId);
-            console.log('manualId :', this.manualId);
-
         },
         getCheckList()
         {
-            console.log('getCheckList');
+            console.log('CheckData....');
+            console.log('typeId :', this.typeId);
+            console.log('manualId :', this.manualId);
             let languageCode = 'en',
                 countryCode = 'kr',
                 kindOfWorkTime = 1,
@@ -78,7 +78,6 @@ export default {
                 + '&kindOfWorkTime=' + kindOfWorkTime	
                 + '&linkUrl=' + linkUrl	
             
-            console.log('query:', query);
             // Send HTTP request
             let xmlHttp = new XMLHttpRequest();
             xmlHttp.open( 'GET', sosUrl + '/ManualHtml' + query, false );

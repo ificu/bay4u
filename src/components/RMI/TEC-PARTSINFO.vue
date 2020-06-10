@@ -1,6 +1,12 @@
 <template>
-    <div>
-        <div class="parts-info" v-for="(item, index) in ParsInfoData" :key="index">
+    <v-card light>
+                <v-card-title
+                    class="headline grey lighten-2"
+                >
+                <span>Article information</span><span style="font-size:0.75em;margin-left:5px"> - {{artInfo}}</span>
+                </v-card-title>           
+                <v-card-text class="mt-2">
+        <div class="parts-info" v-for="(item, index) in partsDetail" :key="index">
             <h5 class="info-title" v-if="showTitle(item, index)">{{index}}</h5>
             <div class="assigned-art" v-if="index === 'oenNumbers'">
                 <span class="attr-text">{{setArrayJoin(item.array,index)}}</span>
@@ -67,21 +73,105 @@
                 </ul>
             </div>
         </div>
-    </div>
+    </v-card-text>
+                <v-divider></v-divider>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                        color="primary"
+                        text
+                        @click="$emit('close')"
+                    >
+                    close
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
 </template>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script>
+    const tecdocUrl = "https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLB.jsonEndpoint?js";
+    const tecApiKey = '2BeBXg6CxtgP7fnQvXr45SzqpEVDcDTGSJd1viDM6VHGJ7bxjDy5';
+    const tecProvider = 22261;
+
     export default {
         name: 'TEC-PARTSINFO',
         data(){
             return{
+                partsInfo :{},
+                tecTypeId : '',
                 partsDetail: [],
-                pickArtinfo:''
+                artInfo: '',
             }
         },
-        props:['ParsInfoData'],
+        props:['PartsInfo', 'TecTypeID'],
+        created(){
+            this.$EventBus.$on('RMI-PARTSINFO.InitData', data => {
+                this.InitData(data);
+            });	
+        },
+        mounted(){
+            console.log(this.partsInfo);
+            this.partsInfo = this.PartsInfo;
+            this.tecTypeId = this.TecTypeID;
+            this.getPartsDetail();
+        },
         methods:{
+            InitData(data){
+                this.partsInfo = data.PartsInfo;
+                this.tecTypeId = data.TecTypeId;
+                this.getPartsDetail();
+            },
+            getPartsDetail(){
+                this.partsDetail = [];
+                this.artInfo = this.partsInfo.brandName + " / " + this.partsInfo.articleNo;
+                let params = {
+                    "getAssignedArticlesByIds6": {
+                        "articleCountry": "kr",
+                        "articleIdPairs": {
+                        "array": [
+                                {
+                                "articleId": this.partsInfo.articleId,
+                                "articleLinkId": this.partsInfo.articleLinkId
+                                }
+                            ]
+                        },
+                        "attributs": true,
+                        "basicData": true,
+                        "documents": true,
+                        "eanNumbers": true,
+                        "immediateAttributs": false,
+                        "immediateInfo": true,
+                        "info": true,
+                        "lang": "en",
+                        "linkingTargetId": this.tecTypeId,
+                        "linkingTargetType": "P",
+                        "mainArticles": true,
+                        "manuId": 0,
+                        "modId": 0,
+                        "normalAustauschPrice": true,
+                        "oeNumbers": true,
+                        "provider": tecProvider,
+                        "replacedByNumbers": true,
+                        "replacedNumbers": true,
+                        "thumbnails": false,
+                        "usageNumbers": true
+                    }
+                };
+                
+                // Send HTTP request
+                let xmlHttp = new XMLHttpRequest();
+				xmlHttp.open( 'POST', tecdocUrl, false );
+				xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
+                xmlHttp.setRequestHeader( 'Accept', 'application/json' );
+                xmlHttp.setRequestHeader( 'x-api-key', tecApiKey);
+				xmlHttp.send( JSON.stringify( params ) );
+				// Handle HTTP response
+				if(xmlHttp.status == 200) {
+                    this.partsDetail = JSON.parse(xmlHttp.responseText).data.array[0];
+                    //console.log('result :',this.partsDetail);
+				}
+            },
             showTitle(value,text)
             {
                 if(value !== ''){
