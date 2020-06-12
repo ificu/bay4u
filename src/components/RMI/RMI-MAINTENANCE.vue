@@ -483,7 +483,7 @@
                             return [item.genericArticleId];
                         });
                     }
-                    console.log('parts : ',  this.parts);
+                    //console.log('parts : ',  this.parts);
 				}
             },
             showPartsImage(value){
