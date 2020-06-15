@@ -91,10 +91,10 @@
                             >
                             <v-expansion-panel  v-for="(item, index) in parts"
                                     :key="index">
-                                <v-expansion-panel-header>{{ item[0].genericArticleName }}</v-expansion-panel-header>
+                                <v-expansion-panel-header>{{ item.genericArticleName }}</v-expansion-panel-header>
                                 <v-expansion-panel-content>
                                     <ul>
-                                        <li  v-for="(part, i) in item"
+                                        <li  v-for="(part, i) in item.array"
                                             :key="i">
                                             <div class="brand-name">{{ part.brandName }}</div>
                                             <div class="item-code">{{ part.articleNo }}</div>
@@ -479,11 +479,34 @@
                     console.log('result2 :', JSON.parse(xmlHttp.responseText));
                     var result = JSON.parse(xmlHttp.responseText);
                     if(result.data !== ""){
-                        this.parts = arrayGroupBy(result.data.array, function(item){
+                        var genArtGroupList = arrayGroupBy(result.data.array, function(item){
                             return [item.genericArticleId];
-                        });
-                    }
-                    //console.log('parts : ',  this.parts);
+						});
+						
+						this.parts = genArtGroupList.map(function(item){
+							var obj = {};
+							obj.genericArticleId = item[0].genericArticleId
+							obj.genericArticleName = item[0].genericArticleName
+							obj.array =  arrayGroupBy(item, function(subItem){
+								return [subItem.brandNo , subItem.articleNo];
+							}).map(function(artItem){
+									var obj2 = {};
+									obj2.articleNo = artItem[0].articleNo;
+									obj2.brandName = artItem[0].brandName;
+									obj2.brandNo = artItem[0].brandNo;
+									obj2.array = artItem.map(function(subArtItem){
+										var obj3 = {};
+										obj3.articleId = subArtItem.articleId;
+										obj3.articleLinkId = subArtItem.articleLinkId;
+										return obj3;
+									});
+									return obj2;
+								});
+							return obj;
+						});
+
+                        console.log('partsList :', this.parts);
+					}
 				}
             },
             showPartsImage(value){

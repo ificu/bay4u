@@ -18,6 +18,26 @@
                 <span class="attr-name">{{item.articleName}}</span>
                 <span class="attr-text">{{item.articleNo}}</span>
             </div>
+            <div class="assigned-art" v-else-if="index ==='articleDocuments' && item !==''">
+                <v-row>
+                    <v-col cols="12"  class="pa-0">
+                         <ul v-for="(item2, index2) in item.array.filter(x=>x.docFileTypeName==='URL')" :key="index2">
+                            <a :href="item2.docUrl" target="_blank">{{item2.docTypeName}}</a>
+                         </ul>
+                    </v-col>
+                </v-row>
+                <v-row>
+                    <v-col cols="12" class="pa-0">
+                        <v-carousel hide-delimiters>
+                            <v-carousel-item
+                                v-for="(item2,i) in item.array.filter(x=>x.docTypeId === 3 || x.docTypeId === 1 || x.docTypeId === 5)"
+                                :key="i"
+                                :src="getImage(item2.docId)"
+                            ></v-carousel-item>
+                        </v-carousel>
+                    </v-col>
+                </v-row>
+            </div>
             <div v-else>
                 <ul v-for="(item2, index2) in item.array" :key="index2">                        
                     <li v-if="index === 'articleAttributes'">
@@ -26,12 +46,16 @@
                             <div class="attr-text">{{item2.attrValue}} {{item2.attrUnit}}</div>                                
                         </div>                            
                     </li>
-                    <li v-else-if="index === 'articleDocuments' && item2.docFileTypeName ==='URL'">
+                    <!--<li v-else-if="index === 'articleDocuments' && item2.docFileTypeName ==='URL'">
                         <div class="attr-text" v-if="item2.docFileTypeName ==='URL'" >
                             <a :href="item2.docUrl" target="_blank">{{item2.docTypeName}}</a>
                         </div>
-                        <!--<div class="attr-text" v-else>{{item2.docFileName}}</div>-->
                     </li>
+                    <li v-else-if="index === 'articleDocuments' && item2.docTypeName ==='Picture'">
+                        <div class="attr-text" >
+                            <v-img class="grey lighten-3 mr-4 ml-4"  v-bind:src="getImage(item2.docId)" max-width="300px"></v-img>
+                        </div>
+                    </li>-->
                     <li v-else-if="index === 'articleInfo'">
                         <div style="display:flex;">
                             <!--<div class="attr-name" >{{item2.infoTypeName}}</div>-->
@@ -94,6 +118,8 @@
     const tecApiKey = '2BeBXg6CxtgP7fnQvXr45SzqpEVDcDTGSJd1viDM6VHGJ7bxjDy5';
     const tecProvider = 22261;
 
+    const imgUrl = "https://webservice.tecalliance.services/pegasus-3-0/documents/"
+
     export default {
         name: 'TEC-PARTSINFO',
         data(){
@@ -102,6 +128,7 @@
                 tecTypeId : '',
                 partsDetail: [],
                 artInfo: '',
+                itemImage:''
             }
         },
         props:['PartsInfo', 'TecTypeID'],
@@ -111,7 +138,7 @@
             });	
         },
         mounted(){
-            console.log(this.partsInfo);
+            console.log('partsInfo:' , this.PartsInfo);
             this.partsInfo = this.PartsInfo;
             this.tecTypeId = this.TecTypeID;
             this.getPartsDetail();
@@ -123,18 +150,15 @@
                 this.getPartsDetail();
             },
             getPartsDetail(){
+
+                console.log('this.partsInfo.array :', this.partsInfo.array);
                 this.partsDetail = [];
                 this.artInfo = this.partsInfo.brandName + " / " + this.partsInfo.articleNo;
                 let params = {
                     "getAssignedArticlesByIds6": {
                         "articleCountry": "kr",
                         "articleIdPairs": {
-                        "array": [
-                                {
-                                "articleId": this.partsInfo.articleId,
-                                "articleLinkId": this.partsInfo.articleLinkId
-                                }
-                            ]
+                        "array":   this.partsInfo.array
                         },
                         "attributs": true,
                         "basicData": true,
@@ -169,7 +193,7 @@
 				// Handle HTTP response
 				if(xmlHttp.status == 200) {
                     this.partsDetail = JSON.parse(xmlHttp.responseText).data.array[0];
-                    //console.log('result :',this.partsDetail);
+                    console.log('result :',this.partsDetail);
 				}
             },
             showTitle(value,text)
@@ -177,7 +201,9 @@
                 if(value !== ''){
                     if(text === 'articleDocuments'){
                         var urlCount =  value.array.filter(x => x.docFileTypeName ==='URL').length;
-                        if(urlCount > 0){
+                        var pictureCount =  value.array.filter(x => x.docTypeId === 5).length;
+                      
+                        if(urlCount + pictureCount > 0){
                             return true;
                         }
                         else{
@@ -212,6 +238,20 @@
                 else{
                     return '';
                 }
+            },
+            getImage(data)
+            {
+                let xmlHttp = new XMLHttpRequest();
+				xmlHttp.open( 'GET', imgUrl+tecProvider+"/"+data+"/0", false );
+				xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
+                xmlHttp.setRequestHeader( 'Accept', 'application/json' );
+                xmlHttp.setRequestHeader( 'x-api-key', tecApiKey);
+                //xmlHttp.responseType = "arraybuffer";
+				xmlHttp.send( null );
+				// Handle HTTP response
+				if(xmlHttp.status == 200) {
+                    return xmlHttp.responseURL;
+				}
             }
         }
     }

@@ -89,8 +89,10 @@
                         this.imgUrl = result.images[0].imageURL800;
                     }
                     else{
-                        alert('상세 이미지가 없습니다.');
-                        this.$emit('close');
+                        this.$nextTick(function(){    
+                            alert('상세 이미지가 없습니다.');
+                            this.$emit('close');
+                        });
                     }
 				}
             },
