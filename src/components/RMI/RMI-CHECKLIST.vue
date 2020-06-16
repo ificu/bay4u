@@ -3,7 +3,7 @@
         <v-card-title
             class="headline grey lighten-2"
         >
-            <span>Check List</span><span style="font-size:0.75em;margin-left:5px"></span>
+            <span>Maintenance Plan</span><span style="font-size:0.75em;margin-left:5px"></span>
         </v-card-title>           
         <v-card-title class="pt-4 font-weight-black" v-html="htmlContents" >    
         </v-card-title>
@@ -24,7 +24,7 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script>
 
-const sosUrl = "https://rmi-services.tecalliance.net/rest/Bulletins";
+const url = "https://rmi-services.tecalliance.net/rest/Maintenance";
 
 export default {
     name: 'RMI-CHECKLIST',
@@ -32,11 +32,13 @@ export default {
         return{
             rmiAuthKey: '',
             htmlContents:'',
-            manualId: '',
-            typeId: ''	
+            workId: '',
+            typeId: '',
+            qualColId : '',
+            target : ''	
         }   
     },
-    props:['RmiAuthKey','TypeID', 'ManualID'],
+    props:['RmiAuthKey','TypeID', 'WorkId', 'QualColId','Target'],
     created(){
 
         this.$EventBus.$on('RMI-CHECKLIST.InitData', data => {
@@ -46,45 +48,54 @@ export default {
     mounted(){
         this.rmiAuthKey = this.RmiAuthKey;
         this.typeId = this.TypeID;
-        this.manualId = this.ManualID;
+        this.workId = this.WorkId;
+        this.qualColId = this.QualColId;
+        this.target = this.Target;
         this.getCheckList();
     },
     methods: {
         InitData(data){
             this.rmiAuthKey = data.RmiAuthKey;
             this.typeId = data.TypeID;
-            this.manualId = data.ManualID;
+            this.workId = data.WorkId;
+            this.qualColId = data.QualColId;
+            this.target = data.Target;
             this.getCheckList();
         },
         getCheckList()
         {
             console.log('CheckData....');
             console.log('typeId :', this.typeId);
-            console.log('manualId :', this.manualId);
-            let languageCode = 'en',
-                countryCode = 'kr',
-                kindOfWorkTime = 1,
-                printView = true,
-                linkUrl = '.',
-                manualId = this.ManualID,
-                typeId = this.TypeID;		
-                
-            // Build url query string
-            let query = '?languageCode=' + languageCode
-                + '&countryCode=' + countryCode
-                + '&typeId=' + typeId	
-                + '&manualId=' + manualId	
-                + '&printView=' + printView
-                + '&kindOfWorkTime=' + kindOfWorkTime	
-                + '&linkUrl=' + linkUrl	
+            console.log('workId :', this.workId);
+            console.log('target :', this.target);
+
+            let params = {};
+            
+            if(this.target == "Main"){
+                params.ServiceWorkIds = [this.workId];
+            }
+            else{
+                params.ServiceWorkIds = [0];
+                params.AdditionalWorkIds = [this.workId];
+            }
+            
+            params.BodyQualColId = this.qualColId ;
+            params.PrintView = true;
+            params.ShowTyreTable = false;
+            params.CountryCode = "kr";
+            params.LanguageCode = "en";
+            params.TypeId = this.TypeID;
+            params.LinkUrl = ".";
+
+            console.log('check params :', params);
             
             // Send HTTP request
             let xmlHttp = new XMLHttpRequest();
-            xmlHttp.open( 'GET', sosUrl + '/ManualHtml' + query, false );
+            xmlHttp.open( 'POST', url + '/MaintenancePlanHtml', false );
             xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
             xmlHttp.setRequestHeader( 'Accept', 'application/json' );
             xmlHttp.setRequestHeader( 'Authorization', this.RmiAuthKey );
-            xmlHttp.send( null );
+            xmlHttp.send( JSON.stringify( params ) );
             // Handle HTTP response
             if(xmlHttp.status == 200) {
                 //console.log(xmlHttp.responseText);
