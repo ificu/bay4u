@@ -35,7 +35,14 @@
                             selected-color="red"
                             v-model="mainJobs"
                             @input="getParts"
-                        ></v-treeview>
+                        >
+                        <template slot="label" slot-scope="{ item }">
+                            {{ item.name }} 
+                            <v-btn icon x-small class="ml-2" v-if="item.children !== undefined" @click="showCheckList(item)">
+                                <v-icon>mdi-wrench</v-icon>
+                            </v-btn>
+                        </template>
+                        </v-treeview>
                     </v-card>
                     <v-card
                         class="pa-2"
@@ -54,7 +61,14 @@
                             selected-color="red"
                             v-model="addJobs"
                             @input="getParts"
-                        ></v-treeview>
+                        >
+                        <template slot="label" slot-scope="{ item }">
+                            {{ item.name }} 
+                            <v-btn icon x-small class="ml-2" v-if="item.children !== undefined"  @click="showCheckList(item)">
+                                <v-icon>mdi-wrench</v-icon>
+                            </v-btn>
+                        </template>
+                        </v-treeview>
                     </v-card>
                 </v-col  >
                 <!--<v-divider light></v-divider>-->
@@ -77,20 +91,20 @@
                             >
                             <v-expansion-panel  v-for="(item, index) in parts"
                                     :key="index">
-                                <v-expansion-panel-header>{{ item[0].genericArticleName }}</v-expansion-panel-header>
+                                <v-expansion-panel-header>{{ item.genericArticleName }}</v-expansion-panel-header>
                                 <v-expansion-panel-content>
                                     <ul>
-                                        <li  v-for="(part, i) in item"
+                                        <li  v-for="(part, i) in item.array"
                                             :key="i">
                                             <div class="brand-name">{{ part.brandName }}</div>
                                             <div class="item-code">{{ part.articleNo }}</div>
                                             <div class="item-detail">
-                                                <v-btn icon x-small @click="getPartsImage(part)">
+                                                <v-btn icon x-small @click="showPartsImage(part)">
                                                     <v-icon>far fa-image</v-icon>
                                                 </v-btn>
                                             </div>
                                             <div class="item-detail">
-                                                <v-btn icon x-small @click="getPartsDetail(part)">
+                                                <v-btn icon x-small @click="showPartsDetail(part)">
                                                     <v-icon>fas fa-info-circle</v-icon>
                                                 </v-btn>
                                             </div>
@@ -106,50 +120,28 @@
         </v-container>
         <BackToTop></BackToTop>
         <!--부품이미지-->
-        <v-dialog v-model="imgDialog"  width="600px">
-            <v-card light>
-                <v-card-title class="headline grey lighten-2">
-                    <span style="font-size:0.8em">{{pickArtInfo}}</span>
-                </v-card-title>           
-                <v-card-text class="mt-2">
-                    <img :src="imgUrl" class="parts-image">
-                </v-card-text>
-                <v-divider></v-divider>
-                <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn
-                    color="primary"
-                    text
-                    @click="imgDialog = false"
-                    >
-                    close
-                    </v-btn>
-                </v-card-actions>
-            </v-card>
+        <v-dialog v-model="imgDialog"  width="650px">
+            <PartsImage 
+			:PartsInfo="partsInfo"
+			:TecTypeID="carTcdTypeId"
+			@close="imgDialog=false"
+			></PartsImage>
         </v-dialog>
         <!--부품상세 정보-->
-        <v-dialog v-model="dialog"  width="600px">            
-           <v-card light>
-                <v-card-title
-                    class="headline grey lighten-2"
-                >
-                <span>Article information</span><span style="font-size:0.75em;margin-left:5px"> - {{pickArtInfo}}</span>
-                </v-card-title>           
-                <v-card-text class="mt-2">
-                    <PartsInfo :ParsInfoData="partsDetail"></PartsInfo>                
-                </v-card-text>
-                <v-divider></v-divider>
-                <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn
-                        color="primary"
-                        text
-                        @click="dialog = false"
-                    >
-                    close
-                    </v-btn>
-                </v-card-actions>
-            </v-card>
+        <v-dialog v-model="dialog"  width="600px">     
+            <PartsInfo :PartsInfo="partsInfo"
+			:TecTypeID="carTcdTypeId"
+			@close="dialog=false">
+            </PartsInfo>               
+        </v-dialog>
+        <!-- 체크리스트-->
+        <v-dialog v-model="checkDialog"  width="750px">
+            <CheckList 
+                :RmiAuthKey="rmiAuthKey" 
+                :TypeID="carTypeId"
+                :ManualID="manualId"
+                @close="checkDialog=false"
+            ></CheckList>      
         </v-dialog>
     </v-content>
 </template>
@@ -158,8 +150,10 @@
 <script>
     import {arrayGroupBy} from '@/utils/common.js'
     import BackToTop from '@/components/Common/BackToTop.vue'
+    import CheckList from '@/components/RMI/RMI-CHECKLIST.vue'
     import PartsInfo from '@/components/RMI/TEC-PARTSINFO.vue'
-
+    import PartsImage from '@/components/RMI/TEC-PARTSIMG.vue'
+    
     const url = "https://rmi-services.tecalliance.net/rest/Maintenance";
     const basketUrl = "https://rmi-services.tecalliance.net/rest/Prices";
     const tecdocUrl = "https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLB.jsonEndpoint?js";
@@ -180,22 +174,27 @@
                 addJobs: [],
                 genArtNoList: [],
                 parts: [],
-                partsDetail: [],
-                imgDialog: false,
-                imgUrl: '',
                 dialog: false,
-                pickArtInfo: '',
+                checkDialog: false,
+                manualId:'',
+                partsInfo: {},
+				imgDialog: false,
 			}
 		},
 		components: {
             BackToTop,
-            PartsInfo
+            CheckList,
+            PartsInfo,
+            PartsImage
 		},
 		created () {
 			this.$EventBus.$on('RMI-MAINTENANCE.InitData', param => {  
                 this.rmiAuthKey = param.rmiAuthKey;
 				this.carTypeId = param.carTypeId; 
-				this.carTcdTypeId = param.carTcdTypeId; 
+                this.carTcdTypeId = param.carTcdTypeId; 
+                
+                if(this.carTypeId === '' && this.carTcdTypeId === '')return;
+                
                 this.initAuthKey();
                 this.initBodiesForMaintenance();
                 this.setWorks();
@@ -266,7 +265,6 @@
 				} 
             },
 			setWorks() {
-
                 this.itemMainLists = [];
                 this.itemAddLists = [];
 
@@ -295,7 +293,7 @@
 				xmlHttp.send( null );
 				// Handle HTTP response
 				if(xmlHttp.status == 200) {
-                    //console.log('리턴 : ', JSON.parse(xmlHttp.responseText));
+                    console.log('리턴 : ', JSON.parse(xmlHttp.responseText));
                     
                     var result = JSON.parse(xmlHttp.responseText);
                     var serviceList = result.Services;
@@ -305,16 +303,18 @@
                     console.log('additionalWorksList : ', additionalWorksList);
 
                     this.$nextTick(function(){
+                        
+                        // Main Service Jobs
                         this.itemMainLists = serviceList.map(function(obj){
                             var mainObj = {};
                             mainObj.id = obj.ItemMpId;
                             mainObj.name = obj.ItemMpText;
-                            mainObj.children = obj.WorkSteps.map( s => ({id:s.WorkId , name:s.WorkText}) );;
+                            mainObj.children = obj.WorkSteps.map( s => ({id:s.WorkId , name:s.WorkText.replace(",", ".")}) );;
                             return mainObj;
                         });
-
                         var mainGenArtNo = this.getItemMpId(this.itemMainLists,'MAIN');
 
+                        // Additional Service Jobs
                         this.itemAddLists = additionalWorksList.map(function(obj){
                             var mainObj = {};
                             mainObj.id = obj.ItemMpId;
@@ -324,10 +324,9 @@
                             else 
                             mainObj.name = obj.ItemMpText;
 
-                            mainObj.children = obj.WorkSteps.map( s => ({id:s.WorkId , name:s.WorkText}) );;
+                            mainObj.children = obj.WorkSteps.map( s => ({id:s.WorkId , name:s.WorkText.replace(",", ".")}) );;
                             return mainObj;
                         });
-
                         var subGenArtNo = this.getItemMpId(this.itemAddLists,'SUB');
 
                         this.genArtNoList = mainGenArtNo.concat(subGenArtNo);
@@ -373,7 +372,9 @@
                     LanguageCode: "en",
                     TypeId: this.carTypeId,
                     ShowPaint: false
-				};
+                };
+                
+                console.log('params : ', params);
                 
                 // Send HTTP request
                 var xmlHttp = new XMLHttpRequest();
@@ -478,105 +479,65 @@
                     console.log('result2 :', JSON.parse(xmlHttp.responseText));
                     var result = JSON.parse(xmlHttp.responseText);
                     if(result.data !== ""){
-                        this.parts = arrayGroupBy(result.data.array, function(item){
+                        var genArtGroupList = arrayGroupBy(result.data.array, function(item){
                             return [item.genericArticleId];
-                        });
-                    }
-                    console.log('parts : ',  this.parts);
+						});
+						
+						this.parts = genArtGroupList.map(function(item){
+							var obj = {};
+							obj.genericArticleId = item[0].genericArticleId
+							obj.genericArticleName = item[0].genericArticleName
+							obj.array =  arrayGroupBy(item, function(subItem){
+								return [subItem.brandNo , subItem.articleNo];
+							}).map(function(artItem){
+									var obj2 = {};
+									obj2.articleNo = artItem[0].articleNo;
+									obj2.brandName = artItem[0].brandName;
+									obj2.brandNo = artItem[0].brandNo;
+									obj2.array = artItem.map(function(subArtItem){
+										var obj3 = {};
+										obj3.articleId = subArtItem.articleId;
+										obj3.articleLinkId = subArtItem.articleLinkId;
+										return obj3;
+									});
+									return obj2;
+								});
+							return obj;
+						});
+
+                        console.log('partsList :', this.parts);
+					}
 				}
             },
-            getPartsImage(value){
-                console.log('img:', value);
-                this.imgUrl = '';
-                this.pickArtInfo = value.brandName + " / " + value.articleNo;
-                let params = {
-                    "getArticles": {
-                        "articleCountry": "kr",
-                        "provider": tecProvider,
-                        "dataSupplierIds": value.brandNo,
-                        "genericArticleIds": value.genericArticleId,
-                        "linkageTargetId": this.carTcdTypeId,
-                        "linkageTargetType": "P",
-                        "lang": "en",
-                        "includeImages": true
-                    }
-                };
+            showPartsImage(value){
+                var partsData = {};
+				partsData.PartsInfo = value;
+				partsData.TecTypeId = this.carTcdTypeId;
 
-                console.log('params :' ,params);
-                // Send HTTP request
-                let xmlHttp = new XMLHttpRequest();
-				xmlHttp.open( 'POST', tecdocUrl, false );
-				xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
-                xmlHttp.setRequestHeader( 'Accept', 'application/json' );
-                xmlHttp.setRequestHeader( 'x-api-key', tecApiKey);
-				xmlHttp.send( JSON.stringify( params ) );
-
-				// Handle HTTP response
-				if(xmlHttp.status == 200) {
-                    console.log('image :',JSON.parse(xmlHttp.responseText));
-                    var result = JSON.parse(xmlHttp.responseText).articles[0];
-                    if(result.images.length > 0){
-                        this.imgDialog = true;
-                        this.imgUrl = result.images[0].imageURL800;
-                    }
-                    else{
-                        alert('상세 이미지가 없습니다.')
-                    }
-				}
+				this.partsInfo = value;
+                this.$EventBus.$emit('RMI-PARTSIMG.InitData',partsData);
+                this.imgDialog = true;
             },
-            getPartsDetail(value){
-                this.partsDetail = [];
-                this.pickArtInfo = value.brandName + " / " + value.articleNo;
-                let params = {
-                    "getAssignedArticlesByIds6": {
-                        "articleCountry": "kr",
-                        "articleIdPairs": {
-                        "array": [
-                            {
-                            "articleId": value.articleId,
-                            "articleLinkId": value.articleLinkId
-                            }
-                        ]
-                        },
-                        "attributs": true,
-                        "basicData": true,
-                        "documents": true,
-                        "eanNumbers": true,
-                        "immediateAttributs": true,
-                        "immediateInfo": true,
-                        "info": true,
-                        "lang": "en",
-                        "linkingTargetId": this.carTcdTypeId,
-                        "linkingTargetType": "P",
-                        "mainArticles": true,
-                        "manuId": 0,
-                        "modId": 0,
-                        "normalAustauschPrice": true,
-                        "oeNumbers": true,
-                        "provider": tecProvider,
-                        "replacedByNumbers": true,
-                        "replacedNumbers": true,
-                        "thumbnails": true,
-                        "usageNumbers": true
-                    }
-                };
+            showPartsDetail(value){
+                var partsData = {};
+				partsData.PartsInfo = value;
+				partsData.TecTypeId = this.carTcdTypeId;
 
-                console.log('params :' ,params);
-                // Send HTTP request
-                let xmlHttp = new XMLHttpRequest();
-				xmlHttp.open( 'POST', tecdocUrl, false );
-				xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
-                xmlHttp.setRequestHeader( 'Accept', 'application/json' );
-                xmlHttp.setRequestHeader( 'x-api-key', tecApiKey);
-				xmlHttp.send( JSON.stringify( params ) );
+				this.partsInfo = value;
+                this.$EventBus.$emit('RMI-PARTSINFO.InitData',partsData);
+                this.dialog = true;
+            },
+            showCheckList(value)
+            {
+                var checkData = {};
+                checkData.RmiAuthKey = this.rmiAuthKey;
+                checkData.TypeID = this.carTypeId;
+                checkData.ManualID = value.id;
 
-				// Handle HTTP response
-				if(xmlHttp.status == 200) {
-                    this.dialog = true;
-                    this.partsDetail = JSON.parse(xmlHttp.responseText).data.array[0];
-                    console.log('result :',this.partsDetail);
-				}
-            },            
+                this.manualId = value.id;
+                this.$EventBus.$emit('RMI-CHECKLIST.InitData',checkData);
+                this.checkDialog = true;
+            }        
 		},   		
 	}
 </script>
@@ -607,7 +568,7 @@
 }
 .contents  li {
     display: flex;
-    align-items:center;
+  /*  align-items:center;*/
     margin-bottom: 8px;
 }
 .contents .brand-name{

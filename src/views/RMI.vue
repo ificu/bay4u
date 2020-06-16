@@ -54,8 +54,7 @@
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <v-row
-        align="right"
-        style="min-width: 900px; max-width:800px;"
+        style="min-width:900px; max-width:1000px;"
       >
         <v-autocomplete
             class="pt-8 pr-4"
@@ -92,7 +91,7 @@
             label="차량 타입"
             small-chips
             clearable
-            style="max-width: 350px; font-size:10px;"
+            style="max-width: 480px; font-size:10px;"
             @change="changeTypeName"
             >
         </v-autocomplete>         
@@ -194,8 +193,8 @@
           this.$nextTick(function(){
             var param = {
               rmiAuthKey: this.rmiAuthKey,
-              carTypeId: JSON.parse(this.carTypeId).TypeId,
-              carTcdTypeId: JSON.parse(this.carTypeId).TcdTypeId
+              carTypeId: (this.carTypeId!=='')?JSON.parse(this.carTypeId).TypeId:'',
+              carTcdTypeId: (this.carTypeId!=='')?JSON.parse(this.carTypeId).TcdTypeId:''
             }          
             console.log('InitData param : ', param);
             this.$EventBus.$emit('RMI-'+page+'.InitData', param);  
@@ -370,7 +369,7 @@
                   else
                     this.carTypeLists = result.data;
 
-                  // 차량 상세 정보를 추가로 넣어 줌. (엔진코드, 연식 등)
+                  // 차량 상세 정보를 추가로 넣어 줌. (엔진코드, 연식, 마력 등)
                   this.carTypeLists = this.carTypeLists.map(obj=>{
                     var carTypeItem = {};
                     var carTypeId = {"TypeId" : obj.TypeId, "TcdTypeId" : obj.TcdTypeId};
@@ -398,8 +397,12 @@
 
                       engineCode += ' ) ';
                     }
+
+                    // 미터마력(ps) = 키로와트(kw) * 1.36
+                    var kw =  obj.TypeDetails.filter(x => x.AddInfoKeyId === 5)[0].AddInfoKeyValue;
+                    var ps = Math.round(kw * 1.36);
                     
-                    carTypeItem.TypeName = obj.TypeName +  engineCode  + ' [ ' + beginDate + '~' + endDate + ' ]';
+                    carTypeItem.TypeName = obj.TypeName +  engineCode  + ' [ ' + beginDate + '~' + endDate + ' ] '+ ps +' hp';
                     
                     return carTypeItem;
 
