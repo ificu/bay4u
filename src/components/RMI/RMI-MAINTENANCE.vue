@@ -38,7 +38,7 @@
                         >
                         <template slot="label" slot-scope="{ item }">
                             {{ item.name }} 
-                            <v-btn icon x-small class="ml-2" v-if="item.children !== undefined" @click="showCheckList(item)">
+                            <v-btn icon x-small class="ml-2" v-if="item.children === undefined" @click="showCheckList(item, 'Main')">
                                 <v-icon>mdi-wrench</v-icon>
                             </v-btn>
                         </template>
@@ -64,7 +64,7 @@
                         >
                         <template slot="label" slot-scope="{ item }">
                             {{ item.name }} 
-                            <v-btn icon x-small class="ml-2" v-if="item.children !== undefined"  @click="showCheckList(item)">
+                            <v-btn icon x-small class="ml-2" v-if="item.children === undefined"  @click="showCheckList(item, 'Additional')">
                                 <v-icon>mdi-wrench</v-icon>
                             </v-btn>
                         </template>
@@ -135,11 +135,13 @@
             </PartsInfo>               
         </v-dialog>
         <!-- 체크리스트-->
-        <v-dialog v-model="checkDialog"  width="750px">
+        <v-dialog v-model="checkDialog"  width="1000px">
             <CheckList 
                 :RmiAuthKey="rmiAuthKey" 
                 :TypeID="carTypeId"
-                :ManualID="manualId"
+                :WorkId="workId"
+                :QualColId="qualColId"
+                :Target="checkTarget"
                 @close="checkDialog=false"
             ></CheckList>      
         </v-dialog>
@@ -176,7 +178,8 @@
                 parts: [],
                 dialog: false,
                 checkDialog: false,
-                manualId:'',
+                checkTarget:'',
+                workId:'',
                 partsInfo: {},
 				imgDialog: false,
 			}
@@ -255,7 +258,7 @@
                         var result = JSON.parse(xmlHttp.responseText);
                         if(result.length > 0){
                             this.qualColId = result[0].QualColId;
-                            console.log('initBodiesForMaintenance 리턴 : ', this.qualColId);
+                            console.log('qualColId', this.qualColId);
                         }
                         else{
                             this.itemMainLists = [];
@@ -293,7 +296,7 @@
 				xmlHttp.send( null );
 				// Handle HTTP response
 				if(xmlHttp.status == 200) {
-                    console.log('리턴 : ', JSON.parse(xmlHttp.responseText));
+                    console.log('Works : ', JSON.parse(xmlHttp.responseText));
                     
                     var result = JSON.parse(xmlHttp.responseText);
                     var serviceList = result.Services;
@@ -527,14 +530,17 @@
                 this.$EventBus.$emit('RMI-PARTSINFO.InitData',partsData);
                 this.dialog = true;
             },
-            showCheckList(value)
-            {
+            showCheckList(value , target)
+            {   
                 var checkData = {};
                 checkData.RmiAuthKey = this.rmiAuthKey;
+                checkData.QualColId = this.qualColId;
                 checkData.TypeID = this.carTypeId;
-                checkData.ManualID = value.id;
+                checkData.WorkId = value.id;
+                checkData.Target = target;
 
-                this.manualId = value.id;
+                this.workId = value.id;
+                this.checkTarget = target;
                 this.$EventBus.$emit('RMI-CHECKLIST.InitData',checkData);
                 this.checkDialog = true;
             }        

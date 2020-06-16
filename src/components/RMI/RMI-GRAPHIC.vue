@@ -80,6 +80,7 @@
                     sm="12"
                 >
 					<v-card>
+						<v-card-title class="pa-2 ml-2">{{tabTitle}}</v-card-title>
 						<v-tabs
 							v-model="tab"
 							id = "RMITabsContents"
@@ -303,6 +304,7 @@
 				carTypeId: '',	
 				carTcdTypeId: '',
 				tab: null,
+				tabTitle : '',
 				manualItemMpList: [],
 				manualItemMpId: '',
 				manualList: [],
@@ -355,6 +357,7 @@
 			},
 			clearTabPage()
 			{
+				this.tabTitle = '';
 				this.manualItemMpList = [];
 				this.manualItemMpId = '';
 				this.manualList = [];
@@ -557,14 +560,24 @@
 													.replace(regexHref, substHref)
 													.replace('x + \'px\';', '(x - 250) + \'px\';')
 													.replace('y + \'px\';', '(y - 200) + \'px\';');
-					//console.log(page);
+					//console.log('page :', page);
 					$("#RMISubgroupContents").html(JSON.parse(page));
 				}									
 			},
 			selectDelegate(){
-
+				
 				console.log('selectDelegate............. : ', document.getElementById('btnFuncDelegate').value);
-				this.itemMpId =  document.getElementById('btnFuncDelegate').value.substring(1);
+				var id = document.getElementById('btnFuncDelegate').value;
+				this.itemMpId =  id.substring(1);
+
+				var toolTipElement = '' + document.getElementById(id).onmouseover;
+				var startIndex = toolTipElement.indexOf('showToolTip');
+				var strToolTip = toolTipElement.substring(startIndex);
+				var endIndex = strToolTip.indexOf(';');
+				this.tabTitle = strToolTip.substring(0,endIndex)
+										.replace("showToolTip('","")
+										.replace("', evt)","");
+				
 				// 1. 정비 메뉴얼
 				this.getManualData();
 				// 2. 정비 참고 데이터
@@ -870,7 +883,7 @@
 					//console.log(xmlHttp.responseText);
 					var result = JSON.parse(xmlHttp.responseText);
 					var itemMpIds = result.map(x=>x.ItemMpId);
-					console.log('parts :', itemMpIds);
+					console.log('itemMpIds :', itemMpIds);
 					this.getGenArtNo(itemMpIds);
 				}
 			},
