@@ -222,11 +222,11 @@
 															<li  v-for="(part, i) in item.array" :key="i">
 																<div class="brand-name">{{ part.brandName }}</div>
 																<div class="item-code">{{ part.articleNo }}</div>
-																<div class="item-detail">
+																<!--<div class="item-detail">
 																	<v-btn icon x-small @click="showPartsImage(part)">
 																		<v-icon>far fa-image</v-icon>
 																	</v-btn>
-																</div>
+																</div>-->
 																<div class="item-detail">
 																	<v-btn icon x-small @click="showPartsDetail(part)">
 																		<v-icon>fas fa-info-circle</v-icon>
