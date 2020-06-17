@@ -116,94 +116,16 @@
 		name: 'RMI-CATEGORY',
 		data(){
 			return{
+				rmiAuthKey: '',	
 				carTcdTypeId: '',
 				colorList: ['red', 'pink', 'purple', 'indigo', 'blue', 'cyan', 'teal', 'green', 'orange', 'deep-orange', 'brown', 'blue-grey', 
 							'red accent-4', 'pink accent-4', 'purple accent-4', 'indigo accent-4', 'blue accent-4', 'cyan accent-4', 'teal accent-4', 'green accent-4', 'orange accent-4', 'deep-orange accent-4', 'brown accent-4', 'blue-grey accent-4'],
 				categoryLists: [],
-				/*categoryLists: [
-					{
-						"shortCutId": 2,
-						"shortCutName": "Body"
-					},
-					{
-						"shortCutId": 3,
-						"shortCutName": "Engine"
-					},
-					{
-						"shortCutId": 4,
-						"shortCutName": "Drive Train"
-					},
-					{
-						"shortCutId": 5,
-						"shortCutName": "Filter"
-					},
-					{
-						"shortCutId": 6,
-						"shortCutName": "Windows/Window Cleaning"
-					},
-					{
-						"shortCutId": 7,
-						"shortCutName": "Fuel Mixture Formation"
-					},
-					{
-						"shortCutId": 8,
-						"shortCutName": "Suspension"
-					},
-					{
-						"shortCutId": 9,
-						"shortCutName": "Brakes"
-					},
-					{
-						"shortCutId": 10,
-						"shortCutName": "Exhaust System"
-					},
-					{
-						"shortCutId": 11,
-						"shortCutName": "Cooling/Air Conditioning"
-					},
-					{
-						"shortCutId": 12,
-						"shortCutName": "Steering"
-					},
-					{
-						"shortCutId": 13,
-						"shortCutName": "Interior Equipment"
-					},
-					{
-						"shortCutId": 14,
-						"shortCutName": "Lights"
-					},
-					{
-						"shortCutId": 15,
-						"shortCutName": "Electrics"
-					},
-					{
-						"shortCutId": 16,
-						"shortCutName": "Spark/Glow Ignition"
-					},
-					{
-						"shortCutId": 17,
-						"shortCutName": "Accessories"
-					},
-					{
-						"shortCutId": 18,
-						"shortCutName": "Service"
-					}
-				],*/
 				assemblyGroupList:[],
 				assemblyGroupId:[],
 				partsList:[],
 				partsInfo: {},
 				dialog: false,
-
-				mainGroupLists: [],
-				subGroupLists: [],
-				itemMpLists: [],
-				mainGroupId: '',
-				subGroupId: '',
-				itemMpId: '',
-				rmiAuthKey: '',	
-				carTypeId: '',			
 			}
 		},
 		components: {
