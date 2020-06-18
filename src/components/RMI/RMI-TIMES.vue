@@ -3,47 +3,67 @@
         <v-container>
             <v-row>
                 <v-col cols="12" sm="12" >
-                    <v-card
+                    <!--<v-card
                         class="pa-2"
                         outlined
                         tile
-                    >
-					<v-icon class="mx-4" style="color:#fddca9; font-size:18px;" >  mdi-arrange-send-backward </v-icon>
-					<span class="font-weight-bold" style="color:#fddca9; font-size:15px;" >표준 공임 시간</span>
-                    </v-card>
+                    >-->
+					<v-container class="pt-0 pb-1 pt-2 contentsTitle">
+						<v-row>
+							<v-col cols="12" sm="10">
+								<v-icon class="mx-4" style="color:#fddca9; font-size:18px;" >  mdi-arrange-send-backward </v-icon>
+								<span class="font-weight-bold" style="color:#fddca9; font-size:15px;" >표준 공임 시간</span>
+							</v-col>
+							<v-col cols="12" sm="2">
+								<v-select
+                                    v-model="qualColId"
+                                    :items="qualColLists"
+                                    item-text="QualColText"
+                                    item-value="QualColId"								
+                                    label="Body 상세"
+                                    outlined
+                                    dense
+                                    @change="setMainGroup"
+                                    >
+                                </v-select>
+							</v-col>
+						</v-row>
+					</v-container>
+					
+                    <!--</v-card>-->
                 </v-col>
             </v-row>  			
             <v-row>
                 <v-col cols="12" sm="4" >
 					<v-card>
-							<v-select
-								class="pa-4 pb-0 pt-6 adjustSelect"
-								v-model="mainGroupId"
-								:items="mainGroupLists"
-								item-text="MainGroupName"
-								item-value="MainGroupId"								
-								label="Main 그룹"
-								outlined
-								dense
-								@change="changeMainGroup"
-								>
-							</v-select>
+						<v-select
+							class="pa-4 pb-0 pt-6 adjustSelect"
+							v-model="mainGroupId"
+							:items="mainGroupLists"
+							item-text="MainGroupName"
+							item-value="MainGroupId"								
+							label="Main 그룹"
+							outlined
+							dense
+							@change="changeMainGroup"
+							>
+						</v-select>
 					</v-card>
                 </v-col>
                 <v-col cols="12" sm="4" >
 					<v-card>
-							<v-select
-								class="pa-4 pb-0 pt-6 adjustSelect"
-								v-model="subGroupId"
-								:items="subGroupLists"
-								item-text="SubGroupName"
-								item-value="SubGroupId"	
-								label="Sub 그룹"
-								outlined
-								dense
-								@change="changeSubGroup"
-								>
-							</v-select>
+						<v-select
+							class="pa-4 pb-0 pt-6 adjustSelect"
+							v-model="subGroupId"
+							:items="subGroupLists"
+							item-text="SubGroupName"
+							item-value="SubGroupId"	
+							label="Sub 그룹"
+							outlined
+							dense
+							@change="changeSubGroup"
+							>
+						</v-select>
 					</v-card>
                 </v-col>				
             </v-row>
@@ -53,7 +73,7 @@
                     sm="12"
                 >
                     <v-card
-                        class="pa-2"
+                        class="pa-1"
                         outlined
                         tile
 						id = "RMIContents"
@@ -80,12 +100,6 @@
 										@update:open="openNode"
 										@input="getParts"
 									>
-									<!--<template slot="label" slot-scope="{ item }">
-										{{ item.name }} 
-										<v-btn icon x-small class="ml-2" v-if="item.children !== undefined"  @click="showCheckList(item)">
-										<v-icon>mdi-wrench</v-icon>
-										</v-btn>
-									</template>-->
 									</v-treeview>
 								</div>
 							</v-card-text>								
@@ -185,6 +199,7 @@
 		name: 'RMI-TIMES',
 		data(){
 			return{
+				qualColLists: [],
                 qualColId: '',
 				mainGroupLists: [],
 				subGroupLists: [],
@@ -218,8 +233,8 @@
 				this.carTypeId = param.carTypeId; 
 				this.carTcdTypeId = param.carTcdTypeId; 
                 this.initAuthKey();
-                this.initBodiesForTimes();
-				this.setMainGroup();
+                this.setBodies();
+				//this.setMainGroup();
 			});
 		},	
         updated(){
@@ -269,7 +284,7 @@
 					this.rmiAuthKey = 'TecRMI ' + xmlHttp.getResponseHeader( 'X-AuthToken' );
 				}
             },
-            initBodiesForTimes()
+            setBodies()
             {
                 if(this.carTypeId !== undefined && this.carTypeId !== '' ) {
 					
@@ -293,8 +308,14 @@
 					// Handle HTTP response
 					if(xmlHttp.status == 200) {
 						var result = JSON.parse(xmlHttp.responseText);
+						this.qualColLists = result;
+
 						if(result.length > 0){
-                            this.qualColId = result[0].QualColId;
+                            if(this.qualColLists.length == 1) {
+                                this.qualColId = this.qualColLists[0].QualColId;
+                                this.setMainGroup();
+                                console.log('qualColId', this.qualColId);
+                            } 
                             console.log('initBodiesForTimes 리턴 : ', this.qualColId);
                         }
                         else{
@@ -379,7 +400,7 @@
 				xmlHttp.send( null );
 				// Handle HTTP response
 				if(xmlHttp.status == 200) {
-                    console.log('리턴 : ', JSON.parse(xmlHttp.responseText));
+                    console.log('WorkStepsForSubgroup : ', JSON.parse(xmlHttp.responseText));
 
                     var list = JSON.parse(xmlHttp.responseText);
                     this.itemMpLists = Object.values(groupBy(list, 'ItemMpId', 'ItemMpText')).map(function(obj){
@@ -594,6 +615,11 @@
   background-color: #f9f9f9;
   color: black;
   font-size: 12px;
+}
+.contents .contentsTitle {
+  background-color: #424242;
+  font-size: 12px;
+  height: 80px;
 }
 .contents .card-title{
     background-color: #37474F;

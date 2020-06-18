@@ -2,35 +2,32 @@
     <v-content class="contents">
         <v-container>
             <v-row>
-                <v-col cols="12" sm="10" >
-                    <v-card
-                        class="pa-2 pb-12"
-                        outlined
-                        tile
-                    >
-						<v-icon id="titleIcon" class="mx-4" style="color:#fddca9; font-size:18px;" >  mdi-arrange-send-backward </v-icon>
-						<span id="titleText" class="font-weight-bold" style="color:#fddca9; font-size:15px;" @click="clearManual">차량 도면</span>				
-                    </v-card>
-                </v-col>
-                <v-col cols="12" sm="2">
-					<v-card>
-							<v-select
-								class="pa-4 pb-0 pt-6 adjustSelect"
-								v-model="qualColId"
-								:items="qualColLists"
-								item-text="QualColText"
-								item-value="QualColId"								
-								label="Body 상세"
-								outlined
-								dense
-								@change="changequalColId"
-								>
-							</v-select>
-					</v-card>
-					<v-btn id='btnFuncMaingroupDelegate' @click="selectMaingroup" style="display:none;">JSMaingroupDelegate</v-btn>
-					<v-btn id='btnFuncSubgroupDelegate' @click="selectSubgroup" style="display:none;">JSSubgroupDelegate</v-btn>
-					<v-btn id='btnFuncDelegate' @click="selectDelegate" style="display:none;">JSDelegate</v-btn>
-                </v-col>
+				<v-col cols="12" sm="12">
+					<v-container class="pt-0 pb-1 pt-2 contentsTitle">
+						<v-row>
+							<v-col cols="12" sm="10">
+								<v-icon id="titleIcon" class="mx-4" style="color:#fddca9; font-size:18px;" >  mdi-arrange-send-backward </v-icon>
+								<span id="titleText" class="font-weight-bold" style="color:#fddca9; font-size:15px;" @click="clearManual">차량 도면</span>
+							</v-col>
+							<v-col  cols="12" sm="2">
+								<v-select
+									v-model="qualColId"
+									:items="qualColLists"
+									item-text="QualColText"
+									item-value="QualColId"								
+									label="Body 상세"
+									outlined
+									dense
+									@change="changequalColId"
+									>
+								</v-select>
+								<v-btn id='btnFuncMaingroupDelegate' @click="selectMaingroup" style="display:none;">JSMaingroupDelegate</v-btn>
+								<v-btn id='btnFuncSubgroupDelegate' @click="selectSubgroup" style="display:none;">JSSubgroupDelegate</v-btn>
+								<v-btn id='btnFuncDelegate' @click="selectDelegate" style="display:none;">JSDelegate</v-btn>
+							</v-col>
+						</v-row>
+					</v-container>
+				</v-col>
             </v-row>  			
             <v-row>
                 <v-col
@@ -222,11 +219,11 @@
 															<li  v-for="(part, i) in item.array" :key="i">
 																<div class="brand-name">{{ part.brandName }}</div>
 																<div class="item-code">{{ part.articleNo }}</div>
-																<div class="item-detail">
+																<!--<div class="item-detail">
 																	<v-btn icon x-small @click="showPartsImage(part)">
 																		<v-icon>far fa-image</v-icon>
 																	</v-btn>
-																</div>
+																</div>-->
 																<div class="item-detail">
 																	<v-btn icon x-small @click="showPartsDetail(part)">
 																		<v-icon>fas fa-info-circle</v-icon>
@@ -793,8 +790,6 @@
 						return newObj;
 					});
 
-					console.log('this.workItemMpList : ' , this.workItemMpList.length);
-
 					if(this.workItemMpList.length === 1){
                         this.workItemMpId = this.workItemMpList[0]["ItemMpId"];
                         this.changeWorkItemMpId();
@@ -1001,6 +996,11 @@
   background-color: #f9f9f9;
   color: black;
   font-size: 12px;
+}
+.contents .contentsTitle {
+  background-color: #424242;
+  font-size: 12px;
+  height: 80px;
 }
 
 .contents .adjustSelect {

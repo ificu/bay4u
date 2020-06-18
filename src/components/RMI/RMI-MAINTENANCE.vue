@@ -3,18 +3,37 @@
         <v-container>
             <v-row>
                 <v-col cols="12" sm="12" >
-                    <v-card
-                        class="pa-2"
+                  <!--  <v-card
+                        class="pa-0"
                         outlined
                         tile
-                    >
-					<v-icon class="mx-4" style="color:#fddca9; font-size:18px;" >  mdi-arrange-send-backward </v-icon>
-					<span class="font-weight-bold" style="color:#fddca9; font-size:15px;" >정기 점검 항목</span>
-                    </v-card>
+                    >--> 
+                    <v-container class="pt-0 pb-1 pt-2 contentsTitle">
+                        <v-row>
+                            <v-col cols="12" sm="10">
+                                <v-icon class="mx-4" style="color:#fddca9; font-size:18px;" >  mdi-arrange-send-backward </v-icon>
+                                <span class="font-weight-bold" style="color:#fddca9; font-size:15px;" >정기 점검 항목</span>
+                            </v-col>
+                            <v-col cols="12" sm="2">
+                                <v-select
+                                    v-model="qualColId"
+                                    :items="qualColLists"
+                                    item-text="QualColText"
+                                    item-value="QualColId"								
+                                    label="Body 상세"
+                                    outlined
+                                    dense
+                                    @change="setWorks"
+                                    >
+                                </v-select>
+                            </v-col>
+                        </v-row>
+                    </v-container>
+                 <!--   </v-card>-->
                 </v-col>
             </v-row>
             <v-row 
-                class="pa-2 mt-4 ml-0 mr-0 mainform"
+                class="pa-0 mt-4 ml-0 mr-0 mainform"
             >
                 <v-col   cols="12"
                     sm="12">
@@ -98,11 +117,11 @@
                                             :key="i">
                                             <div class="brand-name">{{ part.brandName }}</div>
                                             <div class="item-code">{{ part.articleNo }}</div>
-                                            <div class="item-detail">
+                                            <!--<div class="item-detail">
                                                 <v-btn icon x-small @click="showPartsImage(part)">
                                                     <v-icon>far fa-image</v-icon>
                                                 </v-btn>
-                                            </div>
+                                            </div>-->
                                             <div class="item-detail">
                                                 <v-btn icon x-small @click="showPartsDetail(part)">
                                                     <v-icon>fas fa-info-circle</v-icon>
@@ -166,6 +185,7 @@
 		name: 'RMI-MAINTENANCE',
 		data(){
 			return{
+                qualColLists: [],
                 qualColId: '',
                 itemMainLists:[],
                 itemAddLists:[],
@@ -199,8 +219,8 @@
                 if(this.carTypeId === '' && this.carTcdTypeId === '')return;
                 
                 this.initAuthKey();
-                this.initBodiesForMaintenance();
-                this.setWorks();
+                this.setBodies();
+                /*this.setWorks();*/
             });
         },	
         updated(){
@@ -232,7 +252,7 @@
 					this.rmiAuthKey = 'TecRMI ' + xmlHttp.getResponseHeader( 'X-AuthToken' );
 				}
             },
-            initBodiesForMaintenance()
+            setBodies()
             {
                 if(this.carTypeId !== undefined && this.carTypeId !== '' ) {
 					
@@ -256,9 +276,16 @@
 					// Handle HTTP response
 					if(xmlHttp.status == 200) {
                         var result = JSON.parse(xmlHttp.responseText);
+                        this.qualColLists = result;
+                        
                         if(result.length > 0){
-                            this.qualColId = result[0].QualColId;
-                            console.log('qualColId', this.qualColId);
+
+                            if(this.qualColLists.length == 1) {
+                                this.qualColId = this.qualColLists[0].QualColId;
+                                this.setWorks();
+                                console.log('qualColId', this.qualColId);
+                            }  
+                            
                         }
                         else{
                             this.itemMainLists = [];
@@ -356,7 +383,6 @@
                 if(xmlHttp.status == 200) {
                     result = JSON.parse(xmlHttp.responseText);
                 }
-
                 return result;
             },
             getItemMpId(data , target)
@@ -554,6 +580,12 @@
     color: black;
     font-size: 12px;
 }
+.contents .contentsTitle {
+  background-color: #424242;
+  font-size: 12px;
+  height: 80px;
+}
+
 .contents .card-title{
     background-color: #37474F;
     color:white;

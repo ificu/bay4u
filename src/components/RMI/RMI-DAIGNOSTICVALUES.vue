@@ -3,79 +3,92 @@
         <v-container>
             <v-row>
                 <v-col cols="12" sm="12" >
-                    <v-card
-                        class="pa-2"
-                        outlined
-                        tile
-                    >
-					<v-icon class="mx-4" style="color:#fddca9; font-size:18px;" >  mdi-arrange-send-backward </v-icon>
-					<span class="font-weight-bold" style="color:#fddca9; font-size:15px;" >차량 진단 데이터</span>
-                    </v-card>
+					<v-container class="pt-0 pb-1 pt-2 contentsTitle">
+                        <v-row>
+                            <v-col cols="12" sm="6">
+								<v-icon class="mx-4" style="color:#fddca9; font-size:18px;" >  mdi-arrange-send-backward </v-icon>
+								<span class="font-weight-bold" style="color:#fddca9; font-size:15px;" >차량 진단 데이터</span>
+                            </v-col>
+                            <v-col cols="12" sm="6">
+                                <v-select
+                                    v-model="componentTypeId"
+                                    :items="componentTypeIdList"
+                                    item-text="ComponentTypeName"
+                                    item-value="ComponentTypeId"								
+                                    label="상세 항목"
+                                    outlined
+                                    dense
+                                    @change="setMainGroup"
+                                    >
+                                </v-select>
+                            </v-col>
+                        </v-row>
+                    </v-container>
                 </v-col>
             </v-row>  			
             <v-row>
                 <v-col cols="12" sm="3" >
 					<v-card>
-							<v-select
-								class="pa-4 pb-0 pt-6 adjustSelect"
-								v-model="mainGroupId"
-								:items="mainGroupLists"
-								item-text="MainGroupName"
-								item-value="MainGroupId"								
-								label="Main 그룹"
-								outlined
-								dense
-								@change="changeMainGroup"
-								>
-							</v-select>
+						<v-select
+							class="pa-4 pb-0 pt-6 adjustSelect"
+							v-model="mainGroupId"
+							:items="mainGroupLists"
+							item-text="MainGroupName"
+							item-value="MainGroupId"								
+							label="Main 그룹"
+							outlined
+							dense
+							@change="changeMainGroup"
+							>
+						</v-select>
 					</v-card>
                 </v-col>
                 <v-col cols="12" sm="3" >
 					<v-card>
-							<v-select
-								class="pa-4 pb-0 pt-6 adjustSelect"
-								v-model="subGroupId"
-								:items="subGroupLists"
-								item-text="SubGroupName"
-								item-value="SubGroupId"	
-								label="Sub 그룹"
-								outlined
-								dense
-								@change="changeSubGroup"
-								>
-							</v-select>
+						<v-select
+							class="pa-4 pb-0 pt-6 adjustSelect"
+							v-model="subGroupId"
+							:items="subGroupLists"
+							item-text="SubGroupName"
+							item-value="SubGroupId"	
+							label="Sub 그룹"
+							outlined
+							dense
+							@change="changeSubGroup"
+							>
+						</v-select>
 					</v-card>
                 </v-col>
                 <v-col cols="12" sm="3" >
 					<v-card>
-							<v-select
-								class="pa-4 pb-0 pt-6 adjustSelect"
-								v-model="itemMpId"
-								:items="itemMpLists"
-								item-text="ItemMpText"
-								item-value="ItemMpId"	
-								label="상세 항목"
-								outlined
-								dense
-								@change="changeItemMp"
-								>
-							</v-select>
+						<v-select
+							class="pa-4 pb-0 pt-6 adjustSelect"
+							v-model="itemMpId"
+							:items="itemMpLists"
+							item-text="ItemMpText"
+							item-value="ItemMpId"	
+							label="상세 항목"
+							outlined
+							dense
+							@change="changeItemMp"
+							>
+						</v-select>
 					</v-card>
                 </v-col>
                 <v-col cols="12" sm="3" >
 					<v-card>
-							<v-select
-								class="pa-4 pb-0 pt-6 adjustSelect"
-								v-model="manualId"
-								:items="qualColLists"
-								item-text="QualColText"
-								item-value="ManualId"	
-								label="매뉴얼 구분"
-								outlined
-								dense
-								@change="changeManualId"
-								>
-							</v-select>
+						<v-select
+							class="pa-4 pb-0 pt-6 adjustSelect"
+							v-model="manualId"
+							:items="qualColLists"
+							item-text="QualColText"
+							item-value="QualColId"	
+							label="매뉴얼 구분"
+							outlined
+							dense
+							@change="changeManualId"
+							>
+						</v-select>
 					</v-card>
                 </v-col>					
             </v-row>
@@ -108,6 +121,10 @@
 		name: 'RMI-DAIGNOSTICVALUES',
 		data(){
 			return{
+				rmiAuthKey: '',	
+				carTypeId: '',
+				componentTypeIdList:[],
+                componentTypeId: 0,		
 				mainGroupLists: [],
 				subGroupLists: [],
 				itemMpLists: [],
@@ -116,9 +133,6 @@
 				subGroupId: '',
 				itemMpId: '',
 				manualId: '',
-				rmiAuthKey: '',	
-                carTypeId: '',
-                componentTypeId: 0,		
 			}
 		},
 		components: {
@@ -130,7 +144,7 @@
 				this.carTypeId = param.carTypeId; 
                 this.initAuthKey();
                 this.initComponentsForType();
-				this.setMainGroup();
+				//this.setMainGroup();
 			});
 		},	
 		methods: {
@@ -177,17 +191,23 @@
 					
 					// Handle HTTP response
 					if(xmlHttp.status == 200) {
-						//console.log('initComponentsForType 리턴 : ', JSON.parse(xmlHttp.responseText));
+						console.log('initComponentsForType 리턴 : ', JSON.parse(xmlHttp.responseText));
 						var result = JSON.parse(xmlHttp.responseText);
-						if(result.length > 0){
-							this.componentTypeId = result[0].ComponentTypeId;
-							console.log('initComponentsForType 리턴 : ', this.componentTypeId);
+						this.componentTypeIdList = result;
+						if(this.componentTypeIdList.length === 1){
+							this.componentTypeId = this.componentTypeIdList[0].ComponentTypeId;
+							this.setMainGroup();
 						}
-						else{
+						else if(this.componentTypeIdList.length === 0){
 							this.mainGroupLists = [];
 							this.subGroupLists = [];
 							this.itemMpLists = [];
 							this.qualColLists = [];
+
+							this.mainGroupId = '';
+							this.subGroupId = '';
+							this.itemMpId = '';
+							this.manualId = '';
 
 							$("#RMIContents").html('');
 						}
@@ -284,13 +304,19 @@
 						return pre;
 					}
 				}, []);	
+				
+				if(this.qualColLists.length === 1){
+					this.manualId = this.qualColLists[0].QualColId;
+					this.changeManualId();
+				}
+				console.log('this.qualColLists  :', this.qualColLists );
 			},
 			changeManualId() {
 
                 let typeId = this.carTypeId,
                     countryCode = 'kr',
                     languageCode = 'en',
-                    systemQualColId = this.qualColLists[0].SystemQualColId,
+                    //systemQualColId = this.qualColLists[0].SystemQualColId,
                     qualColId = this.manualId,
                     printView = true,
                     componentTypeId = this.componentTypeId,
@@ -301,7 +327,7 @@
                 let query = '?typeId=' + typeId
                     + '&countryCode=' + countryCode
                     + '&languageCode=' + languageCode
-                    + '&systemQualColId=' + systemQualColId
+                //    + '&systemQualColId=' + systemQualColId
 					+ '&qualColId=' + qualColId	
                     + '&printView=' + printView	
                     + '&componentTypeId=' +componentTypeId
@@ -340,7 +366,11 @@
   color: black;
   font-size: 12px;
 }
-
+.contents .contentsTitle {
+  background-color: #424242;
+  font-size: 12px;
+  height: 80px;
+}
 .contents .adjustSelect {
   background-color: #666;
   font-size: 12px;
