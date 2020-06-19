@@ -28,7 +28,7 @@
                     </v-carousel>
                 </div>
                 <!--oemNumbers-->
-                <div>
+                <div v-if="partsInfo.oemNumbers !== undefined && partsInfo.oemNumbers.length > 0">
                     <h5>oemNumbers</h5>
                     <div style="margin-left:20px">
                         <span class="attr-text">{{setArrayJoin(partsInfo.oemNumbers,'oenNumbers')}}</span>
