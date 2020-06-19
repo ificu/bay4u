@@ -334,66 +334,6 @@
                     obj.array = item;
                     return obj;
 				});
-				
-                /*let brnads = [2, 4, 5, 6, 9, 10, 16, 21, 26, 30, 32, 33, 35, 43, 50, 52, 59, 67, 68, 75, 79, 83, 89, 95, 101, 123, 134, 144, 151, 154, 161, 162, 183, 192, 204, 205, 240, 245, 287, 327, 381, 4434, 6020, 6263, 6278, 6441];
-				let params = {
-					"getArticleIdsWithState": {
-						articleCountry: "kr",
-						assemblyGroupNodeId: this.assemblyGroupId[0],
-						brandNo: {
-							array: brnads
-						},
-						lang: "en",
-						linkingTargetId: this.carTcdTypeId,
-						linkingTargetType: "P",
-						provider: tecProvider,
-						sort: 2
-					}
-				}				
-
-                // Send HTTP request
-                let xmlHttp = new XMLHttpRequest();
-				xmlHttp.open( 'POST', tecdocUrl, false );
-				xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
-                xmlHttp.setRequestHeader( 'Accept', 'application/json' );
-                xmlHttp.setRequestHeader( 'x-api-key', tecApiKey);
-				xmlHttp.send( JSON.stringify( params ) );
-
-				// Handle HTTP response
-				if(xmlHttp.status == 200) {
-                    console.log('result2 :', JSON.parse(xmlHttp.responseText));
-					var result = JSON.parse(xmlHttp.responseText);
-					
-                    if(result.data !== ""){
-                        var genArtGroupList = arrayGroupBy(result.data.array, function(item){
-                            return [item.genericArticleId];
-						});
-						
-						this.partsList = genArtGroupList.map(function(item){
-							var obj = {};
-							obj.genericArticleId = item[0].genericArticleId
-							obj.genericArticleName = item[0].genericArticleName
-							obj.array =  arrayGroupBy(item, function(subItem){
-								return [subItem.brandNo , subItem.articleNo];
-							}).map(function(artItem){
-									var obj2 = {};
-									obj2.articleNo = artItem[0].articleNo;
-									obj2.brandName = artItem[0].brandName;
-									obj2.brandNo = artItem[0].brandNo;
-									obj2.array = artItem.map(function(subArtItem){
-										var obj3 = {};
-										obj3.articleId = subArtItem.articleId;
-										obj3.articleLinkId = subArtItem.articleLinkId;
-										return obj3;
-									});
-									return obj2;
-								});
-							return obj;
-						});
-
-						console.log('partsList :', this.partsList);
-					}
-				}*/
 			},
 			setCriteriaData(value)
             {
