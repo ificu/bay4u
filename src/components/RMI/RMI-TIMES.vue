@@ -98,7 +98,7 @@
 										selected-color="red"
 										v-model="repairItem"
 										@update:open="openNode"
-										@input="getParts"
+										@input="getPartsList"
 									>
 									</v-treeview>
 								</div>
@@ -128,17 +128,19 @@
                                 <v-expansion-panel-header>{{ item.genericArticleName }}</v-expansion-panel-header>
                                 <v-expansion-panel-content>
                                     <ul>
-                                        <li  v-for="(part, i) in item.array"
+                                        <li  v-for="(article, i) in item.array"
                                             :key="i">
-                                            <div class="brand-name">{{ part.brandName }}</div>
-                                            <div class="item-code">{{ part.articleNo }}</div>
-                                            <div class="item-detail">
-                                                <v-btn icon x-small @click="showPartsImage(part)">
-                                                    <v-icon>far fa-image</v-icon>
-                                                </v-btn>
+                                            <div class="brand-name">{{ article.mfrName }}</div>
+                                            <div class="item-code">
+                                                {{ article.articleNumber }}
+                                                <span class="item-position">{{setCriteriaData(article)}}</span>
                                             </div>
+
+                                            <!--<div v-if="article.images.length > 0">
+                                                <v-img class="grey lighten-3 mr-4 ml-4" v-bind:src="article.images[0].imageURL50"></v-img>
+                                            </div>-->
                                             <div class="item-detail">
-                                                <v-btn icon x-small @click="showPartsDetail(part)">
+                                                <v-btn icon x-small @click="showPartsDetail(article)">
                                                     <v-icon>fas fa-info-circle</v-icon>
                                                 </v-btn>
                                             </div>
@@ -458,16 +460,16 @@
                     var result = JSON.parse(xmlHttp.responseText);
 					
 					var itemMpIds = result.map(x => x.ItemMpId);
-                    var genArtNos = this.getGenArtNo(itemMpIds);
+					var genArtNos = this.getGenArtNo(itemMpIds);
 					
 					this.genArtNoList = result.map(function(obj){
                         var genartObj = {};
                         genartObj.WorkId = obj.WorkId;
                         genartObj.ItemMpId = obj.ItemMpId;
                         genartObj.ItemMpText = obj.ItemMpText;
-                        genartObj.GenArtNo = genArtNos.filter(x => x.ItemMpId === obj.ItemMpId).map(y=>y.GenArtNo);
+                        genartObj.GenArtInfo = genArtNos.filter(x => x.ItemMpId === obj.ItemMpId);
                         return genartObj;
-                    });
+					});
                 }
 			},
 			getGenArtNo(data){
@@ -490,13 +492,13 @@
 					result = JSON.parse(xmlHttp.responseText);
 				}
 				return result;
-            },
-			getParts(){
-				console.log('repairItem :',this.repairItem);
-				this.parts = [];
+			},
+			async getPartsList(){
+                
+                this.parts = [];
 
 				let selectedWorks = this.repairItem;
-				let picGenArtNr = this.genArtNoList.filter(function(item){   
+				let selctedGenArts = this.genArtNoList.filter(function(item){   
                     var y = false;
                     selectedWorks.forEach(element => {
                        if(item.WorkId === element)
@@ -506,77 +508,119 @@
                     return y 
                 });
 
-				//console.log('picGenArtNr : ',picGenArtNr);
-				
-				let selctedGenArts = [...new Set(picGenArtNr.map(it => it.GenArtNo))];
-				selctedGenArts = selctedGenArts.reduce(function(accumulator, currentValue) {
-					return accumulator.concat(currentValue);
+				selctedGenArts = selctedGenArts.map(x=>x.GenArtInfo).reduce(function(pre,crr){
+                    return pre.concat(crr);
 				},[]);
-				console.log('selctedGenArts : ' ,selctedGenArts);
 				
-				if(selctedGenArts.length === 0)return;
+				console.log('selctedGenArts : ' ,selctedGenArts);
 
-                let brnads = [2, 4, 5, 6, 9, 10, 16, 21, 26, 30, 32, 33, 35, 43, 50, 52, 59, 67, 68, 75, 79, 83, 89, 95, 101, 123, 134, 144, 151, 154, 161, 162, 183, 192, 204, 205, 240, 245, 287, 327, 381, 4434, 6020, 6263, 6278, 6441];
-				let params = {
-					"getArticleIdsWithState": {
-                    articleCountry: "kr",
-                    "brandNo": {
-                        "array": brnads
-                    },
-                    genericArticleId: {
-                        "array": selctedGenArts
-                        },
-                        lang: "en",
-                        linkingTargetId: this.carTcdTypeId,
-                        linkingTargetType: "P",
-                        provider: tecProvider
-                    },
-                    "sort": 2
-				};
+                if(selctedGenArts.length === 0)return;
 
-                // Send HTTP request
-                let xmlHttp = new XMLHttpRequest();
-				xmlHttp.open( 'POST', tecdocUrl, false );
-				xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
-                xmlHttp.setRequestHeader( 'Accept', 'application/json' );
-                xmlHttp.setRequestHeader( 'x-api-key', tecApiKey);
-				xmlHttp.send( JSON.stringify( params ) );
+                var list = await this.getParts(selctedGenArts);
+                
+                var genArtGroupList = arrayGroupBy(list, function(item){
+                    return [item.genericArticleId];
+                });
 
-				// Handle HTTP response
-				if(xmlHttp.status == 200) {
-                    console.log('result2 :', JSON.parse(xmlHttp.responseText));
-                    var result = JSON.parse(xmlHttp.responseText);
-                    if(result.data !== ""){
-                        var genArtGroupList = arrayGroupBy(result.data.array, function(item){
-                            return [item.genericArticleId];
-						});
-						
-						this.parts = genArtGroupList.map(function(item){
-							var obj = {};
-							obj.genericArticleId = item[0].genericArticleId
-							obj.genericArticleName = item[0].genericArticleName
-							obj.array =  arrayGroupBy(item, function(subItem){
-								return [subItem.brandNo , subItem.articleNo];
-							}).map(function(artItem){
-									var obj2 = {};
-									obj2.articleNo = artItem[0].articleNo;
-									obj2.brandName = artItem[0].brandName;
-									obj2.brandNo = artItem[0].brandNo;
-									obj2.array = artItem.map(function(subArtItem){
-										var obj3 = {};
-										obj3.articleId = subArtItem.articleId;
-										obj3.articleLinkId = subArtItem.articleLinkId;
-										return obj3;
-									});
-									return obj2;
-								});
-							return obj;
-						});
+                this.parts = genArtGroupList.map(function(item){
+                    var obj = {};
+                    obj.genericArticleId = item[0].genericArticleId
+                    obj.genericArticleName = item[0].genericArticleName
+                    obj.array = item;
+                    return obj;
+                });
+                console.log('parts:',this.parts)
+            },
+			getParts(data)
+			{	
+				let brnads = [2, 4, 5, 6, 9, 10, 16, 21, 26, 30, 32, 33, 35, 43, 50, 52, 59, 67, 68, 75, 79, 83, 89, 95, 101, 123, 134, 144, 151, 154, 161, 162, 183, 192, 204, 205, 240, 245, 287, 327, 381, 4434, 6020, 6263, 6278, 6441];
+				let partsList = [];
+                data.forEach(element => {
+                    
+                    let params = {
+                        "getArticles": {
+                            articleCountry: "kr",
+                            provider: tecProvider,
+                            genericArticleIds: element.GenArtNo,
+                            criteriaFilters: {
+                                criteriaId: element.GenCritNo,
+                                rawValue: element.GenCritValue
+                            },
+                            linkageTargetId: this.carTcdTypeId,
+                            linkageTargetType: "V",
+                            lang: "en",
+                            perPage: 1000,
+                            page: 1,
+                            includeGenericArticles: true,
+                            includeArticleText: true,
+                            includeOEMNumbers: true,
+                            includeReplacesArticles: true,
+                            includeReplacedByArticles: true,
+                            includeArticleCriteria: true,
+                            includeLinkages: true,
+                            includeImages: true,
+                            includeLinks: true,
+                            includeTradeNumbers: true,
+                            includeCriteriaFacets: true
+                        }
+                    };
 
-                        console.log('partsList :', this.parts);
-					}
-				}
+                    // Send HTTP request
+                    let xmlHttp = new XMLHttpRequest();
+                    xmlHttp.open( 'POST', tecdocUrl, false );
+                    xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
+                    xmlHttp.setRequestHeader( 'Accept', 'application/json' );
+                    xmlHttp.setRequestHeader( 'x-api-key', tecApiKey);
+                    xmlHttp.send( JSON.stringify( params ) );
+
+                    // Handle HTTP response
+                    if(xmlHttp.status == 200) {
+                        //console.log( JSON.parse(xmlHttp.responseText));
+                        var result = JSON.parse(xmlHttp.responseText).articles;
+                        result = result.filter(x => brnads.includes(x.dataSupplierId));
+                        if(result.length > 0){
+                            //console.log('result :', result);
+                            result = result.map(function(item){
+                                var obj = {};
+                                obj = item;
+                                obj.genericArticleId = item.genericArticles.map(y =>y.genericArticleId).join(',');
+                                obj.genericArticleName = item.genericArticles.map(y =>y.genericArticleDescription).join(',');
+                                return obj;
+                            });                           
+                            partsList = partsList.concat(result);
+                        }
+                    };
+                });
+
+                // 중복체크
+                partsList = partsList.filter((item, idx) => {
+                    return partsList.map(x => x.dataSupplierId + x.articleNumber).indexOf(item.dataSupplierId + item.articleNumber) === idx;
+                })
+
+                // 부품군+ 브랜드 정렬
+                partsList.sort(function(a, b){
+                    return (a.genericArticleId + ('000'+ a.dataSupplierId).slice(-3)  >  b.genericArticleId + ('000'+ b.dataSupplierId).slice(-3)) ? 1 : -1;
+                });
+                return partsList;
 			},
+			setCriteriaData(value)
+            {
+                var position = '';
+                var articleList = value.articleCriteria.filter(x => x.criteriaId === 100);
+                //console.log('articleList :', articleList);
+                var linkageList = value.linkages.map(x=>x.linkageCriteria).reduce(function(pre,curr){
+                                        return pre.concat(curr);
+                                },[]).filter(x=>x.criteriaId === 100);
+                //console.log('linkageList :', linkageList);
+                var list = articleList.concat(linkageList);
+                list = list.filter((item, idx) => {
+                    return list.map(x => x.criteriaId).indexOf(item.criteriaId) === idx;
+                })
+                if(list.length > 0)
+                position = list[0].formattedValue;
+
+                return position;
+            },
 			showPartsImage(value){
 				var partsData = {};
 				partsData.PartsInfo = value;
@@ -654,6 +698,11 @@
 }
 .contents .item-code{
     color: #01579B;
+}
+.contents .item-position{
+    margin-left: 5px;
+    color: #616161;
+    font-size: 0.9em;
 }
 .contents .item-detail{
     margin-left: 10px;
