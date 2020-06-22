@@ -49,42 +49,61 @@
 										item-key="assemblyGroupNodeId"
 										item-text="assemblyGroupName"
 										:active.sync="assemblyGroupId"
-										@update:active="getParts()">
+										@update:active="oeNumber = '';getParts();">
 									</v-treeview>
 								</v-col>
 								<v-divider vertical></v-divider>
 								<v-col>
-									<v-expansion-panels
-										multiple
-										light
-										flat
-										>
-										<v-expansion-panel  v-for="(item, index) in partsList"
-												:key="index">
-											<v-expansion-panel-header>{{ item.genericArticleName }}</v-expansion-panel-header>
-											<v-expansion-panel-content>
-												<ul>
-													<li  v-for="(article, i) in item.array"
-														:key="i">
-														<div class="brand-name">{{ article.mfrName }}</div>
-														<div class="item-code">
-															{{ article.articleNumber }}
-															<span class="item-position">{{setCriteriaData(article)}}</span>
-														</div>
+									<v-row v-if="assemblyGroupList.length > 0">
+										<v-col>
+											<v-text-field
+												label="OE번호"
+												dense
+												single-line
+												append-icon="search"
+												v-model="oeNumber"
+												light
+												@keypress.enter="getParts"
+												@click:append="getParts"
+												@focus="$event.target.select()"
+											></v-text-field>
+										</v-col>
+									</v-row>
+									<v-row>
+										<v-col>
+											<v-expansion-panels
+												multiple
+												light
+												flat
+												>
+												<v-expansion-panel  v-for="(item, index) in partsList"
+														:key="index">
+													<v-expansion-panel-header>{{ item.genericArticleName }}</v-expansion-panel-header>
+													<v-expansion-panel-content>
+														<ul>
+															<li  v-for="(article, i) in item.array"
+																:key="i">
+																<div class="brand-name">{{ article.mfrName }}</div>
+																<div class="item-code">
+																	{{ article.articleNumber }}
+																	<span class="item-position">{{setCriteriaData(article)}}</span>
+																</div>
 
-														<!--<div v-if="article.images.length > 0">
-															<v-img class="grey lighten-3 mr-4 ml-4" v-bind:src="article.images[0].imageURL50"></v-img>
-														</div>-->
-														<div class="item-detail">
-															<v-btn icon x-small @click="showPartsDetail(article)">
-																<v-icon>fas fa-info-circle</v-icon>
-															</v-btn>
-														</div>
-													</li>
-												</ul>
-											</v-expansion-panel-content>
-										</v-expansion-panel>
-									</v-expansion-panels>
+																<!--<div v-if="article.images.length > 0">
+																	<v-img class="grey lighten-3 mr-4 ml-4" v-bind:src="article.images[0].imageURL50"></v-img>
+																</div>-->
+																<div class="item-detail">
+																	<v-btn icon x-small @click="showPartsDetail(article)">
+																		<v-icon>fas fa-info-circle</v-icon>
+																	</v-btn>
+																</div>
+															</li>
+														</ul>
+													</v-expansion-panel-content>
+												</v-expansion-panel>
+											</v-expansion-panels>
+										</v-col>
+									</v-row>
 								</v-col>
 							</v-row>
 						</v-container>
@@ -128,6 +147,7 @@
 				partsList:[],
 				partsInfo: {},
 				dialog: false,
+				oeNumber : ''
 			}
 		},
 		components: {
@@ -203,6 +223,7 @@
 			{
 				console.log('shortCutId : ', value);
 				this.partsList  = [];
+				this.oeNumber = '';
 
 				let params ={
 					"getChildNodesAllLinkingTarget2": {
@@ -288,6 +309,11 @@
 					}
 				};
 
+				if(this.oeNumber !== ''){
+					params.getArticles.searchQuery = this.oeNumber;
+					params.getArticles.searchType = 1;
+				}
+
 				// Send HTTP request
 				let xmlHttp = new XMLHttpRequest();
 				xmlHttp.open( 'POST', tecdocUrl, false );
@@ -321,7 +347,7 @@
 
                 // 부품군+ 브랜드 정렬
                 partsResult.sort(function(a, b){
-                    return (a.genericArticleId + ('000'+ a.dataSupplierId).slice(-3)  >  b.genericArticleId + ('000'+ b.dataSupplierId).slice(-3)) ? 1 : -1;
+                    return (a.genericArticleId + a.mfrName  >  b.genericArticleId + b.mfrName) ? 1 : -1;
 				});
 				
 				var genArtGroupList = arrayGroupBy(partsResult, function(item){
