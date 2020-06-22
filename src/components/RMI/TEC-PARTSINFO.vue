@@ -1,115 +1,62 @@
 <template>
     <v-card light>
-                <v-card-title
-                    class="headline grey lighten-2"
-                >
-                <span>Article information</span><span style="font-size:0.75em;margin-left:5px"> - {{artInfo}}</span>
-                </v-card-title>           
-                <v-card-text class="mt-2">
-        <div class="parts-info" v-for="(item, index) in partsDetail" :key="index">
-            <h5 class="info-title" v-if="showTitle(item, index)">{{index}}</h5>
-            <div class="assigned-art" v-if="index === 'oenNumbers'">
-                <span class="attr-text">{{setArrayJoin(item.array,index)}}</span>
+        <v-card-title
+            class="headline grey lighten-2"
+        >
+        <span>Article information</span><span style="font-size:0.75em;margin-left:5px"> - {{artInfo}}</span>
+        </v-card-title>           
+        <v-card-text class="mt-2">
+            <div class="parts-info">
+                <!--articleCriteria-->
+                <div>
+                    <h5>articleCriteria</h5>
+                    <ul v-for="(item, index) in criteriaList" :key="index">
+                        <li>
+                            <div class="attr-name">{{item.criteriaDescription}}</div>
+                            <div class="attr-text">{{item.formattedValue}}</div>  
+                        </li>
+                    </ul>
+                </div>
+                <!--images-->
+                <div v-if=" partsInfo.images !== undefined && partsInfo.images.length > 0">
+                    <v-carousel hide-delimiters>
+                        <v-carousel-item
+                            v-for="(item,i) in partsInfo.images"
+                            :key="i"
+                            :src="item.imageURL400"
+                        ></v-carousel-item>
+                    </v-carousel>
+                </div>
+                <!--oemNumbers-->
+                <div v-if="partsInfo.oemNumbers !== undefined && partsInfo.oemNumbers.length > 0">
+                    <h5>oemNumbers</h5>
+                    <div style="margin-left:20px">
+                        <span class="attr-text">{{setArrayJoin(partsInfo.oemNumbers,'oenNumbers')}}</span>
+                    </div>
+                </div>
+                <!--articleText-->
+                <div v-if="partsInfo.articleText !== undefined && partsInfo.articleText.length > 0">
+                    <h5>articleText</h5>
+                    <ul v-for="(item, index) in partsInfo.articleText" :key="index">
+                        <li v-for="(subItem, subIndex) in item.text" :key="subIndex">
+                            <div class="attr-name">{{subItem}}</div>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <div class="assigned-art" v-else-if="index === 'usageNumbers2'">
-                <span class="attr-text">{{setArrayJoin(item.array,index)}}</span>
-            </div>
-            <div class="assigned-art" v-else-if="index ==='assignedArticle'">
-                <span class="attr-name">{{item.articleName}}</span>
-                <span class="attr-text">{{item.articleNo}}</span>
-            </div>
-            <div class="assigned-art" v-else-if="index ==='articleDocuments' && item !==''">
-                <v-row>
-                    <v-col cols="12"  class="pa-0">
-                         <ul v-for="(item2, index2) in item.array.filter(x=>x.docFileTypeName==='URL')" :key="index2">
-                            <a :href="item2.docUrl" target="_blank">{{item2.docTypeName}}</a>
-                         </ul>
-                    </v-col>
-                </v-row>
-                <v-row>
-                    <v-col cols="12" class="pa-0">
-                        <v-carousel hide-delimiters>
-                            <v-carousel-item
-                                v-for="(item2,i) in item.array.filter(x=>x.docTypeId === 3 || x.docTypeId === 1 || x.docTypeId === 5)"
-                                :key="i"
-                                :src="getImage(item2.docId)"
-                            ></v-carousel-item>
-                        </v-carousel>
-                    </v-col>
-                </v-row>
-            </div>
-            <div v-else>
-                <ul v-for="(item2, index2) in item.array" :key="index2">                        
-                    <li v-if="index === 'articleAttributes'">
-                        <div style="display:flex;">
-                            <div class="attr-name">{{item2.attrName}}</div>
-                            <div class="attr-text">{{item2.attrValue}} {{item2.attrUnit}}</div>                                
-                        </div>                            
-                    </li>
-                    <!--<li v-else-if="index === 'articleDocuments' && item2.docFileTypeName ==='URL'">
-                        <div class="attr-text" v-if="item2.docFileTypeName ==='URL'" >
-                            <a :href="item2.docUrl" target="_blank">{{item2.docTypeName}}</a>
-                        </div>
-                    </li>
-                    <li v-else-if="index === 'articleDocuments' && item2.docTypeName ==='Picture'">
-                        <div class="attr-text" >
-                            <v-img class="grey lighten-3 mr-4 ml-4"  v-bind:src="getImage(item2.docId)" max-width="300px"></v-img>
-                        </div>
-                    </li>-->
-                    <li v-else-if="index === 'articleInfo'">
-                        <div style="display:flex;">
-                            <!--<div class="attr-name" >{{item2.infoTypeName}}</div>-->
-                            <div class="attr-text" v-html="item2.infoText"></div>
-                        </div>
-                    </li>
-                    <li v-else-if="index === 'articleThumbnails'">
-                        <div class="attr-text">{{item2.thumbFileName}}</div>
-                    </li>
-                    <li v-else-if="index === 'eanNumber'">
-                        <div class="attr-text">{{item2.eanNumber}}</div>
-                    </li>
-                    <li v-else-if="index === 'immediateAttributs'">
-                        <div style="display:flex;">
-                            <div class="attr-name">{{item2.attrName}}</div>
-                            <div class="attr-text">{{item2.attrValue}} {{item2.attrUnit}}</div>                             
-                        </div> 
-                    </li>
-                    <li v-else-if="index === 'immediateInfo'">
-                        <div class="attr-text">{{item2.infoText}}</div>
-                    </li>
-                    <li v-else-if="index === 'mainArticle'">
-                        <div style="display:flex;">
-                            <div class="attr-name">{{item2.articleName}}</div>
-                            <div class="attr-text">{{item2.articleNumber}}</div>                             
-                        </div> 
-                    </li>                        
-                    <li v-else-if="index === 'usageNumbers2'">
-                        <div class="attr-text">{{item2.usageNumber}}</div>
-                    </li>
-                    <li v-else-if="index === 'oenNumbers'">
-                       <div class="attr-text">{{item2.oeNumber}}</div>
-                    </li>
-                    <li v-else-if="index === 'replacedNumber'">
-                       <div class="attr-text">{{item2.replaceNumber}}</div>
-                    </li>
-                    <!--<li v-else>                            
-                    </li>-->
-                </ul>
-            </div>
-        </div>
-    </v-card-text>
-                <v-divider></v-divider>
-                <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn
-                        color="primary"
-                        text
-                        @click="$emit('close')"
-                    >
-                    close
-                    </v-btn>
-                </v-card-actions>
-            </v-card>
+        </v-card-text>
+        <v-divider></v-divider>
+        <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+                color="primary"
+                text
+                @click="$emit('close')"
+            >
+            close
+            </v-btn>
+        </v-card-actions>
+    </v-card>
 </template>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
@@ -126,14 +73,16 @@
             return{
                 partsInfo :{},
                 tecTypeId : '',
-                partsDetail: [],
                 artInfo: '',
+                criteriaList : [],
+                partsDetail: [],
                 itemImage:''
             }
         },
         props:['PartsInfo', 'TecTypeID'],
         created(){
             this.$EventBus.$on('RMI-PARTSINFO.InitData', data => {
+                console.log('partsInfo:' , data);
                 this.InitData(data);
             });	
         },
@@ -141,13 +90,45 @@
             console.log('partsInfo:' , this.PartsInfo);
             this.partsInfo = this.PartsInfo;
             this.tecTypeId = this.TecTypeID;
-            this.getPartsDetail();
+            this.setPartsInfo();
+            //this.getPartsDetail();
         },
         methods:{
             InitData(data){
                 this.partsInfo = data.PartsInfo;
                 this.tecTypeId = data.TecTypeId;
-                this.getPartsDetail();
+                this.setPartsInfo();
+                //this.getPartsDetail();
+            },
+            setPartsInfo()
+            {
+                this.artInfo = this.partsInfo.mfrName + " / " + this.partsInfo.articleNumber;
+                var articleList = this.partsInfo.articleCriteria.map(function(item){
+                    var obj = {};
+                    obj.criteriaId = item.criteriaId;
+                    obj.rawValue = item.rawValue;
+                    obj.criteriaDescription = item.criteriaDescription;
+                    obj.formattedValue = item.formattedValue;
+                    return obj;
+                });
+                var linkageList = this.partsInfo.linkages
+                                .map(x=>x.linkageCriteria)
+                                    .reduce(function(pre,curr){
+                                        return pre.concat(curr);
+                                },[]);
+                linkageList = linkageList.map(function(item){
+                    var obj = {};
+                    obj.criteriaId = item.criteriaId;
+                    obj.rawValue = item.rawValue;
+                    obj.criteriaDescription = item.criteriaDescription;
+                    obj.formattedValue = item.formattedValue;
+                    return obj;
+                });
+                this.criteriaList = articleList.concat(linkageList);
+                this.criteriaList.sort(function(a,b){
+                    return a.criteriaId > b.criteriaId ? 1:-1;
+                });
+                console.log('criteriaList : ', this.criteriaList);
             },
             getPartsDetail(){
 
@@ -196,28 +177,6 @@
                     console.log('result :',this.partsDetail);
 				}
             },
-            showTitle(value,text)
-            {
-                if(value !== ''){
-                    if(text === 'articleDocuments'){
-                        var urlCount =  value.array.filter(x => x.docFileTypeName ==='URL').length;
-                        var pictureCount =  value.array.filter(x => x.docTypeId === 5).length;
-                      
-                        if(urlCount + pictureCount > 0){
-                            return true;
-                        }
-                        else{
-                            return false;
-                        }
-                    }
-                    else{
-                        return true;
-                    }
-                }
-                else{
-                    return false;
-                }
-            },
             setArrayJoin(value ,target)
             {   
                 if(value !== undefined){
@@ -225,7 +184,7 @@
 
                     switch (target) {
                         case 'oenNumbers':
-                            list = Array.from(new Set(value.map(x=> x.oeNumber))).join(', ');
+                            list = Array.from(new Set(value.map(x=> x.articleNumber))).join(', ');
                             break;
                         case 'usageNumbers2':
                             list = Array.from(new Set(value.map(x=> x.usageNumber))).join(', ');
@@ -239,20 +198,6 @@
                     return '';
                 }
             },
-            getImage(data)
-            {
-                let xmlHttp = new XMLHttpRequest();
-				xmlHttp.open( 'GET', imgUrl+tecProvider+"/"+data+"/0", false );
-				xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
-                xmlHttp.setRequestHeader( 'Accept', 'application/json' );
-                xmlHttp.setRequestHeader( 'x-api-key', tecApiKey);
-                //xmlHttp.responseType = "arraybuffer";
-				xmlHttp.send( null );
-				// Handle HTTP response
-				if(xmlHttp.status == 200) {
-                    return xmlHttp.responseURL;
-				}
-            }
         }
     }
 </script>
@@ -270,6 +215,10 @@
     {
         padding-top: 5px;
         color: #616161;
+    }
+    .parts-info h5{
+        color:black;
+        margin-top: 5px;
     }
     .parts-info ul{
         list-style-type: none;

@@ -15,7 +15,7 @@
                                     :items="componentTypeIdList"
                                     item-text="ComponentTypeName"
                                     item-value="ComponentTypeId"								
-                                    label="상세 항목"
+                                    label="상세 구분"
                                     outlined
                                     dense
                                     @change="setMainGroup"
