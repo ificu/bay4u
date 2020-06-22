@@ -207,33 +207,57 @@
 										</div>
 										<!--LinkedParts Content-->
 										<div id = "RMIContents" v-if="checkShowTabPage('PARTS')">
-											<v-expansion-panels
-												multiple
-												light
-												flat
-											>
-												<v-expansion-panel  v-for="(item, index) in partsList" :key="index">
-													<v-expansion-panel-header>{{ item.genericArticleName }}</v-expansion-panel-header>
-													<v-expansion-panel-content>
-														<ul>
-															<li  v-for="(part, i) in item.array" :key="i">
-																<div class="brand-name">{{ part.brandName }}</div>
-																<div class="item-code">{{ part.articleNo }}</div>
-																<!--<div class="item-detail">
-																	<v-btn icon x-small @click="showPartsImage(part)">
-																		<v-icon>far fa-image</v-icon>
-																	</v-btn>
-																</div>-->
-																<div class="item-detail">
-																	<v-btn icon x-small @click="showPartsDetail(part)">
-																		<v-icon>fas fa-info-circle</v-icon>
-																	</v-btn>
-																</div>
-															</li>
-														</ul>
-													</v-expansion-panel-content>
-												</v-expansion-panel>
-											</v-expansion-panels>
+											<v-row>
+												<v-col></v-col>
+												<v-col cols="12" sm="6">
+													<v-text-field
+														label="OE번호"
+														dense
+														single-line
+														append-icon="search"
+														v-model="oeNumber"
+														light
+														@keypress.enter="getLinkedPartsData"
+														@click:append="getLinkedPartsData"
+														@focus="$event.target.select()"
+													></v-text-field>
+												</v-col>
+											</v-row>
+											<v-row>
+												<v-col>
+													<v-expansion-panels
+														multiple
+														light
+														flat
+														>
+														<v-expansion-panel  v-for="(item, index) in partsList"
+																:key="index">
+															<v-expansion-panel-header>{{ item.genericArticleName }}</v-expansion-panel-header>
+															<v-expansion-panel-content>
+																<ul>
+																	<li  v-for="(article, i) in item.array"
+																		:key="i">
+																		<div class="brand-name">{{ article.mfrName }}</div>
+																		<div class="item-code">
+																			{{ article.articleNumber }}
+																			<span class="item-position">{{setCriteriaData(article)}}</span>
+																		</div>
+
+																		<!--<div v-if="article.images.length > 0">
+																			<v-img class="grey lighten-3 mr-4 ml-4" v-bind:src="article.images[0].imageURL50"></v-img>
+																		</div>-->
+																		<div class="item-detail">
+																			<v-btn icon x-small @click="showPartsDetail(article)">
+																				<v-icon>fas fa-info-circle</v-icon>
+																			</v-btn>
+																		</div>
+																	</li>
+																</ul>
+															</v-expansion-panel-content>
+														</v-expansion-panel>
+													</v-expansion-panels>
+												</v-col>
+											</v-row>
 										</div>
 									</v-card-text>
 								</v-card>
@@ -319,6 +343,7 @@
 				partsInfo: {},
 				dialog: false,
 				imgDialog: false,
+				oeNumber : ''
 			}
 		},
 		components: {
@@ -351,6 +376,7 @@
 				$("#RMIMaingroupContents").html('');
 				$("#RMISubgroupContents").html('');
 				this.clearTabPage();
+				this.oeNumber = '';
 			},
 			clearTabPage()
 			{
@@ -368,6 +394,7 @@
 				this.korId = '';
 				this.korList = [];
 				this.workList = [];
+				this.oeNumber = '';
 			},
 			initAuthKey() {
 				let url = 'https://rmi-services.tecalliance.net/auth/login';
@@ -431,7 +458,7 @@
 					printView = true,
 					linkUrl = '.',
 					bodyQualColId = this.qualColId,
-					typeId = this.carTypeId;		
+					typeId = this.carTypeId;	
 					
 				// Build url query string
 				let query = '?languageCode=' + languageCode
@@ -899,76 +926,130 @@
                 // Handle HTTP response
                 if(xmlHttp.status == 200) {
 					var result = JSON.parse(xmlHttp.responseText);
-					var selctedGenArts = [...new Set(result.map(it => it.GenArtNo))];
-					console.log('genArtnr : ', selctedGenArts);
-					this.getParts(selctedGenArts);
+					console.log('GenArtsForItemMpIds :',result);
+					//var selctedGenArts = [...new Set(result.map(it => it.GenArtNo))];
+					//onsole.log('genArtnr : ', selctedGenArts);
+					//this.getParts(selctedGenArts);
+					this.getPartsList(result);
 				}
 			},
+			async getPartsList(data){
+                
+                this.parts = [];
+
+				console.log('selctedGenArts : ' ,data);
+
+                if(data.length === 0)return;
+
+                var list = await this.getParts(data);
+                
+                var genArtGroupList = arrayGroupBy(list, function(item){
+                    return [item.genericArticleId];
+                });
+
+                this.partsList = genArtGroupList.map(function(item){
+                    var obj = {};
+                    obj.genericArticleId = item[0].genericArticleId
+                    obj.genericArticleName = item[0].genericArticleName
+                    obj.array = item;
+                    return obj;
+                });
+                console.log('parts:',this.partsList)
+            },
 			getParts(data){
-
-				if(data.length === 0) return;
-				
-                let brnads = [2, 4, 5, 6, 9, 10, 16, 21, 26, 30, 32, 33, 35, 43, 50, 52, 59, 67, 68, 75, 79, 83, 89, 95, 101, 123, 134, 144, 151, 154, 161, 162, 183, 192, 204, 205, 240, 245, 287, 327, 381, 4434, 6020, 6263, 6278, 6441];
-				let params = {
-					"getArticleIdsWithState": {
-					articleCountry: "kr",
-					"brandNo": {
-                        "array": brnads
-                    },
-                    genericArticleId: {
-                        "array": data
-                        },
-                        lang: "en",
-                        linkingTargetId: this.carTcdTypeId,
-                        linkingTargetType: "P",
-                        provider: tecProvider
-                    },
-                    "sort": 2
-				};
-
-                // Send HTTP request
-                let xmlHttp = new XMLHttpRequest();
-				xmlHttp.open( 'POST', tecdocUrl, false );
-				xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
-                xmlHttp.setRequestHeader( 'Accept', 'application/json' );
-                xmlHttp.setRequestHeader( 'x-api-key', tecApiKey);
-				xmlHttp.send( JSON.stringify( params ) );
-
-				// Handle HTTP response
-				if(xmlHttp.status == 200) {
-                    //console.log('result2 :', JSON.parse(xmlHttp.responseText));
-                    var result = JSON.parse(xmlHttp.responseText);
-                    if(result.data !== ""){
-                        var genArtGroupList = arrayGroupBy(result.data.array, function(item){
-                            return [item.genericArticleId];
-						});
-						
-						this.partsList = genArtGroupList.map(function(item){
-							var obj = {};
-							obj.genericArticleId = item[0].genericArticleId
-							obj.genericArticleName = item[0].genericArticleName
-							obj.array =  arrayGroupBy(item, function(subItem){
-								return [subItem.brandNo , subItem.articleNo];
-							}).map(function(artItem){
-									var obj2 = {};
-									obj2.articleNo = artItem[0].articleNo;
-									obj2.brandName = artItem[0].brandName;
-									obj2.brandNo = artItem[0].brandNo;
-									obj2.array = artItem.map(function(subArtItem){
-										var obj3 = {};
-										obj3.articleId = subArtItem.articleId;
-										obj3.articleLinkId = subArtItem.articleLinkId;
-										return obj3;
-									});
-									return obj2;
-								});
-							return obj;
-						});
-
-						console.log('partsList :', this.partsList);
+				let brnads = [2, 4, 5, 6, 9, 10, 16, 21, 26, 30, 32, 33, 35, 43, 50, 52, 59, 67, 68, 75, 79, 83, 89, 95, 101, 123, 134, 144, 151, 154, 161, 162, 183, 192, 204, 205, 240, 245, 287, 327, 381, 4434, 6020, 6263, 6278, 6441];
+				let partsList = [];
+                data.forEach(element => {
+                    
+                    let params = {
+                        "getArticles": {
+                            articleCountry: "kr",
+                            provider: tecProvider,
+                            genericArticleIds: element.GenArtNo,
+                            criteriaFilters: {
+                                criteriaId: element.GenCritNo,
+                                rawValue: element.GenCritValue
+                            },
+                            linkageTargetId: this.carTcdTypeId,
+                            linkageTargetType: "V",
+                            lang: "en",
+                            perPage: 1000,
+                            page: 1,
+                            includeGenericArticles: true,
+                            includeArticleText: true,
+                            includeOEMNumbers: true,
+                            includeReplacesArticles: true,
+                            includeReplacedByArticles: true,
+                            includeArticleCriteria: true,
+                            includeLinkages: true,
+                            includeImages: true,
+                            includeLinks: true,
+                            includeTradeNumbers: true,
+                            includeCriteriaFacets: true
+                        }
+					};
+					
+					if(this.oeNumber !== ''){
+						params.getArticles.searchQuery = this.oeNumber;
+						params.getArticles.searchType = 1;
 					}
-				}
+
+                    // Send HTTP request
+                    let xmlHttp = new XMLHttpRequest();
+                    xmlHttp.open( 'POST', tecdocUrl, false );
+                    xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
+                    xmlHttp.setRequestHeader( 'Accept', 'application/json' );
+                    xmlHttp.setRequestHeader( 'x-api-key', tecApiKey);
+                    xmlHttp.send( JSON.stringify( params ) );
+
+                    // Handle HTTP response
+                    if(xmlHttp.status == 200) {
+                        //console.log( JSON.parse(xmlHttp.responseText));
+                        var result = JSON.parse(xmlHttp.responseText).articles;
+                        result = result.filter(x => brnads.includes(x.dataSupplierId));
+                        if(result.length > 0){
+                            //console.log('result :', result);
+                            result = result.map(function(item){
+                                var obj = {};
+                                obj = item;
+                                obj.genericArticleId = item.genericArticles.map(y =>y.genericArticleId).join(',');
+                                obj.genericArticleName = item.genericArticles.map(y =>y.genericArticleDescription).join(',');
+                                return obj;
+                            });                           
+                            partsList = partsList.concat(result);
+                        }
+                    };
+                });
+
+                // 중복체크
+                partsList = partsList.filter((item, idx) => {
+                    return partsList.map(x => x.dataSupplierId + x.articleNumber).indexOf(item.dataSupplierId + item.articleNumber) === idx;
+                })
+
+                // 부품군+ 브랜드 정렬
+                partsList.sort(function(a, b){
+                     return (a.genericArticleId + a.mfrName  >  b.genericArticleId + b.mfrName) ? 1 : -1;
+                });
+				return partsList;
 			},
+			setCriteriaData(value)
+            {
+                var position = '';
+                var articleList = value.articleCriteria.filter(x => x.criteriaId === 100);
+                //console.log('articleList :', articleList);
+                var linkageList = value.linkages.map(x=>x.linkageCriteria).reduce(function(pre,curr){
+                                        return pre.concat(curr);
+                                },[]).filter(x=>x.criteriaId === 100);
+                //console.log('linkageList :', linkageList);
+                var list = articleList.concat(linkageList);
+                list = list.filter((item, idx) => {
+                    return list.map(x => x.criteriaId).indexOf(item.criteriaId) === idx;
+                })
+                if(list.length > 0)
+                position = list[0].formattedValue;
+
+                return position;
+            },
 			showPartsDetail(value){
 				var partsData = {};
 				partsData.PartsInfo = value;
@@ -1042,7 +1123,13 @@
     width:200px;
 }
 .contents .item-code{
-    color: #01579B;
+    color: #0D47A1;
+	font-weight: bold;
+}
+.contents .item-position{
+    margin-left: 5px;
+    color: #616161;
+    font-size: 0.9em;
 }
 .contents .item-detail{
     margin-left: 10px;

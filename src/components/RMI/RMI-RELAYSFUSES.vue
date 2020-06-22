@@ -3,14 +3,27 @@
         <v-container>
             <v-row>
                 <v-col cols="12" sm="12" >
-                    <v-card
-                        class="pa-2"
-                        outlined
-                        tile
-                    >
-					<v-icon class="mx-4" style="color:#fddca9; font-size:18px;" >  mdi-arrange-send-backward </v-icon>
-					<span class="font-weight-bold" style="color:#fddca9; font-size:15px;" >Fueses & Relay</span>
-                    </v-card>
+					<v-container class="pt-0 pb-1 pt-2 contentsTitle">
+						<v-row>
+							<v-col cols="12" sm="6">
+								<v-icon class="mx-4" style="color:#fddca9; font-size:18px;" >  mdi-arrange-send-backward </v-icon>
+								<span class="font-weight-bold" style="color:#fddca9; font-size:15px;" >Fueses & Relay</span>
+							</v-col>
+							<v-col cols="12" sm="6">
+								<v-select
+                                    v-model="componentTypeId"
+                                    :items="componentTypeIdList"
+                                    item-text="ComponentTypeName"
+                                    item-value="ComponentTypeId"								
+                                    label="상세 구분"
+                                    outlined
+                                    dense
+                                    @change="setMainGroup"
+                                    >
+                                </v-select>
+							</v-col>
+						</v-row>
+					</v-container>
                 </v-col>
             </v-row>  			
             <v-row>
@@ -108,6 +121,9 @@
 		name: 'RMI-RELAYSFUSES',
 		data(){
 			return{
+				carTypeId: '',
+				componentTypeId: 0,
+				componentTypeIdList: [],
 				mainGroupLists: [],
 				subGroupLists: [],
 				itemMpLists: [],
@@ -117,9 +133,7 @@
 				itemMpId: '',
                 manualId: '',
                 boxConfigurationId:'',
-				rmiAuthKey: '',	
-				carTypeId: '',
-				componentTypeId: 0,		
+				rmiAuthKey: '',			
 			}
 		},
 		components: {
@@ -131,7 +145,7 @@
 				this.carTypeId = param.carTypeId; 
 				this.initAuthKey();
 				this.initComponentsForType();
-				this.setMainGroup();
+				//this.setMainGroup();
 				//this.getBoxOverviewHtml();
 			});
 		},	
@@ -179,10 +193,25 @@
 					
 					// Handle HTTP response
 					if(xmlHttp.status == 200) {
-						//console.log('initComponentsForType 리턴 : ', JSON.parse(xmlHttp.responseText));
-                        var result = JSON.parse(xmlHttp.responseText);
-                        this.componentTypeId = result[0].ComponentTypeId;
-                        console.log('initComponentsForType 리턴 : ', this.componentTypeId);
+						console.log('initComponentsForType 리턴 : ', JSON.parse(xmlHttp.responseText));
+						this.componentTypeIdList = JSON.parse(xmlHttp.responseText);
+						if(this.componentTypeIdList.length === 1){
+							this.componentTypeId = this.componentTypeIdList[0].ComponentTypeId;
+							this.setMainGroup();
+						}
+						else if(this.componentTypeIdList.length === 0){
+							this.mainGroupLists = [];
+							this.subGroupLists = [];
+							this.itemMpLists = [];
+							this.qualColLists = [];
+
+							this.mainGroupId = '';
+							this.subGroupId = '';
+							this.itemMpId = '';
+							this.manualId = '';
+
+							$("#RMIContents").html('');
+						}
 					}
 				} 
             },
@@ -201,14 +230,16 @@
 
 				if(this.carTypeId !== undefined && this.carTypeId !== '' ) {
 					
-					let languageCode = 'en',
+					let componentTypeId = this.componentTypeId,
+						languageCode = 'en',
 						countryCode = 'kr',
 						typeId = this.carTypeId;		
 						
 					// Build url query string
-					let query = '?languageCode=' + languageCode
-						+ '&countryCode=' + countryCode
-						+ '&typeId=' + typeId	
+					let query = '?componentTypeId=' + componentTypeId
+					+ '&languageCode=' + languageCode
+					+ '&countryCode=' + countryCode
+					+ '&typeId=' + typeId	
 					
 					// Send HTTP request
 					let xmlHttp = new XMLHttpRequest();
@@ -220,10 +251,9 @@
 					
 					// Handle HTTP response
 					if(xmlHttp.status == 200) {
-						console.log('changeMainGroup 리턴 : ', JSON.parse(xmlHttp.responseText));
+						console.log('MainGroup : ', JSON.parse(xmlHttp.responseText));
 						this.mainGroupLists = JSON.parse(xmlHttp.responseText);
 					}
-
 				}       
 			},
 			changeMainGroup() {
@@ -400,7 +430,11 @@
   color: black;
   font-size: 12px;
 }
-
+.contents .contentsTitle {
+  background-color: #424242;
+  font-size: 12px;
+  height: 80px;
+}
 .contents .adjustSelect {
   background-color: #666;
   font-size: 12px;
