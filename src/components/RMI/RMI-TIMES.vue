@@ -117,7 +117,25 @@
                             tile
                             id = "RMIContents"
                         >
-                            <v-card-title  class="pa-2 card-title">Parts</v-card-title>
+                            <v-card-title class="pt-0 pb-0 card-title">
+								<template>
+									<v-row>
+										<v-col class="pa-1 ml-2 mt-2">Parts</v-col>
+										<v-col class="pa-0 mr-4">
+											<v-text-field
+												label="OE번호"
+												dense
+												single-line
+												append-icon="search"
+												v-model="oeNumber"
+												@keypress.enter="getPartsList"
+												@click:append="getPartsList"
+												@focus="$event.target.select()"
+											></v-text-field>
+										</v-col>
+									</v-row>
+								</template>
+							</v-card-title>
                             <v-expansion-panels
                             multiple
                             light
@@ -221,6 +239,7 @@
 				manualId:'',
 				partsInfo: {},
 				imgDialog: false,
+				oeNumber : '',
 			}
 		},
 		components: {
@@ -335,6 +354,7 @@
 
 				this.mainGroupId = '';
 				this.subGroupId = '';
+				this.oeNumber = '';
 				
 				if(this.carTypeId !== undefined && this.carTypeId !== '' ) {
 					
@@ -366,6 +386,7 @@
 			changeMainGroup() {
 				var selected = this.mainGroupId;
 				this.itemMpLists = [];
+				this.oeNumber = '';
 				
 				this.subGroupLists = this.mainGroupLists.reduce(function (pre, value) {
 					if(value.MainGroupId === selected) {
@@ -494,8 +515,7 @@
 				return result;
 			},
 			async getPartsList(){
-                
-                this.parts = [];
+               this.parts = [];
 
 				let selectedWorks = this.repairItem;
 				let selctedGenArts = this.genArtNoList.filter(function(item){   
@@ -564,7 +584,12 @@
                             includeCriteriaFacets: true
                         }
                     };
-
+					
+					if(this.oeNumber !== ''){
+						params.getArticles.searchQuery = this.oeNumber;
+						params.getArticles.searchType = 1;
+					}
+					
                     // Send HTTP request
                     let xmlHttp = new XMLHttpRequest();
                     xmlHttp.open( 'POST', tecdocUrl, false );
@@ -599,7 +624,7 @@
 
                 // 부품군+ 브랜드 정렬
                 partsList.sort(function(a, b){
-                    return (a.genericArticleId + ('000'+ a.dataSupplierId).slice(-3)  >  b.genericArticleId + ('000'+ b.dataSupplierId).slice(-3)) ? 1 : -1;
+                    return (a.genericArticleId + a.mfrName  >  b.genericArticleId + b.mfrName) ? 1 : -1;
                 });
                 return partsList;
 			},
@@ -649,7 +674,7 @@
                 this.manualId = value.id;
                 this.$EventBus.$emit('RMI-CHECKLIST.InitData',checkData);
 				this.checkDialog = true;
-            }  
+			},
 		},   		
 	}
 </script>
@@ -697,7 +722,8 @@
     width:200px;
 }
 .contents .item-code{
-    color: #01579B;
+    color: #0D47A1;
+	font-weight: bold;
 }
 .contents .item-position{
     margin-left: 5px;
@@ -723,7 +749,7 @@
 	border: 0px;
 }
 #RMISubContents .repair-tree{
-	height: 400px;
+	height: 500px;
 	overflow:auto;
 	overflow-x:hidden;
 }

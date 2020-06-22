@@ -207,37 +207,57 @@
 										</div>
 										<!--LinkedParts Content-->
 										<div id = "RMIContents" v-if="checkShowTabPage('PARTS')">
-											<v-expansion-panels
-												multiple
-												light
-												flat
-												>
-												<v-expansion-panel  v-for="(item, index) in partsList"
-														:key="index">
-													<v-expansion-panel-header>{{ item.genericArticleName }}</v-expansion-panel-header>
-													<v-expansion-panel-content>
-														<ul>
-															<li  v-for="(article, i) in item.array"
-																:key="i">
-																<div class="brand-name">{{ article.mfrName }}</div>
-																<div class="item-code">
-																	{{ article.articleNumber }}
-																	<span class="item-position">{{setCriteriaData(article)}}</span>
-																</div>
+											<v-row>
+												<v-col></v-col>
+												<v-col cols="12" sm="6">
+													<v-text-field
+														label="OE번호"
+														dense
+														single-line
+														append-icon="search"
+														v-model="oeNumber"
+														light
+														@keypress.enter="getLinkedPartsData"
+														@click:append="getLinkedPartsData"
+														@focus="$event.target.select()"
+													></v-text-field>
+												</v-col>
+											</v-row>
+											<v-row>
+												<v-col>
+													<v-expansion-panels
+														multiple
+														light
+														flat
+														>
+														<v-expansion-panel  v-for="(item, index) in partsList"
+																:key="index">
+															<v-expansion-panel-header>{{ item.genericArticleName }}</v-expansion-panel-header>
+															<v-expansion-panel-content>
+																<ul>
+																	<li  v-for="(article, i) in item.array"
+																		:key="i">
+																		<div class="brand-name">{{ article.mfrName }}</div>
+																		<div class="item-code">
+																			{{ article.articleNumber }}
+																			<span class="item-position">{{setCriteriaData(article)}}</span>
+																		</div>
 
-																<!--<div v-if="article.images.length > 0">
-																	<v-img class="grey lighten-3 mr-4 ml-4" v-bind:src="article.images[0].imageURL50"></v-img>
-																</div>-->
-																<div class="item-detail">
-																	<v-btn icon x-small @click="showPartsDetail(article)">
-																		<v-icon>fas fa-info-circle</v-icon>
-																	</v-btn>
-																</div>
-															</li>
-														</ul>
-													</v-expansion-panel-content>
-												</v-expansion-panel>
-											</v-expansion-panels>
+																		<!--<div v-if="article.images.length > 0">
+																			<v-img class="grey lighten-3 mr-4 ml-4" v-bind:src="article.images[0].imageURL50"></v-img>
+																		</div>-->
+																		<div class="item-detail">
+																			<v-btn icon x-small @click="showPartsDetail(article)">
+																				<v-icon>fas fa-info-circle</v-icon>
+																			</v-btn>
+																		</div>
+																	</li>
+																</ul>
+															</v-expansion-panel-content>
+														</v-expansion-panel>
+													</v-expansion-panels>
+												</v-col>
+											</v-row>
 										</div>
 									</v-card-text>
 								</v-card>
@@ -323,6 +343,7 @@
 				partsInfo: {},
 				dialog: false,
 				imgDialog: false,
+				oeNumber : ''
 			}
 		},
 		components: {
@@ -355,6 +376,7 @@
 				$("#RMIMaingroupContents").html('');
 				$("#RMISubgroupContents").html('');
 				this.clearTabPage();
+				this.oeNumber = '';
 			},
 			clearTabPage()
 			{
@@ -372,6 +394,7 @@
 				this.korId = '';
 				this.korList = [];
 				this.workList = [];
+				this.oeNumber = '';
 			},
 			initAuthKey() {
 				let url = 'https://rmi-services.tecalliance.net/auth/login';
@@ -435,7 +458,7 @@
 					printView = true,
 					linkUrl = '.',
 					bodyQualColId = this.qualColId,
-					typeId = this.carTypeId;		
+					typeId = this.carTypeId;	
 					
 				// Build url query string
 				let query = '?languageCode=' + languageCode
@@ -964,7 +987,12 @@
                             includeTradeNumbers: true,
                             includeCriteriaFacets: true
                         }
-                    };
+					};
+					
+					if(this.oeNumber !== ''){
+						params.getArticles.searchQuery = this.oeNumber;
+						params.getArticles.searchType = 1;
+					}
 
                     // Send HTTP request
                     let xmlHttp = new XMLHttpRequest();
@@ -1000,7 +1028,7 @@
 
                 // 부품군+ 브랜드 정렬
                 partsList.sort(function(a, b){
-                    return (a.genericArticleId + ('000'+ a.dataSupplierId).slice(-3)  >  b.genericArticleId + ('000'+ b.dataSupplierId).slice(-3)) ? 1 : -1;
+                     return (a.genericArticleId + a.mfrName  >  b.genericArticleId + b.mfrName) ? 1 : -1;
                 });
 				return partsList;
 			},
@@ -1095,7 +1123,8 @@
     width:200px;
 }
 .contents .item-code{
-    color: #01579B;
+    color: #0D47A1;
+	font-weight: bold;
 }
 .contents .item-position{
     margin-left: 5px;

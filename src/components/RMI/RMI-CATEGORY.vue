@@ -39,18 +39,17 @@
 							<v-row>
 								<v-col cols="12" sm="4">
 									<v-treeview
-											dense
-											light
-											color ="red"
-											:items="assemblyGroupList"
-											class="tree-contents"
-											open-on-click
-											activatable
-											item-key="assemblyGroupNodeId"
-											item-text="assemblyGroupName"
-											:active.sync="assemblyGroupId"
-											@update:active="getParts()"
-										>
+										dense
+										light
+										color ="red"
+										:items="assemblyGroupList"
+										class="tree-contents"
+										open-on-click
+										activatable
+										item-key="assemblyGroupNodeId"
+										item-text="assemblyGroupName"
+										:active.sync="assemblyGroupId"
+										@update:active="getParts()">
 									</v-treeview>
 								</v-col>
 								<v-divider vertical></v-divider>
@@ -97,7 +96,6 @@
 		<!--부품상세 정보-->
         <v-dialog v-model="dialog"  width="600px">     
             <PartsInfo :PartsInfo="partsInfo"
-			:TecTypeID="carTcdTypeId"
 			@close="dialog=false">
             </PartsInfo>               
         </v-dialog>
@@ -361,7 +359,7 @@
 				this.partsInfo = value;
                 this.$EventBus.$emit('RMI-PARTSINFO.InitData',partsData);
                 this.dialog = true;
-            },
+			},
 		},   		
 	}
 </script>
@@ -397,7 +395,8 @@
     width:200px;
 }
 .contents .item-code{
-    color: #01579B;
+    color: #0D47A1;
+	font-weight: bold;
 }
 .contents .item-position{
     margin-left: 5px;
