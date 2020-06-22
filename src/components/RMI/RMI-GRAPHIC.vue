@@ -367,7 +367,10 @@
 					//this.setMainGroup();
 				});
 			});
-		},	
+		},
+		beforeDestroy(){
+            this.$EventBus.$off('RMI-GRAPHIC.InitData');
+        },
 		methods: {
 			clearManual() {
 				console.log('clearManual.......');				

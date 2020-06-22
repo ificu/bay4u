@@ -148,7 +148,10 @@
 				//this.setMainGroup();
 				//this.getBoxOverviewHtml();
 			});
-		},	
+		},
+		beforeDestroy(){
+            this.$EventBus.$off('RMI-RELAYSFUSES.InitData');
+        },	
 		methods: {
 			initAuthKey() {
 				let url = 'https://rmi-services.tecalliance.net/auth/login';

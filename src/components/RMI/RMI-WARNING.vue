@@ -78,7 +78,10 @@
 					this.changeManualId();
 				}
 			});
-		},	
+		},
+		beforeDestroy(){
+            this.$EventBus.$off('RMI-WARNING.InitData');
+        },	
 		methods: {
 			initAuthKey() {
 				let url = 'https://rmi-services.tecalliance.net/auth/login';

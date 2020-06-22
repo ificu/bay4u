@@ -258,6 +258,9 @@
 				//this.setMainGroup();
 			});
 		},	
+		beforeDestroy(){
+            this.$EventBus.$off('RMI-TIMES.InitData');
+        },
         updated(){
             var rootNode = document.getElementsByClassName('v-treeview-node__root');
             rootNode.forEach(element => {
@@ -749,7 +752,7 @@
 	border: 0px;
 }
 #RMISubContents .repair-tree{
-	height: 500px;
+	/*height: 500px;*/
 	overflow:auto;
 	overflow-x:hidden;
 }

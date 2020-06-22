@@ -113,6 +113,9 @@
 				this.setMainGroup();
 			});
 		},	
+		beforeDestroy(){
+            this.$EventBus.$off('RMI-ADJUST.InitData');
+        },
 		methods: {
 			initAuthKey() {
 				let url = 'https://rmi-services.tecalliance.net/auth/login';

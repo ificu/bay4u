@@ -237,7 +237,10 @@
                 this.setBodies();
                 /*this.setWorks();*/
             });
-        },	
+        },
+        beforeDestroy(){
+            this.$EventBus.$off('RMI-MAINTENANCE.InitData');
+        },
         updated(){
             var rootNode = document.getElementsByClassName('v-treeview-node__root');
             rootNode.forEach(element => {

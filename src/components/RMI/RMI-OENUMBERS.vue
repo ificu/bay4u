@@ -106,6 +106,9 @@
                 this.initAuthKey();
 			});
         },
+        beforeDestroy(){
+            this.$EventBus.$off('RMI-OENUMBERS.InitData');
+        },
         methods:{
             initAuthKey() {
 				let url = 'https://rmi-services.tecalliance.net/auth/login';
