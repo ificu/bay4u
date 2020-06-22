@@ -185,6 +185,10 @@
       this.selectedMenu = 0;
       this.carVin = this.$route.query.VIN;
       this.carEngine = this.$route.query.ENGINE;
+
+      window.oncontextmenu = function () {
+        return false;
+      };      
     },
     methods: {
       clickMenu(page) {

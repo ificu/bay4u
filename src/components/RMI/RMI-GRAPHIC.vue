@@ -24,6 +24,7 @@
 								<v-btn id='btnFuncMaingroupDelegate' @click="selectMaingroup" style="display:none;">JSMaingroupDelegate</v-btn>
 								<v-btn id='btnFuncSubgroupDelegate' @click="selectSubgroup" style="display:none;">JSSubgroupDelegate</v-btn>
 								<v-btn id='btnFuncDelegate' @click="selectDelegate" style="display:none;">JSDelegate</v-btn>
+								<v-btn id='btnFuncTranslateDelegate' @click="clickPopup" style="display:none;">JSTranslateDelegate</v-btn>
 							</v-col>
 						</v-row>
 					</v-container>
@@ -259,15 +260,46 @@
 			@close="dialog=false">
             </PartsInfo>               
         </v-dialog>
+		<!--번역 텍스트-->
+		<v-dialog
+			v-model="showTranslateMessage"
+			width="500"
+		>
+			<v-card>
+				<v-card-title
+					class="headline deep-orange accent-2"
+					primary-title
+				>
+					문장 번역
+				</v-card-title>
+
+				<v-card-text class="pt-4" id = "RMITranslate"></v-card-text>
+				<v-divider></v-divider>
+
+				<v-card-actions>
+					<v-spacer></v-spacer>
+					<v-btn
+						color="deep-orange accent-2"
+						text
+						@click="showTranslateMessage = false"
+					>
+						확인
+					</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>			
     </v-content>
 </template>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script>
+	import Constant from '@/Constant';
 	import {arrayGroupBy} from '@/utils/common.js'
 	import BackToTop from '@/components/Common/BackToTop.vue'
 	import PartsInfo from '@/components/RMI/TEC-PARTSINFO.vue'
 	import PartsImage from '@/components/RMI/TEC-PARTSIMG.vue'
+
+	const axios = require('axios').default;	
 
 	const url = "https://rmi-services.tecalliance.net/rest/Graphics";
 	const adjUrl = "https://rmi-services.tecalliance.net/rest/Adjust";
@@ -319,6 +351,8 @@
 				partsInfo: {},
 				dialog: false,
 				imgDialog: false,
+				translateMessage: '',
+				showTranslateMessage: false,				
 			}
 		},
 		components: {
@@ -342,6 +376,30 @@
 					//this.setMainGroup();
 				});
 			});
+
+			document.addEventListener('mousedown', function(){
+				this.translateMessage = '';
+				if ((event.button == 2) || (event.which == 3)) {
+					event.preventDefault();
+					console.log('우클릭 : ', document.getSelection().toString());
+					if(document.getSelection().toString().length > 0) {
+						
+						var param = {};
+						param.text = document.getSelection().toString();
+
+						axios({
+							method: 'POST',
+							url: Constant.TRANSLATE_URL,
+							data: param
+						})
+						.then((result) => {
+							console.log('result : ', result);
+							document.getElementById('btnFuncTranslateDelegate').value = result.data[0];
+							document.getElementById('btnFuncTranslateDelegate').click();
+						});
+					}
+				}
+			});			
 		},	
 		methods: {
 			clearManual() {
@@ -986,7 +1044,12 @@
 				this.partsInfo = value;
 				this.$EventBus.$emit('RMI-PARTSIMG.InitData',partsData);
 				this.imgDialog = true;
-            },
+			},
+			clickPopup() {
+				this.translateMessage = document.getElementById('btnFuncTranslateDelegate').value.replace(/\n/gi, '<br>');
+				this.showTranslateMessage = true;				
+				$("#RMITranslate").html(this.translateMessage);
+			},
 		},   		
 	}
 </script>
