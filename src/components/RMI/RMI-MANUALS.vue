@@ -76,6 +76,7 @@
 								@change="changeManualId"
 								>
 							</v-select>
+							<v-btn id='btnFuncTranslateDelegate' @click="clickPopup" style="display:none;">JSTranslateDelegate</v-btn>
 					</v-card>
                 </v-col>					
             </v-row>
@@ -95,13 +96,41 @@
             </v-row>            
         </v-container>
 		<BackToTop></BackToTop>
+		<v-dialog
+			v-model="showTranslateMessage"
+			width="500"
+		>
+			<v-card>
+				<v-card-title
+					class="headline deep-orange accent-2"
+					primary-title
+				>
+					문장 번역
+				</v-card-title>
+
+				<v-card-text class="pt-4" id = "RMITranslate"></v-card-text>
+				<v-divider></v-divider>
+
+				<v-card-actions>
+					<v-spacer></v-spacer>
+					<v-btn
+						color="deep-orange accent-2"
+						text
+						@click="showTranslateMessage = false"
+					>
+						확인
+					</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>		
     </v-content>
 </template>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script>
+	import Constant from '@/Constant';
 	import BackToTop from '@/components/Common/BackToTop.vue'
-//	const axios = require('axios').default;
+	const axios = require('axios').default;
 	const url = "https://rmi-services.tecalliance.net/rest/Manuals";
 		
 	export default {
@@ -117,7 +146,9 @@
 				itemMpId: '',
 				manualId: '',
 				rmiAuthKey: '',	
-				carTypeId: '',			
+				carTypeId: '',
+				translateMessage: '',
+				showTranslateMessage: false,
 			}
 		},
 		components: {
@@ -132,9 +163,26 @@
 			});
 
 			document.addEventListener('mousedown', function(){
+				this.translateMessage = '';
 				if ((event.button == 2) || (event.which == 3)) {
-					//event.preventDefault();
+					event.preventDefault();
 					console.log('우클릭 : ', document.getSelection().toString());
+					if(document.getSelection().toString().length > 0) {
+						
+						var param = {};
+						param.text = document.getSelection().toString();
+
+						axios({
+							method: 'POST',
+							url: Constant.TRANSLATE_URL,
+							data: param
+						})
+						.then((result) => {
+							console.log('result : ', result);
+							document.getElementById('btnFuncTranslateDelegate').value = result.data[0];
+							document.getElementById('btnFuncTranslateDelegate').click();
+						});
+					}
 				}
 			});
 		},	
@@ -158,6 +206,15 @@
 				if(xmlHttp.status == 200) {
 					this.rmiAuthKey = 'TecRMI ' + xmlHttp.getResponseHeader( 'X-AuthToken' );
 				}
+			},
+			async translateText(text) {
+
+				let [translations] = await translate.translate(text, "ko");
+				translations = Array.isArray(translations) ? translations : [translations];
+				console.log('Translations:');
+				translations.forEach((translation, i) => {
+					console.log(`${text[i]} => (${target}) ${translation}`);
+				});
 			},
 			setMainGroup() {
 				this.mainGroupLists = [];
@@ -299,6 +356,11 @@
 					let page = xmlHttp.responseText.replace('<img src=\"https://rmi-cdn.tecalliance.net/services/Logo.png\" height=\"60px\" border=\"0\" alt=\"\"/>\r\n', '');
 					$("#RMIContents").html(JSON.parse(page));
 				}	
+			},
+			clickPopup() {
+				this.translateMessage = document.getElementById('btnFuncTranslateDelegate').value.replace(/\n/gi, '<br>');
+				this.showTranslateMessage = true;				
+				$("#RMITranslate").html(this.translateMessage);
 			}
 		},   		
 	}

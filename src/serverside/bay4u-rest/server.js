@@ -19,10 +19,11 @@ app.use('/api/intravanpkg', require('./api/intravanpkg'));
 app.use('/api/intravanHist', require('./api/intravanHist'));
 app.use('/api/iparts', require('./api/iparts'));
 app.use('/api/smartlink', require('./api/smartlink'));
+app.use('/api/translate', require('./api/translate'));
 
 // Server
-var port = 8085; /* 운영 */
-/*var port = 8086;  개발 */
+/*var port = 8085;  운영 */
+var port = 8086; /* 개발 */
 app.listen(port, function(){
   console.log('listening on port:' + port);
 });

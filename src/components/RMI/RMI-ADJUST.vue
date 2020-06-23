@@ -9,7 +9,7 @@
                         tile
                     >
 					<v-icon class="mx-4" style="color:#fddca9; font-size:18px;" >  mdi-arrange-send-backward </v-icon>
-					<span class="font-weight-bold" style="color:#fddca9; font-size:15px;" >정비 참고 정보</span>
+					<span class="font-weight-bold" style="color:#fddca9; font-size:15px;" >{{titleText}}</span>
                     </v-card>
                 </v-col>
             </v-row>  			
@@ -99,7 +99,8 @@
 				subGroupId: '',
 				itemMpId: '',
 				rmiAuthKey: '',	
-				carTypeId: '',			
+				carTypeId: '',	
+				titleText: '정비 참고 정보',		
 			}
 		},
 		components: {
@@ -111,6 +112,26 @@
 				this.carTypeId = param.carTypeId; 
 				this.initAuthKey();
 				this.setMainGroup();
+
+				if(param.spec === "OIL") {
+					this.mainGroupLists = this.mainGroupLists.filter(function (item) {
+						return item.MainGroupId === 20;
+					});
+					this.mainGroupId = 20;
+					this.changeMainGroup();
+					this.titleText = '오일 교환량 상세';
+				}
+
+				if(param.spec === "CHANGE") {
+					this.mainGroupLists = this.mainGroupLists.filter(function (item) {
+						return item.MainGroupId === 22;
+					});
+					this.mainGroupId = 22;
+					this.changeMainGroup();
+					this.subGroupId = 95;
+					this.changeSubGroup();
+					this.titleText = '소모품 교환주기';
+				}
 			});
 		},	
 		methods: {
