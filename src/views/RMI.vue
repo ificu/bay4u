@@ -15,7 +15,7 @@
             <v-list-item :key="item.text" 
               v-if="!item.divider" 
               link
-              @click="clickMenu(item.rmi)"
+              @click="clickMenu(item.rmi, item.spec)"
             >
               <v-list-item-action>
                 <v-icon>{{ item.icon }}</v-icon>
@@ -141,22 +141,24 @@
       showPageList: [],
       jsonHeader: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'Authorization': 'TecRMI {{AuthToken}}' },
       menuItems: [
-        { icon: 'mdi-cube-scan', text: 'OverView', rmi: 'OVERVIEW', divider: false },
+        { icon: 'mdi-cube-scan', text: 'OverView', rmi: 'OVERVIEW' },
         { divider: true },
-        { icon: 'mdi-car-info', text: '정비 참고 정보', rmi: 'ADJUST', divider: false },
-        { icon: 'mdi-notebook-multiple', text: '정비 참고 매뉴얼', rmi: 'MANUALS', divider: false },
+        { icon: 'mdi-notebook-multiple', text: '정비 참고 매뉴얼', rmi: 'MANUALS' },
+        { icon: 'mdi-oil', text: '오일 교환량 상세', rmi: 'ADJUST', spec: 'OIL' },
+        { icon: 'mdi-alert-circle-check-outline', text: '소모품 교환 주기', rmi: 'ADJUST', spec: 'CHANGE' },                
         { divider: true },
-        { icon: 'mdi-floor-plan', text: '차량 분해 도면', rmi: 'GRAPHIC', divider: false },
-        { icon: 'mdi-playlist-play', text: '정기 점검 항목', rmi: 'MAINTENANCE', divider: false },
-        { icon: 'mdi-history', text: '표준 공임 시간', rmi: 'TIMES', divider: false },
+        { icon: 'mdi-floor-plan', text: '차량 분해 도면', rmi: 'GRAPHIC' },
+        { icon: 'mdi-playlist-play', text: '경정비 점검 항목', rmi: 'MAINTENANCE' },
+        { icon: 'mdi-history', text: '표준 공임 시간', rmi: 'TIMES' },
         { divider: true },
-        { icon: 'search', text: 'OE번호 조회', rmi: 'OENUMBERS', divider: false },
-        { icon: 'mdi-file-tree-outline', text: '부품 카테고리', rmi: 'CATEGORY', divider: false },
+        { icon: 'search', text: 'OE번호 조회', rmi: 'OENUMBERS' },
+        { icon: 'mdi-file-tree-outline', text: '부품 카테고리', rmi: 'CATEGORY' },
         { divider: true },
-        { icon: 'mdi-laptop-chromebook', text: '차량 진단 데이터', rmi: 'DAIGNOSTICVALUES', divider: false },
-        { icon: 'mdi-currency-sign', text: 'Fueses & Relay', rmi: 'RELAYSFUSES', divider: false },
-        { icon: 'mdi-car-brake-abs', text: '경보등 정보', rmi: 'WARNING', divider: false },
-        { icon: 'mdi-car-shift-pattern', text: '배선 정보', rmi: 'WIRING', divider: false },
+        { icon: 'mdi-laptop-chromebook', text: '차량 진단 데이터', rmi: 'DAIGNOSTICVALUES' },
+        { icon: 'mdi-currency-sign', text: 'Fueses & Relay', rmi: 'RELAYSFUSES' },
+        { icon: 'mdi-car-brake-abs', text: '경보등 정보', rmi: 'WARNING' },
+        { icon: 'mdi-car-shift-pattern', text: '배선 정보', rmi: 'WIRING' },
+        { icon: 'mdi-car-info', text: '정비 참고 정보', rmi: 'ADJUST' },        
       ],
       carMakerLists: [],
       carRangeLists: [],
@@ -196,14 +198,15 @@
       };      
     },
     methods: {
-      clickMenu(page) {
+      clickMenu(page, spec) {
         if(this.subPageList.includes(page) === true) {
           this.setShowPage(page);
           this.$nextTick(function(){
             var param = {
               rmiAuthKey: this.rmiAuthKey,
               carTypeId: (this.carTypeId!=='')?JSON.parse(this.carTypeId).TypeId:'',
-              carTcdTypeId: (this.carTypeId!=='')?JSON.parse(this.carTypeId).TcdTypeId:''
+              carTcdTypeId: (this.carTypeId!=='')?JSON.parse(this.carTypeId).TcdTypeId:'',
+              spec: spec
             }          
             console.log('InitData param : ', param);
             this.$EventBus.$emit('RMI-'+page+'.InitData', param);  
