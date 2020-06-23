@@ -49,25 +49,50 @@
 										item-key="assemblyGroupNodeId"
 										item-text="assemblyGroupName"
 										:active.sync="assemblyGroupId"
-										@update:active="oeNumber = '';getParts();">
+										@update:active="itemNo = '';getParts();">
 									</v-treeview>
 								</v-col>
 								<v-divider vertical></v-divider>
 								<v-col>
 									<v-row v-if="assemblyGroupList.length > 0">
-										<v-col>
+										<v-col class="d-flex" style="flex-direction: row-reverse;">
+											<div class="pa-3" style="width:300px;">
+                                                <v-text-field
+                                                label="부품번호"
+                                                dense
+                                                single-line
+                                                append-icon="search"
+                                                v-model="itemNo"
+												light
+                                                @keypress.enter="getParts"
+                                                @click:append="getParts"
+                                                @focus="$event.target.select()"
+                                            ></v-text-field>
+                                            </div> 
+                                            <div style="width:110px;" class="mr-3"> 
+                                                <v-select
+                                                v-model="itemType"
+                                                :items="itemTypeList"
+                                                item-text="text"
+                                                item-value="value"
+												light
+                                                label="구분"
+                                            ></v-select>
+                                            </div>
+                                        </v-col>
+										<!--<v-col>
 											<v-text-field
 												label="OE번호"
 												dense
 												single-line
 												append-icon="search"
-												v-model="oeNumber"
+												v-model="itemNo"
 												light
 												@keypress.enter="getParts"
 												@click:append="getParts"
 												@focus="$event.target.select()"
 											></v-text-field>
-										</v-col>
+										</v-col>-->
 									</v-row>
 									<v-row>
 										<v-col>
@@ -113,7 +138,7 @@
         </v-container>
 		<BackToTop></BackToTop>
 		<!--부품상세 정보-->
-        <v-dialog v-model="dialog"  width="600px">     
+        <v-dialog v-model="dialog"  width="700px">     
             <PartsInfo :PartsInfo="partsInfo"
 			@close="dialog=false">
             </PartsInfo>               
@@ -147,7 +172,9 @@
 				partsList:[],
 				partsInfo: {},
 				dialog: false,
-				oeNumber : ''
+				itemNo : '',
+				itemType : 1,
+                itemTypeList : [{text:'OE번호', value:1},{text:'AM번호',value:0}],
 			}
 		},
 		components: {
@@ -223,7 +250,7 @@
 			{
 				console.log('shortCutId : ', value);
 				this.partsList  = [];
-				this.oeNumber = '';
+				this.itemNo = '';
 
 				let params ={
 					"getChildNodesAllLinkingTarget2": {
@@ -309,9 +336,9 @@
 					}
 				};
 
-				if(this.oeNumber !== ''){
-					params.getArticles.searchQuery = this.oeNumber;
-					params.getArticles.searchType = 1;
+				if(this.itemNo !== ''){
+					params.getArticles.searchQuery = this.itemNo;
+					params.getArticles.searchType = this.itemType;
 				}
 
 				// Send HTTP request
@@ -385,7 +412,7 @@
 				partsData.PartsInfo = value;
 				partsData.TecTypeId = this.carTcdTypeId;
 
-				this.partsInfo = value;
+				this.partsInfo = partsData;
                 this.$EventBus.$emit('RMI-PARTSINFO.InitData',partsData);
                 this.dialog = true;
 			},
@@ -444,6 +471,5 @@
 	border-width: thick;
 	border-color: #fddca9;
 }
-
 </style>
 

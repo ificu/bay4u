@@ -105,6 +105,7 @@
     <RMIMAINTENANCE v-if="checkShowPage('MAINTENANCE')"></RMIMAINTENANCE>
     <RMITIMES v-if="checkShowPage('TIMES')" ></RMITIMES>
     <RMIOENUMBERS v-if="checkShowPage('OENUMBERS')" ></RMIOENUMBERS>
+    <RMIVEHICLES v-if="checkShowPage('VEHICLES')" ></RMIVEHICLES>
     <RMICATEGORY v-if="checkShowPage('CATEGORY')" ></RMICATEGORY>
     <RMIDAIGNOSTICVALUES v-if="checkShowPage('DAIGNOSTICVALUES')" ></RMIDAIGNOSTICVALUES>
     <RMIRELAYSFUSES v-if="checkShowPage('RELAYSFUSES')" ></RMIRELAYSFUSES>
@@ -121,6 +122,7 @@
   import RMIMAINTENANCE from '@/components/RMI/RMI-MAINTENANCE.vue'
   import RMITIMES from '@/components/RMI/RMI-TIMES.vue'
   import RMIOENUMBERS from '@/components/RMI/RMI-OENUMBERS.vue'
+  import RMIVEHICLES from '@/components/RMI/RMI-VEHICLES.vue'
   import RMICATEGORY from '@/components/RMI/RMI-CATEGORY.vue'
   import RMIDAIGNOSTICVALUES from '@/components/RMI/RMI-DAIGNOSTICVALUES.vue'
   import RMIRELAYSFUSES from '@/components/RMI/RMI-RELAYSFUSES.vue'
@@ -137,7 +139,7 @@
     data: () => ({
       drawer: null,
       selectedMenu:0,
-      subPageList: ['OVERVIEW', 'ADJUST', 'MANUALS', 'GRAPHIC','MAINTENANCE','TIMES','DAIGNOSTICVALUES','OENUMBERS', 'CATEGORY', 'RELAYSFUSES','WIRING', 'WARNING'],
+      subPageList: ['OVERVIEW', 'ADJUST', 'MANUALS', 'GRAPHIC','MAINTENANCE','TIMES','DAIGNOSTICVALUES','OENUMBERS','VEHICLES', 'CATEGORY', 'RELAYSFUSES','WIRING', 'WARNING'],
       showPageList: [],
       jsonHeader: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'Authorization': 'TecRMI {{AuthToken}}' },
       menuItems: [
@@ -151,7 +153,8 @@
         { icon: 'mdi-playlist-play', text: '경정비 점검 항목', rmi: 'MAINTENANCE' },
         { icon: 'mdi-history', text: '표준 공임 시간', rmi: 'TIMES' },
         { divider: true },
-        { icon: 'search', text: 'OE번호 조회', rmi: 'OENUMBERS' },
+        { icon: 'search', text: '부품번호 조회 ( OE / AM )', rmi: 'OENUMBERS' },
+        { icon: 'search', text: '부품 적용차량 조회', rmi: 'VEHICLES' },
         { icon: 'mdi-file-tree-outline', text: '부품 카테고리', rmi: 'CATEGORY' },
         { divider: true },
         { icon: 'mdi-laptop-chromebook', text: '차량 진단 데이터', rmi: 'DAIGNOSTICVALUES' },
@@ -178,6 +181,7 @@
       RMIMAINTENANCE,
       RMITIMES,
       RMIOENUMBERS,
+      RMIVEHICLES,
       RMICATEGORY,
       RMIDAIGNOSTICVALUES,
       RMIRELAYSFUSES,

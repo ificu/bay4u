@@ -121,25 +121,36 @@
 								<template>
 									<v-row>
 										<v-col class="pa-1 ml-2 mt-2">Parts</v-col>
-										<v-col class="pa-0 mr-4">
-											<v-text-field
-												label="OE번호"
-												dense
-												single-line
-												append-icon="search"
-												v-model="oeNumber"
-												@keypress.enter="getPartsList"
-												@click:append="getPartsList"
-												@focus="$event.target.select()"
-											></v-text-field>
-										</v-col>
+										<v-col cols="12" sm="5" class="d-flex pa-0">
+                                            <div style="width:110px;" class="mr-3"> 
+                                                <v-select
+                                                v-model="itemType"
+                                                :items="itemTypeList"
+                                                item-text="text"
+                                                item-value="value"
+                                                label="구분"
+                                            ></v-select>
+                                            </div>
+                                            <div class="pa-3" style="width:300px;">
+                                                <v-text-field
+                                                label="부품번호"
+                                                dense
+                                                single-line
+                                                append-icon="search"
+                                                v-model="itemNo"
+                                                @keypress.enter="getPartsList"
+                                                @click:append="getPartsList"
+                                                @focus="$event.target.select()"
+                                            ></v-text-field>
+                                            </div> 
+                                        </v-col>
 									</v-row>
 								</template>
 							</v-card-title>
                             <v-expansion-panels
-                            multiple
-                            light
-                            flat
+								multiple
+								light
+								flat
                             >
                             <v-expansion-panel  v-for="(item, index) in parts"
                                     :key="index">
@@ -182,7 +193,7 @@
 			></PartsImage>
         </v-dialog>
         <!--부품상세 정보-->
-        <v-dialog v-model="dialog"  width="600px"> 
+        <v-dialog v-model="dialog"  width="700px"> 
 			<PartsInfo :PartsInfo="partsInfo"
 			:TecTypeID="carTcdTypeId"
 			@close="dialog=false">
@@ -239,7 +250,9 @@
 				manualId:'',
 				partsInfo: {},
 				imgDialog: false,
-				oeNumber : '',
+				itemNo : '',
+				itemType : 1,
+                itemTypeList : [{text:'OE번호', value:1},{text:'AM번호',value:0}],
 			}
 		},
 		components: {
@@ -357,7 +370,7 @@
 
 				this.mainGroupId = '';
 				this.subGroupId = '';
-				this.oeNumber = '';
+				this.itemNo = '';
 				
 				if(this.carTypeId !== undefined && this.carTypeId !== '' ) {
 					
@@ -389,7 +402,7 @@
 			changeMainGroup() {
 				var selected = this.mainGroupId;
 				this.itemMpLists = [];
-				this.oeNumber = '';
+				this.itemNo = '';
 				
 				this.subGroupLists = this.mainGroupLists.reduce(function (pre, value) {
 					if(value.MainGroupId === selected) {
@@ -588,9 +601,9 @@
                         }
                     };
 					
-					if(this.oeNumber !== ''){
-						params.getArticles.searchQuery = this.oeNumber;
-						params.getArticles.searchType = 1;
+					if(this.itemNo !== ''){
+						params.getArticles.searchQuery = this.itemNo;
+						params.getArticles.searchType = this.itemType;
 					}
 					
                     // Send HTTP request
@@ -663,7 +676,7 @@
 				partsData.PartsInfo = value;
 				partsData.TecTypeId = this.carTcdTypeId;
 
-				this.partsInfo = value;
+				this.partsInfo = partsData;
                 this.$EventBus.$emit('RMI-PARTSINFO.InitData',partsData);
                 this.dialog = true;
             },

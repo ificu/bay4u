@@ -113,3 +113,13 @@ export function convertArrayToSpecStr(arr) {
     }
     return array1;
 }
+
+export function division(arr, n) {
+    var len = arr.length;
+    var cnt = Math.floor(len / n) + (Math.floor(len % n) > 0 ? 1 : 0);
+    var temp = [];
+    for (let i = 0; i < cnt; i++) {
+        temp.push(arr.splice(0, n));
+    }
+    return temp;
+}

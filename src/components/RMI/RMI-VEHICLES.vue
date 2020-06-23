@@ -9,7 +9,7 @@
                         tile
                     >
 					<v-icon class="mx-4" style="color:#fddca9; font-size:18px;" >  mdi-arrange-send-backward </v-icon>
-					<span class="font-weight-bold" style="color:#fddca9; font-size:15px;" >부품번호 조회 ( OE / AM )</span>
+					<span class="font-weight-bold" style="color:#fddca9; font-size:15px;" >부품 적용차량 조회</span>
                     </v-card>
                 </v-col>
             </v-row>
@@ -57,72 +57,61 @@
                         tile
 						id = "RMIContents"
                     >
-                        <li v-for="(item, i) in partsList"
-                            :key="i">
-                            <div class="brand-name">{{ item.brandName }}</div>
-                            <div class="item-name">{{ item.articleName }}</div>
-                            <div class="item-code">
-                                {{ item.articleNo }}
-                                <!--<span class="item-position">{{setCriteriaData(article)}}</span>-->
-                            </div>
-                            <div class="item-detail">
-                                <v-btn icon x-small light @click="showPartsDetail(item)">
-                                    <v-icon>fas fa-info-circle</v-icon>
-                                </v-btn>
-                            </div>
-                        </li>
+                        <ul>
+                            <li v-for="(item, index) in linkedCars" :key="index">
+                                <div class="attr-name">{{item.manuDesc}} </div>
+                                <div class="attr-name">{{item.modelDesc}}</div>
+                                <div class="attr-name">{{item.carDesc}} ({{item.powerHpTo}} hp)</div>
+                                <div class="attr-name">[ {{item.yearOfConstructionFrom}} ~ {{item.yearOfConstructionTo}} ]</div>
+                            </li>
+                        </ul>
                     </v-card>
                 </v-col>
             </v-row>         
          </v-container>
          <BackToTop></BackToTop>
-		<!--부품상세 정보-->
-        <v-dialog v-model="dialog"  width="700px">     
-            <PartsInfo :PartsInfo="partsInfo"
-			@close="dialog=false">
-            </PartsInfo>               
-        </v-dialog>
+         <Progress v-if="progress"></Progress>
     </v-content>
 </template>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script>
+    import {division} from '@/utils/common.js'
     import BackToTop from '@/components/Common/BackToTop.vue'
-    import PartsInfo from '@/components/RMI/TEC-PARTSINFO.vue'
+    import Progress from '@/components/Common/Progress.vue'
 
     const tecdocUrl = "https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLB.jsonEndpoint?js";
     const tecApiKey = '2BeBXg6CxtgP7fnQvXr45SzqpEVDcDTGSJd1viDM6VHGJ7bxjDy5';
     const tecProvider = 22261;
 
     export default {
-        name: 'RMI-OENUMBERS',
+        name: 'RMI-VEHICLES',
         data(){
             return{
-                itemType : 1,
+                itemType : 0,
                 itemTypeList : [{text:'OE번호', value:1},{text:'AM번호',value:0}],
                 itemNo : '',
-                partsList : [],
-                partsInfo : {},
-                dialog : false
+                articleId : '',
+                linkedCars : [],
+                progress: false
             }
         },
         components: {
             BackToTop,
-            PartsInfo
+            Progress
         },
         created(){
-            this.itemType = 1;
-            this.$EventBus.$on('RMI-OENUMBERS.InitData', param => {  
+            this.$EventBus.$on('RMI-VEHICLES.InitData', param => {  
 				this.rmiAuthKey = param.rmiAuthKey;
                 this.carTypeId = param.carTypeId; 
                 this.itemNo = '';
                 this.partsList = [];
                 this.partsInfo = {};
                 this.initAuthKey();
-			});
+            });
         },
         beforeDestroy(){
-            this.$EventBus.$off('RMI-OENUMBERS.InitData');
+            this.$EventBus.$off('RMI-VEHICLES.InitData');
         },
         methods:{
             initAuthKey() {
@@ -147,6 +136,7 @@
 			},
             getItemNo()
             {
+                this.linkedCars = [];
                 let brnads = [2, 4, 5, 6, 9, 10, 16, 21, 26, 30, 32, 33, 35, 43, 50, 52, 59, 67, 68, 75, 79, 83, 89, 95, 101, 123, 134, 144, 151, 154, 161, 162, 183, 192, 204, 205, 240, 245, 287, 327, 381, 4434, 6020, 6263, 6278, 6441];
                 let params ={
                         "getArticleDirectSearchAllNumbersWithState": {
@@ -154,10 +144,57 @@
                             "articleNumber": this.itemNo,
                             "lang": "en",
                             "numberType": this.itemType,
+                            "searchExact": true,
                             "provider": 22261
                         }
 				}
-		
+
+                this.progress = true;
+
+                // Send HTTP request
+                let xmlHttp = new XMLHttpRequest();
+				xmlHttp.open( 'POST', tecdocUrl, false );
+				xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
+                xmlHttp.setRequestHeader( 'Accept', 'application/json' );
+                xmlHttp.setRequestHeader( 'x-api-key', tecApiKey);
+                xmlHttp.send( JSON.stringify( params ) );
+                
+				// Handle HTTP response
+				if(xmlHttp.status == 200) {
+                    
+                    var result = JSON.parse(xmlHttp.responseText).data.array;
+                    console.log('result :',result);
+                    if(result !== undefined && result.length > 0){
+                        result = result.filter(x => brnads.includes(x.brandNo));
+
+                        // 중복체크
+                        result = result.filter((item, idx) => {
+                            return result.map(x => x.brandNo + x.articleNo).indexOf(item.brandNo + item.articleNo) === idx;
+                        })
+
+                        this.articleId = result[0].articleId;
+                        this.getLinkedArticles(result[0].articleId);
+                    }
+                }
+
+                this.progress = false;
+            },
+            async getLinkedArticles(value){
+
+                console.log('articleId :', this.articleId);
+
+                this.linkedCars = [];
+                let params = {
+                    "getArticleLinkedAllLinkingTarget3": {
+                        articleCountry: "kr",
+                        articleId: this.articleId,
+                        lang: "en",
+                        linkingTargetType: "P",
+                        provider: tecProvider,
+                        withMainArticles: true
+                    }
+                };
+                
                 // Send HTTP request
                 let xmlHttp = new XMLHttpRequest();
 				xmlHttp.open( 'POST', tecdocUrl, false );
@@ -165,70 +202,60 @@
                 xmlHttp.setRequestHeader( 'Accept', 'application/json' );
                 xmlHttp.setRequestHeader( 'x-api-key', tecApiKey);
 				xmlHttp.send( JSON.stringify( params ) );
-
 				// Handle HTTP response
 				if(xmlHttp.status == 200) {
-                    console.log('getItemNo : ', JSON.parse(xmlHttp.responseText) );
                     var result = JSON.parse(xmlHttp.responseText).data.array;
-                    result = result.filter(x => brnads.includes(x.brandNo));
+                    if(result.length > 0 && result[0].articleLinkages !== ''){
+                        result = result[0].articleLinkages.array.map(function(item){
+                            var obj = {};
+                            obj.articleLinkId = item.articleLinkId;
+                            obj.linkingTargetId = item.linkingTargetId;
+                            return obj;
+                        });
 
-                    // 중복체크
-                    result = result.filter((item, idx) => {
-                        return result.map(x => x.brandNo + x.articleNo).indexOf(item.brandNo + item.articleNo) === idx;
-                    })
-
-                    result.sort(function(a,b){
-                        return a.genericArticleId + a.brandName > b.genericArticleId + b.brandName ? 1:-1;
-                    });
-                    this.partsList = result;
+                        this.linkedCars = await this.getLinkedCars(result);
+                        this.linkedCars = this.linkedCars.reduce(function(pre,curr){
+                                return pre.concat(curr);
+                        },[]);
+                        console.log('linkedCars : ', this.linkedCars);
+                    } 
 				}
             },
-            showPartsDetail(value){
-                let params ={
-                    "getArticles": {
-                        articleCountry: "kr",
-                        provider: 22261,
-                        searchQuery: value.articleNo,
-                        searchType: 0,
-                        dataSupplierIds: value.brandNo,
-                        genericArticleIds: value.genericArticleId,
-                        lang: "en",
-                        perPage: 1000,
-                        page: 1,
-                        includeGenericArticles: true,
-						includeArticleText: true,
-						includeOEMNumbers: true,
-						includeReplacesArticles: true,
-						includeReplacedByArticles: true,
-						includeArticleCriteria: true,
-						includeLinkages: true,
-						includeImages: true,
-						includeLinks: true,
-						includeTradeNumbers: true,
-						includeCriteriaFacets: true
-                    }
-				}
-		
-                // Send HTTP request
-                let xmlHttp = new XMLHttpRequest();
-				xmlHttp.open( 'POST', tecdocUrl, false );
-				xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
-                xmlHttp.setRequestHeader( 'Accept', 'application/json' );
-                xmlHttp.setRequestHeader( 'x-api-key', tecApiKey);
-				xmlHttp.send( JSON.stringify( params ) );
+            getLinkedCars(data)
+            {
+                var list = division(data,25);
+                var linkedList  = [];
 
-				// Handle HTTP response
-				if(xmlHttp.status == 200) {
-                    console.log('showPartsDetail : ', JSON.parse(xmlHttp.responseText) );
-                    var result = JSON.parse(xmlHttp.responseText).articles[0];
-                    var partsData = {};
-                    partsData.PartsInfo = result;
-                    partsData.articleId = value.articleId;
-                    
-                    this.partsInfo = partsData;
-                    this.$EventBus.$emit('RMI-PARTSINFO.InitData',partsData);
-                    this.dialog = true;
-				}
+                list.forEach(element => {
+                    let params = {
+                     "getArticleLinkedAllLinkingTargetsByIds3": {
+                        articleCountry: "kr",
+                        articleId: this.articleId,
+                        lang: "en",
+                        linkedArticlePairs: {
+                            array: element
+                        },
+                        linkingTargetType: "P",
+                        provider: tecProvider
+                    }
+                    };
+
+                    // Send HTTP request
+                    let xmlHttp = new XMLHttpRequest();
+                    xmlHttp.open( 'POST', tecdocUrl, false );
+                    xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
+                    xmlHttp.setRequestHeader( 'Accept', 'application/json' );
+                    xmlHttp.setRequestHeader( 'x-api-key', tecApiKey);
+                    xmlHttp.send( JSON.stringify( params ) );
+                    // Handle HTTP response
+                    if(xmlHttp.status == 200) {
+                        //console.log('getLinkedCars :',JSON.parse(xmlHttp.responseText));
+                        var result = JSON.parse(xmlHttp.responseText).data.array;
+                        result = result.map(x => x.linkedVehicles.array);
+                        linkedList = linkedList.concat(result);
+                    }
+                });
+                return linkedList;
             },
         }
     }
@@ -253,20 +280,10 @@
     margin-bottom: 8px;
     font-size: 1.1em;
 }
-.contents .brand-name{
-    margin-right: 10px;
-    width:200px;
-}
-.contents .item-name{
-    margin-right: 15px;
-}
-.contents .item-code{
-    color: #0D47A1;
-	font-weight: bold;
-}
-.contents .item-detail{
-    margin-left: 10px;
-    font-size: 0.3em;
+.contents .attr-name{
+    margin-right:20px;
+    font-size: 0.9em;
+    font-weight:500;
 }
 #RMIContents {
 	background-color: white; 
