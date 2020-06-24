@@ -19,8 +19,8 @@
                         <v-row>
                             <v-col>
                             </v-col>
-                            <v-col cols="12" sm="4" class="d-flex pa-0">
-                                <div style="width:110px;" class="mr-3"> 
+                            <v-col cols="12" sm="4" class="d-flex pa-0 mt-2 searchForm">
+                                <div style="width:110px;" class="mr-2"> 
                                     <v-select
                                     v-model="itemType"
                                     :items="itemTypeList"
@@ -59,10 +59,19 @@
                     >
                         <ul>
                             <li v-for="(item, index) in linkedCars" :key="index">
-                                <div class="attr-name">{{item.manuDesc}} </div>
+                                <div class="attr-name">{{item[0].manuDesc}} {{item[0].modelDesc}} </div>
+                                <ul>
+                                    <li  v-for="(subItem, subIndex) in item" :key="subIndex">
+                                        <div class="attr-name">
+                                            {{subItem.carDesc}} ({{subItem.powerHpTo}} hp)
+                                            [ {{subItem.yearOfConstructionFrom}} ~ {{subItem.yearOfConstructionTo}} ]
+                                        </div>
+                                    </li>
+                                </ul>
+                               <!--<div class="attr-name">{{item.manuDesc}} </div>
                                 <div class="attr-name">{{item.modelDesc}}</div>
                                 <div class="attr-name">{{item.carDesc}} ({{item.powerHpTo}} hp)</div>
-                                <div class="attr-name">[ {{item.yearOfConstructionFrom}} ~ {{item.yearOfConstructionTo}} ]</div>
+                                <div class="attr-name">[ {{item.yearOfConstructionFrom}} ~ {{item.yearOfConstructionTo}} ]</div>-->
                             </li>
                         </ul>
                     </v-card>
@@ -70,13 +79,13 @@
             </v-row>         
          </v-container>
          <BackToTop></BackToTop>
-         <Progress v-if="progress"></Progress>
+         <Progress v-if="isLoaded"></Progress>
     </v-content>
 </template>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script>
-    import {division} from '@/utils/common.js'
+    import {division,arrayGroupBy} from '@/utils/common.js'
     import BackToTop from '@/components/Common/BackToTop.vue'
     import Progress from '@/components/Common/Progress.vue'
 
@@ -93,7 +102,7 @@
                 itemNo : '',
                 articleId : '',
                 linkedCars : [],
-                progress: false
+                isLoaded: false
             }
         },
         components: {
@@ -112,6 +121,13 @@
         },
         beforeDestroy(){
             this.$EventBus.$off('RMI-VEHICLES.InitData');
+        },
+        updated () {
+            this.$nextTick(() => {
+                if(this.isLoaded){
+                    this.isLoaded = false;
+                }
+            })
         },
         methods:{
             initAuthKey() {
@@ -149,8 +165,8 @@
                         }
 				}
 
-                this.progress = true;
-
+                this.isLoaded = true;
+                
                 // Send HTTP request
                 let xmlHttp = new XMLHttpRequest();
 				xmlHttp.open( 'POST', tecdocUrl, false );
@@ -176,8 +192,6 @@
                         this.getLinkedArticles(result[0].articleId);
                     }
                 }
-
-                this.progress = false;
             },
             async getLinkedArticles(value){
 
@@ -217,6 +231,10 @@
                         this.linkedCars = this.linkedCars.reduce(function(pre,curr){
                                 return pre.concat(curr);
                         },[]);
+
+                        this.linkedCars = arrayGroupBy(this.linkedCars , function(item){
+                            return [item.manuId , item.modelId];
+                        });
                         console.log('linkedCars : ', this.linkedCars);
                     } 
 				}
@@ -284,6 +302,9 @@
     margin-right:20px;
     font-size: 0.9em;
     font-weight:500;
+}
+.contents .searchForm{
+    height: 60px;
 }
 #RMIContents {
 	background-color: white; 

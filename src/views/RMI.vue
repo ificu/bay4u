@@ -154,7 +154,7 @@
         { icon: 'mdi-history', text: '표준 공임 시간', rmi: 'TIMES' },
         { divider: true },
         { icon: 'search', text: '부품번호 조회 ( OE / AM )', rmi: 'OENUMBERS' },
-        { icon: 'search', text: '부품 적용차량 조회', rmi: 'VEHICLES' },
+        { icon: 'directions_car', text: '부품 적용차량 조회', rmi: 'VEHICLES' },
         { icon: 'mdi-file-tree-outline', text: '부품 카테고리', rmi: 'CATEGORY' },
         { divider: true },
         { icon: 'mdi-laptop-chromebook', text: '차량 진단 데이터', rmi: 'DAIGNOSTICVALUES' },

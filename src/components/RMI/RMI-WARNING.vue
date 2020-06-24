@@ -45,12 +45,15 @@
             </v-row>   			
         </v-container>
 		<BackToTop></BackToTop>
+		<Progress v-if="isLoaded"></Progress>
     </v-content>
 </template>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script>
 	import BackToTop from '@/components/Common/BackToTop.vue'
+	import Progress from '@/components/Common/Progress.vue'
+
 //	const axios = require('axios').default;
 	const url = "https://rmi-services.tecalliance.net/rest/Manuals";
 		
@@ -61,11 +64,13 @@
 				manualLists: [{'ManualId': '141337', 'ManualName': 'Blue'}, {'ManualId': '141349', 'ManualName': 'Green'}, {'ManualId': '141351', 'ManualName': 'Red'}, {'ManualId': '141350', 'ManualName': 'Yellow'}],
 				manualId: '',
 				rmiAuthKey: '',	
-				carTypeId: '',			
+				carTypeId: '',
+				isLoaded: false	
 			}
 		},
 		components: {
-			BackToTop
+			BackToTop,
+			Progress
 		},
 		created () {
 			this.$EventBus.$on('RMI-WARNING.InitData', param => {  
@@ -81,7 +86,14 @@
 		},
 		beforeDestroy(){
             this.$EventBus.$off('RMI-WARNING.InitData');
-        },	
+		},
+		updated () {
+            this.$nextTick(() => {
+                if(this.isLoaded){
+                    this.isLoaded = false;
+                }
+            })
+        },
 		methods: {
 			initAuthKey() {
 				let url = 'https://rmi-services.tecalliance.net/auth/login';
@@ -119,6 +131,8 @@
 					+ '&printView=' + printView	
 					+ '&linkUrl=' + linkUrl	
 				
+				this.isLoaded = true;
+
 				// Send HTTP request
 				let xmlHttp = new XMLHttpRequest();
 				xmlHttp.open( 'GET', url + '/ManualHtml' + query, false );

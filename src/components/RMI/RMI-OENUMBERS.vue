@@ -19,8 +19,8 @@
                         <v-row>
                             <v-col>
                             </v-col>
-                            <v-col cols="12" sm="4" class="d-flex pa-0">
-                                <div style="width:110px;" class="mr-3"> 
+                            <v-col cols="12" sm="4" class="d-flex pa-0 searchForm">
+                                <div style="width:110px;" class="ml-3 mr-2"> 
                                     <v-select
                                     v-model="itemType"
                                     :items="itemTypeList"
@@ -29,7 +29,7 @@
                                     label="구분"
                                 ></v-select>
                                 </div>
-                                <div class="pa-3 mr-5" style="width:300px;">
+                                <div class="pa-3" style="width:300px;">
                                     <v-text-field
                                     label="부품번호"
                                     dense
@@ -267,6 +267,12 @@
 .contents .item-detail{
     margin-left: 10px;
     font-size: 0.3em;
+}
+.contents .searchForm{
+    background-color: gray;
+    border-radius: 5px;
+    height: 55px;
+    margin: 8px 25px;
 }
 #RMIContents {
 	background-color: white; 

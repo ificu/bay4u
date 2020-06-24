@@ -48,10 +48,15 @@
                     <h5>Vehicles</h5>
                     <ul>
                         <li v-for="(item, index) in linkedCars" :key="index">
-                            <div class="attr-name">{{item.manuDesc}} </div>
-                            <div class="attr-name">{{item.modelDesc}}</div>
-                            <div class="attr-name">{{item.carDesc}} ({{item.powerHpTo}} hp)</div>
-                            <div class="attr-name">[ {{item.yearOfConstructionFrom}} ~ {{item.yearOfConstructionTo}} ]</div>
+                            <div class="attr-name">{{item[0].manuDesc}} {{item[0].modelDesc}} </div>
+                            <ul>
+                                <li  v-for="(subItem, subIndex) in item" :key="subIndex">
+                                    <div class="attr-text">
+                                        {{subItem.carDesc}} ({{subItem.powerHpTo}} hp)
+                                         [ {{subItem.yearOfConstructionFrom}} ~ {{subItem.yearOfConstructionTo}} ]
+                                    </div>
+                                </li>
+                            </ul>
                         </li>
                     </ul>
                 </div>
@@ -73,7 +78,7 @@
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script>
-    import {division} from '@/utils/common.js'
+    import {division,arrayGroupBy} from '@/utils/common.js'
 
     const tecdocUrl = "https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLB.jsonEndpoint?js";
     const tecApiKey = '2BeBXg6CxtgP7fnQvXr45SzqpEVDcDTGSJd1viDM6VHGJ7bxjDy5';
@@ -194,6 +199,10 @@
                         this.linkedCars = this.linkedCars.reduce(function(pre,curr){
                                 return pre.concat(curr);
                         },[]);
+
+                        this.linkedCars = arrayGroupBy(this.linkedCars , function(item){
+                            return [item.manuId , item.modelId];
+                        });
                         console.log('linkedCars : ', this.linkedCars);
                     } 
 				}
