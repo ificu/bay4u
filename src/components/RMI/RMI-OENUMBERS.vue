@@ -9,7 +9,7 @@
                         tile
                     >
 					<v-icon class="mx-4" style="color:#fddca9; font-size:18px;" >  mdi-arrange-send-backward </v-icon>
-					<span class="font-weight-bold" style="color:#fddca9; font-size:15px;" >OE번호 조회</span>
+					<span class="font-weight-bold" style="color:#fddca9; font-size:15px;" >부품번호 조회 ( OE / AM )</span>
                     </v-card>
                 </v-col>
             </v-row>
@@ -17,18 +17,30 @@
                 <v-col cols="12">
                     <v-card class="textfield">
                         <v-row>
-                            <v-col></v-col>
-                            <v-col class="mr-5">
-                                <v-text-field
-                                    label="OE번호"
+                            <v-col>
+                            </v-col>
+                            <v-col cols="12" sm="4" class="d-flex pa-0 searchForm">
+                                <div style="width:110px;" class="ml-3 mr-2"> 
+                                    <v-select
+                                    v-model="itemType"
+                                    :items="itemTypeList"
+                                    item-text="text"
+                                    item-value="value"
+                                    label="구분"
+                                ></v-select>
+                                </div>
+                                <div class="pa-3" style="width:300px;">
+                                    <v-text-field
+                                    label="부품번호"
                                     dense
                                     single-line
                                     append-icon="search"
-                                    v-model="oeNumber"
-                                    @keypress.enter="getOeNumber"
-                                    @click:append="getOeNumber"
+                                    v-model="itemNo"
+                                    @keypress.enter="getItemNo"
+                                    @click:append="getItemNo"
                                     @focus="$event.target.select()"
                                 ></v-text-field>
+                                </div> 
                             </v-col>
                         </v-row>
                     </v-card>
@@ -65,7 +77,7 @@
          </v-container>
          <BackToTop></BackToTop>
 		<!--부품상세 정보-->
-        <v-dialog v-model="dialog"  width="600px">     
+        <v-dialog v-model="dialog"  width="700px">     
             <PartsInfo :PartsInfo="partsInfo"
 			@close="dialog=false">
             </PartsInfo>               
@@ -86,7 +98,9 @@
         name: 'RMI-OENUMBERS',
         data(){
             return{
-                oeNumber : '',
+                itemType : 1,
+                itemTypeList : [{text:'OE번호', value:1},{text:'AM번호',value:0}],
+                itemNo : '',
                 partsList : [],
                 partsInfo : {},
                 dialog : false
@@ -97,14 +111,18 @@
             PartsInfo
         },
         created(){
+            this.itemType = 1;
             this.$EventBus.$on('RMI-OENUMBERS.InitData', param => {  
 				this.rmiAuthKey = param.rmiAuthKey;
                 this.carTypeId = param.carTypeId; 
-                this.oeNumber = '';
+                this.itemNo = '';
                 this.partsList = [];
                 this.partsInfo = {};
                 this.initAuthKey();
 			});
+        },
+        beforeDestroy(){
+            this.$EventBus.$off('RMI-OENUMBERS.InitData');
         },
         methods:{
             initAuthKey() {
@@ -127,15 +145,15 @@
 					this.rmiAuthKey = 'TecRMI ' + xmlHttp.getResponseHeader( 'X-AuthToken' );
 				}
 			},
-            getOeNumber()
+            getItemNo()
             {
                 let brnads = [2, 4, 5, 6, 9, 10, 16, 21, 26, 30, 32, 33, 35, 43, 50, 52, 59, 67, 68, 75, 79, 83, 89, 95, 101, 123, 134, 144, 151, 154, 161, 162, 183, 192, 204, 205, 240, 245, 287, 327, 381, 4434, 6020, 6263, 6278, 6441];
                 let params ={
                         "getArticleDirectSearchAllNumbersWithState": {
                             "articleCountry": "kr",
-                            "articleNumber": this.oeNumber,
+                            "articleNumber": this.itemNo,
                             "lang": "en",
-                            "numberType": 1,
+                            "numberType": this.itemType,
                             "provider": 22261
                         }
 				}
@@ -150,7 +168,7 @@
 
 				// Handle HTTP response
 				if(xmlHttp.status == 200) {
-                    console.log('getOeNumber : ', JSON.parse(xmlHttp.responseText) );
+                    console.log('getItemNo : ', JSON.parse(xmlHttp.responseText) );
                     var result = JSON.parse(xmlHttp.responseText).data.array;
                     result = result.filter(x => brnads.includes(x.brandNo));
 
@@ -166,8 +184,6 @@
 				}
             },
             showPartsDetail(value){
-                
-                console.log('value :',value);
                 let params ={
                     "getArticles": {
                         articleCountry: "kr",
@@ -204,11 +220,12 @@
 				// Handle HTTP response
 				if(xmlHttp.status == 200) {
                     console.log('showPartsDetail : ', JSON.parse(xmlHttp.responseText) );
-                    var result =JSON.parse(xmlHttp.responseText).articles[0];
+                    var result = JSON.parse(xmlHttp.responseText).articles[0];
                     var partsData = {};
                     partsData.PartsInfo = result;
+                    partsData.articleId = value.articleId;
                     
-                    this.partsInfo = result;
+                    this.partsInfo = partsData;
                     this.$EventBus.$emit('RMI-PARTSINFO.InitData',partsData);
                     this.dialog = true;
 				}
@@ -250,6 +267,12 @@
 .contents .item-detail{
     margin-left: 10px;
     font-size: 0.3em;
+}
+.contents .searchForm{
+    background-color: gray;
+    border-radius: 5px;
+    height: 55px;
+    margin: 8px 25px;
 }
 #RMIContents {
 	background-color: white; 

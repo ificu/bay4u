@@ -210,18 +210,30 @@
 										<div id = "RMIContents" v-if="checkShowTabPage('PARTS')">
 											<v-row>
 												<v-col></v-col>
-												<v-col cols="12" sm="6">
-													<v-text-field
-														label="OE번호"
+												<v-col cols="12" sm="4" class="d-flex pa-0">
+													<div style="width:110px;" class="mr-3"> 
+														<v-select
+														v-model="itemType"
+														:items="itemTypeList"
+														item-text="text"
+														item-value="value"
+														light
+														label="구분"
+													></v-select>
+													</div>
+													<div class="pa-3 mr-2" style="width:300px;">
+														<v-text-field
+														label="부품번호"
 														dense
 														single-line
 														append-icon="search"
-														v-model="oeNumber"
+														v-model="itemNo"
 														light
 														@keypress.enter="getLinkedPartsData"
 														@click:append="getLinkedPartsData"
 														@focus="$event.target.select()"
 													></v-text-field>
+													</div> 
 												</v-col>
 											</v-row>
 											<v-row>
@@ -278,7 +290,7 @@
 			></PartsImage>
         </v-dialog>
 		<!--부품상세 정보-->
-        <v-dialog v-model="dialog"  width="600px"> 
+        <v-dialog v-model="dialog"  width="700px"> 
 			<PartsInfo :PartsInfo="partsInfo"
 			:TecTypeID="carTcdTypeId"
 			@close="dialog=false">
@@ -377,7 +389,9 @@
 				imgDialog: false,
 				translateMessage: '',
 				showTranslateMessage: false,
-				oeNumber : ''
+				itemNo : '',
+				itemType : 1,
+                itemTypeList : [{text:'OE번호', value:1},{text:'AM번호',value:0}],
 			}
 		},
 		components: {
@@ -426,6 +440,9 @@
 				}
 			});			
 		},	
+		beforeDestroy(){
+            this.$EventBus.$off('RMI-GRAPHIC.InitData');
+        },
 		methods: {
 			clearManual() {
 				console.log('clearManual.......');				
@@ -434,7 +451,7 @@
 				$("#RMIMaingroupContents").html('');
 				$("#RMISubgroupContents").html('');
 				this.clearTabPage();
-				this.oeNumber = '';
+				this.itemNo = '';
 			},
 			clearTabPage()
 			{
@@ -452,7 +469,7 @@
 				this.korId = '';
 				this.korList = [];
 				this.workList = [];
-				this.oeNumber = '';
+				this.itemNo = '';
 			},
 			initAuthKey() {
 				let url = 'https://rmi-services.tecalliance.net/auth/login';
@@ -1047,9 +1064,9 @@
                         }
 					};
 					
-					if(this.oeNumber !== ''){
-						params.getArticles.searchQuery = this.oeNumber;
-						params.getArticles.searchType = 1;
+					if(this.itemNo !== ''){
+						params.getArticles.searchQuery = this.itemNo;
+						params.getArticles.searchType = this.itemType;
 					}
 
                     // Send HTTP request
@@ -1113,7 +1130,7 @@
 				partsData.PartsInfo = value;
 				partsData.TecTypeId = this.carTcdTypeId;
 
-				this.partsInfo = value;
+				this.partsInfo = partsData;
                 this.$EventBus.$emit('RMI-PARTSINFO.InitData',partsData);
                 this.dialog = true;
 			},

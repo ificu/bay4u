@@ -43,6 +43,23 @@
                         </li>
                     </ul>
                 </div>
+                <!--Vehicles-->
+                <div v-if="linkedCars.length > 0">
+                    <h5>Vehicles</h5>
+                    <ul>
+                        <li v-for="(item, index) in linkedCars" :key="index">
+                            <div class="attr-name">{{item[0].manuDesc}} {{item[0].modelDesc}} </div>
+                            <ul>
+                                <li  v-for="(subItem, subIndex) in item" :key="subIndex">
+                                    <div class="attr-text">
+                                        {{subItem.carDesc}} ({{subItem.powerHpTo}} hp)
+                                         [ {{subItem.yearOfConstructionFrom}} ~ {{subItem.yearOfConstructionTo}} ]
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </v-card-text>
         <v-divider></v-divider>
@@ -61,6 +78,8 @@
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script>
+    import {division,arrayGroupBy} from '@/utils/common.js'
+
     const tecdocUrl = "https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLB.jsonEndpoint?js";
     const tecApiKey = '2BeBXg6CxtgP7fnQvXr45SzqpEVDcDTGSJd1viDM6VHGJ7bxjDy5';
     const tecProvider = 22261;
@@ -74,30 +93,39 @@
                 partsInfo :{},
                 tecTypeId : '',
                 artInfo: '',
+                articleId: '',
                 criteriaList : [],
                 partsDetail: [],
-                itemImage:''
+                itemImage:'',
+                linkedCars: []
             }
         },
         props:['PartsInfo', 'TecTypeID'],
         created(){
             this.$EventBus.$on('RMI-PARTSINFO.InitData', data => {
-                console.log('partsInfo:' , data);
+                console.log('partsInfo1:' , data);
                 this.InitData(data);
             });	
         },
+        beforeDestroy(){
+            this.$EventBus.$off('RMI-PARTSINFO.InitData');
+        },
         mounted(){
-            console.log('partsInfo:' , this.PartsInfo);
-            this.partsInfo = this.PartsInfo;
+            console.log('partsInfo2:' , this.PartsInfo);
+            this.partsInfo = this.PartsInfo.PartsInfo;
             this.tecTypeId = this.TecTypeID;
+            this.articleId = this.PartsInfo.articleId
             this.setPartsInfo();
+            this.getLinkedArticles();
             //this.getPartsDetail();
         },
         methods:{
             InitData(data){
                 this.partsInfo = data.PartsInfo;
                 this.tecTypeId = data.TecTypeId;
+                this.articleId = data.articleId;
                 this.setPartsInfo();
+                this.getLinkedArticles();
                 //this.getPartsDetail();
             },
             setPartsInfo()
@@ -128,7 +156,92 @@
                 this.criteriaList.sort(function(a,b){
                     return a.criteriaId > b.criteriaId ? 1:-1;
                 });
-                console.log('criteriaList : ', this.criteriaList);
+                //console.log('criteriaList : ', this.criteriaList);
+            },
+            async getLinkedArticles(){
+
+                console.log('articleId :', this.articleId);
+                if(this.articleId === undefined){
+                   this.articleId = await this.getArticleId();
+                }
+
+                this.linkedCars = [];
+                let params = {
+                    "getArticleLinkedAllLinkingTarget3": {
+                        articleCountry: "kr",
+                        articleId: this.articleId,
+                        lang: "en",
+                        linkingTargetType: "P",
+                        provider: tecProvider,
+                        withMainArticles: true
+                    }
+                };
+                
+                // Send HTTP request
+                let xmlHttp = new XMLHttpRequest();
+				xmlHttp.open( 'POST', tecdocUrl, false );
+				xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
+                xmlHttp.setRequestHeader( 'Accept', 'application/json' );
+                xmlHttp.setRequestHeader( 'x-api-key', tecApiKey);
+				xmlHttp.send( JSON.stringify( params ) );
+				// Handle HTTP response
+				if(xmlHttp.status == 200) {
+                    var result = JSON.parse(xmlHttp.responseText).data.array;
+                    if(result.length > 0 && result[0].articleLinkages !== ''){
+                        result = result[0].articleLinkages.array.map(function(item){
+                            var obj = {};
+                            obj.articleLinkId = item.articleLinkId;
+                            obj.linkingTargetId = item.linkingTargetId;
+                            return obj;
+                        });
+
+                        this.linkedCars = await this.getLinkedCars(result);
+                        this.linkedCars = this.linkedCars.reduce(function(pre,curr){
+                                return pre.concat(curr);
+                        },[]);
+
+                        this.linkedCars = arrayGroupBy(this.linkedCars , function(item){
+                            return [item.manuId , item.modelId];
+                        });
+                        console.log('linkedCars : ', this.linkedCars);
+                    } 
+				}
+            },
+            getLinkedCars(data)
+            {
+                var list = division(data,25);
+                var linkedList  = [];
+
+                list.forEach(element => {
+                    let params = {
+                     "getArticleLinkedAllLinkingTargetsByIds3": {
+                        articleCountry: "kr",
+                        articleId: this.articleId,
+                        lang: "en",
+                        linkedArticlePairs: {
+                            array: element
+                        },
+                        linkingTargetType: "P",
+                        provider: tecProvider
+                    }
+                    };
+
+                    // Send HTTP request
+                    let xmlHttp = new XMLHttpRequest();
+                    xmlHttp.open( 'POST', tecdocUrl, false );
+                    xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
+                    xmlHttp.setRequestHeader( 'Accept', 'application/json' );
+                    xmlHttp.setRequestHeader( 'x-api-key', tecApiKey);
+                    xmlHttp.send( JSON.stringify( params ) );
+                    // Handle HTTP response
+                    if(xmlHttp.status == 200) {
+                        //console.log('getLinkedCars :',JSON.parse(xmlHttp.responseText));
+                        var result = JSON.parse(xmlHttp.responseText).data.array;
+                        result = result.map(x => x.linkedVehicles.array);
+                        linkedList = linkedList.concat(result);
+                    }
+                });
+                return linkedList;
             },
             getPartsDetail(){
 
@@ -176,6 +289,37 @@
                     this.partsDetail = JSON.parse(xmlHttp.responseText).data.array[0];
                     console.log('result :',this.partsDetail);
 				}
+            },
+            getArticleId()
+            {
+                var aticelId = '';
+
+                let params = {
+                    "getArticleDirectSearchAllNumbersWithState": {
+                        "articleCountry": "kr",
+                        "articleNumber": this.partsInfo.articleNumber,
+                        "lang": "en",
+                        "numberType": 0,
+                        "provider": tecProvider,
+                        "searchExact": true
+                    }
+                };
+
+                // Send HTTP request
+                let xmlHttp = new XMLHttpRequest();
+                xmlHttp.open( 'POST', tecdocUrl, false );
+                xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
+                xmlHttp.setRequestHeader( 'Accept', 'application/json' );
+                xmlHttp.setRequestHeader( 'x-api-key', tecApiKey);
+                xmlHttp.send( JSON.stringify( params ) );
+                // Handle HTTP response
+                if(xmlHttp.status == 200) {
+                    var result = JSON.parse(xmlHttp.responseText).data.array;
+                    if(result.length > 0){
+                        aticelId = result[0].articleId;
+                    }
+                }
+                return aticelId;
             },
             setArrayJoin(value ,target)
             {   

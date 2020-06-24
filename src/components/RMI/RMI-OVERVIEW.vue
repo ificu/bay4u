@@ -106,7 +106,10 @@
 				this.setEngineAdjustList();
 				this.setChangeIntervalAdjustList();
 			});
-		},	
+		},
+		beforeDestroy(){
+            this.$EventBus.$off('RMI-OVERVIEW.InitData');
+        },
 		methods: {
 			initAuthKey() {
 				let url = 'https://rmi-services.tecalliance.net/auth/login';

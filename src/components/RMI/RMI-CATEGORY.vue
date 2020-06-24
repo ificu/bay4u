@@ -49,42 +49,86 @@
 										item-key="assemblyGroupNodeId"
 										item-text="assemblyGroupName"
 										:active.sync="assemblyGroupId"
-										@update:active="getParts()">
+										@update:active="itemNo = '';getParts();">
 									</v-treeview>
 								</v-col>
 								<v-divider vertical></v-divider>
 								<v-col>
-									<v-expansion-panels
-										multiple
-										light
-										flat
-										>
-										<v-expansion-panel  v-for="(item, index) in partsList"
-												:key="index">
-											<v-expansion-panel-header>{{ item.genericArticleName }}</v-expansion-panel-header>
-											<v-expansion-panel-content>
-												<ul>
-													<li  v-for="(article, i) in item.array"
-														:key="i">
-														<div class="brand-name">{{ article.mfrName }}</div>
-														<div class="item-code">
-															{{ article.articleNumber }}
-															<span class="item-position">{{setCriteriaData(article)}}</span>
-														</div>
+									<v-row v-if="assemblyGroupList.length > 0">
+										<v-col class="d-flex" style="flex-direction: row-reverse;">
+											<div class="pa-3" style="width:300px;">
+                                                <v-text-field
+                                                label="부품번호"
+                                                dense
+                                                single-line
+                                                append-icon="search"
+                                                v-model="itemNo"
+												light
+                                                @keypress.enter="getParts"
+                                                @click:append="getParts"
+                                                @focus="$event.target.select()"
+                                            ></v-text-field>
+                                            </div> 
+                                            <div style="width:110px;" class="mr-3"> 
+                                                <v-select
+                                                v-model="itemType"
+                                                :items="itemTypeList"
+                                                item-text="text"
+                                                item-value="value"
+												light
+                                                label="구분"
+                                            ></v-select>
+                                            </div>
+                                        </v-col>
+										<!--<v-col>
+											<v-text-field
+												label="OE번호"
+												dense
+												single-line
+												append-icon="search"
+												v-model="itemNo"
+												light
+												@keypress.enter="getParts"
+												@click:append="getParts"
+												@focus="$event.target.select()"
+											></v-text-field>
+										</v-col>-->
+									</v-row>
+									<v-row>
+										<v-col>
+											<v-expansion-panels
+												multiple
+												light
+												flat
+												>
+												<v-expansion-panel  v-for="(item, index) in partsList"
+														:key="index">
+													<v-expansion-panel-header>{{ item.genericArticleName }}</v-expansion-panel-header>
+													<v-expansion-panel-content>
+														<ul>
+															<li  v-for="(article, i) in item.array"
+																:key="i">
+																<div class="brand-name">{{ article.mfrName }}</div>
+																<div class="item-code">
+																	{{ article.articleNumber }}
+																	<span class="item-position">{{setCriteriaData(article)}}</span>
+																</div>
 
-														<!--<div v-if="article.images.length > 0">
-															<v-img class="grey lighten-3 mr-4 ml-4" v-bind:src="article.images[0].imageURL50"></v-img>
-														</div>-->
-														<div class="item-detail">
-															<v-btn icon x-small @click="showPartsDetail(article)">
-																<v-icon>fas fa-info-circle</v-icon>
-															</v-btn>
-														</div>
-													</li>
-												</ul>
-											</v-expansion-panel-content>
-										</v-expansion-panel>
-									</v-expansion-panels>
+																<!--<div v-if="article.images.length > 0">
+																	<v-img class="grey lighten-3 mr-4 ml-4" v-bind:src="article.images[0].imageURL50"></v-img>
+																</div>-->
+																<div class="item-detail">
+																	<v-btn icon x-small @click="showPartsDetail(article)">
+																		<v-icon>fas fa-info-circle</v-icon>
+																	</v-btn>
+																</div>
+															</li>
+														</ul>
+													</v-expansion-panel-content>
+												</v-expansion-panel>
+											</v-expansion-panels>
+										</v-col>
+									</v-row>
 								</v-col>
 							</v-row>
 						</v-container>
@@ -94,7 +138,7 @@
         </v-container>
 		<BackToTop></BackToTop>
 		<!--부품상세 정보-->
-        <v-dialog v-model="dialog"  width="600px">     
+        <v-dialog v-model="dialog"  width="700px">     
             <PartsInfo :PartsInfo="partsInfo"
 			@close="dialog=false">
             </PartsInfo>               
@@ -128,6 +172,9 @@
 				partsList:[],
 				partsInfo: {},
 				dialog: false,
+				itemNo : '',
+				itemType : 1,
+                itemTypeList : [{text:'OE번호', value:1},{text:'AM번호',value:0}],
 			}
 		},
 		components: {
@@ -141,7 +188,10 @@
 				this.initAuthKey();
 				this.setCategoryList();
 			});
-		},	
+		},
+		beforeDestroy(){
+            this.$EventBus.$off('RMI-CATEGORY.InitData');
+        },	
 		methods: {
 			initAuthKey() {
 				let url = 'https://rmi-services.tecalliance.net/auth/login';
@@ -200,6 +250,7 @@
 			{
 				console.log('shortCutId : ', value);
 				this.partsList  = [];
+				this.itemNo = '';
 
 				let params ={
 					"getChildNodesAllLinkingTarget2": {
@@ -285,6 +336,11 @@
 					}
 				};
 
+				if(this.itemNo !== ''){
+					params.getArticles.searchQuery = this.itemNo;
+					params.getArticles.searchType = this.itemType;
+				}
+
 				// Send HTTP request
 				let xmlHttp = new XMLHttpRequest();
 				xmlHttp.open( 'POST', tecdocUrl, false );
@@ -318,7 +374,7 @@
 
                 // 부품군+ 브랜드 정렬
                 partsResult.sort(function(a, b){
-                    return (a.genericArticleId + ('000'+ a.dataSupplierId).slice(-3)  >  b.genericArticleId + ('000'+ b.dataSupplierId).slice(-3)) ? 1 : -1;
+                    return (a.genericArticleId + a.mfrName  >  b.genericArticleId + b.mfrName) ? 1 : -1;
 				});
 				
 				var genArtGroupList = arrayGroupBy(partsResult, function(item){
@@ -356,7 +412,7 @@
 				partsData.PartsInfo = value;
 				partsData.TecTypeId = this.carTcdTypeId;
 
-				this.partsInfo = value;
+				this.partsInfo = partsData;
                 this.$EventBus.$emit('RMI-PARTSINFO.InitData',partsData);
                 this.dialog = true;
 			},
@@ -415,6 +471,5 @@
 	border-width: thick;
 	border-color: #fddca9;
 }
-
 </style>
 
