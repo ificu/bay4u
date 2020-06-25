@@ -12,6 +12,7 @@ import MainPage from '@/views/MainPage'
 import NewQTList from '@/views/NewQTList'
 
 import RMI from '@/views/RMI'
+import ITEM from '@/views/ITEM'
 
 Vue.use(VueRouter)
 
@@ -24,7 +25,12 @@ const routes = [{
         path: '/RMI',
         name: 'RMI',
         component: RMI
-    },    
+    },
+    {
+        path: '/ITEM',
+        name: 'ITEM',
+        component: ITEM
+    },
     {
         path: '/NewQTOld',
         name: 'NewQTOld',

@@ -57,8 +57,7 @@
                         tile
 						id = "RMIContents"
                     >
-                        <li v-for="(item, i) in partsList"
-                            :key="i">
+                        <li v-for="(item, i) in partsList" :key="i" :class="{ searchNo :(item.articleNo === item.articleSearchNo) ? true :false}">
                             <div class="brand-name">{{ item.brandName }}</div>
                             <div class="item-name">{{ item.articleName }}</div>
                             <div class="item-code">
@@ -98,8 +97,8 @@
         name: 'RMI-OENUMBERS',
         data(){
             return{
-                itemType : 1,
-                itemTypeList : [{text:'OE번호', value:1},{text:'AM번호',value:0}],
+                itemType : 10,
+                itemTypeList : [{text:'전체',value:10},{text:'OE번호', value:1},{text:'AM번호',value:0} ],
                 itemNo : '',
                 partsList : [],
                 partsInfo : {},
@@ -111,7 +110,7 @@
             PartsInfo
         },
         created(){
-            this.itemType = 1;
+            this.itemType = 10;
             this.$EventBus.$on('RMI-OENUMBERS.InitData', param => {  
 				this.rmiAuthKey = param.rmiAuthKey;
                 this.carTypeId = param.carTypeId; 
@@ -156,7 +155,12 @@
                             "numberType": this.itemType,
                             "provider": 22261
                         }
-				}
+                }
+                
+                // Any number 조회일때는 LIKE 조회 설정 막음.
+                if(this.itemType === 10){
+                   params.getArticleDirectSearchAllNumbersWithState.searchExact = true;
+                }
 		
                 // Send HTTP request
                 let xmlHttp = new XMLHttpRequest();
@@ -170,17 +174,25 @@
 				if(xmlHttp.status == 200) {
                     console.log('getItemNo : ', JSON.parse(xmlHttp.responseText) );
                     var result = JSON.parse(xmlHttp.responseText).data.array;
-                    result = result.filter(x => brnads.includes(x.brandNo));
+                    if(result !== undefined){
+                        result = result.filter(x => brnads.includes(x.brandNo));
 
-                    // 중복체크
-                    result = result.filter((item, idx) => {
-                        return result.map(x => x.brandNo + x.articleNo).indexOf(item.brandNo + item.articleNo) === idx;
-                    })
+                        // 중복체크
+                        result = result.filter((item, idx) => {
+                            return result.map(x => x.brandNo + x.articleNo).indexOf(item.brandNo + item.articleNo) === idx;
+                        })
 
-                    result.sort(function(a,b){
-                        return a.genericArticleId + a.brandName > b.genericArticleId + b.brandName ? 1:-1;
-                    });
-                    this.partsList = result;
+                        result.sort(function(a,b){
+                            return a.genericArticleId + a.brandName > b.genericArticleId + b.brandName ? 1:-1;
+                        });
+
+                        this.partsList = result.filter(x => x.articleNo === x.articleSearchNo);
+                        this.partsList = this.partsList.concat(result.filter(x => x.articleNo !== x.articleSearchNo));
+                        console.log('this.partsList :',this.partsList);
+                    }
+                    else{
+                        this.partsList = [];
+                    }
 				}
             },
             showPartsDetail(value){
@@ -253,6 +265,11 @@
     margin-bottom: 8px;
     font-size: 1.1em;
 }
+.contents .searchNo{
+    background-color: #FFD54F;
+    padding:5px;
+    border-radius: 3px;
+}
 .contents .brand-name{
     margin-right: 10px;
     width:200px;
@@ -269,7 +286,7 @@
     font-size: 0.3em;
 }
 .contents .searchForm{
-    background-color: gray;
+    /*background-color: gray;*/
     border-radius: 5px;
     height: 55px;
     margin: 8px 25px;

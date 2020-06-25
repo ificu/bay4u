@@ -174,12 +174,12 @@
 				dialog: false,
 				itemNo : '',
 				itemType : 1,
-                itemTypeList : [{text:'OE번호', value:1},{text:'AM번호',value:0}],
+				itemTypeList : [{text:'OE번호', value:1},{text:'AM번호',value:0}],
 			}
 		},
 		components: {
 			BackToTop,
-			PartsInfo
+			PartsInfo,
 		},
 		created () {
 			this.$EventBus.$on('RMI-CATEGORY.InitData', param => {  
@@ -408,13 +408,17 @@
                 return position;
             },
             showPartsDetail(value){
+				this.isLoaded = true;
                 var partsData = {};
 				partsData.PartsInfo = value;
 				partsData.TecTypeId = this.carTcdTypeId;
 
 				this.partsInfo = partsData;
                 this.$EventBus.$emit('RMI-PARTSINFO.InitData',partsData);
-                this.dialog = true;
+				this.dialog = true;
+				this.$nextTick(function(){
+					this.isLoaded = false;
+				});
 			},
 		},   		
 	}

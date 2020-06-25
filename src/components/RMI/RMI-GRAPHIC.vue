@@ -292,7 +292,6 @@
 		<!--부품상세 정보-->
         <v-dialog v-model="dialog"  width="700px"> 
 			<PartsInfo :PartsInfo="partsInfo"
-			:TecTypeID="carTcdTypeId"
 			@close="dialog=false">
             </PartsInfo>               
         </v-dialog>
