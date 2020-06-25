@@ -390,10 +390,10 @@
         font-size: 0.9em;
     }
     .vehicles-detail li{
-        margin-left: 10px;
+        margin-left: 0px;
     }
     .vehicles-detail li:last-child{
-        margin-left: 10px;
+        margin-left: 0px;
         border: 0px;
     }
 </style>
