@@ -13,6 +13,7 @@ import NewQTList from '@/views/NewQTList'
 
 import RMI from '@/views/RMI'
 import ITEM from '@/views/ITEM'
+import ADJUST from '@/components/RMI/COM_ADJUST'
 
 Vue.use(VueRouter)
 
@@ -30,6 +31,11 @@ const routes = [{
         path: '/ITEM',
         name: 'ITEM',
         component: ITEM
+    },
+    {
+        path: '/ADJUST',
+        name: 'ADJUST',
+        component: ADJUST
     },
     {
         path: '/NewQTOld',
