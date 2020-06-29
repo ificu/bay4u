@@ -63,12 +63,12 @@
                                 <div>
                                     <div v-for="(item3 , index3) in item2.SubGroups" :key="index3" >
                                         <div v-for="(item4 , index4) in item3.ItemMps" :key="index4" class="itemMps">
-                                            <span>{{item.RangeName}};</span>
-                                            <span>{{item2.TypeName}};</span>
-                                            <span>{{item3.SubGroupName}};</span>
-                                            <span>{{item4.ItemMpText}}</span>
-                                            <span v-for="(item5, index5) in item4.Values" :key="index5">
-                                                <span class="blank" v-if="item5.QualColText !== ''">{{item5.QualColText}}</span>{{item5.ValueText}} {{item5.QuantityText}}
+                                            <span v-for="(item5, index5) in item4.Values" :key="index5" class="values">
+                                                <span>{{item.RangeName}};</span>
+                                                <span>{{item2.TypeName}};</span>
+                                                <span>{{item3.SubGroupName}};</span>
+                                                <span>{{item4.ItemMpText}}</span>;
+                                                <span class="blank">{{item5.QualColText}};</span>{{item5.ValueText}} {{item5.QuantityText}}
                                             </span>
                                         </div>
                                     </div>
@@ -455,5 +455,8 @@
     }
     .blank{
         margin-left:10px;
+    }
+    .values{
+        display: block;
     }
 </style>
