@@ -27,41 +27,14 @@
                     @change="changeMakeName"
                     >
                 </v-autocomplete>
-                <!--<v-autocomplete
-                    class="pt-8 pr-4"
-                    v-model="carRangeId"
-                    :items="carRangeLists"
-                    item-text="RangeName"
-                    item-value="RangeId"
-                    label="차량 종류"
-                    small-chips
-                    clearable
-                    style="max-width: 300px; font-size:10px;"
-                    @change="changeRangeName"
-                    >
-                </v-autocomplete>   
-                <v-autocomplete
-                    class="pt-8 pr-4"
-                    v-model="carTypeId"
-                    :items="carTypeLists"
-                    item-text="TypeName"
-                    item-value="TypeId"
-                    label="차량 타입"
-                    small-chips
-                    clearable
-                    style="max-width: 480px; font-size:10px;"
-                    @change="changeTypeName"
-                    >
-                </v-autocomplete>   --> 
             </v-col>
-           
       </v-row>
       <v-row>
             <v-col
                 cols="12"
                 sm="12"
             >
-                <div v-if="dataList.length > 0">
+                <div v-if="dataList.length > 0 && itemId === 22">
                     <span>{{dataList[0].MakeName}}</span>
                     <div v-for="(item , index) in dataList[0].CarRange" :key="index" class="adjustData">
                         <!--<div style="width:200px;">{{item.RangeName}}</div>-->
@@ -73,7 +46,7 @@
                                         <span>{{item.RangeName}};</span>
                                         <span>{{item2.TypeName}};</span>
                                         <span>{{item3.ItemMpText}};</span>
-                                        <span v-for="(item4 , index4) in item3.ItemValues" :key="index4">
+                                        <span v-for="(item4, index4) in item3.ItemValues" :key="index4">
                                             {{item4.ValueText}}
                                         </span>
                                     </div>
@@ -81,6 +54,28 @@
                             </div>
                         </div>
                     </div>
+                </div>
+                <div v-else-if="dataList.length > 0 && itemId === 20">
+                     <span>{{dataList[0].MakeName}}</span>
+                      <div v-for="(item , index) in dataList[0].CarRange" :key="index" class="adjustData">
+                        <div>
+                            <div v-for="(item2 , index2) in item.CarTypes" :key="index2" class="carType">
+                                <div>
+                                    <div v-for="(item3 , index3) in item2.SubGroups" :key="index3" >
+                                        <div v-for="(item4 , index4) in item3.ItemMps" :key="index4" class="itemMps">
+                                            <span>{{item.RangeName}};</span>
+                                            <span>{{item2.TypeName}};</span>
+                                            <span>{{item3.SubGroupName}};</span>
+                                            <span>{{item4.ItemMpText}}</span>
+                                            <span v-for="(item5, index5) in item4.Values" :key="index5">
+                                                <span class="blank" v-if="item5.QualColText !== ''">{{item5.QualColText}}</span>{{item5.ValueText}} {{item5.QuantityText}}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                      </div>
                 </div>
             </v-col>
       </v-row>
@@ -281,7 +276,13 @@
                                 var ps = Math.round(kw * 1.36);
                                 
                                 carTypeItem.TypeName = obj.TypeName +  engineCode  + ' [ ' + beginDate + '~' + endDate + ' ] '+ ps +' hp';
-                                carTypeItem.ItemMps = [];
+                                if(this.itemId === 22){
+                                    carTypeItem.ItemMps = [];
+                                }
+                                else{
+                                    carTypeItem.SubGroups = [];
+                                }
+                                
                                 return carTypeItem;
 
                             });
@@ -294,19 +295,26 @@
                     };
                 };
             
+                var self = this;
+                console.log('itemtype :' , this.itemId);
                 if(this.itemId === 22){
-                    var self = this;
-                    this.getAdjustData(function(data){
+                   
+                    this.getChangeData(function(data){
                         console.log('data :', data);
                         self.adjustList = data;
                         self.isLoaded = false;
                     });
                 }
                 else{
-
+                    this.getOilData(function(data){
+                        console.log('data :', data);
+                        self.adjustList = data;
+                        self.isLoaded = false;
+                    });
                 }
+                this.$forceUpdate();
             },
-            getAdjustData(callback){
+            getChangeData(callback){
 
                 //console.log('dataList : ', this.dataList.length);
                 
@@ -358,67 +366,65 @@
 
                 callback(this.dataList);
             },
+            getOilData(callback){
+                console.log('getOilData..... ');
 
+                this.dataList.forEach(element => {
+                   
+                    element.CarRange.forEach(carRangeEl => {
+                        //console.log('carRangeEl : ', carRangeEl);
+                 
+                        carRangeEl.CarTypes.forEach(carTypeEl => {
+                          //console.log('carTypeEl : ', carTypeEl);
+                 
+                           let  languageCode = 'en',
+                                countryCode = 'kr',
+                                typeId = JSON.parse(carTypeEl.TypeId).TypeId,
+                                mainGroupId = '20';		
+                                
+                            // Build url query string
+                            let query = '?mainGroupId='+ mainGroupId
+                                + '&countryCode=' + countryCode
+                                + '&languageCode=' + languageCode
+                                + '&typeId=' + typeId	
+                            
+                            // Send HTTP request
+                            let xmlHttp = new XMLHttpRequest();
+                            xmlHttp.open( 'GET', adjUrl + '/MainGroupData' + query, false );
+                            xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
+                            xmlHttp.setRequestHeader( 'Accept', 'application/json' );
+                            xmlHttp.setRequestHeader( 'Authorization', "TecRMI " + this.rmiAuthKey);
+                            xmlHttp.send( null );
+                            
+                            // Handle HTTP response
+                            if(xmlHttp.status == 200) {
+                                
+                                var result = JSON.parse(xmlHttp.responseText);
+                                if(result !== null)
+                                {
+                                    //console.log(result);
+                                    carTypeEl.SubGroups = result.map(function(item){
+                                        var obj = {};
+                                        obj.SubGroupId = item.SubGroupId;
+                                        obj.SubGroupName = item.SubGroupName;
+                                        obj.ItemMps = item.ItemMps.map(function(item2){
+                                            var obj2 = {};
+                                            obj2.ItemMpText = item2.ItemMpText;
+                                            obj2.ItemMpId = item2.ItemMpId;
+                                            obj2.Values = item2.Values;
+                                            return obj2;
+                                        });
+                                        return obj;
+                                    });
+                                }
+                            }
+                        });
+                    });
+                
+                });
 
-            changeTypeName() {
-                console.log('changeTypeName : ', this.carTypeId);
-                var param = {
-                    rmiAuthKey: this.rmiAuthKey,
-                    carTypeId: JSON.parse(this.carTypeId).TypeId,
-                    carTcdTypeId: JSON.parse(this.carTypeId).TcdTypeId
-                }
-
-                this.$EventBus.$emit('RMI-'+this.getShowPage()+'.InitData', param);  
+                callback(this.dataList);
             },
-
-
-            InitData(data){
-                
-                this.htmlText = '';
-                this.itemMpList = [];
-
-                this.itemMpList = this.AdjustData;
-                this.carTypeId = data.CarTypeId;
-                this.rmiAuthKey = data.RmiAuthKey;
-                
-                if(this.itemMpList.length === 1){
-                    this.itemMpId = this.itemMpList[0]["ItemMpId"];
-                    this.getAdjust();
-                }
-            },
-            getAdjust() {
-                
-                this.htmlText = '';
-
-				let languageCode = 'en',
-					countryCode = 'kr',
-					printView = true,
-					linkUrl = '.',
-					itemMpId = this.itemMpId,
-					typeId = this.carTypeId;		
-					
-				// Build url query string
-				let query = '?languageCode=' + languageCode
-					+ '&countryCode=' + countryCode
-					+ '&typeId=' + typeId	
-					+ '&itemMpId=' + itemMpId	
-					+ '&printView=' + printView	
-					+ '&linkUrl=' + linkUrl	
-				
-				// Send HTTP request
-				let xmlHttp = new XMLHttpRequest();
-				xmlHttp.open( 'GET', url + '/ItemHtml' + query, false );
-				xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
-				xmlHttp.setRequestHeader( 'Accept', 'application/json' );
-				xmlHttp.setRequestHeader( 'Authorization', this.rmiAuthKey );
-				xmlHttp.send( null );
-				// Handle HTTP response
-				if(xmlHttp.status == 200) {
-                    //console.log(xmlHttp.responseText);
-                    let page = xmlHttp.responseText;
-                    this.htmlText= JSON.parse(page);
-				}				
-			}
         }
     }
 </script>
@@ -446,5 +452,8 @@
     }
     .itemMps span{
        margin-right:20px;
+    }
+    .blank{
+        margin-left:10px;
     }
 </style>
