@@ -43,8 +43,13 @@
                                 <!--<div style="width:300px;">{{item2.TypeName}}</div>-->
                                 <div>
                                     <div v-for="(item3 , index3) in item2.ItemMps" :key="index3" class="itemMps">
+                                        <span>{{item2.TcdTypeId}};</span>
+                                        <span>{{item2.TypeId}};</span>
                                         <span>{{item.RangeName}};</span>
                                         <span>{{item2.TypeName}};</span>
+                                        <span>{{item2.engineCode}};</span>
+                                        <span>{{item2.beginDate}};</span>
+                                        <span>{{item2.endDate}};</span>
                                         <span>{{item3.ItemMpText}};</span>
                                         <span v-for="(item4, index4) in item3.ItemValues" :key="index4">
                                             {{item4.ValueText}}
@@ -64,8 +69,13 @@
                                     <div v-for="(item3 , index3) in item2.SubGroups" :key="index3" >
                                         <div v-for="(item4 , index4) in item3.ItemMps" :key="index4" class="itemMps">
                                             <span v-for="(item5, index5) in item4.Values" :key="index5" class="values">
+                                                <span>{{item2.TcdTypeId}};</span>
+                                                <span>{{item2.TypeId}};</span>
                                                 <span>{{item.RangeName}};</span>
                                                 <span>{{item2.TypeName}};</span>
+                                                <span>{{item2.engineCode}};</span>
+                                                <span>{{item2.beginDate}};</span>
+                                                <span>{{item2.endDate}};</span>
                                                 <span>{{item3.SubGroupName}};</span>
                                                 <span>{{item4.ItemMpText}}</span>;
                                                 <span class="blank">{{item5.QualColText}};</span>{{item5.ValueText}} {{item5.QuantityText}}
@@ -246,7 +256,8 @@
                             this.carTypeLists = this.carTypeLists.map(obj=>{
                                 var carTypeItem = {};
                                 var carTypeId = {"TypeId" : obj.TypeId, "TcdTypeId" : obj.TcdTypeId};
-                                carTypeItem.TypeId = JSON.stringify(carTypeId);
+                                carTypeItem.TypeId = obj.TypeId;
+                                carTypeItem.TcdTypeId = obj.TcdTypeId;
 
                                 var beginDate = obj.TypeDetails.filter(x => x.AddInfoKeyId === 3)[0].AddInfoKeyValue;
                                 beginDate = beginDate.substring(0,4) +'-'+ beginDate.substring(4);
@@ -261,21 +272,26 @@
                                 var enginCodeList = obj.TypeDetails.filter(x => x.AddInfoKeyId === -4);
                                 var engineCode = '';
                                 if (enginCodeList.length > 0) {
-                                    engineCode = ' ( ';
+                                    //engineCode = ' ( ';
 
                                     for(let i=0; i<enginCodeList.length; i++) {
                                         engineCode = engineCode + enginCodeList[i].AddInfoKeyValue;
                                         if(i !== enginCodeList.length-1) engineCode += ', ';
                                     }
 
-                                    engineCode += ' ) ';
+                                    //engineCode += ' ) ';
                                 }
 
                                 // 미터마력(ps) = 키로와트(kw) * 1.36
                                 var kw =  obj.TypeDetails.filter(x => x.AddInfoKeyId === 5)[0].AddInfoKeyValue;
                                 var ps = Math.round(kw * 1.36);
                                 
-                                carTypeItem.TypeName = obj.TypeName +  engineCode  + ' [ ' + beginDate + '~' + endDate + ' ] '+ ps +' hp';
+                                carTypeItem.TypeName = '\'' + obj.TypeName; //+  engineCode  + ' [ ' + beginDate + '~' + endDate + ' ] '+ ps +' hp';
+                                carTypeItem.engineCode = engineCode; 
+                                carTypeItem.beginDate = '\'' + beginDate + '\''; 
+                                carTypeItem.endDate = endDate;
+                                carTypeItem.hp = ps +' hp'; 
+
                                 if(this.itemId === 22){
                                     carTypeItem.ItemMps = [];
                                 }
@@ -328,7 +344,7 @@
                  
                            let languageCode = 'en',
                                 countryCode = 'kr',
-                                typeId = JSON.parse(carTypeEl.TypeId).TypeId,
+                                typeId = carTypeEl.TypeId,
                                 subGroupId = '95';		
                                 
                             // Build url query string
@@ -379,7 +395,7 @@
                  
                            let  languageCode = 'en',
                                 countryCode = 'kr',
-                                typeId = JSON.parse(carTypeEl.TypeId).TypeId,
+                                typeId = carTypeEl.TypeId,
                                 mainGroupId = '20';		
                                 
                             // Build url query string
