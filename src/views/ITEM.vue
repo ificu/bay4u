@@ -1,10 +1,10 @@
 <template>
+<v-app>
     <v-card light>
-        <v-card-title
-            class="headline grey lighten-2"
-        >
-        <span>Article information</span><span style="font-size:0.75em;margin-left:5px"> - {{artInfo}}</span>
-        </v-card-title>           
+        <v-card-title class="headline grey lighten-2">
+            <!--<span>Article information</span>-->
+            <span class="articleTitle"> {{articleTitle}}</span>
+        </v-card-title> 
         <v-card-text class="mt-2">
             <div class="parts-info">
                 <!--articleCriteria-->
@@ -18,26 +18,29 @@
                     </ul>
                 </div>
                 <!--images-->
-                <div v-if=" partsInfo.images !== undefined && partsInfo.images.length > 0">
-                    <v-carousel hide-delimiters>
+                <div v-if=" imageList !== undefined && imageList.length > 0">
+                    <v-carousel 
+                        hide-delimiters
+                        height="250"> 
                         <v-carousel-item
-                            v-for="(item,i) in partsInfo.images"
+                            v-for="(item,i) in imageList"
                             :key="i"
-                            :src="item.imageURL400"
-                        ></v-carousel-item>
+                        >
+                        <v-img :src="item.imageURL800" class="pa-5"></v-img>
+                        </v-carousel-item>
                     </v-carousel>
                 </div>
                 <!--oemNumbers-->
-                <div v-if="partsInfo.oemNumbers !== undefined && partsInfo.oemNumbers.length > 0">
+                <div v-if="oeNumberList !== undefined && oeNumberList.length > 0">
                     <h5>oemNumbers</h5>
                     <div style="margin-left:20px">
-                        <span class="attr-text">{{setArrayJoin(partsInfo.oemNumbers,'oenNumbers')}}</span>
+                        <span class="attr-text">{{setArrayJoin(oeNumberList,'oenNumbers')}}</span>
                     </div>
                 </div>
                 <!--articleText-->
-                <div v-if="partsInfo.articleText !== undefined && partsInfo.articleText.length > 0">
+                <div v-if="articleTextList !== undefined && articleTextList.length > 0">
                     <h5>articleText</h5>
-                    <ul v-for="(item, index) in partsInfo.articleText" :key="index">
+                    <ul v-for="(item, index) in articleTextList" :key="index">
                         <li v-for="(subItem, subIndex) in item.text" :key="subIndex">
                             <div class="attr-name">{{subItem}}</div>
                         </li>
@@ -62,24 +65,16 @@
                 </div>
             </div>
         </v-card-text>
-        <v-divider></v-divider>
-        <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn
-                color="primary"
-                text
-                @click="$emit('close')"
-            >
-            close
-            </v-btn>
-        </v-card-actions>
-        <Progress v-if="isLoaded"></Progress>
     </v-card>
+    <BackToTop></BackToTop>
+    <Progress v-if="isLoaded"></Progress>
+</v-app>
 </template>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script>
     import {division,arrayGroupBy} from '@/utils/common.js'
+    import BackToTop from '@/components/Common/BackToTop.vue'
     import Progress from '@/components/Common/Progress.vue'
 
     const axios = require('axios').default;
@@ -88,77 +83,145 @@
     const tecProvider = 22261;
 
     export default {
-        name: 'TEC-PARTSINFO',
+        name: 'ITEM',
         data(){
             return{
                 jsonHeader: { 'Accept': 'application/json', 'Content-Type': 'application/json;charset=UTF-8', 'x-api-key': tecApiKey },
-                partsInfo :{},
-                artInfo: '',
+                articleNo: '',
                 articleId: '',
+                articleTitle: '',
+                articleInfo :{},
                 criteriaList : [],
-                partsDetail: [],
-                itemImage:'',
+                imageList : [],
+                oeNumberList : [],
+                articleTextList: [],
                 linkedCars: [],
-                isLoaded: false
+                isLoaded: false,
             }
         },
-        props:['PartsInfo'],
         components: {
+            BackToTop,
 			Progress
 		},
         created(){
-            this.$EventBus.$on('RMI-PARTSINFO.InitData', data => {
-                console.log('partsInfo1:' , data);
-                this.InitData(data);
-            });	
-            //console.log('PartsInfo :',this.PartsInfo);
-        },
-        beforeDestroy(){
-            this.$EventBus.$off('RMI-PARTSINFO.InitData');
-        },
-        mounted(){
-            //console.log('partsInfo2:' , this.PartsInfo);
-            this.partsInfo = this.PartsInfo.PartsInfo;
-            this.articleId = this.PartsInfo.articleId
-            this.setPartsInfo();
+            this.$vuetify.theme.dark = true;
+            this.$vuetify.theme.themes.dark.primary = '#aaa'
+            this.articleNo = this.$route.query.ItemNo;
+            this.getArticleInfo();
+            this.getArticles();
             this.getLinkedArticles();
+
+            console.log('articleNo:', this.articleNo);
+            console.log('articleId:', this.articleId);
+            console.log('articleInfo:',this.articleInfo);
         },
         methods:{
-            InitData(data){
-                this.partsInfo = data.PartsInfo;
-                this.articleId = data.articleId;
-                this.setPartsInfo();
-                this.getLinkedArticles();
-            },
-            setPartsInfo()
+            getArticleInfo()
             {
-                this.artInfo = this.partsInfo.mfrName + " / " + this.partsInfo.articleNumber;
-                var articleList = this.partsInfo.articleCriteria.map(function(item){
-                    var obj = {};
-                    obj.criteriaId = item.criteriaId;
-                    obj.rawValue = item.rawValue;
-                    obj.criteriaDescription = item.criteriaDescription;
-                    obj.formattedValue = item.formattedValue;
-                    return obj;
-                });
-                var linkageList = this.partsInfo.linkages
+                let params = {
+                    "getArticleDirectSearchAllNumbersWithState": {
+                        "articleCountry": "kr",
+                        "articleNumber": this.articleNo,
+                        "lang": "en",
+                        "numberType": 0,
+                        "provider": tecProvider,
+                        "searchExact": true
+                    }
+                };
+
+                // Send HTTP request
+                let xmlHttp = new XMLHttpRequest();
+                xmlHttp.open( 'POST', tecdocUrl, false );
+                xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
+                xmlHttp.setRequestHeader( 'Accept', 'application/json' );
+                xmlHttp.setRequestHeader( 'x-api-key', tecApiKey);
+                xmlHttp.send( JSON.stringify( params ) );
+                // Handle HTTP response
+                if(xmlHttp.status == 200) {
+                    var result = JSON.parse(xmlHttp.responseText).data.array;
+                    if(result.length > 0){
+                        this.articleInfo = result[0];
+                        this.articleTitle = result[0].brandName + " / " + this.articleNo;
+                        this.articleId = result[0].articleId;
+                    }
+                }
+            },
+            getArticles(){
+                let params ={
+                    "getArticles": {
+                        articleCountry: "kr",
+                        provider: 22261,
+                        searchQuery: this.articleInfo.articleNo,
+                        searchType: 0,
+                        dataSupplierIds: this.articleInfo.brandNo,
+                        genericArticleIds: this.articleInfo.genericArticleId,
+                        lang: "en",
+                        perPage: 1000,
+                        page: 1,
+                        includeGenericArticles: true,
+						includeArticleText: true,
+						includeOEMNumbers: true,
+						includeReplacesArticles: true,
+						includeReplacedByArticles: true,
+						includeArticleCriteria: true,
+						includeLinkages: true,
+						includeImages: true,
+						includeLinks: true,
+						includeTradeNumbers: true,
+						includeCriteriaFacets: true
+                    }
+				}
+		
+                // Send HTTP request
+                let xmlHttp = new XMLHttpRequest();
+				xmlHttp.open( 'POST', tecdocUrl, false );
+				xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
+                xmlHttp.setRequestHeader( 'Accept', 'application/json' );
+                xmlHttp.setRequestHeader( 'x-api-key', tecApiKey);
+				xmlHttp.send( JSON.stringify( params ) );
+
+				// Handle HTTP response
+				if(xmlHttp.status == 200) {
+                    //console.log('getArticles : ', JSON.parse(xmlHttp.responseText));
+                    var result = JSON.parse(xmlHttp.responseText).articles;
+                    console.log('result : ', result);
+                    if(result.length > 0){
+                        var articleList = result[0].articleCriteria.map(function(item){
+                            var obj = {};
+                            obj.criteriaId = item.criteriaId;
+                            obj.rawValue = item.rawValue;
+                            obj.criteriaDescription = item.criteriaDescription;
+                            obj.formattedValue = item.formattedValue;
+                            return obj;
+                        });
+
+                        var linkageList = result[0].linkages
                                 .map(x=>x.linkageCriteria)
-                                    .reduce(function(pre,curr){
-                                        return pre.concat(curr);
-                                },[]);
-                linkageList = linkageList.map(function(item){
-                    var obj = {};
-                    obj.criteriaId = item.criteriaId;
-                    obj.rawValue = item.rawValue;
-                    obj.criteriaDescription = item.criteriaDescription;
-                    obj.formattedValue = item.formattedValue;
-                    return obj;
-                });
-                this.criteriaList = articleList.concat(linkageList);
-                this.criteriaList.sort(function(a,b){
-                    return a.criteriaId > b.criteriaId ? 1:-1;
-                });
-                //console.log('criteriaList : ', this.criteriaList);
+                                .reduce(function(pre,curr){
+                                return pre.concat(curr);
+                            },[]);
+                            linkageList = linkageList.map(function(item){
+                                var obj = {};
+                                obj.criteriaId = item.criteriaId;
+                                obj.rawValue = item.rawValue;
+                                obj.criteriaDescription = item.criteriaDescription;
+                                obj.formattedValue = item.formattedValue;
+                                return obj;
+                            });
+
+                        articleList = articleList.concat(linkageList);
+
+                        this.criteriaList = articleList;
+                        this.criteriaList.sort(function(a,b){
+                            return a.criteriaId > b.criteriaId ? 1:-1;
+                        });
+
+                        this.imageList = result[0].images;
+                        console.log('imageList :',this.imageList);
+                        this.oeNumberList = result[0].oemNumbers;
+                        this.articleTextList = result[0].articleText;
+                    }
+				}
             },
             async getLinkedArticles(){
 
@@ -252,37 +315,6 @@
                 };
                 callback(linkedList);
             },
-            getArticleId()
-            {
-                var aticelId = '';
-
-                let params = {
-                    "getArticleDirectSearchAllNumbersWithState": {
-                        "articleCountry": "kr",
-                        "articleNumber": this.partsInfo.articleNumber,
-                        "lang": "en",
-                        "numberType": 0,
-                        "provider": tecProvider,
-                        "searchExact": true
-                    }
-                };
-
-                // Send HTTP request
-                let xmlHttp = new XMLHttpRequest();
-                xmlHttp.open( 'POST', tecdocUrl, false );
-                xmlHttp.setRequestHeader( 'Content-type', 'application/json;charset=UTF-8' );
-                xmlHttp.setRequestHeader( 'Accept', 'application/json' );
-                xmlHttp.setRequestHeader( 'x-api-key', tecApiKey);
-                xmlHttp.send( JSON.stringify( params ) );
-                // Handle HTTP response
-                if(xmlHttp.status == 200) {
-                    var result = JSON.parse(xmlHttp.responseText).data.array;
-                    if(result.length > 0){
-                        aticelId = result[0].articleId;
-                    }
-                }
-                return aticelId;
-            },
             setArrayJoin(value ,target)
             {   
                 if(value !== undefined){
@@ -304,11 +336,13 @@
                     return '';
                 }
             },
-        }
+        },
     }
 </script>
-
 <style scoped>
+    .articleTitle{
+        font-weight: bold;
+    }
     .parts-image{
         width: auto; height: auto;
         max-width: 500px;
@@ -353,12 +387,13 @@
     }
     .vehicles li{
         display: block;
+        font-size: 0.9em;
     }
     .vehicles-detail li{
-        margin-left: 10px;
+        margin-left: 0px;
     }
     .vehicles-detail li:last-child{
-        margin-left: 10px;
+        margin-left: 0px;
         border: 0px;
     }
 </style>
